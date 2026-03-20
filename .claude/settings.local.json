@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-next-app@14 . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --no-git --use-npm)",
+      "Bash(npx create-next-app@14 temp-init --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --no-git --use-npm)",
+      "Bash(cp -r temp-init/src .)",
+      "Bash(cp -r temp-init/public .)",
+      "Bash(cp temp-init/package.json .)",
+      "Bash(cp temp-init/tsconfig.json .)",
+      "Bash(cp temp-init/next.config.mjs .)",
+      "Bash(cp temp-init/package-lock.json .)",
+      "Bash(cp temp-init/postcss.config.mjs .)",
+      "Bash(cp temp-init/tailwind.config.ts .)",
+      "Bash(cp temp-init/next-env.d.ts .)",
+      "Bash(cp temp-init/.eslintrc.json .)",
+      "Bash(npm install:*)"
+    ]
+  }
+}

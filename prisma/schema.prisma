@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────
+
+enum Role {
+  USER
+  GM
+  ADMIN
+}
+
+enum SessionStatus {
+  OPEN
+  ACTIVE
+  CLOSING
+  CLOSED
+}
+
+// ─── Sprint 1: Users ────────────────────────────────────
+
+model User {
+  id            String   @id @default(uuid()) @db.Uuid
+  email         String   @unique
+  passwordHash  String   @map("password_hash")
+  username      String   @unique
+  role          Role     @default(USER)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  // Relations (will be added in later sprints)
+  // gmSessions     Session[]          @relation("gm_sessions")
+  // sessionPlayers SessionPlayer[]
+  // characters     Character[]
+
+  @@map("users")
+}

@@ -1,0 +1,19 @@
+{
+  "name": "ttrpg-socket-server",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch index.ts",
+    "start": "tsx index.ts"
+  },
+  "dependencies": {
+    "socket.io": "^4.7.0",
+    "@prisma/client": "^7.5.0",
+    "jsonwebtoken": "^9.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "@types/jsonwebtoken": "^9.0.0",
+    "typescript": "^5.0.0"
+  }
+}
