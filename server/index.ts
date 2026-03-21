@@ -237,6 +237,103 @@ io.on("connection", (socket) => {
     }
   );
 
+  // ─── Inventory events ───────────────────────────────
+  socket.on(
+    "inv:move",
+    ({ characterId, inventoryItemId, posX, posY }: { characterId: string; inventoryItemId: string; posX: number; posY: number }) => {
+      const sessionId = socket.data.sessionId;
+      if (!sessionId) return;
+      io.to(`session:${sessionId}`).emit("inv:moved", {
+        characterId,
+        inventoryItemId,
+        posX,
+        posY,
+      });
+    }
+  );
+
+  socket.on(
+    "inv:equip",
+    ({ characterId, inventoryItemId, slot, stats }: { characterId: string; inventoryItemId: string; slot: string; stats: unknown[] }) => {
+      const sessionId = socket.data.sessionId;
+      if (!sessionId) return;
+      io.to(`session:${sessionId}`).emit("inv:equipped", {
+        characterId,
+        inventoryItemId,
+        slot,
+        stats,
+      });
+    }
+  );
+
+  socket.on(
+    "inv:unequip",
+    ({ characterId, inventoryItemId, stats }: { characterId: string; inventoryItemId: string; stats: unknown[] }) => {
+      const sessionId = socket.data.sessionId;
+      if (!sessionId) return;
+      io.to(`session:${sessionId}`).emit("inv:unequipped", {
+        characterId,
+        inventoryItemId,
+        stats,
+      });
+    }
+  );
+
+  socket.on(
+    "inv:drop",
+    ({ characterId, inventoryItemId }: { characterId: string; inventoryItemId: string }) => {
+      const sessionId = socket.data.sessionId;
+      if (!sessionId) return;
+      io.to(`session:${sessionId}`).emit("inv:dropped", {
+        characterId,
+        inventoryItemId,
+      });
+    }
+  );
+
+  socket.on(
+    "gm:item_add",
+    ({ characterId, item }: { characterId: string; item: Record<string, unknown> }) => {
+      const sessionId = socket.data.sessionId;
+      if (!sessionId) return;
+      io.to(`session:${sessionId}`).emit("inv:item_added", {
+        characterId,
+        item,
+      });
+    }
+  );
+
+  // ─── Spell events ──────────────────────────────────
+  socket.on(
+    "char:use_spell",
+    ({ characterId, spellId, spellName, manaCost, remainingMana }: { characterId: string; spellId: string; spellName: string; manaCost: number; remainingMana: number | null }) => {
+      const sessionId = socket.data.sessionId;
+      if (!sessionId) return;
+      io.to(`session:${sessionId}`).emit("char:spell_cast", {
+        characterId,
+        userId: socket.data.userId,
+        username: socket.data.username,
+        spellId,
+        spellName,
+        manaCost,
+        remainingMana,
+      });
+    }
+  );
+
+  socket.on(
+    "char:assign_spell_slot",
+    ({ characterId, spellId, slotIndex }: { characterId: string; spellId: string; slotIndex: number | null }) => {
+      const sessionId = socket.data.sessionId;
+      if (!sessionId) return;
+      io.to(`session:${sessionId}`).emit("char:spell_slot_updated", {
+        characterId,
+        spellId,
+        slotIndex,
+      });
+    }
+  );
+
   // ─── Disconnect ─────────────────────────────────────
   socket.on("disconnect", () => {
     const sessionId = socket.data.sessionId;

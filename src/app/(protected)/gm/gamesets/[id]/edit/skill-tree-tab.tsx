@@ -3,16 +3,17 @@
 import { useState, useMemo } from "react";
 import { SkillTreeCanvas } from "@/components/skill-tree/skill-tree-canvas";
 import type { DbSkillTreeNode } from "@/lib/skill-tree-utils";
-import type { ClassData, StatGroupData } from "./gameset-editor";
+import type { ClassData, StatGroupData, SpellDefinitionData } from "./gameset-editor";
 
 interface Props {
   gamesetId: string;
   skillTreeNodes: DbSkillTreeNode[];
   classes: ClassData[];
   statGroups: StatGroupData[];
+  spellDefinitions: SpellDefinitionData[];
 }
 
-export function SkillTreeTab({ gamesetId, skillTreeNodes, classes, statGroups }: Props) {
+export function SkillTreeTab({ gamesetId, skillTreeNodes, classes, statGroups, spellDefinitions }: Props) {
   // "common" = ortak ağaç (classId=null), diğerleri sınıf ID'si
   const [selectedTree, setSelectedTree] = useState<string>("common");
 
@@ -61,6 +62,7 @@ export function SkillTreeTab({ gamesetId, skillTreeNodes, classes, statGroups }:
           classId={selectedTree === "common" ? null : selectedTree}
           initialNodes={filteredNodes}
           statKeys={baseStatKeys}
+          spellDefinitions={spellDefinitions.map((s) => ({ id: s.id, name: s.name }))}
         />
       </div>
     </div>

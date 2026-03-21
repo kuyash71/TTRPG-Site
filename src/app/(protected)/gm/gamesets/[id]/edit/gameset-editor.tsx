@@ -6,6 +6,8 @@ import { GeneralTab } from "./general-tab";
 import { StatDefinitionsTab } from "./stat-definitions-tab";
 import { ClassRaceTab } from "./class-race-tab";
 import { SkillTreeTab } from "./skill-tree-tab";
+import { ItemsTab } from "./items-tab";
+import { SpellsTab } from "./spells-tab";
 import type { DbSkillTreeNode } from "@/lib/skill-tree-utils";
 
 // ─── Types ──────────────────────────────────────────────
@@ -51,6 +53,34 @@ export interface RaceData {
   racialTraits: { name: string; description: string }[];
 }
 
+export interface ItemDefinitionData {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  gridWidth: number;
+  gridHeight: number;
+  equipmentSlot: string | null;
+  statBonuses: unknown;
+  stackable: boolean;
+  maxStack: number;
+  rarity: string;
+  iconUrl: string | null;
+}
+
+export interface SpellDefinitionData {
+  id: string;
+  name: string;
+  description: string;
+  manaCost: number;
+  cooldown: number;
+  range: number;
+  targetType: string;
+  effects: unknown;
+  iconUrl: string | null;
+  requiredLevel: number;
+}
+
 export interface GamesetData {
   id: string;
   name: string;
@@ -60,6 +90,8 @@ export interface GamesetData {
   classes: ClassData[];
   races: RaceData[];
   skillTreeNodes: DbSkillTreeNode[];
+  itemDefinitions: ItemDefinitionData[];
+  spellDefinitions: SpellDefinitionData[];
 }
 
 // ─── Tabs ───────────────────────────────────────────────
@@ -157,17 +189,27 @@ export function GamesetEditor({ gameset }: { gameset: GamesetData }) {
             skillTreeNodes={data.skillTreeNodes}
             classes={data.classes}
             statGroups={data.statGroups}
+            spellDefinitions={data.spellDefinitions}
           />
         )}
         {activeTab === "spells" && (
-          <div className="flex items-center justify-center py-20 text-zinc-500">
-            Büyü sistemi Sprint 7&apos;de eklenecek.
-          </div>
+          <SpellsTab
+            gamesetId={data.id}
+            spells={data.spellDefinitions}
+            onUpdate={(spellDefinitions) =>
+              setData((prev) => ({ ...prev, spellDefinitions }))
+            }
+          />
         )}
         {activeTab === "items" && (
-          <div className="flex items-center justify-center py-20 text-zinc-500">
-            Eşya sistemi Sprint 6&apos;da eklenecek.
-          </div>
+          <ItemsTab
+            gamesetId={data.id}
+            items={data.itemDefinitions}
+            statGroups={data.statGroups}
+            onUpdate={(itemDefinitions) =>
+              setData((prev) => ({ ...prev, itemDefinitions }))
+            }
+          />
         )}
       </div>
     </div>

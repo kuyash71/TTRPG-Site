@@ -3,16 +3,22 @@
 import { useState, useEffect } from "react";
 import type { SkillTreeNodeData } from "@/lib/skill-tree-utils";
 
+interface SpellOption {
+  id: string;
+  name: string;
+}
+
 interface Props {
   node: SkillTreeNodeData;
   allNodes: SkillTreeNodeData[];
   statKeys: string[];
+  spellDefinitions?: SpellOption[];
   onSave: (updated: Partial<SkillTreeNodeData> & { id: string }) => void;
   onDelete: (id: string) => void;
   onClose: () => void;
 }
 
-export function NodeEditorPanel({ node, allNodes, statKeys, onSave, onDelete, onClose }: Props) {
+export function NodeEditorPanel({ node, allNodes, statKeys, spellDefinitions, onSave, onDelete, onClose }: Props) {
   const [form, setForm] = useState({
     name: node.name,
     description: node.description,
@@ -22,6 +28,7 @@ export function NodeEditorPanel({ node, allNodes, statKeys, onSave, onDelete, on
     unlockLevel: node.unlockLevel,
     prerequisites: node.prerequisites,
     statBonusesPerLevel: { ...node.statBonusesPerLevel },
+    spellDefinitionId: node.spellDefinitionId,
   });
 
   useEffect(() => {
@@ -34,6 +41,7 @@ export function NodeEditorPanel({ node, allNodes, statKeys, onSave, onDelete, on
       unlockLevel: node.unlockLevel,
       prerequisites: node.prerequisites,
       statBonusesPerLevel: { ...node.statBonusesPerLevel },
+      spellDefinitionId: node.spellDefinitionId,
     });
   }, [node]);
 
@@ -109,6 +117,23 @@ export function NodeEditorPanel({ node, allNodes, statKeys, onSave, onDelete, on
           <option value="SPELL_UNLOCK">SPELL_UNLOCK</option>
         </select>
       </div>
+
+      {/* Spell Link (SPELL_UNLOCK only) */}
+      {form.nodeType === "SPELL_UNLOCK" && spellDefinitions && (
+        <div>
+          <label className="mb-1 block text-xs text-zinc-400">Bağlı Büyü</label>
+          <select
+            value={form.spellDefinitionId ?? ""}
+            onChange={(e) => setForm((f) => ({ ...f, spellDefinitionId: e.target.value || null }))}
+            className="w-full rounded-md border border-border bg-void px-2 py-1.5 text-sm text-zinc-100 focus:border-lavender-400 focus:outline-none"
+          >
+            <option value="">Seçiniz...</option>
+            {spellDefinitions.map((s) => (
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Max Level & Cost */}
       <div className="grid grid-cols-2 gap-2">

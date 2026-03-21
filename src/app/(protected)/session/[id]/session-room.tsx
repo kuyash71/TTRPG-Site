@@ -21,6 +21,7 @@ interface CharacterInfo {
   publicData: Record<string, unknown>;
   privateData: Record<string, unknown>;
   stats: { name: string; baseValue: number; currentValue: number; maxValue: number | null; isPublic: boolean }[];
+  equippedItems?: { name: string; slot: string; rarity: string }[];
 }
 
 interface Props {

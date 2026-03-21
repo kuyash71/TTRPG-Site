@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { InventoryPanel } from "./inventory-panel";
+import { SpellPanel } from "./spell-panel";
 
 interface Stat {
   name: string;
@@ -10,6 +12,48 @@ interface Stat {
   currentValue: number;
   maxValue: number | null;
   isPublic: boolean;
+}
+
+interface InventoryItemDef {
+  id: string;
+  name: string;
+  description: string | null;
+  category: string;
+  gridWidth: number;
+  gridHeight: number;
+  equipmentSlot: string | null;
+  statBonuses: Record<string, number>;
+  rarity: string;
+  iconUrl: string | null;
+}
+
+interface InventoryItem {
+  id: string;
+  itemDefinitionId: string;
+  posX: number;
+  posY: number;
+  quantity: number;
+  isEquipped: boolean;
+  equippedSlot: string | null;
+  itemDefinition: InventoryItemDef;
+}
+
+interface SpellDefInfo {
+  id: string;
+  name: string;
+  description: string;
+  manaCost: number;
+  cooldown: number;
+  range: number;
+  targetType: string;
+  requiredLevel: number;
+}
+
+interface CharacterSpellInfo {
+  id: string;
+  spellDefinitionId: string;
+  slotIndex: number | null;
+  spellDefinition: SpellDefInfo;
 }
 
 interface Props {
@@ -29,6 +73,12 @@ interface Props {
   };
   stats: Stat[];
   wallet: { gold: number; silver: number; copper: number } | null;
+  inventory: InventoryItem[];
+  inventoryGridWidth: number;
+  inventoryGridHeight: number;
+  equipmentSlotsEnabled: boolean;
+  spells: CharacterSpellInfo[];
+  maxSpellSlots: number;
   isOwner: boolean;
   isGm: boolean;
 }
@@ -37,6 +87,12 @@ export function CharacterSheet({
   character,
   stats,
   wallet,
+  inventory,
+  inventoryGridWidth,
+  inventoryGridHeight,
+  equipmentSlotsEnabled,
+  spells,
+  maxSpellSlots,
   isOwner,
   isGm,
 }: Props) {
@@ -228,6 +284,38 @@ export function CharacterSheet({
           >
             {saving ? "Kaydediliyor..." : "Kaydet"}
           </button>
+        </div>
+      )}
+
+      {/* Inventory */}
+      {inventory.length > 0 && (
+        <div className="mt-6 rounded-lg border border-border bg-surface p-5">
+          <InventoryPanel
+            characterId={character.id}
+            items={inventory}
+            gridWidth={inventoryGridWidth}
+            gridHeight={inventoryGridHeight}
+            equipmentSlotsEnabled={equipmentSlotsEnabled}
+            isOwner={isOwner}
+            isGm={isGm}
+          />
+        </div>
+      )}
+
+      {/* Spells */}
+      {spells.length > 0 && (
+        <div className="mt-6 rounded-lg border border-border bg-surface p-5">
+          <SpellPanel
+            characterId={character.id}
+            spells={spells}
+            maxSpellSlots={maxSpellSlots}
+            currentMana={
+              resourceStats.find((s) => s.name === "Mana" || s.name === "mana" || s.name === "MP")
+                ?.currentValue ?? null
+            }
+            isOwner={isOwner}
+            isGm={isGm}
+          />
         </div>
       )}
     </div>

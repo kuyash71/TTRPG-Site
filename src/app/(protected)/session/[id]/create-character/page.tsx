@@ -91,6 +91,7 @@ export default async function CreateCharacterPage({
         statBonusesPerLevel: n.statBonusesPerLevel,
         effect: n.effect,
         classId: n.classId,
+        spellDefinitionId: n.spellDefinitionId,
         posX: n.posX,
         posY: n.posY,
       }))}

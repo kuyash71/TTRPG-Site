@@ -3,6 +3,12 @@ export interface GamesetConfig {
   startingSkillPoints: number;
   skillPointsPerLevel: number;
   manaLabel: string;
+  // Sprint 6
+  inventoryGridWidth: number;
+  inventoryGridHeight: number;
+  equipmentSlotsEnabled: boolean;
+  // Sprint 7
+  maxSpellSlots: number;
 }
 
 export const DEFAULT_GAMESET_CONFIG: GamesetConfig = {
@@ -10,6 +16,10 @@ export const DEFAULT_GAMESET_CONFIG: GamesetConfig = {
   startingSkillPoints: 5,
   skillPointsPerLevel: 2,
   manaLabel: "Mana",
+  inventoryGridWidth: 10,
+  inventoryGridHeight: 6,
+  equipmentSlotsEnabled: true,
+  maxSpellSlots: 4,
 };
 
 export function parseGamesetConfig(raw: unknown): GamesetConfig {
@@ -34,5 +44,21 @@ export function parseGamesetConfig(raw: unknown): GamesetConfig {
       typeof obj.manaLabel === "string"
         ? obj.manaLabel
         : DEFAULT_GAMESET_CONFIG.manaLabel,
+    inventoryGridWidth:
+      typeof obj.inventoryGridWidth === "number"
+        ? obj.inventoryGridWidth
+        : DEFAULT_GAMESET_CONFIG.inventoryGridWidth,
+    inventoryGridHeight:
+      typeof obj.inventoryGridHeight === "number"
+        ? obj.inventoryGridHeight
+        : DEFAULT_GAMESET_CONFIG.inventoryGridHeight,
+    equipmentSlotsEnabled:
+      typeof obj.equipmentSlotsEnabled === "boolean"
+        ? obj.equipmentSlotsEnabled
+        : DEFAULT_GAMESET_CONFIG.equipmentSlotsEnabled,
+    maxSpellSlots:
+      typeof obj.maxSpellSlots === "number"
+        ? obj.maxSpellSlots
+        : DEFAULT_GAMESET_CONFIG.maxSpellSlots,
   };
 }

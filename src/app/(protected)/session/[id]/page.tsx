@@ -28,6 +28,10 @@ export default async function SessionPage({
           user: { select: { id: true, username: true } },
           class: { select: { name: true } },
           race: { select: { name: true } },
+          inventoryItems: {
+            where: { isEquipped: true },
+            include: { itemDefinition: { select: { name: true, equipmentSlot: true, rarity: true } } },
+          },
         },
       },
     },
@@ -86,6 +90,11 @@ export default async function SessionPage({
           currentValue: s.currentValue,
           maxValue: s.maxValue,
           isPublic: s.isPublic,
+        })),
+        equippedItems: c.inventoryItems.map((i) => ({
+          name: i.itemDefinition.name,
+          slot: i.itemDefinition.equipmentSlot ?? "",
+          rarity: i.itemDefinition.rarity,
         })),
       }))}
       currentUser={{

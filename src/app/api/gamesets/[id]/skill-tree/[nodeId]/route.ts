@@ -60,6 +60,7 @@ export async function PATCH(
       ...(body.prerequisites !== undefined && { prerequisites: body.prerequisites }),
       ...(body.statBonusesPerLevel !== undefined && { statBonusesPerLevel: body.statBonusesPerLevel }),
       ...(body.effect !== undefined && { effect: body.effect }),
+      ...(body.spellDefinitionId !== undefined && { spellDefinitionId: body.spellDefinitionId || null }),
       ...(body.posX !== undefined && { posX: body.posX }),
       ...(body.posY !== undefined && { posY: body.posY }),
     },

@@ -93,6 +93,23 @@ export async function POST(
       where: { id: characterId },
       data: { skillPoints: character.skillPoints - node.costPerLevel },
     });
+
+    // SPELL_UNLOCK: büyüyü karaktere otomatik ekle
+    if (node.nodeType === "SPELL_UNLOCK" && node.spellDefinitionId && !existingUnlock) {
+      await tx.characterSpell.upsert({
+        where: {
+          characterId_spellDefinitionId: {
+            characterId,
+            spellDefinitionId: node.spellDefinitionId,
+          },
+        },
+        create: {
+          characterId,
+          spellDefinitionId: node.spellDefinitionId,
+        },
+        update: {},
+      });
+    }
   });
 
   // Stat yeniden hesaplama

@@ -44,6 +44,41 @@ enum ApprovalStatus {
   REJECTED
 }
 
+enum ItemCategory {
+  WEAPON
+  ARMOR
+  CONSUMABLE
+  MATERIAL
+  QUEST
+  MISC
+}
+
+enum EquipmentSlot {
+  HEAD
+  CHEST
+  LEGS
+  FEET
+  MAIN_HAND
+  OFF_HAND
+  ACCESSORY_1
+  ACCESSORY_2
+}
+
+enum ItemRarity {
+  COMMON
+  UNCOMMON
+  RARE
+  EPIC
+  LEGENDARY
+}
+
+enum SpellTargetType {
+  SELF
+  SINGLE
+  AOE
+  LINE
+}
+
 // ─── Sprint 1: Users ────────────────────────────────────
 
 model User {
@@ -88,6 +123,8 @@ model Gameset {
   subclasses      Subclass[]
   races           Race[]
   skillTreeNodes  SkillTreeNode[]
+  itemDefinitions  ItemDefinition[]
+  spellDefinitions SpellDefinition[]
 
   @@map("gamesets")
 }
@@ -184,6 +221,8 @@ model Character {
   stats        CharacterStat[]
   wallet       CharacterWallet?
   skillUnlocks CharacterSkillUnlock[]
+  inventoryItems CharacterInventoryItem[]
+  spells         CharacterSpell[]
 
   @@unique([sessionId, userId])
   @@map("characters")
@@ -309,9 +348,11 @@ model SkillTreeNode {
   effect              Json?
   posX                Float         @default(0) @map("pos_x")
   posY                Float         @default(0) @map("pos_y")
+  spellDefinitionId   String?       @map("spell_definition_id") @db.Uuid
 
-  gameset        Gameset              @relation(fields: [gamesetId], references: [id], onDelete: Cascade)
-  class          GameClass?           @relation(fields: [classId], references: [id], onDelete: Cascade)
+  gameset          Gameset              @relation(fields: [gamesetId], references: [id], onDelete: Cascade)
+  class            GameClass?           @relation(fields: [classId], references: [id], onDelete: Cascade)
+  spellDefinition  SpellDefinition?     @relation("spell_unlock_link", fields: [spellDefinitionId], references: [id], onDelete: SetNull)
   characterUnlocks CharacterSkillUnlock[]
 
   @@map("skill_tree_nodes")
@@ -345,4 +386,78 @@ model CharacterApprovalRequest {
   player  User    @relation(fields: [playerId], references: [id])
 
   @@map("character_approval_requests")
+}
+
+// ─── Sprint 6: Inventory + Items ─────────────────────────
+
+model ItemDefinition {
+  id            String         @id @default(uuid()) @db.Uuid
+  gamesetId     String         @map("gameset_id") @db.Uuid
+  name          String
+  description   String         @default("")
+  category      ItemCategory   @default(MISC)
+  gridWidth     Int            @default(1) @map("grid_width")
+  gridHeight    Int            @default(1) @map("grid_height")
+  equipmentSlot EquipmentSlot? @map("equipment_slot")
+  statBonuses   Json           @default("{}") @map("stat_bonuses")
+  stackable     Boolean        @default(false)
+  maxStack      Int            @default(1) @map("max_stack")
+  rarity        ItemRarity     @default(COMMON)
+  iconUrl       String?        @map("icon_url")
+
+  gameset        Gameset                 @relation(fields: [gamesetId], references: [id], onDelete: Cascade)
+  inventoryItems CharacterInventoryItem[]
+
+  @@map("item_definitions")
+}
+
+model CharacterInventoryItem {
+  id               String         @id @default(uuid()) @db.Uuid
+  characterId      String         @map("character_id") @db.Uuid
+  itemDefinitionId String         @map("item_definition_id") @db.Uuid
+  posX             Int            @default(0) @map("pos_x")
+  posY             Int            @default(0) @map("pos_y")
+  quantity         Int            @default(1)
+  isEquipped       Boolean        @default(false) @map("is_equipped")
+  equippedSlot     EquipmentSlot? @map("equipped_slot")
+
+  character      Character      @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  itemDefinition ItemDefinition @relation(fields: [itemDefinitionId], references: [id], onDelete: Cascade)
+
+  @@map("character_inventory_items")
+}
+
+// ─── Sprint 7: Spell System ─────────────────────────────
+
+model SpellDefinition {
+  id            String          @id @default(uuid()) @db.Uuid
+  gamesetId     String          @map("gameset_id") @db.Uuid
+  name          String
+  description   String          @default("")
+  manaCost      Int             @default(0) @map("mana_cost")
+  cooldown      Int             @default(0)
+  range         Int             @default(0)
+  targetType    SpellTargetType @default(SINGLE) @map("target_type")
+  effects       Json            @default("[]")
+  iconUrl       String?         @map("icon_url")
+  requiredLevel Int             @default(1) @map("required_level")
+
+  gameset         Gameset          @relation(fields: [gamesetId], references: [id], onDelete: Cascade)
+  characterSpells CharacterSpell[]
+  skillTreeNodes  SkillTreeNode[]  @relation("spell_unlock_link")
+
+  @@map("spell_definitions")
+}
+
+model CharacterSpell {
+  id                String  @id @default(uuid()) @db.Uuid
+  characterId       String  @map("character_id") @db.Uuid
+  spellDefinitionId String  @map("spell_definition_id") @db.Uuid
+  slotIndex         Int?    @map("slot_index")
+
+  character       Character       @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  spellDefinition SpellDefinition @relation(fields: [spellDefinitionId], references: [id], onDelete: Cascade)
+
+  @@unique([characterId, spellDefinitionId])
+  @@map("character_spells")
 }

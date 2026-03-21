@@ -18,6 +18,7 @@ export interface SkillTreeNodeData {
   statBonusesPerLevel: Record<string, number>;
   effect: unknown | null;
   classId: string | null;
+  spellDefinitionId: string | null;
   /** Oyuncu görünümünde: bu node'un açılmış seviyesi */
   unlockedLevel?: number;
 }
@@ -50,6 +51,7 @@ export interface DbSkillTreeNode {
   statBonusesPerLevel: unknown;
   effect: unknown | null;
   classId: string | null;
+  spellDefinitionId: string | null;
   posX: number;
   posY: number;
 }
@@ -85,6 +87,7 @@ export function toReactFlowData(
       >,
       effect: n.effect,
       classId: n.classId,
+      spellDefinitionId: n.spellDefinitionId,
       unlockedLevel: unlockedMap?.get(n.id) ?? 0,
     },
   }));

@@ -29,14 +29,20 @@ const nodeTypes: NodeTypes = {
   skillNode: SkillNodeCard as unknown as NodeTypes["skillNode"],
 };
 
+interface SpellOption {
+  id: string;
+  name: string;
+}
+
 interface Props {
   gamesetId: string;
   classId: string | null;
   initialNodes: DbSkillTreeNode[];
   statKeys: string[];
+  spellDefinitions?: SpellOption[];
 }
 
-export function SkillTreeCanvas({ gamesetId, classId, initialNodes, statKeys }: Props) {
+export function SkillTreeCanvas({ gamesetId, classId, initialNodes, statKeys, spellDefinitions }: Props) {
   const initial = toReactFlowData(initialNodes);
   const [nodes, setNodes, onNodesChange] = useNodesState(initial.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initial.edges);
@@ -260,6 +266,7 @@ export function SkillTreeCanvas({ gamesetId, classId, initialNodes, statKeys }: 
           node={selectedNodeData}
           allNodes={allNodeDatas}
           statKeys={statKeys}
+          spellDefinitions={spellDefinitions}
           onSave={handleNodeSave}
           onDelete={handleNodeDelete}
           onClose={() => setSelectedNodeId(null)}

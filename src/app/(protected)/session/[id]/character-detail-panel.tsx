@@ -1,5 +1,11 @@
 "use client";
 
+interface EquippedItemInfo {
+  name: string;
+  slot: string;
+  rarity: string;
+}
+
 interface CharacterInfo {
   id: string;
   userId: string;
@@ -11,6 +17,7 @@ interface CharacterInfo {
   publicData: Record<string, unknown>;
   privateData: Record<string, unknown>;
   stats: { name: string; baseValue: number; currentValue: number; maxValue: number | null; isPublic: boolean }[];
+  equippedItems?: EquippedItemInfo[];
 }
 
 interface Props {
@@ -191,6 +198,32 @@ export function CharacterDetailPanel({ character, isGm, isOwn, onClose }: Props)
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Equipped Items */}
+      {character.equippedItems && character.equippedItems.length > 0 && (
+        <div className="mb-4">
+          <h4 className="mb-1 text-[10px] font-semibold text-zinc-500">Kuşanılmış</h4>
+          <div className="space-y-1">
+            {character.equippedItems.map((item, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between rounded border border-border bg-void px-2 py-1"
+              >
+                <span className={`text-[10px] font-medium ${
+                  item.rarity === "LEGENDARY" ? "text-yellow-400" :
+                  item.rarity === "EPIC" ? "text-purple-400" :
+                  item.rarity === "RARE" ? "text-blue-400" :
+                  item.rarity === "UNCOMMON" ? "text-green-400" :
+                  "text-zinc-300"
+                }`}>
+                  {item.name}
+                </span>
+                <span className="text-[9px] text-zinc-600">{item.slot}</span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

@@ -59,6 +59,10 @@ export interface ComputedStat {
   isPublic: boolean;
 }
 
+export interface EquipmentBonus {
+  statBonuses: Record<string, number>;
+}
+
 // ─── Core Functions ─────────────────────────────────────
 
 /**
@@ -83,6 +87,21 @@ export function calculateBaseStats(
   }
 
   return stats;
+}
+
+/**
+ * Kuşanılmış eşyaların stat bonuslarını hesaplar.
+ */
+export function calculateEquipmentBonuses(
+  equippedItems: EquipmentBonus[]
+): Record<string, number> {
+  const bonuses: Record<string, number> = {};
+  for (const item of equippedItems) {
+    for (const [key, value] of Object.entries(item.statBonuses)) {
+      bonuses[key] = (bonuses[key] || 0) + value;
+    }
+  }
+  return bonuses;
 }
 
 /**
@@ -136,9 +155,16 @@ export function evaluateFormula(
 export function calculateAllStats(
   statDefs: StatDef[],
   unlocks: SkillUnlock[],
-  nodes: SkillNode[]
+  nodes: SkillNode[],
+  equipmentBonuses: Record<string, number> = {}
 ): ComputedStat[] {
   const baseStats = calculateBaseStats(unlocks, nodes);
+
+  // Equipment bonuslarını baseStats'a merge et
+  for (const [key, value] of Object.entries(equipmentBonuses)) {
+    baseStats[key] = (baseStats[key] || 0) + value;
+  }
+
   const results: ComputedStat[] = [];
 
   // Önce BASE statları hesapla
@@ -211,6 +237,10 @@ export async function recalculateCharacterStats(
         skillUnlocks: {
           include: { node: true },
         },
+        inventoryItems: {
+          where: { isEquipped: true },
+          include: { itemDefinition: true },
+        },
       },
     });
 
@@ -232,6 +262,12 @@ export async function recalculateCharacterStats(
       statBonusesPerLevel: u.node.statBonusesPerLevel as Record<string, number>,
     }));
 
+    // Equipment bonuslarını hesapla
+    const equippedItems: EquipmentBonus[] = character.inventoryItems.map((i) => ({
+      statBonuses: (i.itemDefinition.statBonuses as Record<string, number>) ?? {},
+    }));
+    const equipBonuses = calculateEquipmentBonuses(equippedItems);
+
     const computed = calculateAllStats(
       statDefs.map((d) => ({
         key: d.key,
@@ -242,7 +278,8 @@ export async function recalculateCharacterStats(
         maxVal: d.maxVal,
       })),
       unlocks,
-      nodes
+      nodes,
+      equipBonuses
     );
 
     // Mevcut statları al (currentValue'yu korumak için)
