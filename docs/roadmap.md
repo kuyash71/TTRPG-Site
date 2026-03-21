@@ -93,37 +93,37 @@
 
 ### Veritabanı
 
-- [ ] `stat_groups`, `stat_definitions` tabloları (BASE/DERIVED/RESOURCE tipleri)
-- [ ] `classes`, `subclasses`, `races` tabloları (stat_bonuses yok, trait bazlı)
-- [ ] `skill_tree_nodes` tablosu (max_level, cost_per_level, stat_bonuses_per_level)
-- [ ] `character_skill_unlocks` tablosu (current_level)
-- [ ] `character_approval_requests` tablosu
+- [x] `stat_groups`, `stat_definitions` tabloları (BASE/DERIVED/RESOURCE tipleri)
+- [x] `classes`, `subclasses`, `races` tabloları (stat_bonuses yok, trait bazlı)
+- [x] `skill_tree_nodes` tablosu (max_level, cost_per_level, stat_bonuses_per_level)
+- [x] `character_skill_unlocks` tablosu (current_level)
+- [x] `character_approval_requests` tablosu
 
 ### Skill Tree Editörü (GM)
 
-- [ ] `@xyflow/react` canvas entegrasyonu
-- [ ] Class tree / Common tree seçici
-- [ ] Node editörü: tip, ad, max_level, cost_per_level, stat_bonuses_per_level, prerequisites
-- [ ] DFS cycle detection (editör + sunucu)
+- [x] `@xyflow/react` canvas entegrasyonu
+- [x] Class tree / Common tree seçici
+- [x] Node editörü: tip, ad, max_level, cost_per_level, stat_bonuses_per_level, prerequisites
+- [x] DFS cycle detection (editör + sunucu)
 
 ### Ruleset Editörü UI
 
-- [ ] Genel / Stat Tanımları / Sınıf-Irk / Skill Ağacı / Büyüler / Eşyalar sekmeleri
-- [ ] DERIVED stat formula builder (görsel)
-- [ ] Gameset config: starting_skill_points, skill_points_per_level
+- [x] Genel / Stat Tanımları / Sınıf-Irk / Skill Ağacı / Büyüler / Eşyalar sekmeleri
+- [x] DERIVED stat formula builder (görsel)
+- [x] Gameset config: starting_skill_points, skill_points_per_level
 
 ### Karakter Wizard
 
-- [ ] 5 adım: race → class → **skill dağıtımı** → detaylar → özet
-- [ ] Adım 3: Class tree + Common tree üzerinde starting_skill_points dağıtımı
-- [ ] Anlık stat önizlemesi (skill seçimlerine göre hesaplanır)
-- [ ] GM onay paneli (Onayla / Reddet)
+- [x] 5 adım: race → class → **skill dağıtımı** → detaylar → özet
+- [x] Adım 3: Class tree + Common tree üzerinde starting_skill_points dağıtımı
+- [x] Anlık stat önizlemesi (skill seçimlerine göre hesaplanır)
+- [x] GM onay paneli (Onayla / Reddet)
 
 ### Oyuncu Skill Tree
 
-- [ ] Salt-okunur skill tree görünümü + unlock/level-up butonu
-- [ ] Level atlama → skill point kazanımı
-- [ ] Skill unlock/level-up → character_stats.base_value cache güncelleme
+- [x] Salt-okunur skill tree görünümü + unlock/level-up butonu
+- [x] Level atlama → skill point kazanımı
+- [x] Skill unlock/level-up → character_stats.base_value cache güncelleme
 
 ---
 
