@@ -73,13 +73,15 @@
 
 **Hedef:** Karakter sayfası + görünürlük sistemi.
 
-- [ ] `characters` tablosu (public_data, private_data jsonb)
-- [ ] `character_stats`, `character_wallet` tabloları
-- [ ] `GET/PATCH /api/characters/[id]` — sahip + GM yetkisi
-- [ ] Görünürlük middleware: `is_public` stat filtresi
-- [ ] `character:update` / `character:update_private` socket events
-- [ ] `/character/[id]` sayfası — sheet, stats
-- [ ] Oyun odasında oyuncu kartları (HP/Mana public gösterim)
+- [x] `characters` tablosu (public_data, private_data jsonb)
+- [x] `character_stats`, `character_wallet` tabloları
+- [x] `GET/PATCH /api/characters/[id]` — sahip + GM yetkisi
+- [x] Görünürlük middleware: `is_public` stat filtresi
+- [x] `character:update` / `character:update_private` socket events
+- [x] `/character/[id]` sayfası — sheet, stats
+- [x] Oyun odasında oyuncu kartları (HP/Mana public gösterim)
+- [x] `POST /api/characters` — karakter oluşturma (default stats + wallet)
+- [x] `prisma migrate dev` — Sprint 4 migration'ı Supabase'e uygula
 
 ---
 

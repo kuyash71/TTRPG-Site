@@ -6,6 +6,14 @@ import { DicePanel } from "./dice-panel";
 import { PlayerList } from "./player-list";
 import Link from "next/link";
 
+interface CharacterInfo {
+  id: string;
+  userId: string;
+  name: string;
+  username: string;
+  stats: { name: string; currentValue: number; maxValue: number | null }[];
+}
+
 interface Props {
   sessionId: string;
   sessionName: string;
@@ -13,6 +21,7 @@ interface Props {
   status: string;
   gm: { id: string; username: string };
   players: { id: string; username: string }[];
+  characters: CharacterInfo[];
   currentUser: { id: string; username: string; isGm: boolean };
 }
 
@@ -30,6 +39,7 @@ export function SessionRoom({
   status,
   gm,
   players,
+  characters,
   currentUser,
 }: Props) {
   const { socket, connected } = useSocket(sessionId);
@@ -74,6 +84,7 @@ export function SessionRoom({
           <PlayerList
             gm={gm}
             players={players}
+            characters={characters}
             currentUserId={currentUser.id}
             socket={socket}
           />

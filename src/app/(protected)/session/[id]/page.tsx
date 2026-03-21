@@ -22,6 +22,12 @@ export default async function SessionPage({
       players: {
         include: { user: { select: { id: true, username: true } } },
       },
+      characters: {
+        include: {
+          stats: { where: { isPublic: true } },
+          user: { select: { id: true, username: true } },
+        },
+      },
     },
   });
 
@@ -44,6 +50,17 @@ export default async function SessionPage({
       players={gameSession.players.map((p) => ({
         id: p.user.id,
         username: p.user.username,
+      }))}
+      characters={gameSession.characters.map((c) => ({
+        id: c.id,
+        userId: c.user.id,
+        name: c.name,
+        username: c.user.username,
+        stats: c.stats.map((s) => ({
+          name: s.name,
+          currentValue: s.currentValue,
+          maxValue: s.maxValue,
+        })),
       }))}
       currentUser={{
         id: session.user.id,

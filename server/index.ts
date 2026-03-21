@@ -147,6 +147,37 @@ io.on("connection", (socket) => {
     }
   });
 
+  // ─── Character update (broadcast to room) ─────────
+  socket.on(
+    "character:update",
+    async ({ characterId, stats }: { characterId: string; stats: { name: string; currentValue: number }[] }) => {
+      const sessionId = socket.data.sessionId;
+      if (!sessionId || !characterId) return;
+
+      // Broadcast public stat changes to everyone in the room
+      io.to(`session:${sessionId}`).emit("character:updated", {
+        characterId,
+        userId: socket.data.userId,
+        username: socket.data.username,
+        stats,
+      });
+    }
+  );
+
+  socket.on(
+    "character:update_private",
+    async ({ characterId, data }: { characterId: string; data: Record<string, unknown> }) => {
+      const sessionId = socket.data.sessionId;
+      if (!sessionId || !characterId) return;
+
+      // Private updates only go to the owner and GM (not broadcast to all)
+      socket.emit("character:private_updated", {
+        characterId,
+        data,
+      });
+    }
+  );
+
   // ─── Disconnect ─────────────────────────────────────
   socket.on("disconnect", () => {
     const sessionId = socket.data.sessionId;

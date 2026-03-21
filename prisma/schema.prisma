@@ -42,6 +42,7 @@ model User {
   createdGamesets Gameset[]
   chatMessages   ChatMessage[]
   diceRolls      DiceRoll[]
+  characters     Character[]
 
   @@map("users")
 }
@@ -82,6 +83,7 @@ model Session {
   players      SessionPlayer[]
   chatMessages ChatMessage[]
   diceRolls    DiceRoll[]
+  characters   Character[]
 
   @@map("sessions")
 }
@@ -130,4 +132,53 @@ model DiceRoll {
 
   @@index([sessionId, createdAt])
   @@map("dice_rolls")
+}
+
+// ─── Sprint 4: Characters ───────────────────────────────
+
+model Character {
+  id         String   @id @default(uuid()) @db.Uuid
+  sessionId  String   @map("session_id") @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  name       String
+  avatarUrl  String?  @map("avatar_url")
+  publicData Json     @default("{}") @map("public_data")
+  privateData Json    @default("{}") @map("private_data")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  session Session        @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User           @relation(fields: [userId], references: [id])
+  stats   CharacterStat[]
+  wallet  CharacterWallet?
+
+  @@unique([sessionId, userId])
+  @@map("characters")
+}
+
+model CharacterStat {
+  id           String  @id @default(uuid()) @db.Uuid
+  characterId  String  @map("character_id") @db.Uuid
+  name         String
+  baseValue    Int     @default(0) @map("base_value")
+  currentValue Int     @default(0) @map("current_value")
+  maxValue     Int?    @map("max_value")
+  isPublic     Boolean @default(true) @map("is_public")
+
+  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  @@unique([characterId, name])
+  @@map("character_stats")
+}
+
+model CharacterWallet {
+  id          String @id @default(uuid()) @db.Uuid
+  characterId String @unique @map("character_id") @db.Uuid
+  gold        Int    @default(0)
+  silver      Int    @default(0)
+  copper      Int    @default(0)
+
+  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  @@map("character_wallets")
 }
