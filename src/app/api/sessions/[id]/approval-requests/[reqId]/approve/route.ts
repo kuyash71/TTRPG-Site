@@ -47,7 +47,17 @@ export async function POST(
     classId: string;
     skillAllocations: Record<string, number>;
     backstory: string;
+    customFields?: { id: string; title: string; content: string; isPrivate: boolean }[];
   };
+
+  // Custom field'ları public/private olarak ayır
+  const allFields = snapshot.customFields || [];
+  const publicFields = allFields
+    .filter((f) => !f.isPrivate)
+    .map(({ id, title, content }) => ({ id, title, content }));
+  const privateFields = allFields
+    .filter((f) => f.isPrivate)
+    .map(({ id, title, content }) => ({ id, title, content }));
 
   // Transaction: karakter + skill unlock + stat + wallet oluştur
   const character = await prisma.$transaction(async (tx) => {
@@ -62,7 +72,8 @@ export async function POST(
         name: snapshot.name,
         level: 1,
         skillPoints: 0,
-        publicData: { backstory: snapshot.backstory },
+        publicData: { backstory: snapshot.backstory, customFields: publicFields },
+        privateData: { customFields: privateFields },
       },
     });
 

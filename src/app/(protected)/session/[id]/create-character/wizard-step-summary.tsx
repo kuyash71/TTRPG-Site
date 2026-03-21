@@ -135,6 +135,32 @@ export function WizardStepSummary({
             </p>
           </div>
         )}
+
+        {/* Custom Fields */}
+        {draft.customFields?.length > 0 && (
+          <div className="space-y-2">
+            <span className="text-xs text-zinc-500">Ek Bilgiler</span>
+            {draft.customFields.map((field) => (
+              <div key={field.id} className="rounded border border-border bg-void p-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-zinc-300">
+                    {field.title || "Başlıksız"}
+                  </span>
+                  {field.isPrivate && (
+                    <span className="rounded bg-red-900/30 px-1 py-0.5 text-[9px] text-red-400">
+                      Gizli
+                    </span>
+                  )}
+                </div>
+                {field.content && (
+                  <p className="mt-1 whitespace-pre-wrap text-[11px] text-zinc-400">
+                    {field.content}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <p className="text-xs text-zinc-500">

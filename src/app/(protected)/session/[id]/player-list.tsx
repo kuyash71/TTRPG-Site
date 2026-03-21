@@ -18,6 +18,7 @@ interface Props {
   characters: CharacterInfo[];
   currentUserId: string;
   socket: Socket | null;
+  onPlayerClick?: (userId: string) => void;
 }
 
 export function PlayerList({
@@ -26,6 +27,7 @@ export function PlayerList({
   characters,
   currentUserId,
   socket,
+  onPlayerClick,
 }: Props) {
   const [onlineIds, setOnlineIds] = useState<Set<string>>(new Set());
   const [charStats, setCharStats] = useState<
@@ -101,7 +103,11 @@ export function PlayerList({
           const mana = stats.find((s) => s.name === "Mana");
 
           return (
-            <div key={member.id} className="rounded-md border border-border bg-void p-2">
+            <div
+              key={member.id}
+              className="cursor-pointer rounded-md border border-border bg-void p-2 transition-colors hover:border-lavender-400/30"
+              onClick={() => char && onPlayerClick?.(member.id)}
+            >
               <div className="flex items-center gap-2">
                 <span
                   className={`h-2 w-2 flex-shrink-0 rounded-full ${

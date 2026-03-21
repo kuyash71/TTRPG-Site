@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import type { Socket } from "socket.io-client";
 
 interface ApprovalRequest {
   id: string;
@@ -14,6 +15,7 @@ interface ApprovalRequest {
     maxPoints: number;
     previewStats: { key: string; label: string; type: string; currentValue: number; maxValue: number | null }[];
     skillAllocations: Record<string, number>;
+    customFields?: { id: string; title: string; content: string; isPrivate: boolean }[];
   };
   gmComment: string | null;
   submittedAt: string;
@@ -22,9 +24,10 @@ interface ApprovalRequest {
 
 interface Props {
   sessionId: string;
+  socket: Socket | null;
 }
 
-export function ApprovalPanel({ sessionId }: Props) {
+export function ApprovalPanel({ sessionId, socket }: Props) {
   const [requests, setRequests] = useState<ApprovalRequest[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -40,18 +43,26 @@ export function ApprovalPanel({ sessionId }: Props) {
   const pendingRequests = requests.filter((r) => r.status === "PENDING");
 
   async function handleApprove(reqId: string) {
+    const req = requests.find((r) => r.id === reqId);
     const res = await fetch(
       `/api/sessions/${sessionId}/approval-requests/${reqId}/approve`,
       { method: "POST" }
     );
     if (res.ok) {
+      const data = await res.json();
       setRequests((prev) =>
         prev.map((r) => (r.id === reqId ? { ...r, status: "APPROVED" } : r))
       );
+      socket?.emit("gm:approve_character", {
+        sessionId,
+        playerId: req?.player.id,
+        characterId: data.id,
+      });
     }
   }
 
   async function handleReject(reqId: string) {
+    const req = requests.find((r) => r.id === reqId);
     const comment = prompt("Red sebebi (opsiyonel):");
     const res = await fetch(
       `/api/sessions/${sessionId}/approval-requests/${reqId}/reject`,
@@ -67,6 +78,11 @@ export function ApprovalPanel({ sessionId }: Props) {
           r.id === reqId ? { ...r, status: "REJECTED", gmComment: comment } : r
         )
       );
+      socket?.emit("gm:reject_character", {
+        sessionId,
+        playerId: req?.player.id,
+        reason: comment,
+      });
     }
   }
 
@@ -119,6 +135,22 @@ export function ApprovalPanel({ sessionId }: Props) {
               <p className="mb-2 text-xs text-zinc-500 line-clamp-2">
                 {req.snapshot.backstory}
               </p>
+            )}
+
+            {req.snapshot.customFields && req.snapshot.customFields.length > 0 && (
+              <div className="mb-2 space-y-1">
+                {req.snapshot.customFields.map((f) => (
+                  <div key={f.id} className="flex items-center gap-1 text-[10px]">
+                    <span className="font-medium text-zinc-400">{f.title || "Başlıksız"}:</span>
+                    <span className="text-zinc-500 line-clamp-1">{f.content}</span>
+                    {f.isPrivate && (
+                      <span className="rounded bg-red-900/30 px-1 py-0.5 text-[9px] text-red-400">
+                        Gizli
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
             )}
 
             <div className="flex gap-2">

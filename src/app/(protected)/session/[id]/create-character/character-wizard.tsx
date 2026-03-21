@@ -39,12 +39,20 @@ export interface WizardStatGroup {
   }[];
 }
 
+export interface CustomField {
+  id: string;
+  title: string;
+  content: string;
+  isPrivate: boolean;
+}
+
 export interface WizardDraft {
   raceId: string | null;
   classId: string | null;
   skillAllocations: Record<string, number>;
   name: string;
   backstory: string;
+  customFields: CustomField[];
 }
 
 const STEPS = [
@@ -97,6 +105,7 @@ export function CharacterWizard({
       skillAllocations: {},
       name: "",
       backstory: "",
+      customFields: [],
     };
   });
 
@@ -145,6 +154,7 @@ export function CharacterWizard({
         classId: draft.classId,
         skillAllocations: draft.skillAllocations,
         backstory: draft.backstory,
+        customFields: draft.customFields,
       }),
     });
 
@@ -235,6 +245,7 @@ export function CharacterWizard({
           <WizardStepDetails
             name={draft.name}
             backstory={draft.backstory}
+            customFields={draft.customFields}
             onChange={(updates) => updateDraft(updates)}
           />
         )}

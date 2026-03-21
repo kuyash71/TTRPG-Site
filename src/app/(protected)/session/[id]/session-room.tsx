@@ -1,10 +1,13 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useSocket } from "@/hooks/use-socket";
 import { ChatPanel } from "./chat-panel";
 import { DicePanel } from "./dice-panel";
 import { PlayerList } from "./player-list";
 import { ApprovalPanel } from "./approval-panel";
+import { CharacterDetailPanel } from "./character-detail-panel";
 import Link from "next/link";
 
 interface CharacterInfo {
@@ -12,7 +15,12 @@ interface CharacterInfo {
   userId: string;
   name: string;
   username: string;
-  stats: { name: string; currentValue: number; maxValue: number | null }[];
+  className: string | null;
+  raceName: string | null;
+  level: number;
+  publicData: Record<string, unknown>;
+  privateData: Record<string, unknown>;
+  stats: { name: string; baseValue: number; currentValue: number; maxValue: number | null; isPublic: boolean }[];
 }
 
 interface Props {
@@ -20,6 +28,7 @@ interface Props {
   sessionName: string;
   gamesetName: string;
   status: string;
+  inviteCode: string;
   gm: { id: string; username: string };
   players: { id: string; username: string }[];
   characters: CharacterInfo[];
@@ -31,7 +40,6 @@ interface Props {
 const statusLabels: Record<string, { label: string; color: string }> = {
   OPEN: { label: "Açık", color: "text-green-400" },
   ACTIVE: { label: "Aktif", color: "text-lavender-400" },
-  CLOSING: { label: "Kapanıyor", color: "text-gold-400" },
   CLOSED: { label: "Kapalı", color: "text-zinc-500" },
 };
 
@@ -40,6 +48,7 @@ export function SessionRoom({
   sessionName,
   gamesetName,
   status,
+  inviteCode,
   gm,
   players,
   characters,
@@ -47,7 +56,54 @@ export function SessionRoom({
   hasCharacter,
   pendingApproval,
 }: Props) {
+  const router = useRouter();
   const { socket, connected } = useSocket(sessionId);
+  const [mobileTab, setMobileTab] = useState<"chat" | "players" | "dice" | "character">("chat");
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
+  const [isPendingApproval, setIsPendingApproval] = useState(pendingApproval);
+  const [hasChar, setHasChar] = useState(hasCharacter);
+  const [rejectionReason, setRejectionReason] = useState<string | null>(null);
+
+  // Socket: onay/red bildirimleri
+  useEffect(() => {
+    if (!socket) return;
+
+    function handleApproved({ playerId }: { playerId: string }) {
+      if (playerId === currentUser.id) {
+        setIsPendingApproval(false);
+        setHasChar(true);
+        setRejectionReason(null);
+        router.refresh();
+      }
+    }
+
+    function handleRejected({ playerId, reason }: { playerId: string; reason?: string }) {
+      if (playerId === currentUser.id) {
+        setIsPendingApproval(false);
+        setRejectionReason(reason || "Karakter isteğiniz reddedildi.");
+      }
+    }
+
+    socket.on("session:character_approved", handleApproved);
+    socket.on("char:approval_rejected", handleRejected);
+
+    return () => {
+      socket.off("session:character_approved", handleApproved);
+      socket.off("char:approval_rejected", handleRejected);
+    };
+  }, [socket, currentUser.id, router]);
+
+  const selectedCharacter = selectedPlayerId
+    ? characters.find((c) => c.userId === selectedPlayerId) ?? null
+    : null;
+
+  function handlePlayerClick(userId: string) {
+    setSelectedPlayerId((prev) => (prev === userId ? null : userId));
+    // Mobilde karakter tab'ına geç
+    if (window.innerWidth < 768) {
+      setMobileTab("character");
+    }
+  }
 
   return (
     <div className="flex h-screen flex-col bg-void">
@@ -66,6 +122,18 @@ export function SessionRoom({
             </h1>
             <p className="text-xs text-zinc-500">
               {gamesetName} &middot; GM: {gm.username}
+              {status === "OPEN" && (
+                <>
+                  {" "}&middot;{" "}
+                  <button
+                    onClick={() => navigator.clipboard.writeText(inviteCode)}
+                    className="font-mono text-gold-400 hover:text-gold-300"
+                    title="Kopyalamak için tıkla"
+                  >
+                    {inviteCode}
+                  </button>
+                </>
+              )}
             </p>
           </div>
         </div>
@@ -83,7 +151,7 @@ export function SessionRoom({
       </header>
 
       {/* Karakter yoksa wizard'a yönlendir */}
-      {!currentUser.isGm && !hasCharacter && !pendingApproval && (
+      {!currentUser.isGm && !hasChar && !isPendingApproval && !rejectionReason && (
         <div className="border-b border-gold-900/50 bg-gold-900/10 px-4 py-3">
           <div className="flex items-center justify-between">
             <p className="text-sm text-gold-400">
@@ -100,7 +168,7 @@ export function SessionRoom({
       )}
 
       {/* Bekleyen onay */}
-      {!currentUser.isGm && pendingApproval && (
+      {!currentUser.isGm && isPendingApproval && (
         <div className="border-b border-lavender-900/50 bg-lavender-900/10 px-4 py-3">
           <p className="text-sm text-lavender-400">
             Karakter oluşturma isteğiniz GM onayı bekliyor.
@@ -108,16 +176,33 @@ export function SessionRoom({
         </div>
       )}
 
-      {/* GM: Onay paneli */}
-      {currentUser.isGm && (
-        <div className="border-b border-border px-4 py-3">
-          <ApprovalPanel sessionId={sessionId} />
+      {/* Red bildirimi */}
+      {!currentUser.isGm && rejectionReason && (
+        <div className="border-b border-red-900/50 bg-red-900/10 px-4 py-3">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-red-400">
+              {rejectionReason}
+            </p>
+            <Link
+              href={`/session/${sessionId}/create-character`}
+              className="rounded-md bg-gold-400 px-4 py-1.5 text-sm font-medium text-void hover:bg-gold-500"
+            >
+              Tekrar Dene
+            </Link>
+          </div>
         </div>
       )}
 
-      {/* 3-Column Layout */}
+      {/* GM: Onay paneli */}
+      {currentUser.isGm && (
+        <div className="border-b border-border px-4 py-3">
+          <ApprovalPanel sessionId={sessionId} socket={socket} />
+        </div>
+      )}
+
+      {/* 3-Column Layout (Desktop) + Tab Layout (Mobile) */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left: Players */}
+        {/* Left: Players — desktop only */}
         <aside className="hidden w-56 flex-shrink-0 border-r border-border bg-surface md:block">
           <PlayerList
             gm={gm}
@@ -125,23 +210,94 @@ export function SessionRoom({
             characters={characters}
             currentUserId={currentUser.id}
             socket={socket}
+            onPlayerClick={handlePlayerClick}
           />
         </aside>
 
-        {/* Center: Chat */}
+        {/* Center: active mobile tab or chat on desktop */}
         <main className="flex flex-1 flex-col">
-          <ChatPanel
-            sessionId={sessionId}
-            socket={socket}
-            currentUser={currentUser}
-          />
+          {/* Desktop: always chat */}
+          <div className="hidden flex-1 flex-col md:flex">
+            <ChatPanel
+              sessionId={sessionId}
+              socket={socket}
+              currentUser={currentUser}
+            />
+          </div>
+
+          {/* Mobile: tab-based */}
+          <div className="flex flex-1 flex-col md:hidden">
+            {mobileTab === "chat" && (
+              <ChatPanel
+                sessionId={sessionId}
+                socket={socket}
+                currentUser={currentUser}
+              />
+            )}
+            {mobileTab === "players" && (
+              <PlayerList
+                gm={gm}
+                players={players}
+                characters={characters}
+                currentUserId={currentUser.id}
+                socket={socket}
+                onPlayerClick={handlePlayerClick}
+              />
+            )}
+            {mobileTab === "dice" && (
+              <DicePanel socket={socket} currentUser={currentUser} />
+            )}
+            {mobileTab === "character" && selectedCharacter && (
+              <CharacterDetailPanel
+                character={selectedCharacter}
+                isGm={currentUser.isGm}
+                isOwn={selectedCharacter.userId === currentUser.id}
+                onClose={() => {
+                  setSelectedPlayerId(null);
+                  setMobileTab("players");
+                }}
+              />
+            )}
+          </div>
         </main>
 
-        {/* Right: Dice */}
-        <aside className="hidden w-72 flex-shrink-0 border-l border-border bg-surface lg:block">
-          <DicePanel socket={socket} currentUser={currentUser} />
-        </aside>
+        {/* Right: Character detail or Dice — desktop only */}
+        {selectedCharacter ? (
+          <aside className="hidden w-72 flex-shrink-0 border-l border-border bg-surface lg:block">
+            <CharacterDetailPanel
+              character={selectedCharacter}
+              isGm={currentUser.isGm}
+              isOwn={selectedCharacter.userId === currentUser.id}
+              onClose={() => setSelectedPlayerId(null)}
+            />
+          </aside>
+        ) : (
+          <aside className="hidden w-72 flex-shrink-0 border-l border-border bg-surface lg:block">
+            <DicePanel socket={socket} currentUser={currentUser} />
+          </aside>
+        )}
       </div>
+
+      {/* Mobile tab bar */}
+      <nav className="flex border-t border-border bg-surface md:hidden">
+        {([
+          { key: "chat" as const, label: "Sohbet" },
+          { key: "players" as const, label: "Oyuncular" },
+          { key: "dice" as const, label: "Zar" },
+        ]).map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setMobileTab(tab.key)}
+            className={`flex-1 py-3 text-center text-xs font-medium transition-colors ${
+              mobileTab === tab.key
+                ? "border-t-2 border-lavender-400 text-lavender-400"
+                : "text-zinc-500 hover:text-zinc-300"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </nav>
     </div>
   );
 }

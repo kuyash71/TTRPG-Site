@@ -18,6 +18,8 @@ export function StatDefinitionsTab({ gamesetId, statGroups, onUpdate }: Props) {
   const [newGroupName, setNewGroupName] = useState("");
   const [editingDef, setEditingDef] = useState<StatDefData | null>(null);
   const [showDefForm, setShowDefForm] = useState(false);
+  const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
+  const [editGroupName, setEditGroupName] = useState("");
 
   const selectedGroup = groups.find((g) => g.id === selectedGroupId) ?? null;
 
@@ -57,6 +59,24 @@ export function StatDefinitionsTab({ gamesetId, statGroups, onUpdate }: Props) {
     if (selectedGroupId === groupId) {
       setSelectedGroupId(updated[0]?.id ?? null);
     }
+  }
+
+  async function renameGroup(groupId: string, name: string) {
+    if (!name.trim()) return;
+    const res = await fetch(
+      `/api/gamesets/${gamesetId}/stat-groups/${groupId}`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim() }),
+      }
+    );
+    if (!res.ok) return;
+    const updated = groups.map((g) =>
+      g.id === groupId ? { ...g, name: name.trim() } : g
+    );
+    updateState(updated);
+    setEditingGroupId(null);
   }
 
   // ─── Stat Def CRUD ─────────────────────────────────────
@@ -138,13 +158,38 @@ export function StatDefinitionsTab({ gamesetId, statGroups, onUpdate }: Props) {
             }`}
             onClick={() => setSelectedGroupId(g.id)}
           >
-            <span>{g.name}</span>
+            {editingGroupId === g.id ? (
+              <input
+                autoFocus
+                type="text"
+                value={editGroupName}
+                onChange={(e) => setEditGroupName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") renameGroup(g.id, editGroupName);
+                  if (e.key === "Escape") setEditingGroupId(null);
+                }}
+                onBlur={() => renameGroup(g.id, editGroupName)}
+                onClick={(e) => e.stopPropagation()}
+                className="w-full rounded border border-gold-400 bg-void px-1 py-0.5 text-xs text-zinc-100 focus:outline-none"
+              />
+            ) : (
+              <span
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
+                  setEditingGroupId(g.id);
+                  setEditGroupName(g.name);
+                }}
+                title="Çift tıkla: yeniden adlandır"
+              >
+                {g.name}
+              </span>
+            )}
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 deleteGroup(g.id);
               }}
-              className="text-zinc-600 hover:text-red-400"
+              className="flex-shrink-0 text-zinc-600 hover:text-red-400"
               title="Grubu sil"
             >
               &times;

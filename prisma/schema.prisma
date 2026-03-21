@@ -18,7 +18,6 @@ enum Role {
 enum SessionStatus {
   OPEN
   ACTIVE
-  CLOSING
   CLOSED
 }
 

@@ -56,7 +56,7 @@ export async function POST(
   }
 
   const body = await req.json();
-  const { name, raceId, classId, skillAllocations, backstory } = body;
+  const { name, raceId, classId, skillAllocations, backstory, customFields } = body;
 
   if (!name?.trim()) return NextResponse.json({ error: "Karakter adı zorunludur." }, { status: 400 });
   if (!raceId) return NextResponse.json({ error: "Irk seçimi zorunludur." }, { status: 400 });
@@ -96,12 +96,23 @@ export async function POST(
 
   const previewStats = calculateAllStats(statDefs, unlocks, nodes);
 
+  // Custom field doğrulama (max 5)
+  const validatedFields = Array.isArray(customFields)
+    ? customFields.slice(0, 5).map((f: { id: string; title: string; content: string; isPrivate: boolean }) => ({
+        id: f.id,
+        title: String(f.title || "").slice(0, 100),
+        content: String(f.content || "").slice(0, 2000),
+        isPrivate: Boolean(f.isPrivate),
+      }))
+    : [];
+
   const snapshot = {
     name: name.trim(),
     raceId,
     classId,
     skillAllocations: skillAllocations || {},
     backstory: backstory || "",
+    customFields: validatedFields,
     previewStats: JSON.parse(JSON.stringify(previewStats)),
     spentPoints: totalSpent,
     maxPoints: config.startingSkillPoints,

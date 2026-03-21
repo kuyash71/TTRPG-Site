@@ -70,7 +70,7 @@ export function GmPanel() {
 
   return (
     <div className="mb-6 rounded-lg border border-gold-900/50 bg-surface p-6">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="heading-gothic text-lg font-semibold text-gold-400">
           GM Paneli
         </h2>

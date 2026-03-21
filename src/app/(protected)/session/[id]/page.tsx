@@ -24,8 +24,10 @@ export default async function SessionPage({
       },
       characters: {
         include: {
-          stats: { where: { isPublic: true } },
+          stats: true,
           user: { select: { id: true, username: true } },
+          class: { select: { name: true } },
+          race: { select: { name: true } },
         },
       },
     },
@@ -62,6 +64,7 @@ export default async function SessionPage({
       sessionName={gameSession.name}
       gamesetName={gameSession.gameset.name}
       status={gameSession.status}
+      inviteCode={gameSession.inviteCode}
       gm={gameSession.gm}
       players={gameSession.players.map((p) => ({
         id: p.user.id,
@@ -72,10 +75,17 @@ export default async function SessionPage({
         userId: c.user.id,
         name: c.name,
         username: c.user.username,
+        className: c.class?.name ?? null,
+        raceName: c.race?.name ?? null,
+        level: c.level,
+        publicData: c.publicData as Record<string, unknown>,
+        privateData: c.privateData as Record<string, unknown>,
         stats: c.stats.map((s) => ({
           name: s.name,
+          baseValue: s.baseValue,
           currentValue: s.currentValue,
           maxValue: s.maxValue,
+          isPublic: s.isPublic,
         })),
       }))}
       currentUser={{

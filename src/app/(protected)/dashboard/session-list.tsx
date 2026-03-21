@@ -17,7 +17,6 @@ interface SessionData {
 const statusLabels: Record<string, { label: string; color: string }> = {
   OPEN: { label: "Açık", color: "text-green-400" },
   ACTIVE: { label: "Aktif", color: "text-lavender-400" },
-  CLOSING: { label: "Kapanıyor", color: "text-gold-400" },
   CLOSED: { label: "Kapalı", color: "text-zinc-500" },
 };
 
@@ -74,7 +73,7 @@ export function SessionList({ isGm }: { isGm: boolean }) {
           {sessions.map((s) => (
             <div
               key={s.id}
-              className="flex items-center justify-between rounded-md border border-border bg-void p-4"
+              className="flex flex-col gap-3 rounded-md border border-border bg-void p-4 sm:flex-row sm:items-center sm:justify-between"
             >
               <div>
                 <h3 className="font-medium text-zinc-100">{s.name}</h3>
@@ -84,7 +83,7 @@ export function SessionList({ isGm }: { isGm: boolean }) {
                   {" "}&middot; {s.players.length} oyuncu
                 </p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2">
                 {isGm && s.status === "OPEN" && (
                   <span className="rounded bg-surface-raised px-2 py-1 font-mono text-xs text-gold-400">
                     {s.inviteCode}
@@ -125,8 +124,7 @@ function StatusActions({
 }) {
   const transitions: Record<string, { label: string; next: string }[]> = {
     OPEN: [{ label: "Başlat", next: "ACTIVE" }],
-    ACTIVE: [{ label: "Kapat", next: "CLOSING" }],
-    CLOSING: [],
+    ACTIVE: [{ label: "Kapat", next: "CLOSED" }],
     CLOSED: [],
   };
 

@@ -6,8 +6,7 @@ import { SessionStatus } from "@/generated/prisma/client";
 
 const VALID_TRANSITIONS: Record<SessionStatus, SessionStatus[]> = {
   OPEN: ["ACTIVE", "CLOSED"],
-  ACTIVE: ["CLOSING"],
-  CLOSING: ["CLOSED"],
+  ACTIVE: ["CLOSED"],
   CLOSED: [],
 };
 
@@ -48,7 +47,7 @@ export async function PATCH(
     where: { id: params.id },
     data: {
       status,
-      closedAt: status === "CLOSING" || status === "CLOSED" ? new Date() : undefined,
+      closedAt: status === "CLOSED" ? new Date() : undefined,
     },
   });
 
