@@ -37,12 +37,14 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-950 p-4">
+    <main className="flex min-h-screen items-center justify-center bg-void p-4">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-sm space-y-4 rounded-lg border border-gray-800 bg-gray-900 p-6"
+        className="w-full max-w-sm space-y-4 rounded-lg border border-border bg-surface p-6"
       >
-        <h1 className="text-xl font-bold text-gray-100">Kayıt Ol</h1>
+        <h1 className="heading-gothic text-xl font-bold text-lavender-400">
+          Kayıt Ol
+        </h1>
 
         {error && <p className="text-sm text-red-400">{error}</p>}
 
@@ -51,14 +53,14 @@ export default function RegisterPage() {
           type="email"
           placeholder="Email"
           required
-          className="w-full rounded border border-gray-700 bg-gray-800 px-3 py-2 text-gray-100 placeholder-gray-500 focus:border-amber-500 focus:outline-none"
+          className="w-full rounded-md border border-border bg-void px-3 py-2 text-zinc-200 placeholder-zinc-500 transition-colors focus:border-lavender-400 focus:outline-none"
         />
         <input
           name="username"
           type="text"
           placeholder="Kullanıcı Adı"
           required
-          className="w-full rounded border border-gray-700 bg-gray-800 px-3 py-2 text-gray-100 placeholder-gray-500 focus:border-amber-500 focus:outline-none"
+          className="w-full rounded-md border border-border bg-void px-3 py-2 text-zinc-200 placeholder-zinc-500 transition-colors focus:border-lavender-400 focus:outline-none"
         />
         <input
           name="password"
@@ -66,20 +68,20 @@ export default function RegisterPage() {
           placeholder="Şifre (min 6 karakter)"
           required
           minLength={6}
-          className="w-full rounded border border-gray-700 bg-gray-800 px-3 py-2 text-gray-100 placeholder-gray-500 focus:border-amber-500 focus:outline-none"
+          className="w-full rounded-md border border-border bg-void px-3 py-2 text-zinc-200 placeholder-zinc-500 transition-colors focus:border-lavender-400 focus:outline-none"
         />
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded bg-amber-600 py-2 font-medium text-gray-100 hover:bg-amber-500 disabled:opacity-50"
+          className="w-full rounded-md bg-lavender-400 py-2 font-medium text-void transition-colors hover:bg-lavender-500 disabled:opacity-50"
         >
           {loading ? "Kaydediliyor..." : "Kayıt Ol"}
         </button>
 
-        <p className="text-center text-sm text-gray-400">
+        <p className="text-center text-sm text-zinc-400">
           Zaten hesabın var mı?{" "}
-          <a href="/login" className="text-amber-500 hover:underline">
+          <a href="/login" className="text-lavender-400 hover:underline">
             Giriş Yap
           </a>
         </p>

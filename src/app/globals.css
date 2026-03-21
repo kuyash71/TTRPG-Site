@@ -2,22 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Dark-only Theme ──────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #09090b;
+  --foreground: #e4e4e7;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ─── Gothic Heading Utility ───────────────────────── */
+@layer components {
+  .heading-gothic {
+    font-family: var(--font-cinzel), serif;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .nav-gothic {
+    font-family: var(--font-cinzel), serif;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.8125rem;
+  }
+
+  /* ─── Ornamental Divider ───────────────────────── */
+  .divider-ornament {
+    @apply flex items-center gap-4 text-zinc-600;
+  }
+
+  .divider-ornament::before,
+  .divider-ornament::after {
+    content: "";
+    @apply h-px flex-1 bg-border;
+  }
+}
+
+/* ─── Focus Ring ───────────────────────────────────── */
+@layer base {
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-lavender-400;
+  }
+}
+
+/* ─── Scrollbar (Dark) ─────────────────────────────── */
+@layer base {
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #09090b;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #27272a;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3f3f46;
+  }
 }
 
 @layer utilities {

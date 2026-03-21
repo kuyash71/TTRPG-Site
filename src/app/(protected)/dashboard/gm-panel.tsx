@@ -12,8 +12,6 @@ export function GmPanel() {
   const [gamesets, setGamesets] = useState<GamesetData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  // Gameset yoksa inline oluşturma
   const [showGamesetForm, setShowGamesetForm] = useState(false);
 
   useEffect(() => {
@@ -66,12 +64,14 @@ export function GmPanel() {
   }
 
   return (
-    <div className="mb-6 rounded-lg border border-amber-900/50 bg-gray-900 p-6">
+    <div className="mb-6 rounded-lg border border-gold-900/50 bg-surface p-6">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-amber-400">GM Paneli</h2>
+        <h2 className="heading-gothic text-lg font-semibold text-gold-400">
+          GM Paneli
+        </h2>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="rounded bg-amber-600 px-3 py-1 text-sm font-medium text-gray-100 hover:bg-amber-500"
+          className="rounded-md bg-gold-400 px-3 py-1 text-sm font-medium text-void transition-colors hover:bg-gold-500"
         >
           {showForm ? "Vazgeç" : "Yeni Session"}
         </button>
@@ -86,35 +86,35 @@ export function GmPanel() {
             type="text"
             placeholder="Session adı"
             required
-            className="w-full rounded border border-gray-700 bg-gray-800 px-3 py-2 text-gray-100 placeholder-gray-500 focus:border-amber-500 focus:outline-none"
+            className="w-full rounded-md border border-border bg-void px-3 py-2 text-zinc-200 placeholder-zinc-500 transition-colors focus:border-gold-400 focus:outline-none"
           />
 
           {gamesets.length === 0 && !showGamesetForm ? (
-            <div className="rounded border border-gray-700 bg-gray-800 p-3">
-              <p className="mb-2 text-sm text-gray-400">
+            <div className="rounded-md border border-border bg-void p-3">
+              <p className="mb-2 text-sm text-zinc-400">
                 Henüz bir gameset&apos;in yok.
               </p>
               <button
                 type="button"
                 onClick={() => setShowGamesetForm(true)}
-                className="text-sm text-amber-500 hover:underline"
+                className="text-sm text-gold-400 hover:underline"
               >
                 Hızlı Gameset Oluştur
               </button>
             </div>
           ) : showGamesetForm ? (
-            <div className="rounded border border-gray-700 bg-gray-800 p-3">
+            <div className="rounded-md border border-border bg-void p-3">
               <form onSubmit={handleCreateGameset} className="flex gap-2">
                 <input
                   name="gamesetName"
                   type="text"
                   placeholder="Gameset adı"
                   required
-                  className="flex-1 rounded border border-gray-600 bg-gray-700 px-2 py-1 text-sm text-gray-100 placeholder-gray-500 focus:border-amber-500 focus:outline-none"
+                  className="flex-1 rounded-md border border-border bg-surface-raised px-2 py-1 text-sm text-zinc-200 placeholder-zinc-500 transition-colors focus:border-gold-400 focus:outline-none"
                 />
                 <button
                   type="submit"
-                  className="rounded bg-amber-600 px-3 py-1 text-sm text-gray-100 hover:bg-amber-500"
+                  className="rounded-md bg-gold-400 px-3 py-1 text-sm text-void transition-colors hover:bg-gold-500"
                 >
                   Oluştur
                 </button>
@@ -124,7 +124,7 @@ export function GmPanel() {
             <select
               name="gamesetId"
               required
-              className="w-full rounded border border-gray-700 bg-gray-800 px-3 py-2 text-gray-100 focus:border-amber-500 focus:outline-none"
+              className="w-full rounded-md border border-border bg-void px-3 py-2 text-zinc-200 transition-colors focus:border-gold-400 focus:outline-none"
             >
               <option value="">Gameset seç...</option>
               {gamesets.map((g) => (
@@ -138,7 +138,7 @@ export function GmPanel() {
           <button
             type="submit"
             disabled={loading || gamesets.length === 0}
-            className="w-full rounded bg-amber-600 py-2 font-medium text-gray-100 hover:bg-amber-500 disabled:opacity-50"
+            className="w-full rounded-md bg-gold-400 py-2 font-medium text-void transition-colors hover:bg-gold-500 disabled:opacity-50"
           >
             {loading ? "Oluşturuluyor..." : "Session Oluştur"}
           </button>

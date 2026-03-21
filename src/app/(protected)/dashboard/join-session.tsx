@@ -34,8 +34,8 @@ export function JoinSession() {
   }
 
   return (
-    <div className="mt-6 rounded-lg border border-gray-800 bg-gray-900 p-6">
-      <h2 className="mb-4 text-lg font-semibold text-gray-200">
+    <div className="mt-6 rounded-lg border border-border bg-surface p-6">
+      <h2 className="heading-gothic mb-4 text-lg font-semibold text-zinc-200">
         Session&apos;a Katıl
       </h2>
       <form onSubmit={handleSubmit} className="flex gap-2">
@@ -45,12 +45,12 @@ export function JoinSession() {
           type="text"
           placeholder="Davet kodu"
           required
-          className="flex-1 rounded border border-gray-700 bg-gray-800 px-3 py-2 text-gray-100 placeholder-gray-500 uppercase focus:border-amber-500 focus:outline-none"
+          className="flex-1 rounded-md border border-border bg-void px-3 py-2 font-mono uppercase text-zinc-200 placeholder-zinc-500 transition-colors focus:border-lavender-400 focus:outline-none"
         />
         <button
           type="submit"
           disabled={loading}
-          className="rounded bg-amber-600 px-4 py-2 font-medium text-gray-100 hover:bg-amber-500 disabled:opacity-50"
+          className="rounded-md bg-lavender-400 px-4 py-2 font-medium text-void transition-colors hover:bg-lavender-500 disabled:opacity-50"
         >
           {loading ? "..." : "Katıl"}
         </button>

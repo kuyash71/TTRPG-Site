@@ -15,9 +15,9 @@ interface SessionData {
 
 const statusLabels: Record<string, { label: string; color: string }> = {
   OPEN: { label: "Açık", color: "text-green-400" },
-  ACTIVE: { label: "Aktif", color: "text-blue-400" },
-  CLOSING: { label: "Kapanıyor", color: "text-yellow-400" },
-  CLOSED: { label: "Kapalı", color: "text-gray-500" },
+  ACTIVE: { label: "Aktif", color: "text-lavender-400" },
+  CLOSING: { label: "Kapanıyor", color: "text-gold-400" },
+  CLOSED: { label: "Kapalı", color: "text-zinc-500" },
 };
 
 export function SessionList({ isGm }: { isGm: boolean }) {
@@ -50,20 +50,20 @@ export function SessionList({ isGm }: { isGm: boolean }) {
 
   if (loading) {
     return (
-      <div className="rounded-lg border border-gray-800 bg-gray-900 p-6">
-        <p className="text-sm text-gray-500">Yükleniyor...</p>
+      <div className="rounded-lg border border-border bg-surface p-6">
+        <p className="text-sm text-zinc-500">Yükleniyor...</p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-lg border border-gray-800 bg-gray-900 p-6">
-      <h2 className="mb-4 text-lg font-semibold text-gray-200">
+    <div className="rounded-lg border border-border bg-surface p-6">
+      <h2 className="heading-gothic mb-4 text-lg font-semibold text-zinc-200">
         {isGm ? "Session'larım" : "Katıldığım Session'lar"}
       </h2>
 
       {sessions.length === 0 ? (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-zinc-500">
           {isGm
             ? "Henüz bir session oluşturmadın."
             : "Henüz bir session'a katılmadın. GM'inden davet kodu iste."}
@@ -73,11 +73,11 @@ export function SessionList({ isGm }: { isGm: boolean }) {
           {sessions.map((s) => (
             <div
               key={s.id}
-              className="flex items-center justify-between rounded border border-gray-800 bg-gray-950 p-4"
+              className="flex items-center justify-between rounded-md border border-border bg-void p-4"
             >
               <div>
-                <h3 className="font-medium text-gray-100">{s.name}</h3>
-                <p className="text-xs text-gray-500">
+                <h3 className="font-medium text-zinc-100">{s.name}</h3>
+                <p className="text-xs text-zinc-500">
                   {s.gameset.name}
                   {s.gm && <> &middot; GM: {s.gm.username}</>}
                   {" "}&middot; {s.players.length} oyuncu
@@ -85,7 +85,7 @@ export function SessionList({ isGm }: { isGm: boolean }) {
               </div>
               <div className="flex items-center gap-3">
                 {isGm && s.status === "OPEN" && (
-                  <span className="rounded bg-gray-800 px-2 py-1 text-xs font-mono text-amber-400">
+                  <span className="rounded bg-surface-raised px-2 py-1 font-mono text-xs text-gold-400">
                     {s.inviteCode}
                   </span>
                 )}
@@ -129,7 +129,7 @@ function StatusActions({
         <button
           key={a.next}
           onClick={() => onChangeStatus(a.next)}
-          className="rounded bg-gray-800 px-2 py-1 text-xs text-gray-300 hover:bg-gray-700"
+          className="rounded-md bg-surface-raised px-2 py-1 text-xs text-zinc-300 transition-colors hover:bg-surface-overlay"
         >
           {a.label}
         </button>
