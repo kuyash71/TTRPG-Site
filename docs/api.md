@@ -9,10 +9,11 @@ Tüm endpoint'ler Next.js App Router `/app/api/` altında tanımlanır. Socket.i
 1. [Auth](#auth)
 2. [Sessions](#sessions)
 3. [Gamesets](#gamesets)
-4. [Characters](#characters)
-5. [Inventory](#inventory)
-6. [Stores](#stores)
-7. [Cron](#cron)
+4. [Skill Tree (Oyuncu)](#skill-tree-oyuncu)
+5. [Characters](#characters)
+6. [Inventory](#inventory)
+7. [Stores](#stores)
+8. [Cron](#cron)
 
 ---
 
@@ -246,26 +247,106 @@ Yeni stat tanımı ekler. **Yetki: GM**
   "group_id": "uuid",
   "key": "STR",
   "label": "Güç",
-  "type": "PRIMARY | DERIVED | RESOURCE",
-  "min_val": 8,
-  "max_val": 20,
+  "type": "BASE | DERIVED | RESOURCE",
+  "max_val": null,
   "formula": null,
   "is_public": true,
   "sort_order": 0
 }
 ```
 
+> **Not:** `BASE` statlar için değer atanmaz — değerler skill tree'den türetilir. `DERIVED` için formula zorunludur. `RESOURCE` için max değer DERIVED veya BASE olabilir.
+
 ---
 
 ### `GET /api/gamesets/[id]/skill-tree`
 
-Skill tree node'larını döndürür (class_id filtresi opsiyonel).
+Skill tree node'larını döndürür. **Query params:**
+- `class_id` (opsiyonel) — belirli class'ın tree'si
+- `common=true` — common tree (class_id=NULL olan node'lar)
+
+Filtre verilmezse gameset'teki tüm node'lar döner.
 
 ### `POST /api/gamesets/[id]/skill-tree/nodes`
 
 Node ekler. **Yetki: GM**
 
-**Validasyon:** prerequisites DFS cycle detection — döngü varsa 400.
+**Body:**
+```json
+{
+  "class_id": "uuid | null",
+  "name": "Kılıç Ustalığı",
+  "description": "string",
+  "node_type": "PASSIVE | ACTIVE | SPELL_UNLOCK",
+  "max_level": 5,
+  "cost_per_level": 1,
+  "unlock_level": 1,
+  "stat_bonuses_per_level": { "STR": 2, "DEX": 1 },
+  "prerequisites": ["uuid"],
+  "pos_x": 100,
+  "pos_y": 200,
+  "spell_id": null
+}
+```
+
+**Validasyon:**
+- prerequisites DFS cycle detection — döngü varsa 400
+- `class_id = null` → Common Tree node'u
+- `stat_bonuses_per_level` key'leri gameset'teki stat_definitions'da mevcut olmalı
+
+---
+
+## Skill Tree (Oyuncu)
+
+### `GET /api/characters/[id]/skill-tree`
+
+Oyuncunun erişebildiği skill tree'yi döndürür (class tree + common tree). Unlock durumları dahil.
+
+**Response:**
+```json
+{
+  "class_tree": {
+    "nodes": [
+      {
+        "id": "uuid",
+        "name": "Kılıç Ustalığı",
+        "max_level": 5,
+        "cost_per_level": 1,
+        "stat_bonuses_per_level": { "STR": 2, "DEX": 1 },
+        "current_level": 3,
+        "is_unlockable": true
+      }
+    ]
+  },
+  "common_tree": {
+    "nodes": [...]
+  },
+  "available_skill_points": 4,
+  "total_spent": 11
+}
+```
+
+---
+
+### `POST /api/characters/[id]/skill-tree/unlock`
+
+Skill node açar veya seviye yükseltir. **Yetki: Karakter sahibi**
+
+**Body:**
+```json
+{ "node_id": "uuid" }
+```
+
+**Validasyonlar:**
+- Yeterli skill point var mı?
+- Prerequisites karşılanmış mı?
+- Karakter seviye gereksinimi sağlanıyor mu?
+- current_level < max_level mi?
+
+**Başarı → Prisma transaction:**
+1. `character_skill_unlocks` UPSERT (current_level++)
+2. `character_stats` UPDATE (base_value yeniden hesaplanır)
+3. Socket: `char:stats_updated` broadcast
 
 ---
 
@@ -319,7 +400,10 @@ Karakter onay isteği gönderir. **Yetki: Player (session üyesi)**
   "snapshot": {
     "race_id": "uuid",
     "class_id": "uuid",
-    "stats": { "STR": 14, "DEX": 12 },
+    "skill_allocations": [
+      { "node_id": "uuid", "level": 3 },
+      { "node_id": "uuid", "level": 1 }
+    ],
     "details": { "name": "Alaric", "backstory": "..." }
   }
 }
@@ -327,8 +411,10 @@ Karakter onay isteği gönderir. **Yetki: Player (session üyesi)**
 
 **Validasyonlar:**
 - race_id, class_id gameset'te mevcut mu?
-- Her stat min/max aralığında mı?
-- Harcanan puan ≤ starting_points?
+- Seçilen skill node'ları geçerli mi? (class tree + common tree)
+- Her node'un prerequisite'leri karşılanmış mı?
+- Node seviyeleri max_level'ı aşmıyor mu?
+- Toplam harcanan skill point ≤ starting_skill_points?
 - Zaten PENDING veya onaylı karakter var mı?
 
 ---
@@ -347,10 +433,11 @@ Onay isteğini onaylar veya reddeder. **Yetki: GM**
 
 **APPROVE → Prisma transaction:**
 1. `characters` INSERT
-2. `character_stats` INSERT
-3. `character_wallet` INSERT (her currency_unit, amount=0)
-4. `approval_requests.status = APPROVED`
-5. Socket broadcast: `session:character_approved`
+2. `character_skill_unlocks` INSERT (snapshot'taki skill seçimleri)
+3. `character_stats` INSERT (skill bonuslarından hesaplanan base_value'lar)
+4. `character_wallet` INSERT (her currency_unit, amount=0)
+5. `approval_requests.status = APPROVED`
+6. Socket broadcast: `session:character_approved`
 
 ---
 
@@ -370,6 +457,7 @@ Karakter JSON export. **Yetki: Sahip veya GM**
   "exported_at": "2026-03-20T10:00:00Z",
   "character": {},
   "stats": [],
+  "skill_unlocks": [],
   "inventory": [],
   "wallet": [],
   "spells": [],

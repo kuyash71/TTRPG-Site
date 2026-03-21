@@ -8,11 +8,11 @@ Web tabanlı, kişisel fantastik evren odaklı TTRPG yönetim platformu. GM ve o
 
 - **Session Yönetimi** — GM davet kodu üretir, oyuncular `/join/[code]` ile katılır
 - **Gerçek Zamanlı Oyun Odası** — Socket.io tabanlı chat (IC/OOC), zar atma, canlı güncellemeler
-- **Özelleştirilebilir Ruleset Editörü** — Stat grupları, sınıf/ırk, skill tree, büyüler, eşyalar; GM her şeyi görsel editörle tanımlar
+- **Özelleştirilebilir Ruleset Editörü** — Stat tanımları, sınıf/ırk, skill tree (class + common), büyüler, eşyalar; GM her şeyi görsel editörle tanımlar
 - **EFT Tarzı Grid Inventory** — Sürükle-bırak, döndürme, slot bazlı ekipman yönetimi
 - **Mağaza ve Ekonomi** — GM onaylı alım/satım, hiyerarşik para birimi sistemi, atomik transaction
-- **Karakter Wizard** — 5 adımlı oluşturma akışı + GM onay mekanizması
-- **Skill Tree** — Node-based görsel editör, ön koşul sistemi, büyü unlock
+- **Karakter Wizard** — 5 adımlı oluşturma akışı (skill dağıtımlı) + GM onay mekanizması
+- **Skill-Tree-Based Stat Sistemi** — Tüm statlar skill tree'den türetilir; class skill tree + common skill tree; node seviyeleri, ön koşul sistemi, büyü unlock
 - **Karakter Export** — Session kapandıktan sonra 7 günlük grace period + JSON export
 
 ---

@@ -162,8 +162,8 @@ gamesets
   -- config şeması:
   -- {
   --   max_level: 20,
-  --   starting_points: 27,
-  --   point_buy_costs: { "8":0, "9":1, "10":2, "11":3, "12":4, "13":5, "14":7, "15":9 },
+  --   starting_skill_points: 5,         -- karakter oluşturmada verilen ilk skill puanı
+  --   skill_points_per_level: 2,        -- her level'da kazanılan skill puanı
   --   inventory_cols: 12,
   --   inventory_rows: 10,
   --   equipment_slots: ["head","chest","hands","legs","feet","weapon_main","weapon_off","ring1","ring2","neck"],
@@ -171,9 +171,13 @@ gamesets
   --   alignments: [{ key:"LG", label:"Kural İyisi" }, ...],
   --   mana_label: "Mana"
   -- }
+  -- NOT: starting_points ve point_buy_costs KALDIRILDI.
+  -- Stat dağıtımı artık skill tree üzerinden yapılır.
 ```
 
-### 4.4 Stat Sistemi
+### 4.4 Stat Sistemi (Skill-Tree-Based)
+
+> **Temel tasarım kararı:** Oyuncular doğrudan stat puanı dağıtmaz. Tüm stat değerleri skill tree ilerlemesinden türetilir. Bu, class seçimini anlamlı kılar ve "skill tree = stat kaynağı" bütünlüğünü sağlar.
 
 ```sql
 stat_groups
@@ -189,10 +193,9 @@ stat_definitions
   group_id    → stat_groups.id
   key         text         -- "STR"
   label       text         -- "Güç"
-  type        ENUM(PRIMARY, DERIVED, RESOURCE)
-  min_val     integer
-  max_val     integer
-  formula     jsonb nullable   -- sadece DERIVED için
+  type        ENUM(BASE, DERIVED, RESOURCE)
+  max_val     integer nullable   -- opsiyonel tavan (GM belirler)
+  formula     jsonb nullable     -- sadece DERIVED için
   is_public   boolean
   sort_order  integer
 
@@ -209,25 +212,36 @@ stat_definitions
 ```
 
 **Stat tipleri:**
-- `PRIMARY` — Oyuncu point-buy ile değer atar, DB'de saklanır
-- `DERIVED` — Formula'dan hesaplanır, DB'ye **yazılmaz**; her okumada hesaplanır
-- `RESOURCE` — HP/Mana gibi; current_resource ayrıca takip edilir
+- `BASE` — Değeri tamamen skill tree bonuslarının toplamından gelir. Oyuncu doğrudan değer atamaz.
+- `DERIVED` — Formula'dan hesaplanır (diğer stat'lara bağlı), DB'ye **yazılmaz**; her okumada hesaplanır
+- `RESOURCE` — HP/Mana gibi; max değeri BASE veya DERIVED olabilir, `current_resource` ayrıca takip edilir
+
+**Stat hesaplama zinciri:**
+```
+BASE stat   = Σ(unlocked skill node bonusları × node seviyesi) + Σ(equipped item bonusları)
+DERIVED stat = formula(BASE statlar)
+RESOURCE    = max: DERIVED veya BASE'den gelir, current: ayrıca takip edilir
+```
 
 ```sql
 character_stats
   character_id      → characters.id
   stat_key          text              -- "STR"
-  base_value        integer           -- PRIMARY ve RESOURCE için
-  current_value     integer           -- item bonusları dahil hesaplanmış değer
+  base_value        integer           -- Σ(skill bonusları) — cache, skill unlock değişince yeniden hesaplanır
+  current_value     integer           -- base_value + Σ(equipped item stat_bonuses)
   current_resource  integer nullable  -- sadece RESOURCE tip için (mevcut HP/Mana)
   UNIQUE(character_id, stat_key)
 
 -- DERIVED statlar bu tabloya yazılmaz.
+-- base_value = Σ(character_skill_unlocks → node.stat_bonuses_per_level × current_level)
 -- current_value = base_value + Σ(equipped item stat_bonuses)
+-- Skill unlock/level-up olduğunda base_value yeniden hesaplanır ve cache güncellenir
 -- current_resource güncelleme yetkisi: oyuncu kendi, GM herkesinki
 ```
 
 ### 4.5 Sınıf ve Irk
+
+> **Tasarım kararı:** Class ve race doğrudan stat bonusu vermez. Class seçimi oyuncunun eriştiği skill tree'yi belirler. Race ise kozmetik + trait bazlıdır. Tüm stat kazanımları skill tree ilerlemesinden gelir.
 
 ```sql
 classes
@@ -236,9 +250,11 @@ classes
   name          text
   description   text
   hit_die       integer        -- 8, 10, 12
-  stat_bonuses  jsonb          -- { "STR": 2, "CON": 1 }
-  skill_tree_root → skill_tree_nodes.id nullable
+  skill_tree_root → skill_tree_nodes.id nullable  -- class skill tree kök node'u
   icon_url      text
+
+-- NOT: stat_bonuses KALDIRILDI. Class stat bonusu vermez;
+-- bunun yerine class skill tree'sindeki node'lar stat verir.
 
 subclasses
   id              uuid PK
@@ -246,8 +262,7 @@ subclasses
   gameset_id      → gamesets.id
   name            text
   unlock_level    integer
-  extra_bonuses   jsonb
-  extra_skill_tree → skill_tree_nodes.id nullable
+  extra_skill_tree → skill_tree_nodes.id nullable  -- subclass skill tree kökü
   description     text
 
 races
@@ -255,38 +270,72 @@ races
   gameset_id      → gamesets.id
   name            text
   description     text
-  stat_bonuses    jsonb          -- { "DEX": 2, "INT": 1 }
   racial_traits   jsonb[]        -- [{ name, description, effect }, ...]
   icon_url        text
+
+-- NOT: stat_bonuses KALDIRILDI. Race stat bonusu vermez.
+-- Racial trait'ler mekanik etki verebilir ama doğrudan stat bonusu yoktur.
 ```
 
-### 4.6 Skill Tree
+### 4.6 Skill Tree (Stat Kaynağı)
+
+> **Temel mekanik:** Skill tree, oyundaki **tek stat kaynağıdır**. Her gameset'te iki tür ağaç bulunur:
+> 1. **Class Skill Tree** — Her class'a özel, daha derin ve ucuz node'lar
+> 2. **Common Skill Tree** — Tüm class'ların erişebildiği ortak ağaç
+>
+> Class ağacında aynı stat bonusunu daha az skill point'e, ortak ağaçta daha fazla skill point'e koymak önerilir. Bu sayede class kimliği korunur ama hibrit build'ler de mümkün olur.
 
 ```sql
 skill_tree_nodes
-  id            uuid PK
-  gameset_id    → gamesets.id
-  class_id      → classes.id nullable
-  parent_id     → skill_tree_nodes.id nullable
-  name          text
-  description   text
-  node_type     ENUM(PASSIVE, ACTIVE, SPELL_UNLOCK)
-  unlock_level  integer
-  prerequisites uuid[]          -- node id'leri; DFS cycle detection zorunlu
-  effect        jsonb
-  pos_x         float
-  pos_y         float
-  spell_id      → spells.id nullable  -- SPELL_UNLOCK için
+  id                    uuid PK
+  gameset_id            → gamesets.id
+  class_id              → classes.id nullable   -- NULL = Common Tree
+  parent_id             → skill_tree_nodes.id nullable
+  name                  text
+  description           text
+  node_type             ENUM(PASSIVE, ACTIVE, SPELL_UNLOCK)
+  max_level             integer DEFAULT 1       -- node kaç kez yükseltilebilir
+  cost_per_level        integer DEFAULT 1       -- her seviye kaç skill point harcar
+  unlock_level          integer                 -- karakter seviye gereksinimi
+  prerequisites         uuid[]                  -- node id'leri; DFS cycle detection zorunlu
+  stat_bonuses_per_level jsonb                  -- { "STR": 2, "DEX": 1 } — her seviyede verilen bonus
+  effect                jsonb nullable          -- ACTIVE/SPELL_UNLOCK için ek mekanik
+  pos_x                 float
+  pos_y                 float
+  spell_id              → spells.id nullable    -- SPELL_UNLOCK için
+
+-- class_id NULL → Common Tree node'u (tüm class'lar erişebilir)
+-- class_id set  → Class-specific node (sadece o class erişir)
 
 character_skill_unlocks
   id            uuid PK
   character_id  → characters.id
   node_id       → skill_tree_nodes.id
+  current_level integer DEFAULT 1     -- node'daki mevcut seviye (1..max_level)
   unlocked_at   timestamptz
   UNIQUE(character_id, node_id)
 ```
 
-> **Skill tree mekaniği:** Level at → seviyeye uygun node'lar seçilebilir olur. `SPELL_UNLOCK` node'u açılınca büyü `character_spells`'e eklenir.
+**Skill tree mekaniği:**
+1. Karakter oluşturulurken `starting_skill_points` kadar puan class + common tree'ye dağıtılır
+2. Level atlandığında `skill_points_per_level` kadar yeni puan kazanılır
+3. Node açma: `cost_per_level` skill point harcanır, `stat_bonuses_per_level` kadar stat kazanılır
+4. Node yükseltme: aynı node'da `current_level++`, aynı bonus tekrar eklenir
+5. `SPELL_UNLOCK` node açılınca büyü `character_spells`'e eklenir
+6. Her skill unlock/level-up sonrası `character_stats.base_value` yeniden hesaplanır (cache güncelleme)
+
+**Stat hesaplama örneği:**
+```
+Savaşçı class tree:
+  "Kılıç Ustalığı" (max_level: 5, cost: 1, bonuses: { "STR": 2, "DEX": 1 })
+  Seviye 3'te: STR += 6, DEX += 3
+
+Common tree:
+  "Dayanıklılık" (max_level: 3, cost: 2, bonuses: { "CON": 3 })
+  Seviye 2'de: CON += 6
+
+Toplam STR = Σ tüm unlock'ların STR bonusları = 6 + ...
+```
 
 ### 4.7 Büyü Sistemi
 
@@ -609,31 +658,42 @@ Server → Client:
 
 | Sekme | İçerik |
 |---|---|
-| Genel | Gameset adı, açıklama, genel config (max_level, starting_points, equipment_slots, mana_label) |
-| Stat Grupları | Grup listesi (sürükle-bırak sıralama) + seçili grubun stat tanımları |
-| Sınıf / Irk | Sınıf kartları + subclass yönetimi + ırk kartları |
-| Skill Ağacı | React Flow canvas, sınıf bazlı, node editörü |
+| Genel | Gameset adı, açıklama, genel config (max_level, starting_skill_points, skill_points_per_level, equipment_slots, mana_label) |
+| Stat Tanımları | Stat grupları + stat key/label/type tanımları (BASE/DERIVED/RESOURCE) |
+| Sınıf / Irk | Sınıf kartları + subclass yönetimi + ırk kartları (trait bazlı, stat bonusu yok) |
+| Skill Ağacı | React Flow canvas — **Class tree + Common tree** — node editörü (seviye, maliyet, stat bonusu) |
 | Büyüler | Büyü listesi + filtreler + büyü formu |
 | Eşyalar | Eşya listesi + kategori filtresi + eşya formu |
 
 Her sekme bağımsız kaydeder. Değişiklikler **"Yayınla"** ile bir sonraki session'dan itibaren geçerli olur.
 
-### Stat Grupları Sekmesi
+### Stat Tanımları Sekmesi
 
 - Sol panel: Grup listesi (+ ekle, sürükle-bırak sırala)
 - Sağ panel: Seçili grubun stat tanımları
-  - Stat ekleme: key, label, tip (PRIMARY/DERIVED/RESOURCE)
-  - PRIMARY → sayı min/max, is_public toggle
+  - Stat ekleme: key, label, tip (BASE/DERIVED/RESOURCE)
+  - BASE → is_public toggle, opsiyonel max_val (değer skill tree'den gelir, burada sadece tanım)
   - DERIVED → görsel formula builder açılır
   - RESOURCE → mevcut/max + renk seçimi
 - **Görsel formula builder:** `[STR ▾] [× ▾] [level ▾] [+ ▾] [10]`
+- **Not:** Bu sekmede stat **değer** atanmaz, sadece stat'ın ne olduğu tanımlanır. Değerler skill tree node'larında belirlenir.
 
 ### Skill Ağacı Sekmesi
 
-- Üstte sınıf seçici dropdown
+- Üstte seçici: **Common Tree** | Sınıf1 | Sınıf2 | ... (dropdown veya tab)
 - `@xyflow/react` canvas; sağ tık → node ekle
-- Node paneli: tip (PASSIVE/ACTIVE/SPELL_UNLOCK), ad, açıklama, unlock_level, prerequisites
+- Node paneli:
+  - Tip: PASSIVE / ACTIVE / SPELL_UNLOCK
+  - Ad, açıklama
+  - **Max seviye** (1–10)
+  - **Seviye başına maliyet** (skill point)
+  - **Seviye başına stat bonusu** — { "STR": 2, "DEX": 1 } (mevcut stat key'lerinden seçim)
+  - Unlock level (karakter seviye gereksinimi)
+  - Prerequisites (diğer node'lara bağlantı)
+  - SPELL_UNLOCK ise → büyü seçimi
 - **Cycle detection:** Bağlantı eklenirken DFS ile döngü kontrol; döngü varsa reddedilir
+- **Common tree** node'ları: class_id = NULL olarak kaydedilir, tüm class'lar erişir
+- **Balans ipucu:** GM aynı stat bonusunu class tree'de ucuza, common tree'de pahalıya koyarak class kimliğini korur
 
 ### Eşya Sekmesi
 
@@ -659,11 +719,11 @@ Yok?         → /session/[id]/create-character (wizard)
 
 | Adım | İçerik |
 |---|---|
-| 1 — Irk Seçimi | Kart grid'i; seç → sağda detay + stat bonusları + racial_traits |
-| 2 — Sınıf Seçimi | Kart grid'i; hit_die, açıklama; ırk+sınıf kombine stat önizlemesi |
-| 3 — Stat Dağıtımı | Point-buy; remaining = total − Σcost; `point_buy_costs` GM tanımlar; draft localStorage'da |
+| 1 — Irk Seçimi | Kart grid'i; seç → sağda detay + racial_traits |
+| 2 — Sınıf Seçimi | Kart grid'i; hit_die, açıklama; seçilen class'ın skill tree önizlemesi |
+| 3 — Skill Dağıtımı | Class tree + Common tree görsel canvas; `starting_skill_points` kadar puan dağıtılır; stat önizlemesi anlık güncellenir; draft localStorage'da |
 | 4 — Karakter Detayları | Ad (zorunlu); avatar, alignment, backstory, notlar (opsiyonel) |
-| 5 — Özet ve Gönderim | Salt-okunur özet → "GM'e Gönder" → `character_approval_requests` INSERT |
+| 5 — Özet ve Gönderim | Salt-okunur özet (seçilen skill'ler + hesaplanan statlar) → "GM'e Gönder" → `character_approval_requests` INSERT |
 
 ### GM Onay Akışı
 
@@ -676,10 +736,11 @@ GM özeti inceler → ONAYLA veya REDDET+yorum
   ↓
 Onay → tek Prisma transaction:
   1. characters INSERT (snapshot'tan)
-  2. character_stats INSERT
-  3. character_wallet INSERT (her currency_unit için amount=0)
-  4. approval_request.status = APPROVED
-  5. socket: session:character_approved broadcast
+  2. character_skill_unlocks INSERT (snapshot'taki skill seçimleri)
+  3. character_stats INSERT (skill bonuslarından hesaplanan base_value'lar)
+  4. character_wallet INSERT (her currency_unit için amount=0)
+  5. approval_request.status = APPROVED
+  6. socket: session:character_approved broadcast
 
 Red → char:approval_rejected { comment } → oyuncu wizard'a döner, seçimler korunur
 ```
@@ -687,8 +748,11 @@ Red → char:approval_rejected { comment } → oyuncu wizard'a döner, seçimler
 ### Sunucu Validasyonu (Submit'te)
 
 - race_id, class_id gameset'te mevcut mu?
-- Her stat min/max aralığında mı?
-- Harcanan puan ≤ starting_points?
+- Seçilen skill node'ları geçerli mi? (class tree + common tree'de var mı?)
+- Her node'un unlock_level gereksinimi karşılanıyor mu?
+- Her node'un prerequisite'leri açılmış mı?
+- Harcanan toplam skill point ≤ starting_skill_points?
+- Node seviyeleri max_level'ı aşmıyor mu?
 - Ad dolu mu?
 - Zaten onaylı karakter var mı?
 - Zaten PENDING request var mı?
@@ -842,7 +906,7 @@ Alt çubukta kendi karakter özeti (HP/Mana) her zaman sabit görünür.
 | Geçmiş hikayesi | ✓ | ✓ | ✓ |
 | HP / Mana (public stat ise) | ✓ | ✓ | ✓ |
 | Stat detayları (private) | ✗ | ✓ | ✓ |
-| Skill puanları | ✗ | ✓ | ✓ |
+| Skill tree ilerlemesi | ✗ | ✓ | ✓ |
 | Private notlar | ✗ | ✓ | ✓ |
 | Inventory detayı | ✗ | ✓ | ✓ |
 | GM notları | ✗ | ✗ | ✓ |
@@ -990,10 +1054,12 @@ AND closed_at < NOW() - INTERVAL '7 days'
 
 ## Kritik Implementasyon Notları
 
-1. **DERIVED statlar hiçbir zaman DB'ye yazılmaz.** Her okumada formula'dan hesaplanır.
-2. **Grid collision sunucuda yapılır.** Client önizleme sadece UX.
-3. **Tüm ekonomi işlemleri `SELECT FOR UPDATE` + Prisma `$transaction`.**
-4. **`character_approval_requests.snapshot` jsonb** — wizard verisi onaylanana kadar burada yaşar, gerçek tablolara yazılmaz.
-5. **Mağaza fiyatı asla önceden tanımlı değildir.** `price_in_base` sadece GM onayladığında set edilir.
-6. **`@xyflow/react`** — React Flow'un MIT lisanslı yeni paket adı; ticari kullanımda sorun yok.
-7. **Gameset versiyonları bağımsız DB satırlarıdır.** Snapshot/version lock mekanizması yok.
+1. **Tüm stat değerleri skill tree'den türetilir.** Oyuncu doğrudan stat puanı dağıtmaz. `character_stats.base_value` bir cache'dir ve her skill unlock/level-up'ta yeniden hesaplanır.
+2. **İki tür skill tree:** Class tree (class_id set) + Common tree (class_id NULL). Oyuncu her ikisine de puan harcayabilir.
+3. **DERIVED statlar hiçbir zaman DB'ye yazılmaz.** Her okumada formula'dan hesaplanır.
+4. **Grid collision sunucuda yapılır.** Client önizleme sadece UX.
+5. **Tüm ekonomi işlemleri `SELECT FOR UPDATE` + Prisma `$transaction`.**
+6. **`character_approval_requests.snapshot` jsonb** — wizard verisi (skill seçimleri dahil) onaylanana kadar burada yaşar, gerçek tablolara yazılmaz.
+7. **Mağaza fiyatı asla önceden tanımlı değildir.** `price_in_base` sadece GM onayladığında set edilir.
+8. **`@xyflow/react`** — React Flow'un MIT lisanslı yeni paket adı; ticari kullanımda sorun yok.
+9. **Gameset versiyonları bağımsız DB satırlarıdır.** Snapshot/version lock mekanizması yok.
