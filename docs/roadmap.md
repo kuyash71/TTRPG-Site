@@ -131,13 +131,13 @@
 
 **Hedef:** Grid inventory + eşya sistemi.
 
-- [ ] `item_definitions` tablosu
-- [ ] `character_inventory` tablosu
-- [ ] Grid inventory UI (EFT tarzı, drag-drop)
-- [ ] Eşya formu: ad, kategori, grid_w × grid_h, equipment_slot, stat_bonuses, stackable
-- [ ] Server-side çakışma algoritması
-- [ ] Equip/unequip → `character_stats.current_value` güncelleme
-- [ ] `inv:move`, `inv:equip`, `inv:drop`, `gm:item_add` socket events
+- [x] `item_definitions` tablosu
+- [x] `character_inventory` tablosu
+- [x] Grid inventory UI (EFT tarzı, drag-drop)
+- [x] Eşya formu: ad, kategori, grid_w × grid_h, equipment_slot, stat_bonuses, stackable
+- [x] Server-side çakışma algoritması
+- [x] Equip/unequip → `character_stats.current_value` güncelleme
+- [x] `inv:move`, `inv:equip`, `inv:drop`, `gm:item_add` socket events
 
 ---
 
@@ -145,12 +145,12 @@
 
 **Hedef:** Büyü sistemi tamamlanması.
 
-- [ ] `spells`, `character_spells` tabloları
-- [ ] Gameset büyü editörü sekmesi
-- [ ] `char:use_spell` socket event
-- [ ] Mana tüketimi + slot yönetimi
-- [ ] Oyuncu spell listesi UI (slot atama)
-- [ ] SPELL_UNLOCK node → otomatik büyü ekleme
+- [x] `spells`, `character_spells` tabloları
+- [x] Gameset büyü editörü sekmesi
+- [x] `char:use_spell` socket event
+- [x] Mana tüketimi + slot yönetimi
+- [x] Oyuncu spell listesi UI (slot atama)
+- [x] SPELL_UNLOCK node → otomatik büyü ekleme
 
 ---
 
