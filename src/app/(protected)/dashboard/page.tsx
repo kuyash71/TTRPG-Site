@@ -2,6 +2,9 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { LogoutButton } from "./logout-button";
+import { SessionList } from "./session-list";
+import { GmPanel } from "./gm-panel";
+import { JoinSession } from "./join-session";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -9,6 +12,7 @@ export default async function DashboardPage() {
   if (!session) redirect("/login");
 
   const { user } = session;
+  const isGm = user.role === "GM" || user.role === "ADMIN";
 
   return (
     <main className="min-h-screen bg-gray-950 p-6">
@@ -28,25 +32,11 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-lg border border-gray-800 bg-gray-900 p-6">
-          <h2 className="mb-4 text-lg font-semibold text-gray-200">
-            Session&apos;larım
-          </h2>
-          <p className="text-sm text-gray-500">
-            Henüz bir session&apos;a katılmadın. GM&apos;inden davet kodu iste.
-          </p>
-        </div>
+        {isGm && <GmPanel />}
 
-        {(user.role === "GM" || user.role === "ADMIN") && (
-          <div className="mt-6 rounded-lg border border-amber-900/50 bg-gray-900 p-6">
-            <h2 className="mb-4 text-lg font-semibold text-amber-400">
-              GM Paneli
-            </h2>
-            <p className="text-sm text-gray-500">
-              Session oluşturma ve gameset editörü Sprint 2&apos;de aktif olacak.
-            </p>
-          </div>
-        )}
+        <SessionList isGm={isGm} />
+
+        {!isGm && <JoinSession />}
       </div>
     </main>
   );

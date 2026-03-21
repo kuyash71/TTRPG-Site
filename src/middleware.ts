@@ -1,7 +1,7 @@
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
-const protectedPaths = ["/dashboard"];
+const protectedPaths = ["/dashboard", "/join"];
 
 export async function middleware(req: NextRequest) {
   const token = await getToken({ req });
@@ -29,5 +29,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/login", "/register"],
+  matcher: ["/dashboard/:path*", "/join/:path*", "/login", "/register"],
 };

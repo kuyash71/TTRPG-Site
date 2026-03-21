@@ -42,13 +42,14 @@
 
 **Hedef:** GM session oluşturabilir, oyuncu davet koduyla katılabilir.
 
-- [ ] `sessions`, `session_players` tabloları
-- [ ] `gamesets` tablosu (basit, config olmadan)
-- [ ] `POST /api/sessions` — GM session oluşturur, invite_code üretilir
-- [ ] `GET /join/[invite_code]` — oyuncu session'a katılır
-- [ ] Session durum geçişleri (OPEN → ACTIVE → CLOSING → CLOSED)
-- [ ] GM dashboard: session listesi + yeni session butonu
-- [ ] Oyuncu dashboard: katıldığı session'lar listesi
+- [x] `sessions`, `session_players` tabloları
+- [x] `gamesets` tablosu (basit, config olmadan)
+- [x] `POST /api/sessions` — GM session oluşturur, invite_code üretilir
+- [x] `GET /join/[invite_code]` — oyuncu session'a katılır
+- [x] Session durum geçişleri (OPEN → ACTIVE → CLOSING → CLOSED)
+- [x] GM dashboard: session listesi + yeni session butonu
+- [x] Oyuncu dashboard: katıldığı session'lar listesi
+- [ ] `prisma migrate dev` — Sprint 2 migration'ı Supabase'e uygula
 
 ---
 

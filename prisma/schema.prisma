@@ -32,10 +32,60 @@ model User {
   role          Role     @default(USER)
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
 
-  // Relations (will be added in later sprints)
-  // gmSessions     Session[]          @relation("gm_sessions")
-  // sessionPlayers SessionPlayer[]
-  // characters     Character[]
+  gmSessions     Session[]        @relation("gm_sessions")
+  sessionPlayers SessionPlayer[]
+  createdGamesets Gameset[]
 
   @@map("users")
+}
+
+// ─── Sprint 2: Sessions & Gamesets ──────────────────────
+
+model Gameset {
+  id              String   @id @default(uuid()) @db.Uuid
+  name            String
+  description     String   @default("")
+  version         Int      @default(1)
+  parentGamesetId String?  @map("parent_gameset_id") @db.Uuid
+  isPublished     Boolean  @default(false) @map("is_published")
+  createdById     String   @map("created_by") @db.Uuid
+  config          Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  parentGameset   Gameset?  @relation("gameset_versions", fields: [parentGamesetId], references: [id])
+  childVersions   Gameset[] @relation("gameset_versions")
+  createdBy       User      @relation(fields: [createdById], references: [id])
+  sessions        Session[]
+
+  @@map("gamesets")
+}
+
+model Session {
+  id         String        @id @default(uuid()) @db.Uuid
+  inviteCode String        @unique @map("invite_code")
+  gmId       String        @map("gm_id") @db.Uuid
+  gamesetId  String        @map("gameset_id") @db.Uuid
+  name       String
+  status     SessionStatus @default(OPEN)
+  closedAt   DateTime?     @map("closed_at") @db.Timestamptz()
+  createdAt  DateTime      @default(now()) @map("created_at") @db.Timestamptz()
+
+  gm      User            @relation("gm_sessions", fields: [gmId], references: [id])
+  gameset Gameset         @relation(fields: [gamesetId], references: [id])
+  players SessionPlayer[]
+
+  @@map("sessions")
+}
+
+model SessionPlayer {
+  id        String   @id @default(uuid()) @db.Uuid
+  sessionId String   @map("session_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  joinedAt  DateTime @default(now()) @map("joined_at") @db.Timestamptz()
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@unique([sessionId, userId])
+  @@map("session_players")
 }
