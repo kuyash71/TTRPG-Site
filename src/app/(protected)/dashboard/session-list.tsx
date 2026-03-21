@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 interface SessionData {
   id: string;
@@ -92,6 +93,14 @@ export function SessionList({ isGm }: { isGm: boolean }) {
                 <span className={`text-xs font-medium ${statusLabels[s.status]?.color}`}>
                   {statusLabels[s.status]?.label}
                 </span>
+                {(s.status === "ACTIVE" || s.status === "OPEN") && (
+                  <Link
+                    href={`/session/${s.id}`}
+                    className="rounded-md bg-lavender-400 px-2 py-1 text-xs font-medium text-void transition-colors hover:bg-lavender-500"
+                  >
+                    Odaya Gir
+                  </Link>
+                )}
                 {isGm && (
                   <StatusActions
                     status={s.status}

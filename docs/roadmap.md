@@ -6,16 +6,16 @@
 
 ## Sprint Planı
 
-| Sprint | Odak | Teslim Edilecekler |
-|---|---|---|
-| **Sprint 1** | Temel altyapı | Next.js 14 App Router kurulumu, Prisma + Supabase bağlantısı, NextAuth email/password provider, kullanıcı rolleri (USER/GM/ADMIN), temel User CRUD |
-| **Sprint 2** | Session sistemi | Session oluşturma, `invite_code` üretimi, `/join/[invite_code]` akışı, session durum yönetimi (OPEN → ACTIVE → CLOSING → CLOSED) |
-| **Sprint 3** | Gerçek zamanlı | Socket.io server (Railway), room sistemi, IC/OOC chat, zar atma (`rpg-dice-roller`), event broadcast altyapısı |
-| **Sprint 4** | Karakter sistemi | Character sheet CRUD, public/private veri ayrımı, görünürlük middleware, anlık güncelleme (socket events) |
-| **Sprint 5** | Gameset + Skill Tree (stat kaynağı) | Stat tanımları (BASE/DERIVED/RESOURCE), class/race sistemi, **skill tree editörü (class tree + common tree)**, node seviye/maliyet/stat bonus sistemi, karakter wizard (skill dağıtımlı), GM onay akışı |
-| **Sprint 6** | Inventory + Eşya | Grid inventory UI (EFT tarzı), eşya tanımları, equip/unequip → stat bonusu, server-side çakışma algoritması |
-| **Sprint 7** | Büyü sistemi | Spell tanımları, slot sistemi, `char:use_spell` event, mana tüketimi, SPELL_UNLOCK node entegrasyonu |
-| **Sprint 8+** | Polishing & v1 | Dark fantasy UI (Tailwind), mobile optimizasyon, GM panel genişletme, admin dashboard, export sistemi, e-posta bildirimleri (Resend), Vercel Cron cleanup |
+| Sprint        | Odak                                | Teslim Edilecekler                                                                                                                                                                                      |
+| ------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Sprint 1**  | Temel altyapı                       | Next.js 14 App Router kurulumu, Prisma + Supabase bağlantısı, NextAuth email/password provider, kullanıcı rolleri (USER/GM/ADMIN), temel User CRUD                                                      |
+| **Sprint 2**  | Session sistemi                     | Session oluşturma, `invite_code` üretimi, `/join/[invite_code]` akışı, session durum yönetimi (OPEN → ACTIVE → CLOSING → CLOSED)                                                                        |
+| **Sprint 3**  | Gerçek zamanlı                      | Socket.io server (Railway), room sistemi, IC/OOC chat, zar atma (`rpg-dice-roller`), event broadcast altyapısı                                                                                          |
+| **Sprint 4**  | Karakter sistemi                    | Character sheet CRUD, public/private veri ayrımı, görünürlük middleware, anlık güncelleme (socket events)                                                                                               |
+| **Sprint 5**  | Gameset + Skill Tree (stat kaynağı) | Stat tanımları (BASE/DERIVED/RESOURCE), class/race sistemi, **skill tree editörü (class tree + common tree)**, node seviye/maliyet/stat bonus sistemi, karakter wizard (skill dağıtımlı), GM onay akışı |
+| **Sprint 6**  | Inventory + Eşya                    | Grid inventory UI (EFT tarzı), eşya tanımları, equip/unequip → stat bonusu, server-side çakışma algoritması                                                                                             |
+| **Sprint 7**  | Büyü sistemi                        | Spell tanımları, slot sistemi, `char:use_spell` event, mana tüketimi, SPELL_UNLOCK node entegrasyonu                                                                                                    |
+| **Sprint 8+** | Polishing & v1                      | Dark fantasy UI (Tailwind), mobile optimizasyon, GM panel genişletme, admin dashboard, export sistemi, e-posta bildirimleri (Resend), Vercel Cron cleanup                                               |
 
 ---
 
@@ -49,7 +49,7 @@
 - [x] Session durum geçişleri (OPEN → ACTIVE → CLOSING → CLOSED)
 - [x] GM dashboard: session listesi + yeni session butonu
 - [x] Oyuncu dashboard: katıldığı session'lar listesi
-- [ ] `prisma migrate dev` — Sprint 2 migration'ı Supabase'e uygula
+- [x] `prisma migrate dev` — Sprint 2 migration'ı Supabase'e uygula
 
 ---
 
@@ -57,13 +57,15 @@
 
 **Hedef:** Canlı oyun odası — chat + zar.
 
-- [ ] Ayrı Node.js Socket.io server (Railway deploy)
-- [ ] Room sistemi: `session:join` / `session:leave`
-- [ ] IC / OOC chat (mesaj gönder / al)
-- [ ] `dice:roll` → `rpg-dice-roller` → sonucu broadcast
-- [ ] `chat_messages`, `dice_rolls` tabloları + persistence
-- [ ] Session ekranı basic layout (3 kolon desktop)
-- [ ] CORS konfigürasyonu (Vercel ↔ Railway)
+- [x] Ayrı Node.js Socket.io server (Railway deploy)
+- [x] Room sistemi: `session:join` / `session:leave`
+- [x] IC / OOC chat (mesaj gönder / al)
+- [x] `dice:roll` → `rpg-dice-roller` → sonucu broadcast
+- [x] `chat_messages`, `dice_rolls` tabloları + persistence
+- [x] Session ekranı basic layout (3 kolon desktop)
+- [x] CORS konfigürasyonu (Vercel ↔ Railway)
+- [x] Socket token endpoint (`/api/socket/token`)
+- [x] `prisma migrate dev` — Sprint 3 migration'ı Supabase'e uygula
 
 ---
 
@@ -88,6 +90,7 @@
 > **Kilit karar:** Tüm stat değerleri skill tree'den türetilir. Point-buy yoktur. Class seçimi class skill tree'ye erişim verir, common tree herkese açıktır.
 
 ### Veritabanı
+
 - [ ] `stat_groups`, `stat_definitions` tabloları (BASE/DERIVED/RESOURCE tipleri)
 - [ ] `classes`, `subclasses`, `races` tabloları (stat_bonuses yok, trait bazlı)
 - [ ] `skill_tree_nodes` tablosu (max_level, cost_per_level, stat_bonuses_per_level)
@@ -95,23 +98,27 @@
 - [ ] `character_approval_requests` tablosu
 
 ### Skill Tree Editörü (GM)
+
 - [ ] `@xyflow/react` canvas entegrasyonu
 - [ ] Class tree / Common tree seçici
 - [ ] Node editörü: tip, ad, max_level, cost_per_level, stat_bonuses_per_level, prerequisites
 - [ ] DFS cycle detection (editör + sunucu)
 
 ### Ruleset Editörü UI
+
 - [ ] Genel / Stat Tanımları / Sınıf-Irk / Skill Ağacı / Büyüler / Eşyalar sekmeleri
 - [ ] DERIVED stat formula builder (görsel)
 - [ ] Gameset config: starting_skill_points, skill_points_per_level
 
 ### Karakter Wizard
+
 - [ ] 5 adım: race → class → **skill dağıtımı** → detaylar → özet
 - [ ] Adım 3: Class tree + Common tree üzerinde starting_skill_points dağıtımı
 - [ ] Anlık stat önizlemesi (skill seçimlerine göre hesaplanır)
 - [ ] GM onay paneli (Onayla / Reddet)
 
 ### Oyuncu Skill Tree
+
 - [ ] Salt-okunur skill tree görünümü + unlock/level-up butonu
 - [ ] Level atlama → skill point kazanımı
 - [ ] Skill unlock/level-up → character_stats.base_value cache güncelleme
@@ -150,24 +157,28 @@
 **Hedef:** Üretim kalitesinde ilk sürüm.
 
 ### UI / UX
+
 - [ ] Dark fantasy tema (Cinzel font, gold/dark color palette)
 - [ ] Mobile-first responsive layout (4 sekme)
 - [ ] Tüm ekranlar için loading/error state'leri
 - [ ] Toast bildirimleri sistemi
 
 ### Mağaza Sistemi
+
 - [ ] `stores`, `store_items`, `session_store_state`, `pending_transactions` tabloları
 - [ ] Mağaza UI — GM panel entegrasyonu
 - [ ] Transaction onay akışı (buy + sell)
 - [ ] Ekonomi güvenlik kontrolleri (SELECT FOR UPDATE)
 
 ### Export & Cron
+
 - [ ] `GET /api/characters/[id]/export` endpoint
 - [ ] Grace period UI (banner + dashboard badge)
 - [ ] Vercel Cron Job: `/api/cron/cleanup-sessions` (günlük)
 - [ ] Resend e-posta: session kapanma bildirimleri (gün 0 + gün 5)
 
 ### Admin & Operasyonel
+
 - [ ] `/admin/users` — kullanıcı yönetimi
 - [ ] GM rolü atama/kaldırma
 - [ ] Rate limiting (export endpoint)
@@ -177,28 +188,28 @@
 
 ## v2 Backlog (MVP Sonrası)
 
-| Özellik | Notlar |
-|---|---|
-| Skill respec sistemi | Kısmi veya tam sıfırlama mekanizması; stat cache yeniden hesaplama |
-| Redis entegrasyonu | Socket.io server restart'ta state koruma |
-| Karakter import | Export JSON'dan karakter yükleme |
-| Çoklu GM desteği | Prototipte tek GM; v2'de birden fazla |
-| NPC sistemi | GM'in yönettiği NPC karakterler |
-| Battle map | Grid tabanlı savaş haritası |
-| Oyun notları / session log | GM notları sayfası |
-| Discord entegrasyonu | Zar sonucu + session bildirimleri |
-| Mobil uygulama | React Native veya PWA |
+| Özellik                    | Notlar                                                             |
+| -------------------------- | ------------------------------------------------------------------ |
+| Skill respec sistemi       | Kısmi veya tam sıfırlama mekanizması; stat cache yeniden hesaplama |
+| Redis entegrasyonu         | Socket.io server restart'ta state koruma                           |
+| Karakter import            | Export JSON'dan karakter yükleme                                   |
+| Çoklu GM desteği           | Prototipte tek GM; v2'de birden fazla                              |
+| NPC sistemi                | GM'in yönettiği NPC karakterler                                    |
+| Battle map                 | Grid tabanlı savaş haritası                                        |
+| Oyun notları / session log | GM notları sayfası                                                 |
+| Discord entegrasyonu       | Zar sonucu + session bildirimleri                                  |
+| Mobil uygulama             | React Native veya PWA                                              |
 
 ---
 
 ## Teknik Borç ve Riskler
 
-| Risk | Önlem |
-|---|---|
-| Vercel serverless + Socket.io uyumsuzluğu | Socket.io ayrı Railway servisi olarak çalışıyor — çözüldü |
-| Redis yokken session state kaybı | MVP'de ~2-5sn restart toleransı kabul edildi; v2'de Redis |
-| Supabase ücretsiz tier limitleri | Prototip için yeterli; büyümede Supabase Pro geçişi |
-| `@xyflow/react` learning curve | MIT lisanslı, iyi dokümante; Sprint 5'te skill tree editörü ile birlikte gelir |
-| DERIVED stat formula sonsuz döngü | Formula recursive jsonb; evaluator stack overflow koruması gerekli |
-| Skill tree stat cache tutarsızlığı | Her skill unlock/level-up tek transaction'da base_value yeniden hesaplanır |
-| Skill tree balans | Class tree ucuz, common tree pahalı prensibi; GM test araçları gerekebilir |
+| Risk                                      | Önlem                                                                          |
+| ----------------------------------------- | ------------------------------------------------------------------------------ |
+| Vercel serverless + Socket.io uyumsuzluğu | Socket.io ayrı Railway servisi olarak çalışıyor — çözüldü                      |
+| Redis yokken session state kaybı          | MVP'de ~2-5sn restart toleransı kabul edildi; v2'de Redis                      |
+| Supabase ücretsiz tier limitleri          | Prototip için yeterli; büyümede Supabase Pro geçişi                            |
+| `@xyflow/react` learning curve            | MIT lisanslı, iyi dokümante; Sprint 5'te skill tree editörü ile birlikte gelir |
+| DERIVED stat formula sonsuz döngü         | Formula recursive jsonb; evaluator stack overflow koruması gerekli             |
+| Skill tree stat cache tutarsızlığı        | Her skill unlock/level-up tek transaction'da base_value yeniden hesaplanır     |
+| Skill tree balans                         | Class tree ucuz, common tree pahalı prensibi; GM test araçları gerekebilir     |

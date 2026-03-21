@@ -22,6 +22,11 @@ enum SessionStatus {
   CLOSED
 }
 
+enum ChatChannel {
+  IC
+  OOC
+}
+
 // ─── Sprint 1: Users ────────────────────────────────────
 
 model User {
@@ -35,6 +40,8 @@ model User {
   gmSessions     Session[]        @relation("gm_sessions")
   sessionPlayers SessionPlayer[]
   createdGamesets Gameset[]
+  chatMessages   ChatMessage[]
+  diceRolls      DiceRoll[]
 
   @@map("users")
 }
@@ -70,9 +77,11 @@ model Session {
   closedAt   DateTime?     @map("closed_at") @db.Timestamptz()
   createdAt  DateTime      @default(now()) @map("created_at") @db.Timestamptz()
 
-  gm      User            @relation("gm_sessions", fields: [gmId], references: [id])
-  gameset Gameset         @relation(fields: [gamesetId], references: [id])
-  players SessionPlayer[]
+  gm           User            @relation("gm_sessions", fields: [gmId], references: [id])
+  gameset      Gameset         @relation(fields: [gamesetId], references: [id])
+  players      SessionPlayer[]
+  chatMessages ChatMessage[]
+  diceRolls    DiceRoll[]
 
   @@map("sessions")
 }
@@ -88,4 +97,37 @@ model SessionPlayer {
 
   @@unique([sessionId, userId])
   @@map("session_players")
+}
+
+// ─── Sprint 3: Chat & Dice ──────────────────────────────
+
+model ChatMessage {
+  id        String      @id @default(uuid()) @db.Uuid
+  sessionId String      @map("session_id") @db.Uuid
+  userId    String      @map("user_id") @db.Uuid
+  channel   ChatChannel @default(OOC)
+  content   String
+  createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz()
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@index([sessionId, createdAt])
+  @@map("chat_messages")
+}
+
+model DiceRoll {
+  id         String   @id @default(uuid()) @db.Uuid
+  sessionId  String   @map("session_id") @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  notation   String
+  results    Json
+  total      Int
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@index([sessionId, createdAt])
+  @@map("dice_rolls")
 }
