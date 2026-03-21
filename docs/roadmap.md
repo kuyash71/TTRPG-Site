@@ -23,14 +23,17 @@
 
 **Hedef:** Çalışan auth + temel DB şeması + rol sistemi.
 
-- [ ] Next.js 14 App Router projesi oluştur
-- [ ] Prisma + Supabase PostgreSQL bağlantısı kur
-- [ ] `users` tablosunu migrate et (id, email, password_hash, username, role)
-- [ ] NextAuth credential provider (email/password, bcrypt)
-- [ ] JWT içine `role` ekle
-- [ ] Rol middleware (`withRole` wrapper)
-- [ ] `/register`, `/login`, `/dashboard` sayfaları (bare minimum UI)
+- [x] Next.js 14 App Router projesi oluştur
+- [x] Prisma + Supabase PostgreSQL bağlantısı kur
+- [x] `users` tablosunu migrate et (id, email, password_hash, username, role)
+- [x] NextAuth credential provider (email/password, bcrypt)
+- [x] JWT içine `role` ekle
+- [x] Rol middleware (`withRole` wrapper)
+- [x] `/register`, `/login`, `/dashboard` sayfaları (bare minimum UI)
+- [x] NextAuth middleware (protected route + auth page redirect)
+- [x] Logout butonu (dashboard)
 - [ ] Environment variables Vercel'e yükle
+- [ ] `prisma migrate dev` — Supabase DB'ye ilk migration
 
 ---
 
