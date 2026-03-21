@@ -17,13 +17,11 @@ body {
 @layer components {
   .heading-gothic {
     font-family: var(--font-cinzel), serif;
-    text-transform: uppercase;
     letter-spacing: 0.05em;
   }
 
   .nav-gothic {
     font-family: var(--font-cinzel), serif;
-    text-transform: uppercase;
     letter-spacing: 0.08em;
     font-size: 0.8125rem;
   }

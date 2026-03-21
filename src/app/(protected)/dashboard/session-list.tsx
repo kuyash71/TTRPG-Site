@@ -60,7 +60,7 @@ export function SessionList({ isGm }: { isGm: boolean }) {
   return (
     <div className="rounded-lg border border-border bg-surface p-6">
       <h2 className="heading-gothic mb-4 text-lg font-semibold text-zinc-200">
-        {isGm ? "Session'larım" : "Katıldığım Session'lar"}
+        {isGm ? "Sessionlarım" : "Katıldığım Sessionlar"}
       </h2>
 
       {sessions.length === 0 ? (

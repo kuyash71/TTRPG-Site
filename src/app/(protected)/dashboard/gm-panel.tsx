@@ -17,8 +17,12 @@ export function GmPanel() {
 
   useEffect(() => {
     fetch("/api/gamesets")
-      .then((res) => res.json())
-      .then(setGamesets);
+      .then((res) => {
+        if (!res.ok) return [];
+        return res.json();
+      })
+      .then(setGamesets)
+      .catch(() => setGamesets([]));
   }, []);
 
   async function handleCreateGameset(e: FormEvent<HTMLFormElement>) {
@@ -70,13 +74,40 @@ export function GmPanel() {
         <h2 className="heading-gothic text-lg font-semibold text-gold-400">
           GM Paneli
         </h2>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="rounded-md bg-gold-400 px-3 py-1 text-sm font-medium text-void transition-colors hover:bg-gold-500"
-        >
-          {showForm ? "Vazgeç" : "Yeni Session"}
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowGamesetForm(!showGamesetForm)}
+            className="rounded-md bg-gold-900/50 px-3 py-1 text-sm font-medium text-gold-400 transition-colors hover:bg-gold-900"
+          >
+            {showGamesetForm ? "Vazgeç" : "Yeni Gameset"}
+          </button>
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="rounded-md bg-gold-400 px-3 py-1 text-sm font-medium text-void transition-colors hover:bg-gold-500"
+          >
+            {showForm ? "Vazgeç" : "Yeni Session"}
+          </button>
+        </div>
       </div>
+
+      {/* Yeni Gameset formu */}
+      {showGamesetForm && !showForm && (
+        <form onSubmit={handleCreateGameset} className="mb-4 flex gap-2">
+          <input
+            name="gamesetName"
+            type="text"
+            placeholder="Gameset adı"
+            required
+            className="flex-1 rounded-md border border-border bg-void px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 transition-colors focus:border-gold-400 focus:outline-none"
+          />
+          <button
+            type="submit"
+            className="rounded-md bg-gold-400 px-4 py-2 text-sm font-medium text-void transition-colors hover:bg-gold-500"
+          >
+            Oluştur
+          </button>
+        </form>
+      )}
 
       {/* Gameset listesi */}
       {gamesets.length > 0 && (
@@ -111,37 +142,10 @@ export function GmPanel() {
             className="w-full rounded-md border border-border bg-void px-3 py-2 text-zinc-200 placeholder-zinc-500 transition-colors focus:border-gold-400 focus:outline-none"
           />
 
-          {gamesets.length === 0 && !showGamesetForm ? (
-            <div className="rounded-md border border-border bg-void p-3">
-              <p className="mb-2 text-sm text-zinc-400">
-                Henüz bir gameset&apos;in yok.
-              </p>
-              <button
-                type="button"
-                onClick={() => setShowGamesetForm(true)}
-                className="text-sm text-gold-400 hover:underline"
-              >
-                Hızlı Gameset Oluştur
-              </button>
-            </div>
-          ) : showGamesetForm ? (
-            <div className="rounded-md border border-border bg-void p-3">
-              <form onSubmit={handleCreateGameset} className="flex gap-2">
-                <input
-                  name="gamesetName"
-                  type="text"
-                  placeholder="Gameset adı"
-                  required
-                  className="flex-1 rounded-md border border-border bg-surface-raised px-2 py-1 text-sm text-zinc-200 placeholder-zinc-500 transition-colors focus:border-gold-400 focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  className="rounded-md bg-gold-400 px-3 py-1 text-sm text-void transition-colors hover:bg-gold-500"
-                >
-                  Oluştur
-                </button>
-              </form>
-            </div>
+          {gamesets.length === 0 ? (
+            <p className="text-sm text-zinc-400">
+              Önce bir gameset oluşturun.
+            </p>
           ) : (
             <select
               name="gamesetId"
