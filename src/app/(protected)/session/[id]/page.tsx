@@ -40,6 +40,22 @@ export default async function SessionPage({
 
   if (!isGm && !isPlayer) redirect("/dashboard");
 
+  // Oyuncunun bu session'da karakteri var mı?
+  const hasCharacter = gameSession.characters.some(
+    (c) => c.userId === session.user.id
+  );
+
+  // Bekleyen onay isteği var mı?
+  const pendingApproval = !isGm
+    ? !!(await prisma.characterApprovalRequest.findFirst({
+        where: {
+          sessionId: gameSession.id,
+          playerId: session.user.id,
+          status: "PENDING",
+        },
+      }))
+    : false;
+
   return (
     <SessionRoom
       sessionId={gameSession.id}
@@ -67,6 +83,8 @@ export default async function SessionPage({
         username: session.user.username,
         isGm,
       }}
+      hasCharacter={hasCharacter}
+      pendingApproval={pendingApproval}
     />
   );
 }

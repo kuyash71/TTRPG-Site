@@ -22,6 +22,10 @@ interface Props {
     sessionId: string;
     sessionName: string;
     ownerUsername: string;
+    className: string | null;
+    raceName: string | null;
+    level: number;
+    skillPoints: number;
   };
   stats: Stat[];
   wallet: { gold: number; silver: number; copper: number } | null;
@@ -81,14 +85,20 @@ export function CharacterSheet({
           <h1 className="heading-gothic mt-1 text-2xl font-bold text-zinc-100">
             {character.name}
           </h1>
-          <p className="text-sm text-zinc-500">
-            Oyuncu: {character.ownerUsername}
+          <div className="flex items-center gap-2 text-sm text-zinc-500">
+            <span>Oyuncu: {character.ownerUsername}</span>
             {isOwner && (
-              <span className="ml-2 rounded bg-lavender-900/50 px-1.5 py-0.5 text-[10px] text-lavender-400">
+              <span className="rounded bg-lavender-900/50 px-1.5 py-0.5 text-[10px] text-lavender-400">
                 Senin
               </span>
             )}
-          </p>
+          </div>
+          <div className="mt-1 flex items-center gap-3 text-xs text-zinc-500">
+            {character.raceName && <span>{character.raceName}</span>}
+            {character.className && <span>{character.className}</span>}
+            <span>Lv {character.level}</span>
+            <span>SP: {character.skillPoints}</span>
+          </div>
         </div>
       </div>
 

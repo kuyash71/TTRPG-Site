@@ -4,6 +4,7 @@ import { useSocket } from "@/hooks/use-socket";
 import { ChatPanel } from "./chat-panel";
 import { DicePanel } from "./dice-panel";
 import { PlayerList } from "./player-list";
+import { ApprovalPanel } from "./approval-panel";
 import Link from "next/link";
 
 interface CharacterInfo {
@@ -23,6 +24,8 @@ interface Props {
   players: { id: string; username: string }[];
   characters: CharacterInfo[];
   currentUser: { id: string; username: string; isGm: boolean };
+  hasCharacter: boolean;
+  pendingApproval: boolean;
 }
 
 const statusLabels: Record<string, { label: string; color: string }> = {
@@ -41,6 +44,8 @@ export function SessionRoom({
   players,
   characters,
   currentUser,
+  hasCharacter,
+  pendingApproval,
 }: Props) {
   const { socket, connected } = useSocket(sessionId);
 
@@ -76,6 +81,39 @@ export function SessionRoom({
           />
         </div>
       </header>
+
+      {/* Karakter yoksa wizard'a yönlendir */}
+      {!currentUser.isGm && !hasCharacter && !pendingApproval && (
+        <div className="border-b border-gold-900/50 bg-gold-900/10 px-4 py-3">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-gold-400">
+              Bu session&apos;da henüz bir karakteriniz yok.
+            </p>
+            <Link
+              href={`/session/${sessionId}/create-character`}
+              className="rounded-md bg-gold-400 px-4 py-1.5 text-sm font-medium text-void hover:bg-gold-500"
+            >
+              Karakter Oluştur
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Bekleyen onay */}
+      {!currentUser.isGm && pendingApproval && (
+        <div className="border-b border-lavender-900/50 bg-lavender-900/10 px-4 py-3">
+          <p className="text-sm text-lavender-400">
+            Karakter oluşturma isteğiniz GM onayı bekliyor.
+          </p>
+        </div>
+      )}
+
+      {/* GM: Onay paneli */}
+      {currentUser.isGm && (
+        <div className="border-b border-border px-4 py-3">
+          <ApprovalPanel sessionId={sessionId} />
+        </div>
+      )}
 
       {/* 3-Column Layout */}
       <div className="flex flex-1 overflow-hidden">

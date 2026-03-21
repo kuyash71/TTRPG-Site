@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import Link from "next/link";
 
 interface GamesetData {
   id: string;
@@ -76,6 +77,27 @@ export function GmPanel() {
           {showForm ? "Vazgeç" : "Yeni Session"}
         </button>
       </div>
+
+      {/* Gameset listesi */}
+      {gamesets.length > 0 && (
+        <div className="mb-4 space-y-2">
+          <h3 className="text-xs font-medium text-zinc-500">Gameset&apos;lerin</h3>
+          {gamesets.map((g) => (
+            <div
+              key={g.id}
+              className="flex items-center justify-between rounded-md border border-border bg-void px-3 py-2"
+            >
+              <span className="text-sm text-zinc-300">{g.name}</span>
+              <Link
+                href={`/gm/gamesets/${g.id}/edit`}
+                className="rounded bg-gold-900/50 px-2 py-0.5 text-xs font-medium text-gold-400 transition-colors hover:bg-gold-900"
+              >
+                Düzenle
+              </Link>
+            </div>
+          ))}
+        </div>
+      )}
 
       {showForm && (
         <form onSubmit={handleCreateSession} className="space-y-3">

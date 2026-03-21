@@ -12,6 +12,7 @@
     "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "^7.5.0",
     "@supabase/supabase-js": "^2.99.3",
+    "@xyflow/react": "^12.10.1",
     "bcryptjs": "^3.0.3",
     "jsonwebtoken": "^9.0.3",
     "next": "14.2.35",

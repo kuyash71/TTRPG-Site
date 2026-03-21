@@ -27,6 +27,24 @@ enum ChatChannel {
   OOC
 }
 
+enum StatType {
+  BASE
+  DERIVED
+  RESOURCE
+}
+
+enum SkillNodeType {
+  PASSIVE
+  ACTIVE
+  SPELL_UNLOCK
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 // ─── Sprint 1: Users ────────────────────────────────────
 
 model User {
@@ -37,12 +55,13 @@ model User {
   role          Role     @default(USER)
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
 
-  gmSessions     Session[]        @relation("gm_sessions")
-  sessionPlayers SessionPlayer[]
-  createdGamesets Gameset[]
-  chatMessages   ChatMessage[]
-  diceRolls      DiceRoll[]
-  characters     Character[]
+  gmSessions       Session[]        @relation("gm_sessions")
+  sessionPlayers   SessionPlayer[]
+  createdGamesets  Gameset[]
+  chatMessages     ChatMessage[]
+  diceRolls        DiceRoll[]
+  characters       Character[]
+  approvalRequests CharacterApprovalRequest[]
 
   @@map("users")
 }
@@ -64,6 +83,12 @@ model Gameset {
   childVersions   Gameset[] @relation("gameset_versions")
   createdBy       User      @relation(fields: [createdById], references: [id])
   sessions        Session[]
+  statGroups      StatGroup[]
+  statDefinitions StatDefinition[]
+  classes         GameClass[]
+  subclasses      Subclass[]
+  races           Race[]
+  skillTreeNodes  SkillTreeNode[]
 
   @@map("gamesets")
 }
@@ -78,12 +103,13 @@ model Session {
   closedAt   DateTime?     @map("closed_at") @db.Timestamptz()
   createdAt  DateTime      @default(now()) @map("created_at") @db.Timestamptz()
 
-  gm           User            @relation("gm_sessions", fields: [gmId], references: [id])
-  gameset      Gameset         @relation(fields: [gamesetId], references: [id])
-  players      SessionPlayer[]
-  chatMessages ChatMessage[]
-  diceRolls    DiceRoll[]
-  characters   Character[]
+  gm               User            @relation("gm_sessions", fields: [gmId], references: [id])
+  gameset          Gameset         @relation(fields: [gamesetId], references: [id])
+  players          SessionPlayer[]
+  chatMessages     ChatMessage[]
+  diceRolls        DiceRoll[]
+  characters       Character[]
+  approvalRequests CharacterApprovalRequest[]
 
   @@map("sessions")
 }
@@ -137,20 +163,28 @@ model DiceRoll {
 // ─── Sprint 4: Characters ───────────────────────────────
 
 model Character {
-  id         String   @id @default(uuid()) @db.Uuid
-  sessionId  String   @map("session_id") @db.Uuid
-  userId     String   @map("user_id") @db.Uuid
-  name       String
-  avatarUrl  String?  @map("avatar_url")
-  publicData Json     @default("{}") @map("public_data")
-  privateData Json    @default("{}") @map("private_data")
-  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz()
-  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+  id          String   @id @default(uuid()) @db.Uuid
+  sessionId   String   @map("session_id") @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  gamesetId   String?  @map("gameset_id") @db.Uuid
+  classId     String?  @map("class_id") @db.Uuid
+  raceId      String?  @map("race_id") @db.Uuid
+  name        String
+  avatarUrl   String?  @map("avatar_url")
+  level       Int      @default(1)
+  skillPoints Int      @default(0) @map("skill_points")
+  publicData  Json     @default("{}") @map("public_data")
+  privateData Json     @default("{}") @map("private_data")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz()
 
-  session Session        @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  user    User           @relation(fields: [userId], references: [id])
-  stats   CharacterStat[]
-  wallet  CharacterWallet?
+  session      Session              @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user         User                 @relation(fields: [userId], references: [id])
+  class        GameClass?           @relation(fields: [classId], references: [id])
+  race         Race?                @relation(fields: [raceId], references: [id])
+  stats        CharacterStat[]
+  wallet       CharacterWallet?
+  skillUnlocks CharacterSkillUnlock[]
 
   @@unique([sessionId, userId])
   @@map("characters")
@@ -181,4 +215,135 @@ model CharacterWallet {
   character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
 
   @@map("character_wallets")
+}
+
+// ─── Sprint 5: Gameset Ruleset + Skill Tree ──────────────
+
+model StatGroup {
+  id        String @id @default(uuid()) @db.Uuid
+  gamesetId String @map("gameset_id") @db.Uuid
+  name      String
+  icon      String @default("")
+  sortOrder Int    @default(0) @map("sort_order")
+
+  gameset     Gameset          @relation(fields: [gamesetId], references: [id], onDelete: Cascade)
+  definitions StatDefinition[]
+
+  @@map("stat_groups")
+}
+
+model StatDefinition {
+  id        String   @id @default(uuid()) @db.Uuid
+  gamesetId String   @map("gameset_id") @db.Uuid
+  groupId   String   @map("group_id") @db.Uuid
+  key       String
+  label     String
+  type      StatType
+  formula   Json?
+  isPublic  Boolean  @default(true) @map("is_public")
+  maxVal    Int?     @map("max_val")
+  sortOrder Int      @default(0) @map("sort_order")
+
+  gameset Gameset  @relation(fields: [gamesetId], references: [id], onDelete: Cascade)
+  group   StatGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([gamesetId, key])
+  @@map("stat_definitions")
+}
+
+model GameClass {
+  id          String  @id @default(uuid()) @db.Uuid
+  gamesetId   String  @map("gameset_id") @db.Uuid
+  name        String
+  description String  @default("")
+  hitDie      Int     @default(8) @map("hit_die")
+  iconUrl     String? @map("icon_url")
+
+  gameset    Gameset         @relation(fields: [gamesetId], references: [id], onDelete: Cascade)
+  subclasses Subclass[]
+  characters Character[]
+  skillNodes SkillTreeNode[]
+
+  @@map("classes")
+}
+
+model Subclass {
+  id          String @id @default(uuid()) @db.Uuid
+  classId     String @map("class_id") @db.Uuid
+  gamesetId   String @map("gameset_id") @db.Uuid
+  name        String
+  description String @default("")
+  unlockLevel Int    @default(3) @map("unlock_level")
+
+  parentClass GameClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+  gameset     Gameset   @relation(fields: [gamesetId], references: [id], onDelete: Cascade)
+
+  @@map("subclasses")
+}
+
+model Race {
+  id           String  @id @default(uuid()) @db.Uuid
+  gamesetId    String  @map("gameset_id") @db.Uuid
+  name         String
+  description  String  @default("")
+  racialTraits Json    @default("[]") @map("racial_traits")
+  iconUrl      String? @map("icon_url")
+
+  gameset    Gameset     @relation(fields: [gamesetId], references: [id], onDelete: Cascade)
+  characters Character[]
+
+  @@map("races")
+}
+
+model SkillTreeNode {
+  id                  String        @id @default(uuid()) @db.Uuid
+  gamesetId           String        @map("gameset_id") @db.Uuid
+  classId             String?       @map("class_id") @db.Uuid
+  name                String
+  description         String        @default("")
+  nodeType            SkillNodeType @default(PASSIVE) @map("node_type")
+  maxLevel            Int           @default(1) @map("max_level")
+  costPerLevel        Int           @default(1) @map("cost_per_level")
+  unlockLevel         Int           @default(1) @map("unlock_level")
+  prerequisites       String[]      @db.Uuid
+  statBonusesPerLevel Json          @default("{}") @map("stat_bonuses_per_level")
+  effect              Json?
+  posX                Float         @default(0) @map("pos_x")
+  posY                Float         @default(0) @map("pos_y")
+
+  gameset        Gameset              @relation(fields: [gamesetId], references: [id], onDelete: Cascade)
+  class          GameClass?           @relation(fields: [classId], references: [id], onDelete: Cascade)
+  characterUnlocks CharacterSkillUnlock[]
+
+  @@map("skill_tree_nodes")
+}
+
+model CharacterSkillUnlock {
+  id           String   @id @default(uuid()) @db.Uuid
+  characterId  String   @map("character_id") @db.Uuid
+  nodeId       String   @map("node_id") @db.Uuid
+  currentLevel Int      @default(1) @map("current_level")
+  unlockedAt   DateTime @default(now()) @map("unlocked_at") @db.Timestamptz()
+
+  character Character     @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  node      SkillTreeNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+
+  @@unique([characterId, nodeId])
+  @@map("character_skill_unlocks")
+}
+
+model CharacterApprovalRequest {
+  id          String         @id @default(uuid()) @db.Uuid
+  sessionId   String         @map("session_id") @db.Uuid
+  playerId    String         @map("player_id") @db.Uuid
+  status      ApprovalStatus @default(PENDING)
+  snapshot    Json
+  gmComment   String?        @map("gm_comment")
+  submittedAt DateTime       @default(now()) @map("submitted_at") @db.Timestamptz()
+  reviewedAt  DateTime?      @map("reviewed_at") @db.Timestamptz()
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  player  User    @relation(fields: [playerId], references: [id])
+
+  @@map("character_approval_requests")
 }

@@ -178,6 +178,65 @@ io.on("connection", (socket) => {
     }
   );
 
+  // ─── Character approval flow ────────────────────────
+  socket.on(
+    "char:submit_for_approval",
+    ({ sessionId: sid }: { sessionId: string }) => {
+      if (!sid) return;
+      // GM'e bildir
+      socket.to(`session:${sid}`).emit("gm:approval_request", {
+        playerId: socket.data.userId,
+        username: socket.data.username,
+      });
+    }
+  );
+
+  socket.on(
+    "gm:approve_character",
+    ({ sessionId: sid, playerId, characterId }: { sessionId: string; playerId: string; characterId: string }) => {
+      if (!sid) return;
+      io.to(`session:${sid}`).emit("session:character_approved", {
+        playerId,
+        characterId,
+      });
+    }
+  );
+
+  socket.on(
+    "gm:reject_character",
+    ({ sessionId: sid, playerId, reason }: { sessionId: string; playerId: string; reason?: string }) => {
+      if (!sid) return;
+      io.to(`session:${sid}`).emit("char:approval_rejected", {
+        playerId,
+        reason,
+      });
+    }
+  );
+
+  socket.on(
+    "char:skill_unlock",
+    ({ sessionId: sid, characterId, nodeId, newLevel }: { sessionId: string; characterId: string; nodeId: string; newLevel: number }) => {
+      if (!sid) return;
+      io.to(`session:${sid}`).emit("char:skill_unlocked", {
+        characterId,
+        userId: socket.data.userId,
+        nodeId,
+        newLevel,
+      });
+    }
+  );
+
+  socket.on(
+    "char:level_up",
+    ({ sessionId: sid, characterId, newLevel }: { sessionId: string; characterId: string; newLevel: number }) => {
+      if (!sid) return;
+      io.to(`session:${sid}`).emit("char:leveled_up", {
+        characterId,
+        newLevel,
+      });
+    }
+  );
+
   // ─── Disconnect ─────────────────────────────────────
   socket.on("disconnect", () => {
     const sessionId = socket.data.sessionId;
