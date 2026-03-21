@@ -32,8 +32,9 @@
 - [x] `/register`, `/login`, `/dashboard` sayfaları (bare minimum UI)
 - [x] NextAuth middleware (protected route + auth page redirect)
 - [x] Logout butonu (dashboard)
-- [ ] Environment variables Vercel'e yükle
-- [ ] `prisma migrate dev` — Supabase DB'ye ilk migration
+- [x] Environment variables Vercel'e yükle
+- [x] `prisma migrate dev` — Supabase DB'ye ilk migration
+- [x] Custom domain bağlantısı (umbracaelis.com)
 
 ---
 
