@@ -7,6 +7,7 @@ const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3001"
 
 export function useSocket(sessionId: string | null) {
   const socketRef = useRef<Socket | null>(null);
+  const [socket, setSocket] = useState<Socket | null>(null);
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
@@ -15,28 +16,39 @@ export function useSocket(sessionId: string | null) {
     let cancelled = false;
 
     async function connect() {
-      // Fetch socket token from our API
-      const res = await fetch("/api/socket/token");
-      if (!res.ok) return;
-      const { token } = await res.json();
+      try {
+        const res = await fetch("/api/socket/token");
+        if (!res.ok) {
+          console.error("[socket] Token fetch failed:", res.status);
+          return;
+        }
+        const { token } = await res.json();
 
-      if (cancelled) return;
+        if (cancelled) return;
 
-      const socket = io(SOCKET_URL, {
-        auth: { token },
-        transports: ["websocket", "polling"],
-      });
+        const sock = io(SOCKET_URL, {
+          auth: { token },
+          transports: ["websocket", "polling"],
+        });
 
-      socket.on("connect", () => {
-        setConnected(true);
-        socket.emit("session:join", { sessionId });
-      });
+        sock.on("connect", () => {
+          setConnected(true);
+          sock.emit("session:join", { sessionId });
+        });
 
-      socket.on("disconnect", () => {
-        setConnected(false);
-      });
+        sock.on("disconnect", () => {
+          setConnected(false);
+        });
 
-      socketRef.current = socket;
+        sock.on("connect_error", (err) => {
+          console.error("[socket] Connection error:", err.message);
+        });
+
+        socketRef.current = sock;
+        setSocket(sock);
+      } catch (err) {
+        console.error("[socket] Connect error:", err);
+      }
     }
 
     connect();
@@ -47,10 +59,11 @@ export function useSocket(sessionId: string | null) {
         socketRef.current.emit("session:leave");
         socketRef.current.disconnect();
         socketRef.current = null;
+        setSocket(null);
         setConnected(false);
       }
     };
   }, [sessionId]);
 
-  return { socket: socketRef.current, connected };
+  return { socket, connected };
 }

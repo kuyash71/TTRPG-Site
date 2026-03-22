@@ -167,13 +167,15 @@ export function CharacterSheet({
             </h2>
             <div className="space-y-4">
               {resourceStats.map((stat) => {
+                const hidden = !stat.isPublic && !isOwner && !isGm;
                 const current =
                   editingStats[stat.name] ?? stat.currentValue;
                 const percentage = stat.maxValue
                   ? (current / stat.maxValue) * 100
                   : 100;
-                const barColor =
-                  stat.name === "HP"
+                const barColor = hidden
+                  ? "bg-zinc-600"
+                  : stat.name === "HP"
                     ? "bg-green-500"
                     : stat.name === "Mana"
                       ? "bg-blue-500"
@@ -186,7 +188,7 @@ export function CharacterSheet({
                         {stat.name}
                       </span>
                       <span className="font-mono text-sm text-zinc-400">
-                        {current} / {stat.maxValue}
+                        {hidden ? "XXX / XXX" : `${current} / ${stat.maxValue}`}
                       </span>
                     </div>
                     <div className="h-3 overflow-hidden rounded-full bg-void">
@@ -219,24 +221,22 @@ export function CharacterSheet({
           <div className="rounded-lg border border-border bg-surface p-5">
             <h2 className="heading-gothic mb-4 text-sm font-semibold text-zinc-400">
               Nitelikler
-              {!isOwner && !isGm && (
-                <span className="ml-2 text-[10px] font-normal normal-case text-zinc-600">
-                  (sadece public)
-                </span>
-              )}
             </h2>
             <div className="grid grid-cols-2 gap-3">
-              {attributeStats.map((stat) => (
-                <div
-                  key={stat.name}
-                  className="flex items-center justify-between rounded-md border border-border bg-void px-3 py-2"
-                >
-                  <span className="text-sm text-zinc-400">{stat.name}</span>
-                  <span className="font-mono text-lg font-bold text-zinc-100">
-                    {stat.currentValue}
-                  </span>
-                </div>
-              ))}
+              {attributeStats.map((stat) => {
+                const hidden = !stat.isPublic && !isOwner && !isGm;
+                return (
+                  <div
+                    key={stat.name}
+                    className="flex items-center justify-between rounded-md border border-border bg-void px-3 py-2"
+                  >
+                    <span className="text-sm text-zinc-400">{stat.name}</span>
+                    <span className="font-mono text-lg font-bold text-zinc-100">
+                      {hidden ? "XXX" : stat.currentValue}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

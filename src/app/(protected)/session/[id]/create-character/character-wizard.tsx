@@ -134,7 +134,7 @@ export function CharacterWizard({
             href={`/session/${sessionId}`}
             className="text-sm text-lavender-400 hover:underline"
           >
-            Session&apos;a Dön
+            Odaya Don
           </Link>
         </div>
       </div>

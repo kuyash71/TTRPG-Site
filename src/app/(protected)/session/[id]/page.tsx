@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import { parseGamesetConfig } from "@/types/gameset-config";
 import { SessionRoom } from "./session-room";
 
 export default async function SessionPage({
@@ -18,7 +19,7 @@ export default async function SessionPage({
     where: { id },
     include: {
       gm: { select: { id: true, username: true } },
-      gameset: { select: { name: true } },
+      gameset: { select: { name: true, config: true } },
       players: {
         include: { user: { select: { id: true, username: true } } },
       },
@@ -29,8 +30,11 @@ export default async function SessionPage({
           class: { select: { name: true } },
           race: { select: { name: true } },
           inventoryItems: {
-            where: { isEquipped: true },
-            include: { itemDefinition: { select: { name: true, equipmentSlot: true, rarity: true } } },
+            include: { itemDefinition: { select: { name: true, description: true, category: true, equipmentSlot: true, rarity: true, statBonuses: true, gridWidth: true, gridHeight: true } } },
+          },
+          spells: {
+            include: { spellDefinition: { select: { id: true, name: true, description: true, manaCost: true, cooldown: true, range: true, targetType: true, requiredLevel: true } } },
+            orderBy: { slotIndex: "asc" },
           },
         },
       },
@@ -45,6 +49,8 @@ export default async function SessionPage({
   );
 
   if (!isGm && !isPlayer) redirect("/dashboard");
+
+  const config = parseGamesetConfig(gameSession.gameset.config);
 
   // Oyuncunun bu session'da karakteri var mı?
   const hasCharacter = gameSession.characters.some(
@@ -91,10 +97,42 @@ export default async function SessionPage({
           maxValue: s.maxValue,
           isPublic: s.isPublic,
         })),
-        equippedItems: c.inventoryItems.map((i) => ({
+        equippedItems: c.inventoryItems
+          .filter((i) => i.isEquipped)
+          .map((i) => ({
+            name: i.itemDefinition.name,
+            slot: i.itemDefinition.equipmentSlot ?? "",
+            rarity: i.itemDefinition.rarity,
+          })),
+        inventoryItems: c.inventoryItems.map((i) => ({
+          id: i.id,
           name: i.itemDefinition.name,
-          slot: i.itemDefinition.equipmentSlot ?? "",
+          description: i.itemDefinition.description,
+          category: i.itemDefinition.category,
+          equipmentSlot: i.itemDefinition.equipmentSlot,
           rarity: i.itemDefinition.rarity,
+          statBonuses: (i.itemDefinition.statBonuses as Record<string, number>) ?? {},
+          gridWidth: i.itemDefinition.gridWidth,
+          gridHeight: i.itemDefinition.gridHeight,
+          posX: i.posX,
+          posY: i.posY,
+          quantity: i.quantity,
+          isEquipped: i.isEquipped,
+          equippedSlot: i.equippedSlot,
+        })),
+        spells: c.spells.map((s) => ({
+          id: s.id,
+          slotIndex: s.slotIndex,
+          spellDefinition: {
+            id: s.spellDefinition.id,
+            name: s.spellDefinition.name,
+            description: s.spellDefinition.description,
+            manaCost: s.spellDefinition.manaCost,
+            cooldown: s.spellDefinition.cooldown,
+            range: s.spellDefinition.range,
+            targetType: s.spellDefinition.targetType,
+            requiredLevel: s.spellDefinition.requiredLevel,
+          },
         })),
       }))}
       currentUser={{
@@ -102,6 +140,7 @@ export default async function SessionPage({
         username: session.user.username,
         isGm,
       }}
+      manaLabel={config.manaLabel}
       hasCharacter={hasCharacter}
       pendingApproval={pendingApproval}
     />

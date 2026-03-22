@@ -10,6 +10,38 @@ import { ApprovalPanel } from "./approval-panel";
 import { CharacterDetailPanel } from "./character-detail-panel";
 import Link from "next/link";
 
+interface InventoryItemInfo {
+  id: string;
+  name: string;
+  description: string | null;
+  category: string;
+  equipmentSlot: string | null;
+  rarity: string;
+  statBonuses: Record<string, number>;
+  gridWidth: number;
+  gridHeight: number;
+  posX: number;
+  posY: number;
+  quantity: number;
+  isEquipped: boolean;
+  equippedSlot: string | null;
+}
+
+interface SpellInfo {
+  id: string;
+  slotIndex: number | null;
+  spellDefinition: {
+    id: string;
+    name: string;
+    description: string;
+    manaCost: number;
+    cooldown: number;
+    range: number;
+    targetType: string;
+    requiredLevel: number;
+  };
+}
+
 interface CharacterInfo {
   id: string;
   userId: string;
@@ -22,6 +54,8 @@ interface CharacterInfo {
   privateData: Record<string, unknown>;
   stats: { name: string; baseValue: number; currentValue: number; maxValue: number | null; isPublic: boolean }[];
   equippedItems?: { name: string; slot: string; rarity: string }[];
+  inventoryItems?: InventoryItemInfo[];
+  spells?: SpellInfo[];
 }
 
 interface Props {
@@ -33,6 +67,7 @@ interface Props {
   gm: { id: string; username: string };
   players: { id: string; username: string }[];
   characters: CharacterInfo[];
+  manaLabel: string;
   currentUser: { id: string; username: string; isGm: boolean };
   hasCharacter: boolean;
   pendingApproval: boolean;
@@ -53,6 +88,7 @@ export function SessionRoom({
   gm,
   players,
   characters,
+  manaLabel,
   currentUser,
   hasCharacter,
   pendingApproval,
@@ -156,7 +192,7 @@ export function SessionRoom({
         <div className="border-b border-gold-900/50 bg-gold-900/10 px-4 py-3">
           <div className="flex items-center justify-between">
             <p className="text-sm text-gold-400">
-              Bu session&apos;da henüz bir karakteriniz yok.
+              Bu odada henuz bir karakteriniz yok.
             </p>
             <Link
               href={`/session/${sessionId}/create-character`}
@@ -210,6 +246,7 @@ export function SessionRoom({
             players={players}
             characters={characters}
             currentUserId={currentUser.id}
+            manaLabel={manaLabel}
             socket={socket}
             onPlayerClick={handlePlayerClick}
           />
@@ -241,6 +278,7 @@ export function SessionRoom({
                 players={players}
                 characters={characters}
                 currentUserId={currentUser.id}
+                manaLabel={manaLabel}
                 socket={socket}
                 onPlayerClick={handlePlayerClick}
               />
@@ -253,6 +291,7 @@ export function SessionRoom({
                 character={selectedCharacter}
                 isGm={currentUser.isGm}
                 isOwn={selectedCharacter.userId === currentUser.id}
+                manaLabel={manaLabel}
                 onClose={() => {
                   setSelectedPlayerId(null);
                   setMobileTab("players");
@@ -269,6 +308,7 @@ export function SessionRoom({
               character={selectedCharacter}
               isGm={currentUser.isGm}
               isOwn={selectedCharacter.userId === currentUser.id}
+              manaLabel={manaLabel}
               onClose={() => setSelectedPlayerId(null)}
             />
           </aside>

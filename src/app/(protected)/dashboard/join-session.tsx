@@ -36,7 +36,7 @@ export function JoinSession() {
   return (
     <div className="mt-6 rounded-lg border border-border bg-surface p-6">
       <h2 className="heading-gothic mb-4 text-lg font-semibold text-zinc-200">
-        Session&apos;a Katıl
+        Odaya Katil
       </h2>
       <form onSubmit={handleSubmit} className="flex gap-2">
         {error && <p className="mb-2 text-sm text-red-400">{error}</p>}

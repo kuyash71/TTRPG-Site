@@ -23,7 +23,7 @@ export default function JoinPage() {
 
       if (res.ok) {
         setStatus("success");
-        setMessage("Session'a başarıyla katıldın!");
+        setMessage("Odaya basariyla katildin!");
         setTimeout(() => router.push("/dashboard"), 2000);
       } else {
         setStatus("error");

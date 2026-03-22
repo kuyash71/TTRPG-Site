@@ -44,11 +44,8 @@ export default async function CharacterPage({
   const isOwner = character.userId === session.user.id;
   const isGm = character.session.gmId === session.user.id;
 
-  // Anyone in the session can view, but with filtered data
-  const filteredStats =
-    isOwner || isGm
-      ? character.stats
-      : character.stats.filter((s) => s.isPublic);
+  // All stats are sent, but non-public ones show XXX on client side
+  const filteredStats = character.stats;
 
   // Skill tree node'ları (gameset varsa)
   const skillTreeNodes = character.session.gamesetId

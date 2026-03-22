@@ -17,6 +17,7 @@ interface Props {
   players: { id: string; username: string }[];
   characters: CharacterInfo[];
   currentUserId: string;
+  manaLabel: string;
   socket: Socket | null;
   onPlayerClick?: (userId: string) => void;
 }
@@ -26,6 +27,7 @@ export function PlayerList({
   players,
   characters,
   currentUserId,
+  manaLabel,
   socket,
   onPlayerClick,
 }: Props) {
@@ -100,7 +102,7 @@ export function PlayerList({
           const char = characters.find((c) => c.userId === member.id);
           const stats = charStats[member.id] || [];
           const hp = stats.find((s) => s.name === "HP");
-          const mana = stats.find((s) => s.name === "Mana");
+          const mana = stats.find((s) => s.name === manaLabel || s.name === "Mana" || s.name === "mana" || s.name === "MP");
 
           return (
             <div
@@ -165,7 +167,7 @@ export function PlayerList({
                   {mana && mana.maxValue && (
                     <div className="mt-1">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] text-zinc-500">Mana</span>
+                        <span className="text-[10px] text-zinc-500">{manaLabel}</span>
                         <span className="font-mono text-[10px] text-zinc-500">
                           {mana.currentValue}/{mana.maxValue}
                         </span>
