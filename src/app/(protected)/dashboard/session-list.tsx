@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale, TranslationKey } from "@/lib/locale";
+import { Icon } from "@/components/icon";
 
 interface SessionData {
   id: string;
@@ -93,7 +94,8 @@ export function SessionList({ isGm }: { isGm: boolean }) {
         <h2 className="heading-gothic text-lg font-semibold text-zinc-200">
           {isGm ? t("session.myRooms") : t("session.joinedRooms")}
         </h2>
-        <div className="flex gap-1 rounded bg-void p-0.5">
+        <div className="flex items-center gap-1 rounded bg-void p-0.5">
+          <Icon name="Filter" size={14} className="ml-1 opacity-40" />
           {FILTER_KEYS.map((opt) => (
             <button
               key={opt.value}
@@ -183,9 +185,9 @@ export function SessionList({ isGm }: { isGm: boolean }) {
                     ) : (
                       <button
                         onClick={() => setConfirmDelete(s.id)}
-                        className="rounded-md bg-red-900/30 px-2 py-1 text-xs text-red-400 transition-colors hover:bg-red-900/50"
+                        className="flex items-center gap-1 rounded-md bg-red-900/30 px-2 py-1 text-xs text-red-400 transition-colors hover:bg-red-900/50"
                       >
-                        {t("common.delete")}
+                        <Icon name="trash" size={12} /> {t("common.delete")}
                       </button>
                     )}
                   </>

@@ -10,6 +10,7 @@ import { ApprovalPanel } from "./approval-panel";
 import { CharacterDetailPanel } from "./character-detail-panel";
 import Link from "next/link";
 import { useLocale, TranslationKey } from "@/lib/locale";
+import { Icon } from "@/components/icon";
 
 interface InventoryItemInfo {
   id: string;
@@ -324,19 +325,20 @@ export function SessionRoom({
       {/* Mobile tab bar */}
       <nav className="flex border-t border-border bg-surface md:hidden">
         {([
-          { key: "chat" as const, label: t("room.chatTab") },
-          { key: "players" as const, label: t("room.playersTab") },
-          { key: "dice" as const, label: t("room.diceTab") },
+          { key: "chat" as const, label: t("room.chatTab"), icon: "chat" },
+          { key: "players" as const, label: t("room.playersTab"), icon: "user" },
+          { key: "dice" as const, label: t("room.diceTab"), icon: "d20" },
         ]).map((tab) => (
           <button
             key={tab.key}
             onClick={() => setMobileTab(tab.key)}
-            className={`flex-1 py-3 text-center text-xs font-medium transition-colors ${
+            className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-xs font-medium transition-colors ${
               mobileTab === tab.key
                 ? "border-t-2 border-lavender-400 text-lavender-400"
                 : "text-zinc-500 hover:text-zinc-300"
             }`}
           >
+            <Icon name={tab.icon} size={18} />
             {tab.label}
           </button>
         ))}

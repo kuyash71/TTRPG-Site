@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 import Link from "next/link";
+import { Icon } from "@/components/icon";
 
 interface CharacterInfo {
   id: string;
@@ -94,8 +95,8 @@ export function PlayerList({
 
   return (
     <div className="p-4">
-      <h2 className="heading-gothic mb-3 text-xs font-semibold text-zinc-400">
-        Oyuncular
+      <h2 className="heading-gothic mb-3 flex items-center gap-1.5 text-xs font-semibold text-zinc-400">
+        <Icon name="user" size={14} /> Oyuncular
       </h2>
       <div className="space-y-3">
         {allMembers.map((member) => {
@@ -128,8 +129,8 @@ export function PlayerList({
                   {member.username}
                 </span>
                 {member.isGm && (
-                  <span className="rounded bg-gold-900/50 px-1.5 py-0.5 text-[10px] font-medium text-gold-400">
-                    GM
+                  <span className="flex items-center gap-0.5 rounded bg-gold-900/50 px-1.5 py-0.5 text-[10px] font-medium text-gold-400">
+                    <Icon name="crown" size={10} /> GM
                   </span>
                 )}
               </div>
@@ -147,7 +148,9 @@ export function PlayerList({
                   {hp && hp.maxValue && (
                     <div className="mt-1">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] text-zinc-500">HP</span>
+                        <span className="flex items-center gap-0.5 text-[10px] text-zinc-500">
+                          <Icon name="health" size={10} /> HP
+                        </span>
                         <span className="font-mono text-[10px] text-zinc-500">
                           {hp.currentValue}/{hp.maxValue}
                         </span>
@@ -167,7 +170,9 @@ export function PlayerList({
                   {mana && mana.maxValue && (
                     <div className="mt-1">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] text-zinc-500">{manaLabel}</span>
+                        <span className="flex items-center gap-0.5 text-[10px] text-zinc-500">
+                          <Icon name="mana" size={10} /> {manaLabel}
+                        </span>
                         <span className="font-mono text-[10px] text-zinc-500">
                           {mana.currentValue}/{mana.maxValue}
                         </span>

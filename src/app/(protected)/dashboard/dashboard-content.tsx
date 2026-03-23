@@ -2,6 +2,7 @@
 
 import { useLocale } from "@/lib/locale";
 import { LocaleSwitcher } from "@/components/locale-switcher";
+import { Icon } from "@/components/icon";
 import { LogoutButton } from "./logout-button";
 import { SessionList } from "./session-list";
 import { GmPanel } from "./gm-panel";
@@ -21,8 +22,8 @@ export function DashboardContent({ username, role, isGm }: Props) {
       <div className="mx-auto max-w-4xl">
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="heading-gothic text-2xl font-bold text-lavender-400">
-              {t("dashboard.title")}
+            <h1 className="heading-gothic flex items-center gap-2 text-2xl font-bold text-lavender-400">
+              <Icon name="logo" size={28} /> {t("dashboard.title")}
             </h1>
             <p className="text-zinc-400">
               {t("dashboard.welcome")}{" "}
@@ -32,8 +33,8 @@ export function DashboardContent({ username, role, isGm }: Props) {
           <div className="flex items-center gap-3">
             <LocaleSwitcher />
             {role === "GM" || role === "ADMIN" ? (
-              <span className="rounded bg-gold-900/30 px-3 py-1 text-xs font-medium text-gold-400">
-                {role}
+              <span className="flex items-center gap-1 rounded bg-gold-900/30 px-3 py-1 text-xs font-medium text-gold-400">
+                <Icon name="crown" size={14} /> {role}
               </span>
             ) : (
               <span className="rounded bg-zinc-800 px-3 py-1 text-xs font-medium text-zinc-300">

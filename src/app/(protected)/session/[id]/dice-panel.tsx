@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
 import { useLocale } from "@/lib/locale";
+import { Icon } from "@/components/icon";
 
 interface DiceResult {
   id: string;
@@ -20,6 +21,15 @@ interface Props {
 }
 
 const QUICK_ROLLS = ["1d20", "2d6", "1d12", "1d100", "4d6"];
+
+const DICE_ICON_MAP: Record<string, string> = {
+  d4: "d4", d6: "d6", d8: "d8", d10: "d10", d12: "d12", d20: "d20", d100: "d100",
+};
+
+function getDiceIcon(notation: string): string | null {
+  const match = notation.match(/d(\d+)/);
+  return match ? DICE_ICON_MAP[`d${match[1]}`] ?? null : null;
+}
 
 export function DicePanel({ socket, currentUser }: Props) {
   const { t } = useLocale();
@@ -68,8 +78,8 @@ export function DicePanel({ socket, currentUser }: Props) {
   return (
     <div className="flex h-full flex-col">
       <div className="border-b border-border p-4">
-        <h2 className="heading-gothic mb-3 text-xs font-semibold text-zinc-400">
-          {t("dice.title")}
+        <h2 className="heading-gothic mb-3 flex items-center gap-1.5 text-xs font-semibold text-zinc-400">
+          <Icon name="d20" size={16} /> {t("dice.title")}
         </h2>
         {/* Quick rolls */}
         <div className="mb-3 flex flex-wrap gap-1.5">
@@ -77,8 +87,9 @@ export function DicePanel({ socket, currentUser }: Props) {
             <button
               key={n}
               onClick={() => quickRoll(n)}
-              className="rounded border border-border bg-void px-2 py-1 font-mono text-xs text-zinc-400 transition-colors hover:border-lavender-400 hover:text-lavender-400"
+              className="flex items-center gap-1 rounded border border-border bg-void px-2 py-1 font-mono text-xs text-zinc-400 transition-colors hover:border-lavender-400 hover:text-lavender-400"
             >
+              {getDiceIcon(n) && <Icon name={getDiceIcon(n)!} size={14} />}
               {n}
             </button>
           ))}

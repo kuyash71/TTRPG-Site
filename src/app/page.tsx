@@ -13,6 +13,7 @@ export default function Home() {
         <LocaleSwitcher />
       </div>
       <div className="text-center">
+        <img src="/icons/ui/logo.svg" alt="Umbra Caelis" className="mx-auto mb-4 h-20 w-20" />
         <h1 className="heading-gothic mb-2 text-4xl font-bold text-lavender-400">
           Umbra Caelis
         </h1>

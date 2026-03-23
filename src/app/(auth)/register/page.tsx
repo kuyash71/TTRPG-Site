@@ -46,9 +46,12 @@ export default function RegisterPage() {
         className="w-full max-w-sm space-y-4 rounded-lg border border-border bg-surface p-6"
       >
         <div className="flex items-center justify-between">
-          <h1 className="heading-gothic text-xl font-bold text-lavender-400">
-            {t("auth.register")}
-          </h1>
+          <div className="flex items-center gap-2">
+            <img src="/icons/ui/logo.svg" alt="" className="h-7 w-7" />
+            <h1 className="heading-gothic text-xl font-bold text-lavender-400">
+              {t("auth.register")}
+            </h1>
+          </div>
           <LocaleSwitcher />
         </div>
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { Socket } from "socket.io-client";
+import { Icon } from "@/components/icon";
 
 interface ApprovalRequest {
   id: string;
@@ -92,7 +93,7 @@ export function ApprovalPanel({ sessionId, socket }: Props) {
   return (
     <div className="rounded-lg border border-gold-900/50 bg-surface p-4">
       <h3 className="heading-gothic mb-3 flex items-center gap-2 text-sm font-semibold text-gold-400">
-        Karakter Onayları
+        <Icon name="scroll" size={16} /> Karakter Onayları
         <span className="rounded-full bg-gold-400 px-1.5 py-0.5 text-[10px] font-bold text-void">
           {pendingRequests.length}
         </span>

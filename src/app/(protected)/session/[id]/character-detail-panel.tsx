@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { Icon } from "@/components/icon";
 
 interface EquippedItemInfo {
   name: string;
@@ -243,17 +244,18 @@ export function CharacterDetailPanel({ character, isGm, isOwn, manaLabel, onClos
             const hasContent = t === "stats" || (t === "inventory" && inventoryItems.length > 0) || (t === "spells" && spells.length > 0);
             if (!hasContent) return null;
             const labels = { stats: "Statlar", inventory: "Envanter", spells: "Büyüler" };
+            const icons = { stats: "stats", inventory: "Inventory", spells: "Spellbook" };
             return (
               <button
                 key={t}
                 onClick={() => setTab(t)}
-                className={`flex-1 rounded px-2 py-1 text-[10px] font-medium transition-colors ${
+                className={`flex flex-1 items-center justify-center gap-1 rounded px-2 py-1 text-[10px] font-medium transition-colors ${
                   tab === t
                     ? "bg-surface text-zinc-100"
                     : "text-zinc-500 hover:text-zinc-300"
                 }`}
               >
-                {labels[t]}
+                <Icon name={icons[t]} size={12} /> {labels[t]}
               </button>
             );
           })}
@@ -267,13 +269,15 @@ export function CharacterDetailPanel({ character, isGm, isOwn, manaLabel, onClos
           {resourceStats.length > 0 && (
             <div className="mb-4 space-y-2">
               <div className="flex items-center justify-between">
-                <h4 className="text-[10px] font-semibold text-zinc-500">Kaynaklar</h4>
+                <h4 className="flex items-center gap-1 text-[10px] font-semibold text-zinc-500">
+                  <Icon name="health" size={12} /> Kaynaklar
+                </h4>
                 {(isGm || isOwn) && !editMode && (
                   <button
                     onClick={() => setEditMode(true)}
-                    className="text-[9px] text-lavender-400 hover:text-lavender-300"
+                    className="flex items-center gap-0.5 text-[9px] text-lavender-400 hover:text-lavender-300"
                   >
-                    Düzenle
+                    <Icon name="Editpen" size={10} /> Düzenle
                   </button>
                 )}
               </div>
@@ -287,7 +291,11 @@ export function CharacterDetailPanel({ character, isGm, isOwn, manaLabel, onClos
                 return (
                   <div key={stat.name}>
                     <div className="mb-0.5 flex items-center justify-between">
-                      <span className="text-[10px] text-zinc-400">{stat.name}</span>
+                      <span className="flex items-center gap-0.5 text-[10px] text-zinc-400">
+                        {stat.name === "HP" && <Icon name="health" size={10} />}
+                        {(stat.name === manaLabel || stat.name === "Mana" || stat.name === "MP") && <Icon name="mana" size={10} />}
+                        {stat.name}
+                      </span>
                       <span className="font-mono text-[10px] text-zinc-300">
                         {hidden ? "XXX / XXX" : `${currentVal}/${stat.maxValue}`}
                       </span>
@@ -435,7 +443,9 @@ export function CharacterDetailPanel({ character, isGm, isOwn, manaLabel, onClos
           {/* Equipped Items */}
           {character.equippedItems && character.equippedItems.length > 0 && (
             <div className="mb-4">
-              <h4 className="mb-1 text-[10px] font-semibold text-zinc-500">Kuşanılmış</h4>
+              <h4 className="mb-1 flex items-center gap-1 text-[10px] font-semibold text-zinc-500">
+                <Icon name="Shield" size={12} /> Kuşanılmış
+              </h4>
               <div className="space-y-1">
                 {character.equippedItems.map((item, i) => (
                   <div

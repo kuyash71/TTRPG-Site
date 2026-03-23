@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
 import { useLocale } from "@/lib/locale";
+import { Icon } from "@/components/icon";
 
 interface ChatMsg {
   id: string;
@@ -61,7 +62,7 @@ export function ChatPanel({ sessionId, socket, currentUser }: Props) {
           <button
             key={ch}
             onClick={() => setChannel(ch)}
-            className={`px-4 py-2 text-xs font-medium transition-colors ${
+            className={`flex items-center gap-1.5 px-4 py-2 text-xs font-medium transition-colors ${
               channel === ch
                 ? ch === "IC"
                   ? "border-b-2 border-lavender-400 text-lavender-400"
@@ -69,6 +70,7 @@ export function ChatPanel({ sessionId, socket, currentUser }: Props) {
                 : "text-zinc-500 hover:text-zinc-300"
             }`}
           >
+            <Icon name={ch === "IC" ? "chat-ic" : "chat-ooc"} size={14} />
             {ch === "IC" ? t("chat.ic") : t("chat.ooc")}
           </button>
         ))}

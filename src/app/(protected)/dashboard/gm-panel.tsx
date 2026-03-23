@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale } from "@/lib/locale";
+import { Icon } from "@/components/icon";
 
 interface GamesetData {
   id: string;
@@ -94,21 +95,21 @@ export function GmPanel() {
   return (
     <div className="mb-6 rounded-lg border border-gold-900/50 bg-surface p-6">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="heading-gothic text-lg font-semibold text-gold-400">
-          {t("gm.panel")}
+        <h2 className="heading-gothic flex items-center gap-2 text-lg font-semibold text-gold-400">
+          <Icon name="crown" size={20} /> {t("gm.panel")}
         </h2>
         <div className="flex gap-2">
           <button
             onClick={() => setShowGamesetForm(!showGamesetForm)}
-            className="rounded-md bg-gold-900/50 px-3 py-1 text-sm font-medium text-gold-400 transition-colors hover:bg-gold-900"
+            className="flex items-center gap-1 rounded-md bg-gold-900/50 px-3 py-1 text-sm font-medium text-gold-400 transition-colors hover:bg-gold-900"
           >
-            {showGamesetForm ? t("common.giveUp") : t("gm.newGameset")}
+            {showGamesetForm ? t("common.giveUp") : <><Icon name="plus" size={14} /> {t("gm.newGameset")}</>}
           </button>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="rounded-md bg-gold-400 px-3 py-1 text-sm font-medium text-void transition-colors hover:bg-gold-500"
+            className="flex items-center gap-1 rounded-md bg-gold-400 px-3 py-1 text-sm font-medium text-void transition-colors hover:bg-gold-500"
           >
-            {showForm ? t("common.giveUp") : t("gm.newRoom")}
+            {showForm ? t("common.giveUp") : <><Icon name="plus" size={14} /> {t("gm.newRoom")}</>}
           </button>
         </div>
       </div>
@@ -143,15 +144,15 @@ export function GmPanel() {
               <div className="flex items-center gap-2">
                 <Link
                   href={`/gm/gamesets/${g.id}/edit`}
-                  className="rounded bg-gold-900/50 px-2 py-0.5 text-xs font-medium text-gold-400 transition-colors hover:bg-gold-900"
+                  className="flex items-center gap-1 rounded bg-gold-900/50 px-2 py-0.5 text-xs font-medium text-gold-400 transition-colors hover:bg-gold-900"
                 >
-                  {t("common.edit")}
+                  <Icon name="Editpen" size={12} /> {t("common.edit")}
                 </Link>
                 <button
                   onClick={() => { setDeletingGameset(g); setDeleteConfirmName(""); setDeleteError(""); }}
-                  className="rounded bg-red-900/30 px-2 py-0.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-900/50"
+                  className="flex items-center gap-1 rounded bg-red-900/30 px-2 py-0.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-900/50"
                 >
-                  {t("common.delete")}
+                  <Icon name="trash" size={12} /> {t("common.delete")}
                 </button>
               </div>
             </div>
