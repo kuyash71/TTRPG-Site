@@ -9,6 +9,7 @@ import { PlayerList } from "./player-list";
 import { ApprovalPanel } from "./approval-panel";
 import { CharacterDetailPanel } from "./character-detail-panel";
 import Link from "next/link";
+import { useLocale, TranslationKey } from "@/lib/locale";
 
 interface InventoryItemInfo {
   id: string;
@@ -73,10 +74,10 @@ interface Props {
   pendingApproval: boolean;
 }
 
-const statusLabels: Record<string, { label: string; color: string }> = {
-  OPEN: { label: "Açık", color: "text-green-400" },
-  ACTIVE: { label: "Aktif", color: "text-lavender-400" },
-  CLOSED: { label: "Kapalı", color: "text-zinc-500" },
+const STATUS_KEYS: Record<string, { label: TranslationKey; color: string }> = {
+  OPEN: { label: "session.statusOpen", color: "text-green-400" },
+  ACTIVE: { label: "session.statusActive", color: "text-lavender-400" },
+  CLOSED: { label: "session.statusClosed", color: "text-zinc-500" },
 };
 
 export function SessionRoom({
@@ -93,6 +94,7 @@ export function SessionRoom({
   hasCharacter,
   pendingApproval,
 }: Props) {
+  const { t } = useLocale();
   const router = useRouter();
   const { socket, connected } = useSocket(sessionId);
   const [mobileTab, setMobileTab] = useState<"chat" | "players" | "dice" | "character">("chat");
@@ -151,7 +153,7 @@ export function SessionRoom({
             href="/dashboard"
             className="text-sm text-zinc-500 transition-colors hover:text-zinc-300"
           >
-            &larr; Dashboard
+            &larr; {t("room.backToDashboard")}
           </Link>
           <div>
             <h1 className="heading-gothic text-base font-semibold text-zinc-100">
@@ -165,7 +167,7 @@ export function SessionRoom({
                   <button
                     onClick={() => navigator.clipboard.writeText(inviteCode)}
                     className="font-mono text-gold-400 hover:text-gold-300"
-                    title="Kopyalamak için tıkla"
+                    title={t("room.clickToCopy")}
                   >
                     {inviteCode}
                   </button>
@@ -176,13 +178,13 @@ export function SessionRoom({
         </div>
         <div className="flex items-center gap-3">
           <span
-            className={`text-xs font-medium ${statusLabels[status]?.color}`}
+            className={`text-xs font-medium ${STATUS_KEYS[status]?.color}`}
           >
-            {statusLabels[status]?.label}
+            {t(STATUS_KEYS[status]?.label)}
           </span>
           <span
             className={`h-2 w-2 rounded-full ${connected ? "bg-green-400" : "bg-zinc-600"}`}
-            title={connected ? "Bağlı" : "Bağlantı yok"}
+            title={connected ? t("room.connected") : t("room.disconnected")}
           />
         </div>
       </header>
@@ -192,13 +194,13 @@ export function SessionRoom({
         <div className="border-b border-gold-900/50 bg-gold-900/10 px-4 py-3">
           <div className="flex items-center justify-between">
             <p className="text-sm text-gold-400">
-              Bu odada henuz bir karakteriniz yok.
+              {t("room.noCharacter")}
             </p>
             <Link
               href={`/session/${sessionId}/create-character`}
               className="rounded-md bg-gold-400 px-4 py-1.5 text-sm font-medium text-void hover:bg-gold-500"
             >
-              Karakter Oluştur
+              {t("room.createCharacter")}
             </Link>
           </div>
         </div>
@@ -208,7 +210,7 @@ export function SessionRoom({
       {!currentUser.isGm && isPendingApproval && (
         <div className="border-b border-lavender-900/50 bg-lavender-900/10 px-4 py-3">
           <p className="text-sm text-lavender-400">
-            Karakter oluşturma isteğiniz GM onayı bekliyor.
+            {t("room.pendingApproval")}
           </p>
         </div>
       )}
@@ -224,7 +226,7 @@ export function SessionRoom({
               href={`/session/${sessionId}/create-character`}
               className="rounded-md bg-gold-400 px-4 py-1.5 text-sm font-medium text-void hover:bg-gold-500"
             >
-              Tekrar Dene
+              {t("common.tryAgain")}
             </Link>
           </div>
         </div>
@@ -322,9 +324,9 @@ export function SessionRoom({
       {/* Mobile tab bar */}
       <nav className="flex border-t border-border bg-surface md:hidden">
         {([
-          { key: "chat" as const, label: "Sohbet" },
-          { key: "players" as const, label: "Oyuncular" },
-          { key: "dice" as const, label: "Zar" },
+          { key: "chat" as const, label: t("room.chatTab") },
+          { key: "players" as const, label: t("room.playersTab") },
+          { key: "dice" as const, label: t("room.diceTab") },
         ]).map((tab) => (
           <button
             key={tab.key}

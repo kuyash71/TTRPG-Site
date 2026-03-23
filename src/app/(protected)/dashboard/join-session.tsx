@@ -2,8 +2,10 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "@/lib/locale";
 
 export function JoinSession() {
+  const { t } = useLocale();
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,7 +29,7 @@ export function JoinSession() {
     if (res.ok) {
       router.refresh();
     } else {
-      setError(data.error || "Bir hata oluştu.");
+      setError(data.error || t("common.error"));
     }
 
     setLoading(false);
@@ -36,14 +38,14 @@ export function JoinSession() {
   return (
     <div className="mt-6 rounded-lg border border-border bg-surface p-6">
       <h2 className="heading-gothic mb-4 text-lg font-semibold text-zinc-200">
-        Odaya Katil
+        {t("join.title")}
       </h2>
       <form onSubmit={handleSubmit} className="flex gap-2">
         {error && <p className="mb-2 text-sm text-red-400">{error}</p>}
         <input
           name="inviteCode"
           type="text"
-          placeholder="Davet kodu"
+          placeholder={t("join.inviteCode")}
           required
           className="flex-1 rounded-md border border-border bg-void px-3 py-2 font-mono uppercase text-zinc-200 placeholder-zinc-500 transition-colors focus:border-lavender-400 focus:outline-none"
         />
@@ -52,7 +54,7 @@ export function JoinSession() {
           disabled={loading}
           className="rounded-md bg-lavender-400 px-4 py-2 font-medium text-void transition-colors hover:bg-lavender-500 disabled:opacity-50"
         >
-          {loading ? "..." : "Katıl"}
+          {loading ? "..." : t("common.join")}
         </button>
       </form>
     </div>

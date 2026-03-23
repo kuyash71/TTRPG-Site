@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useLocale, TranslationKey } from "@/lib/locale";
+import { LocaleSwitcher } from "@/components/locale-switcher";
 import { GeneralTab } from "./general-tab";
 import { StatDefinitionsTab } from "./stat-definitions-tab";
 import { ClassRaceTab } from "./class-race-tab";
@@ -96,20 +98,21 @@ export interface GamesetData {
 
 // ─── Tabs ───────────────────────────────────────────────
 
-const TABS = [
-  { key: "general", label: "Genel" },
-  { key: "stats", label: "Stat Tanımları" },
-  { key: "class-race", label: "Sınıf & Irk" },
-  { key: "skill-tree", label: "Skill Ağacı" },
-  { key: "spells", label: "Büyüler" },
-  { key: "items", label: "Eşyalar" },
+const TAB_KEYS = [
+  { key: "general", label: "editor.tabGeneral" as TranslationKey },
+  { key: "stats", label: "editor.tabStats" as TranslationKey },
+  { key: "class-race", label: "editor.tabClassRace" as TranslationKey },
+  { key: "skill-tree", label: "editor.tabSkillTree" as TranslationKey },
+  { key: "spells", label: "editor.tabSpells" as TranslationKey },
+  { key: "items", label: "editor.tabItems" as TranslationKey },
 ] as const;
 
-type TabKey = (typeof TABS)[number]["key"];
+type TabKey = (typeof TAB_KEYS)[number]["key"];
 
 // ─── Component ──────────────────────────────────────────
 
 export function GamesetEditor({ gameset }: { gameset: GamesetData }) {
+  const { t } = useLocale();
   const [activeTab, setActiveTab] = useState<TabKey>("general");
   const [data, setData] = useState<GamesetData>(gameset);
 
@@ -128,14 +131,15 @@ export function GamesetEditor({ gameset }: { gameset: GamesetData }) {
             {data.name}
           </h1>
           <span className="rounded bg-gold-900/50 px-1.5 py-0.5 text-[10px] font-medium text-gold-400">
-            Gameset Editörü
+            {t("editor.badge")}
           </span>
         </div>
+        <LocaleSwitcher />
       </header>
 
       {/* Tab Bar */}
       <div className="flex border-b border-border bg-surface-raised px-4">
-        {TABS.map((tab) => (
+        {TAB_KEYS.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
@@ -145,7 +149,7 @@ export function GamesetEditor({ gameset }: { gameset: GamesetData }) {
                 : "text-zinc-500 hover:text-zinc-300"
             }`}
           >
-            {tab.label}
+            {t(tab.label)}
           </button>
         ))}
       </div>

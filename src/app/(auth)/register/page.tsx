@@ -2,8 +2,11 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "@/lib/locale";
+import { LocaleSwitcher } from "@/components/locale-switcher";
 
 export default function RegisterPage() {
+  const { t } = useLocale();
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -28,7 +31,7 @@ export default function RegisterPage() {
 
     if (!res.ok) {
       const data = await res.json();
-      setError(data.error || "Bir hata oluştu.");
+      setError(data.error || t("common.error"));
       setLoading(false);
       return;
     }
@@ -42,30 +45,33 @@ export default function RegisterPage() {
         onSubmit={handleSubmit}
         className="w-full max-w-sm space-y-4 rounded-lg border border-border bg-surface p-6"
       >
-        <h1 className="heading-gothic text-xl font-bold text-lavender-400">
-          Kayıt Ol
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1 className="heading-gothic text-xl font-bold text-lavender-400">
+            {t("auth.register")}
+          </h1>
+          <LocaleSwitcher />
+        </div>
 
         {error && <p className="text-sm text-red-400">{error}</p>}
 
         <input
           name="email"
           type="email"
-          placeholder="Email"
+          placeholder={t("auth.email")}
           required
           className="w-full rounded-md border border-border bg-void px-3 py-2 text-zinc-200 placeholder-zinc-500 transition-colors focus:border-lavender-400 focus:outline-none"
         />
         <input
           name="username"
           type="text"
-          placeholder="Kullanıcı Adı"
+          placeholder={t("auth.username")}
           required
           className="w-full rounded-md border border-border bg-void px-3 py-2 text-zinc-200 placeholder-zinc-500 transition-colors focus:border-lavender-400 focus:outline-none"
         />
         <input
           name="password"
           type="password"
-          placeholder="Şifre (min 6 karakter)"
+          placeholder={t("auth.password")}
           required
           minLength={6}
           className="w-full rounded-md border border-border bg-void px-3 py-2 text-zinc-200 placeholder-zinc-500 transition-colors focus:border-lavender-400 focus:outline-none"
@@ -76,13 +82,13 @@ export default function RegisterPage() {
           disabled={loading}
           className="w-full rounded-md bg-lavender-400 py-2 font-medium text-void transition-colors hover:bg-lavender-500 disabled:opacity-50"
         >
-          {loading ? "Kaydediliyor..." : "Kayıt Ol"}
+          {loading ? t("auth.registering") : t("auth.register")}
         </button>
 
         <p className="text-center text-sm text-zinc-400">
-          Zaten hesabın var mı?{" "}
+          {t("auth.hasAccount")}{" "}
           <a href="/login" className="text-lavender-400 hover:underline">
-            Giriş Yap
+            {t("auth.login")}
           </a>
         </p>
       </form>

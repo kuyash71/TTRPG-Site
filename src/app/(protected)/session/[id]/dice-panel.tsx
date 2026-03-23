@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
+import { useLocale } from "@/lib/locale";
 
 interface DiceResult {
   id: string;
@@ -21,6 +22,7 @@ interface Props {
 const QUICK_ROLLS = ["1d20", "2d6", "1d12", "1d100", "4d6"];
 
 export function DicePanel({ socket, currentUser }: Props) {
+  const { t } = useLocale();
   const [rolls, setRolls] = useState<DiceResult[]>([]);
   const [notation, setNotation] = useState("");
   const [error, setError] = useState("");
@@ -67,7 +69,7 @@ export function DicePanel({ socket, currentUser }: Props) {
     <div className="flex h-full flex-col">
       <div className="border-b border-border p-4">
         <h2 className="heading-gothic mb-3 text-xs font-semibold text-zinc-400">
-          Zar
+          {t("dice.title")}
         </h2>
         {/* Quick rolls */}
         <div className="mb-3 flex flex-wrap gap-1.5">
@@ -93,7 +95,7 @@ export function DicePanel({ socket, currentUser }: Props) {
             type="submit"
             className="rounded-md bg-gold-400 px-3 py-1.5 text-sm font-medium text-void transition-colors hover:bg-gold-500"
           >
-            At
+            {t("dice.roll")}
           </button>
         </form>
         {error && <p className="mt-1 text-xs text-red-400">{error}</p>}

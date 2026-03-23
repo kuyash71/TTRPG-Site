@@ -55,12 +55,14 @@ export interface WizardDraft {
   customFields: CustomField[];
 }
 
-const STEPS = [
-  { key: "race", label: "Irk" },
-  { key: "class", label: "Sınıf" },
-  { key: "skills", label: "Yetenekler" },
-  { key: "details", label: "Detaylar" },
-  { key: "summary", label: "Özet" },
+import { useLocale, TranslationKey } from "@/lib/locale";
+
+const STEP_KEYS = [
+  { key: "race", label: "wizard.stepRace" as TranslationKey },
+  { key: "class", label: "wizard.stepClass" as TranslationKey },
+  { key: "skills", label: "wizard.stepSkills" as TranslationKey },
+  { key: "details", label: "wizard.stepDetails" as TranslationKey },
+  { key: "summary", label: "wizard.stepSummary" as TranslationKey },
 ] as const;
 
 interface Props {
@@ -84,6 +86,7 @@ export function CharacterWizard({
   skillTreeNodes,
   pendingRequest,
 }: Props) {
+  const { t } = useLocale();
   const router = useRouter();
   const config = parseGamesetConfig(gamesetConfig);
 
@@ -125,16 +128,16 @@ export function CharacterWizard({
       <div className="flex min-h-screen flex-col items-center justify-center bg-void p-6">
         <div className="max-w-md rounded-lg border border-border bg-surface p-8 text-center">
           <h2 className="heading-gothic mb-3 text-lg font-semibold text-gold-400">
-            Onay Bekleniyor
+            {t("wizard.pendingTitle")}
           </h2>
           <p className="mb-4 text-sm text-zinc-400">
-            Karakter oluşturma isteğiniz GM onayı bekliyor. GM onayladığında karakteriniz oluşturulacak.
+            {t("wizard.pendingMsg")}
           </p>
           <Link
             href={`/session/${sessionId}`}
             className="text-sm text-lavender-400 hover:underline"
           >
-            Odaya Don
+            {t("wizard.backToRoom")}
           </Link>
         </div>
       </div>
@@ -163,7 +166,7 @@ export function CharacterWizard({
       router.push(`/session/${sessionId}`);
     } else {
       const data = await res.json();
-      setError(data.error || "Bir hata oluştu.");
+      setError(data.error || t("common.error"));
       setSubmitting(false);
     }
   }
@@ -190,14 +193,14 @@ export function CharacterWizard({
             &larr; {sessionName}
           </Link>
           <h1 className="heading-gothic text-base font-semibold text-zinc-100">
-            Karakter Oluştur
+            {t("wizard.title")}
           </h1>
         </div>
       </header>
 
       {/* Step indicator */}
       <div className="flex border-b border-border bg-surface-raised px-4">
-        {STEPS.map((s, i) => (
+        {STEP_KEYS.map((s, i) => (
           <button
             key={s.key}
             onClick={() => i <= step && setStep(i)}
@@ -210,7 +213,7 @@ export function CharacterWizard({
                   : "text-zinc-600 cursor-not-allowed"
             }`}
           >
-            {i + 1}. {s.label}
+            {i + 1}. {t(s.label)}
           </button>
         ))}
       </div>
@@ -268,18 +271,18 @@ export function CharacterWizard({
           disabled={step === 0}
           className="rounded-md bg-surface-raised px-4 py-2 text-sm text-zinc-400 hover:text-zinc-200 disabled:opacity-30"
         >
-          Geri
+          {t("wizard.prev")}
         </button>
 
         {error && <span className="text-sm text-red-400">{error}</span>}
 
-        {step < STEPS.length - 1 ? (
+        {step < STEP_KEYS.length - 1 ? (
           <button
-            onClick={() => setStep((s) => Math.min(STEPS.length - 1, s + 1))}
+            onClick={() => setStep((s) => Math.min(STEP_KEYS.length - 1, s + 1))}
             disabled={!canNext()}
             className="rounded-md bg-gold-600 px-6 py-2 text-sm font-medium text-void hover:bg-gold-500 disabled:opacity-50"
           >
-            İleri
+            {t("wizard.next")}
           </button>
         ) : (
           <button
@@ -287,7 +290,7 @@ export function CharacterWizard({
             disabled={submitting || !draft.name.trim()}
             className="rounded-md bg-gold-400 px-6 py-2 text-sm font-medium text-void hover:bg-gold-500 disabled:opacity-50"
           >
-            {submitting ? "Gönderiliyor..." : "GM Onayına Gönder"}
+            {submitting ? t("wizard.submitting") : t("wizard.submitToGm")}
           </button>
         )}
       </div>

@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
+import { useLocale } from "@/lib/locale";
 
 interface ChatMsg {
   id: string;
@@ -19,12 +20,12 @@ interface Props {
 }
 
 export function ChatPanel({ sessionId, socket, currentUser }: Props) {
+  const { t, locale } = useLocale();
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [channel, setChannel] = useState<"IC" | "OOC">("OOC");
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Load history
   useEffect(() => {
     fetch(`/api/sessions/${sessionId}/messages`)
       .then((res) => res.json())
@@ -33,21 +34,15 @@ export function ChatPanel({ sessionId, socket, currentUser }: Props) {
       });
   }, [sessionId]);
 
-  // Listen for new messages
   useEffect(() => {
     if (!socket) return;
-
     function handleMessage(msg: ChatMsg) {
       setMessages((prev) => [...prev, msg]);
     }
-
     socket.on("chat:message", handleMessage);
-    return () => {
-      socket.off("chat:message", handleMessage);
-    };
+    return () => { socket.off("chat:message", handleMessage); };
   }, [socket]);
 
-  // Auto-scroll
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -55,14 +50,12 @@ export function ChatPanel({ sessionId, socket, currentUser }: Props) {
   function handleSend(e: FormEvent) {
     e.preventDefault();
     if (!socket || !input.trim()) return;
-
     socket.emit("chat:send", { content: input.trim(), channel });
     setInput("");
   }
 
   return (
     <div className="flex flex-1 flex-col">
-      {/* Channel tabs */}
       <div className="flex border-b border-border bg-surface">
         {(["OOC", "IC"] as const).map((ch) => (
           <button
@@ -76,12 +69,11 @@ export function ChatPanel({ sessionId, socket, currentUser }: Props) {
                 : "text-zinc-500 hover:text-zinc-300"
             }`}
           >
-            {ch === "IC" ? "In-Character" : "Out-of-Character"}
+            {ch === "IC" ? t("chat.ic") : t("chat.ooc")}
           </button>
         ))}
       </div>
 
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4">
         <div className="space-y-1">
           {messages
@@ -90,16 +82,14 @@ export function ChatPanel({ sessionId, socket, currentUser }: Props) {
               <div key={m.id} className="group">
                 <span
                   className={`text-sm font-medium ${
-                    m.userId === currentUser.id
-                      ? "text-lavender-400"
-                      : "text-zinc-300"
+                    m.userId === currentUser.id ? "text-lavender-400" : "text-zinc-300"
                   }`}
                 >
                   {m.username}
                 </span>
                 <span className="ml-2 text-sm text-zinc-400">{m.content}</span>
                 <span className="ml-2 text-[10px] text-zinc-600 opacity-0 transition-opacity group-hover:opacity-100">
-                  {new Date(m.createdAt).toLocaleTimeString("tr-TR", {
+                  {new Date(m.createdAt).toLocaleTimeString(locale === "tr" ? "tr-TR" : "en-US", {
                     hour: "2-digit",
                     minute: "2-digit",
                   })}
@@ -110,24 +100,19 @@ export function ChatPanel({ sessionId, socket, currentUser }: Props) {
         </div>
       </div>
 
-      {/* Input */}
       <form onSubmit={handleSend} className="border-t border-border bg-surface p-3">
         <div className="flex gap-2">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={
-              channel === "IC"
-                ? "Karakterin olarak yaz..."
-                : "Mesajını yaz..."
-            }
+            placeholder={channel === "IC" ? t("chat.icPlaceholder") : t("chat.oocPlaceholder")}
             className="flex-1 rounded-md border border-border bg-void px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 transition-colors focus:border-lavender-400 focus:outline-none"
           />
           <button
             type="submit"
             className="rounded-md bg-lavender-400 px-4 py-2 text-sm font-medium text-void transition-colors hover:bg-lavender-500"
           >
-            Gönder
+            {t("common.send")}
           </button>
         </div>
       </form>

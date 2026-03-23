@@ -3,8 +3,11 @@
 import { signIn } from "next-auth/react";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "@/lib/locale";
+import { LocaleSwitcher } from "@/components/locale-switcher";
 
 export default function LoginPage() {
+  const { t } = useLocale();
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -22,7 +25,7 @@ export default function LoginPage() {
     });
 
     if (res?.error) {
-      setError("Email veya şifre hatalı.");
+      setError(t("auth.loginError"));
       setLoading(false);
     } else {
       router.push("/dashboard");
@@ -35,23 +38,26 @@ export default function LoginPage() {
         onSubmit={handleSubmit}
         className="w-full max-w-sm space-y-4 rounded-lg border border-border bg-surface p-6"
       >
-        <h1 className="heading-gothic text-xl font-bold text-lavender-400">
-          Giriş Yap
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1 className="heading-gothic text-xl font-bold text-lavender-400">
+            {t("auth.login")}
+          </h1>
+          <LocaleSwitcher />
+        </div>
 
         {error && <p className="text-sm text-red-400">{error}</p>}
 
         <input
           name="email"
           type="email"
-          placeholder="Email"
+          placeholder={t("auth.email")}
           required
           className="w-full rounded-md border border-border bg-void px-3 py-2 text-zinc-200 placeholder-zinc-500 transition-colors focus:border-lavender-400 focus:outline-none"
         />
         <input
           name="password"
           type="password"
-          placeholder="Şifre"
+          placeholder={t("auth.password")}
           required
           className="w-full rounded-md border border-border bg-void px-3 py-2 text-zinc-200 placeholder-zinc-500 transition-colors focus:border-lavender-400 focus:outline-none"
         />
@@ -61,13 +67,13 @@ export default function LoginPage() {
           disabled={loading}
           className="w-full rounded-md bg-lavender-400 py-2 font-medium text-void transition-colors hover:bg-lavender-500 disabled:opacity-50"
         >
-          {loading ? "Giriş yapılıyor..." : "Giriş Yap"}
+          {loading ? t("auth.loggingIn") : t("auth.login")}
         </button>
 
         <p className="text-center text-sm text-zinc-400">
-          Hesabın yok mu?{" "}
+          {t("auth.noAccount")}{" "}
           <a href="/register" className="text-lavender-400 hover:underline">
-            Kayıt Ol
+            {t("auth.register")}
           </a>
         </p>
       </form>

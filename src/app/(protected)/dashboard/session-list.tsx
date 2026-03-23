@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useLocale, TranslationKey } from "@/lib/locale";
 
 interface SessionData {
   id: string;
@@ -14,20 +15,21 @@ interface SessionData {
   players: { user: { id: string; username: string } }[];
 }
 
-const statusLabels: Record<string, { label: string; color: string }> = {
-  OPEN: { label: "Acik", color: "text-green-400" },
-  ACTIVE: { label: "Aktif", color: "text-lavender-400" },
-  CLOSED: { label: "Kapali", color: "text-zinc-500" },
+const STATUS_KEYS: Record<string, { label: TranslationKey; color: string }> = {
+  OPEN: { label: "session.statusOpen", color: "text-green-400" },
+  ACTIVE: { label: "session.statusActive", color: "text-lavender-400" },
+  CLOSED: { label: "session.statusClosed", color: "text-zinc-500" },
 };
 
-const FILTER_OPTIONS = [
-  { value: "ALL", label: "Hepsi" },
-  { value: "OPEN", label: "Acik" },
-  { value: "ACTIVE", label: "Aktif" },
-  { value: "CLOSED", label: "Kapali" },
+const FILTER_KEYS: { value: string; label: TranslationKey }[] = [
+  { value: "ALL", label: "session.filterAll" },
+  { value: "OPEN", label: "session.statusOpen" },
+  { value: "ACTIVE", label: "session.statusActive" },
+  { value: "CLOSED", label: "session.statusClosed" },
 ];
 
 export function SessionList({ isGm }: { isGm: boolean }) {
+  const { t } = useLocale();
   const [sessions, setSessions] = useState<SessionData[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("ALL");
@@ -43,17 +45,14 @@ export function SessionList({ isGm }: { isGm: boolean }) {
   }, []);
 
   async function handleStatusChange(sessionId: string, newStatus: string) {
-    // Confirmation for CLOSED
     if (newStatus === "CLOSED") {
-      if (!window.confirm("Bu odayi kapatmak istediginize emin misiniz?")) return;
+      if (!window.confirm(t("session.confirmClose"))) return;
     }
-
     const res = await fetch(`/api/sessions/${sessionId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: newStatus }),
     });
-
     if (res.ok) {
       const updated = await res.json();
       setSessions((prev) =>
@@ -63,9 +62,7 @@ export function SessionList({ isGm }: { isGm: boolean }) {
   }
 
   async function handleDelete(sessionId: string) {
-    const res = await fetch(`/api/sessions/${sessionId}`, {
-      method: "DELETE",
-    });
+    const res = await fetch(`/api/sessions/${sessionId}`, { method: "DELETE" });
     if (res.ok) {
       setSessions((prev) => prev.filter((s) => s.id !== sessionId));
       setConfirmDelete(null);
@@ -73,10 +70,8 @@ export function SessionList({ isGm }: { isGm: boolean }) {
   }
 
   async function handleLeave(sessionId: string) {
-    if (!window.confirm("Bu odayi listenizden kaldirmak istediginize emin misiniz?")) return;
-    const res = await fetch(`/api/sessions/${sessionId}`, {
-      method: "DELETE",
-    });
+    if (!window.confirm(t("session.confirmRemove"))) return;
+    const res = await fetch(`/api/sessions/${sessionId}`, { method: "DELETE" });
     if (res.ok) {
       setSessions((prev) => prev.filter((s) => s.id !== sessionId));
     }
@@ -87,7 +82,7 @@ export function SessionList({ isGm }: { isGm: boolean }) {
   if (loading) {
     return (
       <div className="rounded-lg border border-border bg-surface p-6">
-        <p className="text-sm text-zinc-500">Yukleniyor...</p>
+        <p className="text-sm text-zinc-500">{t("common.loading")}</p>
       </div>
     );
   }
@@ -96,11 +91,10 @@ export function SessionList({ isGm }: { isGm: boolean }) {
     <div className="rounded-lg border border-border bg-surface p-6">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="heading-gothic text-lg font-semibold text-zinc-200">
-          {isGm ? "Odalarim" : "Katildigim Odalar"}
+          {isGm ? t("session.myRooms") : t("session.joinedRooms")}
         </h2>
-        {/* Filter */}
         <div className="flex gap-1 rounded bg-void p-0.5">
-          {FILTER_OPTIONS.map((opt) => (
+          {FILTER_KEYS.map((opt) => (
             <button
               key={opt.value}
               onClick={() => setFilter(opt.value)}
@@ -110,7 +104,7 @@ export function SessionList({ isGm }: { isGm: boolean }) {
                   : "text-zinc-500 hover:text-zinc-300"
               }`}
             >
-              {opt.label}
+              {t(opt.label)}
               {opt.value !== "ALL" && (
                 <span className="ml-1 text-[10px] text-zinc-600">
                   {sessions.filter((s) => s.status === opt.value).length}
@@ -125,9 +119,9 @@ export function SessionList({ isGm }: { isGm: boolean }) {
         <p className="text-sm text-zinc-500">
           {sessions.length === 0
             ? isGm
-              ? "Henuz bir oda olusturmadin."
-              : "Henuz bir odaya katilmadin. GM'inden davet kodu iste."
-            : "Bu filtreye uygun oda bulunamadi."}
+              ? t("session.noRoomsGm")
+              : t("session.noRoomsPlayer")
+            : t("session.noFilterResults")}
         </p>
       ) : (
         <div className="space-y-3">
@@ -141,7 +135,7 @@ export function SessionList({ isGm }: { isGm: boolean }) {
                 <p className="text-xs text-zinc-500">
                   {s.gameset.name}
                   {s.gm && <> &middot; GM: {s.gm.username}</>}
-                  {" "}&middot; {s.players.length} oyuncu
+                  {" "}&middot; {s.players.length} {t("common.player")}
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -150,15 +144,15 @@ export function SessionList({ isGm }: { isGm: boolean }) {
                     {s.inviteCode}
                   </span>
                 )}
-                <span className={`text-xs font-medium ${statusLabels[s.status]?.color}`}>
-                  {statusLabels[s.status]?.label}
+                <span className={`text-xs font-medium ${STATUS_KEYS[s.status]?.color}`}>
+                  {t(STATUS_KEYS[s.status]?.label)}
                 </span>
                 {(s.status === "ACTIVE" || s.status === "OPEN") && (
                   <Link
                     href={`/session/${s.id}`}
                     className="rounded-md bg-lavender-400 px-2 py-1 text-xs font-medium text-void transition-colors hover:bg-lavender-500"
                   >
-                    Odaya Gir
+                    {t("session.enterRoom")}
                   </Link>
                 )}
                 {isGm && (
@@ -168,23 +162,22 @@ export function SessionList({ isGm }: { isGm: boolean }) {
                   />
                 )}
 
-                {/* GM: Delete closed session */}
                 {isGm && s.status === "CLOSED" && (
                   <>
                     {confirmDelete === s.id ? (
                       <div className="flex items-center gap-1">
-                        <span className="text-[10px] text-red-400">Emin misiniz?</span>
+                        <span className="text-[10px] text-red-400">{t("session.confirmDelete")}</span>
                         <button
                           onClick={() => handleDelete(s.id)}
                           className="rounded bg-red-600 px-2 py-0.5 text-[10px] text-white hover:bg-red-700"
                         >
-                          Sil
+                          {t("common.delete")}
                         </button>
                         <button
                           onClick={() => setConfirmDelete(null)}
                           className="rounded border border-border px-2 py-0.5 text-[10px] text-zinc-400 hover:text-zinc-200"
                         >
-                          Vazgec
+                          {t("common.giveUp")}
                         </button>
                       </div>
                     ) : (
@@ -192,19 +185,18 @@ export function SessionList({ isGm }: { isGm: boolean }) {
                         onClick={() => setConfirmDelete(s.id)}
                         className="rounded-md bg-red-900/30 px-2 py-1 text-xs text-red-400 transition-colors hover:bg-red-900/50"
                       >
-                        Sil
+                        {t("common.delete")}
                       </button>
                     )}
                   </>
                 )}
 
-                {/* Player: Leave closed session */}
                 {!isGm && s.status === "CLOSED" && (
                   <button
                     onClick={() => handleLeave(s.id)}
                     className="rounded-md bg-zinc-800 px-2 py-1 text-xs text-zinc-400 transition-colors hover:bg-zinc-700"
                   >
-                    Kaldir
+                    {t("common.remove")}
                   </button>
                 )}
               </div>
@@ -223,9 +215,10 @@ function StatusActions({
   status: string;
   onChangeStatus: (s: string) => void;
 }) {
-  const transitions: Record<string, { label: string; next: string }[]> = {
-    OPEN: [{ label: "Baslat", next: "ACTIVE" }],
-    ACTIVE: [{ label: "Kapat", next: "CLOSED" }],
+  const { t } = useLocale();
+  const transitions: Record<string, { label: TranslationKey; next: string }[]> = {
+    OPEN: [{ label: "session.start", next: "ACTIVE" }],
+    ACTIVE: [{ label: "session.closeRoom", next: "CLOSED" }],
     CLOSED: [],
   };
 
@@ -239,7 +232,7 @@ function StatusActions({
           onClick={() => onChangeStatus(a.next)}
           className="rounded-md bg-surface-raised px-2 py-1 text-xs text-zinc-300 transition-colors hover:bg-surface-overlay"
         >
-          {a.label}
+          {t(a.label)}
         </button>
       ))}
     </>

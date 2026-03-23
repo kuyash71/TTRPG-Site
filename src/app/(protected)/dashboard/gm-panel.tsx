@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
+import { useLocale } from "@/lib/locale";
 
 interface GamesetData {
   id: string;
@@ -9,13 +10,13 @@ interface GamesetData {
 }
 
 export function GmPanel() {
+  const { t } = useLocale();
   const [showForm, setShowForm] = useState(false);
   const [gamesets, setGamesets] = useState<GamesetData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showGamesetForm, setShowGamesetForm] = useState(false);
 
-  // Gameset delete state
   const [deletingGameset, setDeletingGameset] = useState<GamesetData | null>(null);
   const [deleteConfirmName, setDeleteConfirmName] = useState("");
   const [deleteError, setDeleteError] = useState("");
@@ -39,7 +40,6 @@ export function GmPanel() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: formData.get("gamesetName") }),
     });
-
     if (res.ok) {
       const newGameset = await res.json();
       setGamesets((prev) => [newGameset, ...prev]);
@@ -51,9 +51,7 @@ export function GmPanel() {
     e.preventDefault();
     setLoading(true);
     setError("");
-
     const formData = new FormData(e.currentTarget);
-
     const res = await fetch("/api/sessions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -62,14 +60,13 @@ export function GmPanel() {
         gamesetId: formData.get("gamesetId"),
       }),
     });
-
     if (res.ok) {
       setShowForm(false);
       setLoading(false);
       window.location.reload();
     } else {
       const data = await res.json();
-      setError(data.error || "Bir hata olustu.");
+      setError(data.error || t("common.error"));
       setLoading(false);
     }
   }
@@ -78,20 +75,18 @@ export function GmPanel() {
     if (!deletingGameset) return;
     setDeleteLoading(true);
     setDeleteError("");
-
     const res = await fetch(`/api/gamesets/${deletingGameset.id}`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ confirmName: deleteConfirmName }),
     });
-
     if (res.ok) {
       setGamesets((prev) => prev.filter((g) => g.id !== deletingGameset.id));
       setDeletingGameset(null);
       setDeleteConfirmName("");
     } else {
       const data = await res.json();
-      setDeleteError(data.error || "Silinemedi.");
+      setDeleteError(data.error || t("gm.deleteFailed"));
     }
     setDeleteLoading(false);
   }
@@ -100,31 +95,30 @@ export function GmPanel() {
     <div className="mb-6 rounded-lg border border-gold-900/50 bg-surface p-6">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="heading-gothic text-lg font-semibold text-gold-400">
-          GM Paneli
+          {t("gm.panel")}
         </h2>
         <div className="flex gap-2">
           <button
             onClick={() => setShowGamesetForm(!showGamesetForm)}
             className="rounded-md bg-gold-900/50 px-3 py-1 text-sm font-medium text-gold-400 transition-colors hover:bg-gold-900"
           >
-            {showGamesetForm ? "Vazgec" : "Yeni Gameset"}
+            {showGamesetForm ? t("common.giveUp") : t("gm.newGameset")}
           </button>
           <button
             onClick={() => setShowForm(!showForm)}
             className="rounded-md bg-gold-400 px-3 py-1 text-sm font-medium text-void transition-colors hover:bg-gold-500"
           >
-            {showForm ? "Vazgec" : "Yeni Oda"}
+            {showForm ? t("common.giveUp") : t("gm.newRoom")}
           </button>
         </div>
       </div>
 
-      {/* Yeni Gameset formu */}
       {showGamesetForm && !showForm && (
         <form onSubmit={handleCreateGameset} className="mb-4 flex gap-2">
           <input
             name="gamesetName"
             type="text"
-            placeholder="Gameset adi"
+            placeholder={t("gm.gamesetName")}
             required
             className="flex-1 rounded-md border border-border bg-void px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 transition-colors focus:border-gold-400 focus:outline-none"
           />
@@ -132,15 +126,14 @@ export function GmPanel() {
             type="submit"
             className="rounded-md bg-gold-400 px-4 py-2 text-sm font-medium text-void transition-colors hover:bg-gold-500"
           >
-            Olustur
+            {t("common.create")}
           </button>
         </form>
       )}
 
-      {/* Gameset listesi */}
       {gamesets.length > 0 && (
         <div className="mb-4 space-y-2">
-          <h3 className="text-xs font-medium text-zinc-500">Gameset&apos;lerin</h3>
+          <h3 className="text-xs font-medium text-zinc-500">{t("gm.yourGamesets")}</h3>
           {gamesets.map((g) => (
             <div
               key={g.id}
@@ -152,13 +145,13 @@ export function GmPanel() {
                   href={`/gm/gamesets/${g.id}/edit`}
                   className="rounded bg-gold-900/50 px-2 py-0.5 text-xs font-medium text-gold-400 transition-colors hover:bg-gold-900"
                 >
-                  Duzenle
+                  {t("common.edit")}
                 </Link>
                 <button
                   onClick={() => { setDeletingGameset(g); setDeleteConfirmName(""); setDeleteError(""); }}
                   className="rounded bg-red-900/30 px-2 py-0.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-900/50"
                 >
-                  Sil
+                  {t("common.delete")}
                 </button>
               </div>
             </div>
@@ -166,15 +159,13 @@ export function GmPanel() {
         </div>
       )}
 
-      {/* Gameset silme onay dialog */}
       {deletingGameset && (
         <div className="mb-4 rounded-md border border-red-900/50 bg-red-950/20 p-4">
           <h4 className="mb-2 text-sm font-semibold text-red-400">
-            Gameset Sil: {deletingGameset.name}
+            {t("gm.deleteGameset")}: {deletingGameset.name}
           </h4>
           <p className="mb-3 text-xs text-zinc-400">
-            Bu islem geri alinamaz. Gameset&apos;e bagli tum kapatilmis odalar, karakterler
-            ve veriler kalici olarak silinecektir. Onaylamak icin gameset adini yazin:
+            {t("gm.deleteGamesetWarning")}
           </p>
           <input
             value={deleteConfirmName}
@@ -191,13 +182,13 @@ export function GmPanel() {
               disabled={deleteConfirmName !== deletingGameset.name || deleteLoading}
               className="rounded-md bg-red-600 px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-30"
             >
-              {deleteLoading ? "Siliniyor..." : "Kalici Olarak Sil"}
+              {deleteLoading ? t("gm.deleting") : t("gm.deletePermanently")}
             </button>
             <button
               onClick={() => setDeletingGameset(null)}
               className="rounded-md border border-border px-4 py-1.5 text-xs text-zinc-400 hover:text-zinc-200"
             >
-              Vazgec
+              {t("common.giveUp")}
             </button>
           </div>
         </div>
@@ -206,40 +197,33 @@ export function GmPanel() {
       {showForm && (
         <form onSubmit={handleCreateSession} className="space-y-3">
           {error && <p className="text-sm text-red-400">{error}</p>}
-
           <input
             name="name"
             type="text"
-            placeholder="Oda adi"
+            placeholder={t("gm.roomName")}
             required
             className="w-full rounded-md border border-border bg-void px-3 py-2 text-zinc-200 placeholder-zinc-500 transition-colors focus:border-gold-400 focus:outline-none"
           />
-
           {gamesets.length === 0 ? (
-            <p className="text-sm text-zinc-400">
-              Once bir gameset olusturun.
-            </p>
+            <p className="text-sm text-zinc-400">{t("gm.createGamesetFirst")}</p>
           ) : (
             <select
               name="gamesetId"
               required
               className="w-full rounded-md border border-border bg-void px-3 py-2 text-zinc-200 transition-colors focus:border-gold-400 focus:outline-none"
             >
-              <option value="">Gameset sec...</option>
+              <option value="">{t("gm.selectGameset")}</option>
               {gamesets.map((g) => (
-                <option key={g.id} value={g.id}>
-                  {g.name}
-                </option>
+                <option key={g.id} value={g.id}>{g.name}</option>
               ))}
             </select>
           )}
-
           <button
             type="submit"
             disabled={loading || gamesets.length === 0}
             className="w-full rounded-md bg-gold-400 py-2 font-medium text-void transition-colors hover:bg-gold-500 disabled:opacity-50"
           >
-            {loading ? "Olusturuluyor..." : "Oda Olustur"}
+            {loading ? t("gm.creating") : t("gm.createRoom")}
           </button>
         </form>
       )}
