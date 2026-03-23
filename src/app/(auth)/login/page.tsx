@@ -5,6 +5,7 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "@/lib/locale";
 import { LocaleSwitcher } from "@/components/locale-switcher";
+import { Icon } from "@/components/icon";
 
 export default function LoginPage() {
   const { t } = useLocale();
@@ -40,7 +41,7 @@ export default function LoginPage() {
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <img src="/icons/ui/logo.svg" alt="" className="h-7 w-7" />
+            <Icon name="logo" size={28} className="text-lavender-400" />
             <h1 className="heading-gothic text-xl font-bold text-lavender-400">
               {t("auth.login")}
             </h1>

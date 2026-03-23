@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useLocale } from "@/lib/locale";
 import { LocaleSwitcher } from "@/components/locale-switcher";
+import { Icon } from "@/components/icon";
 
 export default function Home() {
   const { t } = useLocale();
@@ -13,7 +14,7 @@ export default function Home() {
         <LocaleSwitcher />
       </div>
       <div className="text-center">
-        <img src="/icons/ui/logo.svg" alt="Umbra Caelis" className="mx-auto mb-4 h-20 w-20" />
+        <Icon name="logo" size={80} className="mx-auto mb-4 text-lavender-400" />
         <h1 className="heading-gothic mb-2 text-4xl font-bold text-lavender-400">
           Umbra Caelis
         </h1>

@@ -1,20 +1,28 @@
-import Image from "next/image";
-
 type IconProps = {
   name: string;
   size?: number;
   className?: string;
-  alt?: string;
 };
 
-export function Icon({ name, size = 20, className = "", alt = "" }: IconProps) {
+export function Icon({ name, size = 20, className = "" }: IconProps) {
   return (
-    <Image
-      src={`/icons/ui/${name}.svg`}
-      alt={alt || name}
-      width={size}
-      height={size}
+    <span
+      role="img"
+      aria-hidden
       className={`inline-block shrink-0 ${className}`}
+      style={{
+        width: size,
+        height: size,
+        backgroundColor: "currentColor",
+        maskImage: `url(/icons/ui/${name}.svg)`,
+        maskSize: "contain",
+        maskRepeat: "no-repeat",
+        maskPosition: "center",
+        WebkitMaskImage: `url(/icons/ui/${name}.svg)`,
+        WebkitMaskSize: "contain",
+        WebkitMaskRepeat: "no-repeat",
+        WebkitMaskPosition: "center",
+      }}
     />
   );
 }
