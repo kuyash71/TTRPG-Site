@@ -1,7 +1,7 @@
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
-const protectedPaths = ["/dashboard", "/join"];
+const protectedPaths = ["/dashboard", "/join", "/session", "/gm", "/character"];
 
 export async function middleware(req: NextRequest) {
   const token = await getToken({ req });
@@ -18,6 +18,7 @@ export async function middleware(req: NextRequest) {
 
   // Redirect logged-in users away from auth pages
   const isAuthPage =
+    req.nextUrl.pathname === "/" ||
     req.nextUrl.pathname.startsWith("/login") ||
     req.nextUrl.pathname.startsWith("/register");
 
@@ -29,5 +30,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/join/:path*", "/login", "/register"],
+  matcher: ["/", "/dashboard/:path*", "/join/:path*", "/session/:path*", "/gm/:path*", "/character/:path*", "/login", "/register"],
 };

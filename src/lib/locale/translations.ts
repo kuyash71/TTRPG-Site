@@ -35,6 +35,12 @@ export const translations = {
   "common.noPermission": { tr: "Yetkiniz yok.", en: "No permission." },
   "common.notFound": { tr: "Bulunamadı.", en: "Not found." },
 
+  // ─── Home ──────────────────────────────────────────────
+  "home.tagline": {
+    tr: "Masanı kur, karakterini oluştur, maceraya atıl.",
+    en: "Set your table, create your character, embark on an adventure.",
+  },
+
   // ─── Auth ──────────────────────────────────────────────
   "auth.login": { tr: "Giriş Yap", en: "Sign In" },
   "auth.register": { tr: "Kayıt Ol", en: "Sign Up" },
