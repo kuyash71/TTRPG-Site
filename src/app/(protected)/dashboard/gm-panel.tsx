@@ -10,7 +10,7 @@ interface GamesetData {
   name: string;
 }
 
-export function GmPanel() {
+export function GmPanel({ onCreated }: { onCreated?: () => void }) {
   const { t } = useLocale();
   const [showForm, setShowForm] = useState(false);
   const [gamesets, setGamesets] = useState<GamesetData[]>([]);
@@ -64,7 +64,7 @@ export function GmPanel() {
     if (res.ok) {
       setShowForm(false);
       setLoading(false);
-      window.location.reload();
+      onCreated?.();
     } else {
       const data = await res.json();
       setError(data.error || t("common.error"));

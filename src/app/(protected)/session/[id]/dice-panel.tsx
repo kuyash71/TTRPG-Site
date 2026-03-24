@@ -12,6 +12,7 @@ interface DiceResult {
   notation: string;
   output: string;
   total: number;
+  title?: string;
   createdAt: string;
 }
 
@@ -20,21 +21,21 @@ interface Props {
   currentUser: { id: string; username: string; isGm: boolean };
 }
 
-const QUICK_ROLLS = ["1d20", "2d6", "1d12", "1d100", "4d6"];
-
-const DICE_ICON_MAP: Record<string, string> = {
-  d4: "d4", d6: "d6", d8: "d8", d10: "d10", d12: "d12", d20: "d20", d100: "d100",
-};
-
-function getDiceIcon(notation: string): string | null {
-  const match = notation.match(/d(\d+)/);
-  return match ? DICE_ICON_MAP[`d${match[1]}`] ?? null : null;
-}
+const QUICK_ROLLS = [
+  { notation: "1d4", icon: "d4" },
+  { notation: "1d6", icon: "d6" },
+  { notation: "1d8", icon: "d8" },
+  { notation: "1d10", icon: "d10" },
+  { notation: "1d12", icon: "d12" },
+  { notation: "1d20", icon: "d20" },
+  { notation: "1d100", icon: "d100" },
+];
 
 export function DicePanel({ socket, currentUser }: Props) {
   const { t } = useLocale();
   const [rolls, setRolls] = useState<DiceResult[]>([]);
   const [notation, setNotation] = useState("");
+  const [title, setTitle] = useState("");
   const [error, setError] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -66,34 +67,52 @@ export function DicePanel({ socket, currentUser }: Props) {
   function handleRoll(e: FormEvent) {
     e.preventDefault();
     if (!socket || !notation.trim()) return;
-    socket.emit("dice:roll", { notation: notation.trim() });
+    socket.emit("dice:roll", { notation: notation.trim(), title: title.trim() || undefined });
     setNotation("");
+    setTitle("");
   }
 
   function quickRoll(n: string) {
     if (!socket) return;
-    socket.emit("dice:roll", { notation: n });
+    socket.emit("dice:roll", { notation: n, title: title.trim() || undefined });
+    setTitle("");
   }
+
+  const isConnected = !!socket;
 
   return (
     <div className="flex h-full flex-col">
       <div className="border-b border-border p-4">
         <h2 className="heading-gothic mb-3 flex items-center gap-1.5 text-xs font-semibold text-zinc-400">
           <Icon name="d20" size={16} /> {t("dice.title")}
+          {!isConnected && (
+            <span className="ml-1 text-[10px] text-red-400">(bağlantı yok)</span>
+          )}
         </h2>
+
+        {/* Title input */}
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Zar başlığı (opsiyonel)"
+          className="mb-2 w-full rounded-md border border-border bg-void px-2 py-1.5 text-sm text-zinc-200 placeholder-zinc-600 transition-colors focus:border-lavender-400 focus:outline-none"
+        />
+
         {/* Quick rolls */}
         <div className="mb-3 flex flex-wrap gap-1.5">
-          {QUICK_ROLLS.map((n) => (
+          {QUICK_ROLLS.map((r) => (
             <button
-              key={n}
-              onClick={() => quickRoll(n)}
-              className="flex items-center gap-1 rounded border border-border bg-void px-2 py-1 font-mono text-xs text-zinc-400 transition-colors hover:border-lavender-400 hover:text-lavender-400"
+              key={r.notation}
+              onClick={() => quickRoll(r.notation)}
+              disabled={!isConnected}
+              className="flex items-center gap-1 rounded border border-border bg-void px-2 py-1 font-mono text-xs text-zinc-400 transition-colors hover:border-lavender-400 hover:text-lavender-400 disabled:opacity-30 disabled:cursor-not-allowed"
             >
-              {getDiceIcon(n) && <Icon name={getDiceIcon(n)!} size={14} />}
-              {n}
+              <Icon name={r.icon} size={14} />
+              {r.notation}
             </button>
           ))}
         </div>
+
         {/* Custom roll */}
         <form onSubmit={handleRoll} className="flex gap-2">
           <input
@@ -104,7 +123,8 @@ export function DicePanel({ socket, currentUser }: Props) {
           />
           <button
             type="submit"
-            className="rounded-md bg-gold-400 px-3 py-1.5 text-sm font-medium text-void transition-colors hover:bg-gold-500"
+            disabled={!isConnected || !notation.trim()}
+            className="rounded-md bg-gold-400 px-3 py-1.5 text-sm font-medium text-void transition-colors hover:bg-gold-500 disabled:opacity-40"
           >
             {t("dice.roll")}
           </button>
@@ -115,11 +135,17 @@ export function DicePanel({ socket, currentUser }: Props) {
       {/* Roll history */}
       <div className="flex-1 overflow-y-auto p-4">
         <div className="space-y-2">
+          {rolls.length === 0 && (
+            <p className="text-center text-xs text-zinc-600">Henüz zar atılmadı.</p>
+          )}
           {rolls.map((r) => (
             <div
               key={r.id}
               className="rounded-md border border-border bg-void p-2"
             >
+              {r.title && (
+                <p className="mb-0.5 text-[11px] font-medium text-gold-400">{r.title}</p>
+              )}
               <div className="flex items-center justify-between">
                 <span
                   className={`text-xs font-medium ${
@@ -134,7 +160,7 @@ export function DicePanel({ socket, currentUser }: Props) {
                   {r.total}
                 </span>
               </div>
-              <p className="font-mono text-xs text-zinc-500">{r.output}</p>
+              <p className="font-mono text-xs text-zinc-500">{r.notation} → {r.output}</p>
             </div>
           ))}
           <div ref={bottomRef} />

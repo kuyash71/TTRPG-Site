@@ -29,7 +29,7 @@ const FILTER_KEYS: { value: string; label: TranslationKey }[] = [
   { value: "CLOSED", label: "session.statusClosed" },
 ];
 
-export function SessionList({ isGm }: { isGm: boolean }) {
+export function SessionList({ isGm, refreshKey = 0 }: { isGm: boolean; refreshKey?: number }) {
   const { t } = useLocale();
   const [sessions, setSessions] = useState<SessionData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,7 +43,7 @@ export function SessionList({ isGm }: { isGm: boolean }) {
         setSessions(data);
         setLoading(false);
       });
-  }, []);
+  }, [refreshKey]);
 
   async function handleStatusChange(sessionId: string, newStatus: string) {
     if (newStatus === "CLOSED") {

@@ -50,6 +50,8 @@ const emptyForm = {
   stackable: false,
   maxStack: 1,
   rarity: "COMMON" as string,
+  usable: false,
+  useStatReq: null as { stat: string; min: number } | null,
 };
 
 export function ItemsTab({ gamesetId, items, statGroups, onUpdate }: Props) {
@@ -82,6 +84,8 @@ export function ItemsTab({ gamesetId, items, statGroups, onUpdate }: Props) {
       stackable: item.stackable,
       maxStack: item.maxStack,
       rarity: item.rarity,
+      usable: (item as unknown as Record<string, unknown>).usable as boolean ?? false,
+      useStatReq: (item as unknown as Record<string, unknown>).useStatReq as { stat: string; min: number } | null ?? null,
     });
   }
 
@@ -107,6 +111,7 @@ export function ItemsTab({ gamesetId, items, statGroups, onUpdate }: Props) {
     const body = {
       ...form,
       equipmentSlot: form.equipmentSlot || null,
+      useStatReq: form.usable && form.useStatReq?.stat ? form.useStatReq : null,
     };
 
     if (editingId) {
@@ -201,7 +206,7 @@ export function ItemsTab({ gamesetId, items, statGroups, onUpdate }: Props) {
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div>
-            <label className="mb-1 block text-xs text-zinc-500">Grid W</label>
+            <label className="mb-1 block text-xs text-zinc-500">Grid H</label>
             <input
               type="number"
               min={1}
@@ -212,7 +217,7 @@ export function ItemsTab({ gamesetId, items, statGroups, onUpdate }: Props) {
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-zinc-500">Grid H</label>
+            <label className="mb-1 block text-xs text-zinc-500">Grid V</label>
             <input
               type="number"
               min={1}
@@ -255,6 +260,52 @@ export function ItemsTab({ gamesetId, items, statGroups, onUpdate }: Props) {
               />
             )}
           </div>
+        </div>
+
+        {/* Kullanılabilirlik */}
+        <div className="space-y-2">
+          <label className="flex items-center gap-1.5 text-xs text-zinc-400">
+            <input
+              type="checkbox"
+              checked={form.usable}
+              onChange={(e) => setForm((p) => ({ ...p, usable: e.target.checked, useStatReq: e.target.checked ? p.useStatReq : null }))}
+              className="rounded"
+            />
+            Kullanılabilir Eşya
+          </label>
+          {form.usable && (
+            <div className="ml-5 flex items-center gap-2">
+              <span className="text-[11px] text-zinc-500">Stat Şartı:</span>
+              <select
+                value={form.useStatReq?.stat || ""}
+                onChange={(e) => setForm((p) => ({
+                  ...p,
+                  useStatReq: e.target.value ? { stat: e.target.value, min: p.useStatReq?.min || 1 } : null,
+                }))}
+                className="rounded border border-border bg-void px-2 py-1 text-xs text-zinc-100"
+              >
+                <option value="">Şart yok</option>
+                {allStatKeys.map((s) => (
+                  <option key={s.key} value={s.key}>{s.label}</option>
+                ))}
+              </select>
+              {form.useStatReq?.stat && (
+                <>
+                  <span className="text-[11px] text-zinc-500">Min:</span>
+                  <input
+                    type="number"
+                    min={1}
+                    value={form.useStatReq.min}
+                    onChange={(e) => setForm((p) => ({
+                      ...p,
+                      useStatReq: { stat: p.useStatReq!.stat, min: +e.target.value },
+                    }))}
+                    className="w-16 rounded border border-border bg-void px-2 py-1 text-xs text-zinc-100"
+                  />
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Stat Bonusları */}
@@ -346,6 +397,15 @@ export function ItemsTab({ gamesetId, items, statGroups, onUpdate }: Props) {
 
               {item.description && (
                 <p className="mt-1 text-[11px] text-zinc-400 line-clamp-2">{item.description}</p>
+              )}
+
+              {Boolean((item as unknown as Record<string, unknown>).usable) && (
+                <span className="mt-1 inline-block rounded bg-gold-900/30 px-1.5 py-0.5 text-[10px] text-gold-400">
+                  Kullanılabilir
+                  {(item as unknown as Record<string, unknown>).useStatReq ? (
+                    <> &middot; {allStatKeys.find((s) => s.key === ((item as unknown as Record<string, unknown>).useStatReq as { stat: string; min: number }).stat)?.label} ≥ {((item as unknown as Record<string, unknown>).useStatReq as { stat: string; min: number }).min}</>
+                  ) : null}
+                </span>
               )}
 
               {Object.keys(item.statBonuses as Record<string, number>).length > 0 && (

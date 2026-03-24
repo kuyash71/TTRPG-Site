@@ -33,6 +33,9 @@ export function WizardStepSkills({
     );
   }, [skillTreeNodes, classId]);
 
+  const commonNodes = useMemo(() => availableNodes.filter((n) => !n.classId), [availableNodes]);
+  const classNodes = useMemo(() => availableNodes.filter((n) => !!n.classId), [availableNodes]);
+
   const spentPoints = Object.values(skillAllocations).reduce((sum, v) => sum + v, 0);
   const remainingPoints = maxPoints - spentPoints;
 
@@ -126,81 +129,54 @@ export function WizardStepSkills({
         {/* Sol: Node listesi veya harita */}
         <div className="flex-1">
           {viewMode === "list" ? (
-            <div className="space-y-2">
+            <div className="space-y-4">
               {availableNodes.length === 0 && (
                 <p className="py-10 text-center text-sm text-zinc-500">
                   Henüz skill tree node&apos;u tanımlanmamış.
                 </p>
               )}
-              {availableNodes.map((node) => {
-                const allocated = skillAllocations[node.id] || 0;
-                const canUse = canAllocate(node);
-                const bonuses = (node.statBonusesPerLevel ?? {}) as Record<string, number>;
 
-                return (
-                  <div
-                    key={node.id}
-                    className={`flex items-center justify-between rounded-lg border p-3 ${
-                      !canUse
-                        ? "border-border bg-void opacity-50"
-                        : allocated > 0
-                          ? "border-gold-400/50 bg-gold-900/10"
-                          : "border-border bg-surface"
-                    }`}
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-zinc-100">{node.name}</span>
-                        <span className="text-[10px] text-zinc-500">
-                          ({node.costPerLevel} SP/lv)
-                        </span>
-                        {!node.classId && (
-                          <span className="rounded bg-zinc-800 px-1 py-0.5 text-[9px] text-zinc-500">
-                            Ortak
-                          </span>
-                        )}
-                      </div>
-                      {node.description && (
-                        <p className="mt-0.5 text-xs text-zinc-500">{node.description}</p>
-                      )}
-                      {Object.keys(bonuses).length > 0 && (
-                        <div className="mt-1 flex flex-wrap gap-1">
-                          {Object.entries(bonuses).map(([key, val]) => (
-                            <span key={key} className="text-[10px] text-lavender-400">
-                              {key} +{val}/lv
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {canUse && (
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => allocate(node.id, -1)}
-                          disabled={allocated <= 0}
-                          className="h-7 w-7 rounded bg-surface-raised text-sm text-zinc-400 hover:text-zinc-100 disabled:opacity-30"
-                        >
-                          -
-                        </button>
-                        <span className="w-6 text-center font-mono text-sm text-zinc-100">
-                          {allocated}
-                        </span>
-                        <button
-                          onClick={() => allocate(node.id, 1)}
-                          disabled={allocated >= node.maxLevel || remainingPoints < node.costPerLevel}
-                          className="h-7 w-7 rounded bg-surface-raised text-sm text-zinc-400 hover:text-zinc-100 disabled:opacity-30"
-                        >
-                          +
-                        </button>
-                        <span className="text-[10px] text-zinc-600">
-                          /{node.maxLevel}
-                        </span>
-                      </div>
-                    )}
+              {/* Ortak Ağaç */}
+              {commonNodes.length > 0 && (
+                <div>
+                  <h3 className="heading-gothic mb-2 border-b border-border pb-1 text-xs font-semibold text-zinc-400">
+                    Ortak Ağaç
+                  </h3>
+                  <div className="space-y-2">
+                    {commonNodes.map((node) => (
+                      <SkillNodeRow
+                        key={node.id}
+                        node={node}
+                        allocated={skillAllocations[node.id] || 0}
+                        canUse={canAllocate(node)}
+                        remainingPoints={remainingPoints}
+                        onAllocate={(delta) => allocate(node.id, delta)}
+                      />
+                    ))}
                   </div>
-                );
-              })}
+                </div>
+              )}
+
+              {/* Sınıf Ağacı */}
+              {classNodes.length > 0 && (
+                <div>
+                  <h3 className="heading-gothic mb-2 border-b border-gold-900/30 pb-1 text-xs font-semibold text-gold-400">
+                    Sınıf Ağacı
+                  </h3>
+                  <div className="space-y-2">
+                    {classNodes.map((node) => (
+                      <SkillNodeRow
+                        key={node.id}
+                        node={node}
+                        allocated={skillAllocations[node.id] || 0}
+                        canUse={canAllocate(node)}
+                        remainingPoints={remainingPoints}
+                        onAllocate={(delta) => allocate(node.id, delta)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="h-[500px] overflow-hidden rounded-lg border border-border">
@@ -240,6 +216,80 @@ export function WizardStepSkills({
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function SkillNodeRow({
+  node,
+  allocated,
+  canUse,
+  remainingPoints,
+  onAllocate,
+}: {
+  node: DbSkillTreeNode;
+  allocated: number;
+  canUse: boolean;
+  remainingPoints: number;
+  onAllocate: (delta: number) => void;
+}) {
+  const bonuses = (node.statBonusesPerLevel ?? {}) as Record<string, number>;
+
+  return (
+    <div
+      className={`flex items-center justify-between rounded-lg border p-3 ${
+        !canUse
+          ? "border-border bg-void opacity-50"
+          : allocated > 0
+            ? "border-gold-400/50 bg-gold-900/10"
+            : "border-border bg-surface"
+      }`}
+    >
+      <div className="flex-1">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-zinc-100">{node.name}</span>
+          <span className="text-[10px] text-zinc-500">
+            ({node.costPerLevel} SP/lv)
+          </span>
+        </div>
+        {node.description && (
+          <p className="mt-0.5 text-xs text-zinc-500">{node.description}</p>
+        )}
+        {Object.keys(bonuses).length > 0 && (
+          <div className="mt-1 flex flex-wrap gap-1">
+            {Object.entries(bonuses).map(([key, val]) => (
+              <span key={key} className="text-[10px] text-lavender-400">
+                {key} +{val}/lv
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {canUse && (
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => onAllocate(-1)}
+            disabled={allocated <= 0}
+            className="h-7 w-7 rounded bg-surface-raised text-sm text-zinc-400 hover:text-zinc-100 disabled:opacity-30"
+          >
+            -
+          </button>
+          <span className="w-6 text-center font-mono text-sm text-zinc-100">
+            {allocated}
+          </span>
+          <button
+            onClick={() => onAllocate(1)}
+            disabled={allocated >= node.maxLevel || remainingPoints < node.costPerLevel}
+            className="h-7 w-7 rounded bg-surface-raised text-sm text-zinc-400 hover:text-zinc-100 disabled:opacity-30"
+          >
+            +
+          </button>
+          <span className="text-[10px] text-zinc-600">
+            /{node.maxLevel}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

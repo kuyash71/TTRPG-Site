@@ -21,6 +21,7 @@ interface Props {
   manaLabel: string;
   socket: Socket | null;
   onPlayerClick?: (userId: string) => void;
+  onDetailView?: (userId: string) => void;
 }
 
 export function PlayerList({
@@ -31,6 +32,7 @@ export function PlayerList({
   manaLabel,
   socket,
   onPlayerClick,
+  onDetailView,
 }: Props) {
   const [onlineIds, setOnlineIds] = useState<Set<string>>(new Set());
   const [charStats, setCharStats] = useState<
@@ -186,6 +188,19 @@ export function PlayerList({
                         />
                       </div>
                     </div>
+                  )}
+
+                  {/* GM: Detaylar butonu */}
+                  {onDetailView && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDetailView(member.id);
+                      }}
+                      className="mt-1.5 w-full rounded bg-lavender-900/30 px-2 py-1 text-[10px] font-medium text-lavender-400 transition-colors hover:bg-lavender-900/50"
+                    >
+                      Detaylar
+                    </button>
                   )}
                 </div>
               )}

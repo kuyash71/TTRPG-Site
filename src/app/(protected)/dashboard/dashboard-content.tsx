@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useLocale } from "@/lib/locale";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { Icon } from "@/components/icon";
@@ -16,6 +17,7 @@ interface Props {
 
 export function DashboardContent({ username, role, isGm }: Props) {
   const { t } = useLocale();
+  const [refreshKey, setRefreshKey] = useState(0);
 
   return (
     <main className="min-h-screen bg-void p-6">
@@ -45,11 +47,11 @@ export function DashboardContent({ username, role, isGm }: Props) {
           </div>
         </div>
 
-        {isGm && <GmPanel />}
+        {isGm && <GmPanel onCreated={() => setRefreshKey((k) => k + 1)} />}
 
-        <SessionList isGm={isGm} />
+        <SessionList isGm={isGm} refreshKey={refreshKey} />
 
-        {!isGm && <JoinSession />}
+        {!isGm && <JoinSession onJoined={() => setRefreshKey((k) => k + 1)} />}
       </div>
     </main>
   );

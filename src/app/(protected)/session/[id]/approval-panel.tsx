@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { Socket } from "socket.io-client";
 import { Icon } from "@/components/icon";
 
@@ -32,7 +32,7 @@ export function ApprovalPanel({ sessionId, socket }: Props) {
   const [requests, setRequests] = useState<ApprovalRequest[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchRequests = useCallback(() => {
     fetch(`/api/sessions/${sessionId}/approval-requests`)
       .then((res) => res.json())
       .then((data) => {
@@ -40,6 +40,21 @@ export function ApprovalPanel({ sessionId, socket }: Props) {
         setLoading(false);
       });
   }, [sessionId]);
+
+  useEffect(() => {
+    fetchRequests();
+  }, [fetchRequests]);
+
+  // Socket: yeni onay isteği geldiğinde listeyi yenile
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("gm:approval_request", fetchRequests);
+
+    return () => {
+      socket.off("gm:approval_request", fetchRequests);
+    };
+  }, [socket, fetchRequests]);
 
   const pendingRequests = requests.filter((r) => r.status === "PENDING");
 

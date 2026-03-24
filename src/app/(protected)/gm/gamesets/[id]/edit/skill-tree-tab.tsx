@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { SkillTreeCanvas } from "@/components/skill-tree/skill-tree-canvas";
 import type { DbSkillTreeNode } from "@/lib/skill-tree-utils";
 import type { ClassData, StatGroupData, SpellDefinitionData } from "./gameset-editor";
@@ -14,23 +14,36 @@ interface Props {
 }
 
 export function SkillTreeTab({ gamesetId, skillTreeNodes, classes, statGroups, spellDefinitions }: Props) {
-  // "common" = ortak ağaç (classId=null), diğerleri sınıf ID'si
   const [selectedTree, setSelectedTree] = useState<string>("common");
+  const [nodes, setNodes] = useState<DbSkillTreeNode[]>(skillTreeNodes);
+  const [loading, setLoading] = useState(false);
 
-  const filteredNodes = useMemo(() => {
-    if (selectedTree === "common") {
-      return skillTreeNodes.filter((n) => !n.classId);
+  const filteredNodes = selectedTree === "common"
+    ? nodes.filter((n) => !n.classId)
+    : nodes.filter((n) => n.classId === selectedTree);
+
+  const fetchNodes = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/gamesets/${gamesetId}/skill-tree`);
+      if (res.ok) {
+        const data: DbSkillTreeNode[] = await res.json();
+        setNodes(data);
+      }
+    } finally {
+      setLoading(false);
     }
-    return skillTreeNodes.filter((n) => n.classId === selectedTree);
-  }, [skillTreeNodes, selectedTree]);
+  }, [gamesetId]);
 
-  // BASE stat anahtarları (node stat bonus'ları için)
-  const baseStatKeys = useMemo(() => {
-    return statGroups
-      .flatMap((g) => g.definitions)
-      .filter((d) => d.type === "BASE")
-      .map((d) => d.key);
-  }, [statGroups]);
+  // Ağaç değiştiğinde güncel node'ları çek
+  useEffect(() => {
+    fetchNodes();
+  }, [selectedTree, fetchNodes]);
+
+  const baseStatKeys = statGroups
+    .flatMap((g) => g.definitions)
+    .filter((d) => d.type === "BASE")
+    .map((d) => d.key);
 
   return (
     <div className="flex h-[calc(100vh-140px)] flex-col">
@@ -52,6 +65,7 @@ export function SkillTreeTab({ gamesetId, skillTreeNodes, classes, statGroups, s
         <span className="text-xs text-zinc-500">
           ({filteredNodes.length} node)
         </span>
+        {loading && <span className="text-xs text-zinc-600">Yükleniyor...</span>}
       </div>
 
       {/* Canvas */}

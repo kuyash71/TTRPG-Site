@@ -403,6 +403,8 @@ model ItemDefinition {
   stackable     Boolean        @default(false)
   maxStack      Int            @default(1) @map("max_stack")
   rarity        ItemRarity     @default(COMMON)
+  usable        Boolean        @default(false)
+  useStatReq    Json?          @map("use_stat_req")
   iconUrl       String?        @map("icon_url")
 
   gameset        Gameset                 @relation(fields: [gamesetId], references: [id], onDelete: Cascade)

@@ -1,7 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { parseGamesetConfig } from "@/types/gameset-config";
+import {
+  parseGamesetConfig,
+  DEFAULT_REALISTIC_HP_STATES,
+  type HpSystemType,
+  type RealisticHpState,
+} from "@/types/gameset-config";
 
 interface Props {
   gamesetId: string;
@@ -31,6 +36,9 @@ export function GeneralTab({
     startingSkillPoints: parsed.startingSkillPoints,
     skillPointsPerLevel: parsed.skillPointsPerLevel,
     manaLabel: parsed.manaLabel,
+    hpSystem: parsed.hpSystem as HpSystemType,
+    realisticHpStates: parsed.realisticHpStates as RealisticHpState[],
+    hitDieLevelsPerRoll: parsed.hitDieLevelsPerRoll,
   });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -45,6 +53,9 @@ export function GeneralTab({
       startingSkillPoints: form.startingSkillPoints,
       skillPointsPerLevel: form.skillPointsPerLevel,
       manaLabel: form.manaLabel,
+      hpSystem: form.hpSystem,
+      realisticHpStates: form.realisticHpStates,
+      hitDieLevelsPerRoll: form.hitDieLevelsPerRoll,
     };
 
     const res = await fetch(`/api/gamesets/${gamesetId}`, {
@@ -179,6 +190,140 @@ export function GeneralTab({
             className="w-full rounded-md border border-border bg-void px-3 py-2 text-sm text-zinc-100 focus:border-lavender-400 focus:outline-none"
           />
         </div>
+      </div>
+
+      <hr className="border-border" />
+
+      <h3 className="heading-gothic text-sm font-semibold text-zinc-300">
+        Can Sistemi
+      </h3>
+
+      <div className="space-y-4">
+        {/* HP System Type */}
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => setForm((f) => ({ ...f, hpSystem: "hit-die" }))}
+            className={`flex-1 rounded-lg border p-3 text-left transition-colors ${
+              form.hpSystem === "hit-die"
+                ? "border-gold-400 bg-gold-900/10"
+                : "border-border bg-void hover:border-zinc-600"
+            }`}
+          >
+            <span className="text-sm font-medium text-zinc-100">Hit-Die</span>
+            <p className="mt-0.5 text-[11px] text-zinc-500">
+              Sayısal HP. Karakter oluşturmada hit-die atılır, level atlayınca artar.
+            </p>
+          </button>
+          <button
+            type="button"
+            onClick={() => setForm((f) => ({ ...f, hpSystem: "realistic" }))}
+            className={`flex-1 rounded-lg border p-3 text-left transition-colors ${
+              form.hpSystem === "realistic"
+                ? "border-gold-400 bg-gold-900/10"
+                : "border-border bg-void hover:border-zinc-600"
+            }`}
+          >
+            <span className="text-sm font-medium text-zinc-100">Realistic</span>
+            <p className="mt-0.5 text-[11px] text-zinc-500">
+              Kelime bazlı can durumu. GM oyun sırasında değiştirir.
+            </p>
+          </button>
+        </div>
+
+        {form.hpSystem === "hit-die" && (
+          <div>
+            <label className="mb-1 block text-sm text-zinc-400">
+              Kaç Seviyede Bir Hit-Die Atılır
+            </label>
+            <input
+              type="number"
+              min={1}
+              max={10}
+              value={form.hitDieLevelsPerRoll}
+              onChange={(e) => setForm((f) => ({ ...f, hitDieLevelsPerRoll: +e.target.value }))}
+              className="w-32 rounded-md border border-border bg-void px-3 py-2 text-sm text-zinc-100 focus:border-lavender-400 focus:outline-none"
+            />
+            <p className="mt-1 text-[11px] text-zinc-500">
+              Sınıfın hit-die değeri (d6, d8, d10 vb.) sınıf ayarlarından gelir.
+            </p>
+          </div>
+        )}
+
+        {form.hpSystem === "realistic" && (
+          <div>
+            <label className="mb-2 block text-sm text-zinc-400">
+              Can Durumları (yukarıdan aşağı: en iyiden en kötüye)
+            </label>
+            <div className="space-y-2">
+              {form.realisticHpStates.map((state, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={state.label}
+                    onChange={(e) => {
+                      const next = [...form.realisticHpStates];
+                      next[idx] = { ...next[idx], label: e.target.value };
+                      setForm((f) => ({ ...f, realisticHpStates: next }));
+                    }}
+                    className="flex-1 rounded border border-border bg-void px-2 py-1.5 text-sm text-zinc-100 focus:border-lavender-400 focus:outline-none"
+                    placeholder="Durum adı"
+                  />
+                  <select
+                    value={state.color}
+                    onChange={(e) => {
+                      const next = [...form.realisticHpStates];
+                      next[idx] = { ...next[idx], color: e.target.value };
+                      setForm((f) => ({ ...f, realisticHpStates: next }));
+                    }}
+                    className="rounded border border-border bg-void px-2 py-1.5 text-sm text-zinc-100"
+                  >
+                    <option value="text-yellow-400">Altın</option>
+                    <option value="text-green-400">Yeşil</option>
+                    <option value="text-blue-400">Mavi</option>
+                    <option value="text-orange-400">Turuncu</option>
+                    <option value="text-red-400">Kırmızı</option>
+                    <option value="text-zinc-400">Gri</option>
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const next = form.realisticHpStates.filter((_, i) => i !== idx);
+                      setForm((f) => ({ ...f, realisticHpStates: next }));
+                    }}
+                    className="text-xs text-red-400 hover:text-red-300"
+                  >
+                    &times;
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                setForm((f) => ({
+                  ...f,
+                  realisticHpStates: [
+                    ...f.realisticHpStates,
+                    { label: "", color: "text-zinc-400" },
+                  ],
+                }))
+              }
+              className="mt-2 rounded bg-surface-raised px-3 py-1 text-xs text-zinc-400 hover:text-zinc-200"
+            >
+              + Durum Ekle
+            </button>
+            {form.realisticHpStates.length === 0 && (
+              <button
+                type="button"
+                onClick={() => setForm((f) => ({ ...f, realisticHpStates: DEFAULT_REALISTIC_HP_STATES }))}
+                className="ml-2 mt-2 rounded bg-surface-raised px-3 py-1 text-xs text-lavender-400 hover:text-lavender-300"
+              >
+                Varsayılanları Yükle
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Save */}

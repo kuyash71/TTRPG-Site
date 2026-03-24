@@ -1,12 +1,10 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useLocale } from "@/lib/locale";
 
-export function JoinSession() {
+export function JoinSession({ onJoined }: { onJoined?: () => void }) {
   const { t } = useLocale();
-  const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -27,7 +25,8 @@ export function JoinSession() {
     const data = await res.json();
 
     if (res.ok) {
-      router.refresh();
+      onJoined?.();
+      (e.target as HTMLFormElement).reset();
     } else {
       setError(data.error || t("common.error"));
     }

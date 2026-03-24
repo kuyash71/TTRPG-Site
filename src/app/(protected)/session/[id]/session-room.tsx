@@ -98,8 +98,9 @@ export function SessionRoom({
   const { t } = useLocale();
   const router = useRouter();
   const { socket, connected } = useSocket(sessionId);
-  const [mobileTab, setMobileTab] = useState<"chat" | "players" | "dice" | "character">("chat");
+  const [mobileTab, setMobileTab] = useState<"chat" | "players" | "dice" | "character" | "myChar">("chat");
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
+  const [detailViewUserId, setDetailViewUserId] = useState<string | null>(null);
   const [isPendingApproval, setIsPendingApproval] = useState(pendingApproval);
   const [hasChar, setHasChar] = useState(hasCharacter);
   const [rejectionReason, setRejectionReason] = useState<string | null>(null);
@@ -113,8 +114,9 @@ export function SessionRoom({
         setIsPendingApproval(false);
         setHasChar(true);
         setRejectionReason(null);
-        router.refresh();
       }
+      // Refresh for everyone so new character appears in player list
+      router.refresh();
     }
 
     function handleRejected({ playerId, reason }: { playerId: string; reason?: string }) {
@@ -137,12 +139,21 @@ export function SessionRoom({
     ? characters.find((c) => c.userId === selectedPlayerId) ?? null
     : null;
 
+  const myCharacter = characters.find((c) => c.userId === currentUser.id) ?? null;
+  const detailViewCharacter = detailViewUserId
+    ? characters.find((c) => c.userId === detailViewUserId) ?? null
+    : null;
+
   function handlePlayerClick(userId: string) {
     setSelectedPlayerId((prev) => (prev === userId ? null : userId));
     // Mobilde karakter tab'ına geç
     if (window.innerWidth < 768) {
       setMobileTab("character");
     }
+  }
+
+  function handleDetailView(userId: string) {
+    setDetailViewUserId(userId);
   }
 
   return (
@@ -252,18 +263,44 @@ export function SessionRoom({
             manaLabel={manaLabel}
             socket={socket}
             onPlayerClick={handlePlayerClick}
+            onDetailView={currentUser.isGm ? handleDetailView : undefined}
           />
         </aside>
 
         {/* Center: active mobile tab or chat on desktop */}
         <main className="flex flex-1 flex-col">
-          {/* Desktop: always chat */}
+          {/* Desktop: chat + optional detail view tabs */}
           <div className="hidden flex-1 flex-col md:flex">
-            <ChatPanel
-              sessionId={sessionId}
-              socket={socket}
-              currentUser={currentUser}
-            />
+            {detailViewCharacter ? (
+              <div className="flex h-full flex-col">
+                <div className="flex items-center gap-2 border-b border-border bg-surface px-4 py-2">
+                  <button
+                    onClick={() => setDetailViewUserId(null)}
+                    className="text-xs text-zinc-500 hover:text-zinc-300"
+                  >
+                    &larr; {t("room.chatTab")}
+                  </button>
+                  <span className="text-xs text-zinc-400">
+                    {detailViewCharacter.name} — Detaylar
+                  </span>
+                </div>
+                <div className="flex-1 overflow-y-auto">
+                  <CharacterDetailPanel
+                    character={detailViewCharacter}
+                    isGm={currentUser.isGm}
+                    isOwn={detailViewCharacter.userId === currentUser.id}
+                    manaLabel={manaLabel}
+                    onClose={() => setDetailViewUserId(null)}
+                  />
+                </div>
+              </div>
+            ) : (
+              <ChatPanel
+                sessionId={sessionId}
+                socket={socket}
+                currentUser={currentUser}
+              />
+            )}
           </div>
 
           {/* Mobile: tab-based */}
@@ -284,6 +321,7 @@ export function SessionRoom({
                 manaLabel={manaLabel}
                 socket={socket}
                 onPlayerClick={handlePlayerClick}
+                onDetailView={currentUser.isGm ? handleDetailView : undefined}
               />
             )}
             {mobileTab === "dice" && (
@@ -299,6 +337,15 @@ export function SessionRoom({
                   setSelectedPlayerId(null);
                   setMobileTab("players");
                 }}
+              />
+            )}
+            {mobileTab === "myChar" && myCharacter && (
+              <CharacterDetailPanel
+                character={myCharacter}
+                isGm={false}
+                isOwn={true}
+                manaLabel={manaLabel}
+                onClose={() => setMobileTab("chat")}
               />
             )}
           </div>
@@ -328,6 +375,9 @@ export function SessionRoom({
           { key: "chat" as const, label: t("room.chatTab"), icon: "chat" },
           { key: "players" as const, label: t("room.playersTab"), icon: "user" },
           { key: "dice" as const, label: t("room.diceTab"), icon: "d20" },
+          ...(!currentUser.isGm && myCharacter
+            ? [{ key: "myChar" as const, label: "Karakterim", icon: "Shield" }]
+            : []),
         ]).map((tab) => (
           <button
             key={tab.key}

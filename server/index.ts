@@ -114,7 +114,7 @@ io.on("connection", (socket) => {
   );
 
   // ─── Dice roll ──────────────────────────────────────
-  socket.on("dice:roll", async ({ notation }: { notation: string }) => {
+  socket.on("dice:roll", async ({ notation, title }: { notation: string; title?: string }) => {
     const sessionId = socket.data.sessionId;
     if (!sessionId || !notation.trim()) return;
 
@@ -138,7 +138,31 @@ io.on("connection", (socket) => {
         notation: roll.notation,
         output: roll.output,
         total: roll.total,
+        title: title || undefined,
         createdAt: diceRoll.createdAt.toISOString(),
+      });
+
+      // Also broadcast as OOC chat so dice results appear in chat
+      const chatContent = title
+        ? `🎲 ${title}: ${roll.notation} → ${roll.output} = ${roll.total}`
+        : `🎲 ${roll.notation} → ${roll.output} = ${roll.total}`;
+
+      const chatMsg = await prisma.chatMessage.create({
+        data: {
+          sessionId,
+          userId: socket.data.userId,
+          channel: "OOC",
+          content: chatContent,
+        },
+      });
+
+      io.to(`session:${sessionId}`).emit("chat:message", {
+        id: chatMsg.id,
+        userId: socket.data.userId,
+        username: socket.data.username,
+        channel: "OOC",
+        content: chatMsg.content,
+        createdAt: chatMsg.createdAt.toISOString(),
       });
     } catch {
       socket.emit("dice:error", {
