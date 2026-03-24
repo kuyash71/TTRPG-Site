@@ -33,6 +33,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="tr">
+      <head>
+        <link rel="icon" href="/icons/ui/logo.svg" type="image/svg+xml" />
+      </head>
       <body
         className={`${cinzel.variable} ${inter.variable} ${jetbrainsMono.variable} font-body antialiased bg-void text-zinc-200`}
       >
