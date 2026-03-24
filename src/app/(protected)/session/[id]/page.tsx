@@ -19,7 +19,15 @@ export default async function SessionPage({
     where: { id },
     include: {
       gm: { select: { id: true, username: true } },
-      gameset: { select: { name: true, config: true } },
+      gameset: {
+        select: {
+          name: true,
+          config: true,
+          skillTreeNodes: {
+            select: { id: true, name: true, description: true, classId: true, posX: true, posY: true, maxLevel: true, costPerLevel: true, unlockLevel: true, prerequisites: true, statBonusesPerLevel: true, effect: true, nodeType: true, spellDefinitionId: true },
+          },
+        },
+      },
       players: {
         include: { user: { select: { id: true, username: true } } },
       },
@@ -29,6 +37,7 @@ export default async function SessionPage({
           user: { select: { id: true, username: true } },
           class: { select: { name: true } },
           race: { select: { name: true } },
+          skillUnlocks: { select: { nodeId: true, currentLevel: true } },
           inventoryItems: {
             include: { itemDefinition: { select: { name: true, description: true, category: true, equipmentSlot: true, rarity: true, statBonuses: true, gridWidth: true, gridHeight: true } } },
           },
@@ -85,6 +94,7 @@ export default async function SessionPage({
         userId: c.user.id,
         name: c.name,
         username: c.user.username,
+        classId: c.classId ?? null,
         className: c.class?.name ?? null,
         raceName: c.race?.name ?? null,
         level: c.level,
@@ -120,6 +130,10 @@ export default async function SessionPage({
           isEquipped: i.isEquipped,
           equippedSlot: i.equippedSlot,
         })),
+        skillUnlocks: c.skillUnlocks.map((u) => ({
+          nodeId: u.nodeId,
+          currentLevel: u.currentLevel,
+        })),
         spells: c.spells.map((s) => ({
           id: s.id,
           slotIndex: s.slotIndex,
@@ -135,6 +149,24 @@ export default async function SessionPage({
           },
         })),
       }))}
+      skillTreeNodes={gameSession.gameset.skillTreeNodes.map((n) => ({
+        id: n.id,
+        name: n.name,
+        description: n.description,
+        classId: n.classId,
+        posX: n.posX,
+        posY: n.posY,
+        maxLevel: n.maxLevel,
+        costPerLevel: n.costPerLevel,
+        unlockLevel: n.unlockLevel,
+        prerequisites: n.prerequisites as string[],
+        statBonusesPerLevel: n.statBonusesPerLevel as Record<string, number>,
+        effect: n.effect,
+        nodeType: n.nodeType,
+        spellDefinitionId: n.spellDefinitionId,
+      }))}
+      hpSystem={config.hpSystem}
+      realisticHpStates={config.realisticHpStates}
       currentUser={{
         id: session.user.id,
         username: session.user.username,

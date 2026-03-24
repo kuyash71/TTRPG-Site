@@ -52,6 +52,7 @@ const emptyForm = {
   rarity: "COMMON" as string,
   usable: false,
   useStatReq: null as { stat: string; min: number } | null,
+  useTextReq: "",
 };
 
 export function ItemsTab({ gamesetId, items, statGroups, onUpdate }: Props) {
@@ -86,6 +87,7 @@ export function ItemsTab({ gamesetId, items, statGroups, onUpdate }: Props) {
       rarity: item.rarity,
       usable: (item as unknown as Record<string, unknown>).usable as boolean ?? false,
       useStatReq: (item as unknown as Record<string, unknown>).useStatReq as { stat: string; min: number } | null ?? null,
+      useTextReq: ((item as unknown as Record<string, unknown>).useTextReq as string) ?? "",
     });
   }
 
@@ -112,6 +114,7 @@ export function ItemsTab({ gamesetId, items, statGroups, onUpdate }: Props) {
       ...form,
       equipmentSlot: form.equipmentSlot || null,
       useStatReq: form.usable && form.useStatReq?.stat ? form.useStatReq : null,
+      useTextReq: form.usable && form.useTextReq.trim() ? form.useTextReq.trim() : null,
     };
 
     if (editingId) {
@@ -262,48 +265,60 @@ export function ItemsTab({ gamesetId, items, statGroups, onUpdate }: Props) {
           </div>
         </div>
 
-        {/* Kullanılabilirlik */}
+        {/* Şartlı Eşya */}
         <div className="space-y-2">
           <label className="flex items-center gap-1.5 text-xs text-zinc-400">
             <input
               type="checkbox"
               checked={form.usable}
-              onChange={(e) => setForm((p) => ({ ...p, usable: e.target.checked, useStatReq: e.target.checked ? p.useStatReq : null }))}
+              onChange={(e) => setForm((p) => ({ ...p, usable: e.target.checked, useStatReq: e.target.checked ? p.useStatReq : null, useTextReq: e.target.checked ? p.useTextReq : "" }))}
               className="rounded"
             />
-            Kullanılabilir Eşya
+            Şartlı Eşya
           </label>
           {form.usable && (
-            <div className="ml-5 flex items-center gap-2">
-              <span className="text-[11px] text-zinc-500">Stat Şartı:</span>
-              <select
-                value={form.useStatReq?.stat || ""}
-                onChange={(e) => setForm((p) => ({
-                  ...p,
-                  useStatReq: e.target.value ? { stat: e.target.value, min: p.useStatReq?.min || 1 } : null,
-                }))}
-                className="rounded border border-border bg-void px-2 py-1 text-xs text-zinc-100"
-              >
-                <option value="">Şart yok</option>
-                {allStatKeys.map((s) => (
-                  <option key={s.key} value={s.key}>{s.label}</option>
-                ))}
-              </select>
-              {form.useStatReq?.stat && (
-                <>
-                  <span className="text-[11px] text-zinc-500">Min:</span>
-                  <input
-                    type="number"
-                    min={1}
-                    value={form.useStatReq.min}
-                    onChange={(e) => setForm((p) => ({
-                      ...p,
-                      useStatReq: { stat: p.useStatReq!.stat, min: +e.target.value },
-                    }))}
-                    className="w-16 rounded border border-border bg-void px-2 py-1 text-xs text-zinc-100"
-                  />
-                </>
-              )}
+            <div className="ml-5 space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] text-zinc-500">Stat Şartı:</span>
+                <select
+                  value={form.useStatReq?.stat || ""}
+                  onChange={(e) => setForm((p) => ({
+                    ...p,
+                    useStatReq: e.target.value ? { stat: e.target.value, min: p.useStatReq?.min || 1 } : null,
+                  }))}
+                  className="rounded border border-border bg-void px-2 py-1 text-xs text-zinc-100"
+                >
+                  <option value="">Şart yok</option>
+                  {allStatKeys.map((s) => (
+                    <option key={s.key} value={s.key}>{s.label}</option>
+                  ))}
+                </select>
+                {form.useStatReq?.stat && (
+                  <>
+                    <span className="text-[11px] text-zinc-500">Min:</span>
+                    <input
+                      type="number"
+                      min={1}
+                      value={form.useStatReq.min}
+                      onChange={(e) => setForm((p) => ({
+                        ...p,
+                        useStatReq: { stat: p.useStatReq!.stat, min: +e.target.value },
+                      }))}
+                      className="w-16 rounded border border-border bg-void px-2 py-1 text-xs text-zinc-100"
+                    />
+                  </>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] text-zinc-500">Metin Şartı:</span>
+                <input
+                  type="text"
+                  value={form.useTextReq}
+                  onChange={(e) => setForm((p) => ({ ...p, useTextReq: e.target.value }))}
+                  placeholder="Ör: Büyücü sınıfı gerektirir"
+                  className="flex-1 rounded border border-border bg-void px-2 py-1 text-xs text-zinc-100 placeholder-zinc-600 focus:border-lavender-400 focus:outline-none"
+                />
+              </div>
             </div>
           )}
         </div>
@@ -400,12 +415,19 @@ export function ItemsTab({ gamesetId, items, statGroups, onUpdate }: Props) {
               )}
 
               {Boolean((item as unknown as Record<string, unknown>).usable) && (
-                <span className="mt-1 inline-block rounded bg-gold-900/30 px-1.5 py-0.5 text-[10px] text-gold-400">
-                  Kullanılabilir
-                  {(item as unknown as Record<string, unknown>).useStatReq ? (
-                    <> &middot; {allStatKeys.find((s) => s.key === ((item as unknown as Record<string, unknown>).useStatReq as { stat: string; min: number }).stat)?.label} ≥ {((item as unknown as Record<string, unknown>).useStatReq as { stat: string; min: number }).min}</>
+                <div className="mt-1 space-y-0.5">
+                  <span className="inline-block rounded bg-gold-900/30 px-1.5 py-0.5 text-[10px] text-gold-400">
+                    Şartlı
+                    {(item as unknown as Record<string, unknown>).useStatReq ? (
+                      <> &middot; {allStatKeys.find((s) => s.key === ((item as unknown as Record<string, unknown>).useStatReq as { stat: string; min: number }).stat)?.label} ≥ {((item as unknown as Record<string, unknown>).useStatReq as { stat: string; min: number }).min}</>
+                    ) : null}
+                  </span>
+                  {(item as unknown as Record<string, unknown>).useTextReq ? (
+                    <p className="text-[10px] text-zinc-500 italic">
+                      {String((item as unknown as Record<string, unknown>).useTextReq)}
+                    </p>
                   ) : null}
-                </span>
+                </div>
               )}
 
               {Object.keys(item.statBonuses as Record<string, number>).length > 0 && (

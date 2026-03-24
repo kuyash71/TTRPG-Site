@@ -7,6 +7,7 @@ interface Props {
   gamesetId: string;
   classes: ClassData[];
   races: RaceData[];
+  hpSystem: string;
   onUpdateClasses: (classes: ClassData[]) => void;
   onUpdateRaces: (races: RaceData[]) => void;
 }
@@ -15,6 +16,7 @@ export function ClassRaceTab({
   gamesetId,
   classes,
   races,
+  hpSystem,
   onUpdateClasses,
   onUpdateRaces,
 }: Props) {
@@ -50,6 +52,7 @@ export function ClassRaceTab({
         <ClassSection
           gamesetId={gamesetId}
           classes={classes}
+          hpSystem={hpSystem}
           onUpdate={onUpdateClasses}
         />
       ) : (
@@ -68,10 +71,12 @@ export function ClassRaceTab({
 function ClassSection({
   gamesetId,
   classes,
+  hpSystem,
   onUpdate,
 }: {
   gamesetId: string;
   classes: ClassData[];
+  hpSystem: string;
   onUpdate: (c: ClassData[]) => void;
 }) {
   const [showForm, setShowForm] = useState(false);
@@ -196,9 +201,11 @@ function ClassSection({
                 <h4 className="text-sm font-semibold text-zinc-100">
                   {cls.name}
                 </h4>
-                <p className="text-xs text-zinc-500">
-                  Hit Die: d{cls.hitDie}
-                </p>
+                {hpSystem === "hit-die" && (
+                  <p className="text-xs text-zinc-500">
+                    Hit Die: d{cls.hitDie}
+                  </p>
+                )}
               </div>
               <div className="flex gap-2">
                 <button
@@ -281,24 +288,26 @@ function ClassSection({
                 rows={3}
                 className="w-full rounded-md border border-border bg-void px-3 py-2 text-sm text-zinc-100 focus:border-lavender-400 focus:outline-none"
               />
-              <div>
-                <label className="mb-1 block text-xs text-zinc-400">
-                  Hit Die
-                </label>
-                <select
-                  value={form.hitDie}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, hitDie: Number(e.target.value) }))
-                  }
-                  className="rounded-md border border-border bg-void px-3 py-2 text-sm text-zinc-100 focus:border-lavender-400 focus:outline-none"
-                >
-                  {[4, 6, 8, 10, 12].map((d) => (
-                    <option key={d} value={d}>
-                      d{d}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {hpSystem === "hit-die" && (
+                <div>
+                  <label className="mb-1 block text-xs text-zinc-400">
+                    Hit Die
+                  </label>
+                  <select
+                    value={form.hitDie}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, hitDie: Number(e.target.value) }))
+                    }
+                    className="rounded-md border border-border bg-void px-3 py-2 text-sm text-zinc-100 focus:border-lavender-400 focus:outline-none"
+                  >
+                    {[4, 6, 8, 10, 12].map((d) => (
+                      <option key={d} value={d}>
+                        d{d}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div className="flex justify-end gap-2 pt-2">
                 <button
                   onClick={() => setShowForm(false)}

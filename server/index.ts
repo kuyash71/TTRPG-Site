@@ -3,7 +3,30 @@ import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
 import { PrismaClient } from "../src/generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { DiceRoll } from "@dice-roller/rpg-dice-roller";
+// Simple dice roller — no external library
+function parseDiceNotation(notation: string): { count: number; sides: number; modifier: number } | null {
+  // Supports: 1d20, 2d6+3, 1d8-1, d20, 4d10+5, 1d100
+  const match = notation.trim().match(/^(\d*)d(\d+)([+-]\d+)?$/i);
+  if (!match) return null;
+  const count = match[1] ? parseInt(match[1], 10) : 1;
+  const sides = parseInt(match[2], 10);
+  const modifier = match[3] ? parseInt(match[3], 10) : 0;
+  if (count < 1 || count > 100 || sides < 2 || sides > 1000) return null;
+  return { count, sides, modifier };
+}
+
+function rollDice(parsed: { count: number; sides: number; modifier: number }): { rolls: number[]; total: number; output: string; notation: string } {
+  const rolls: number[] = [];
+  for (let i = 0; i < parsed.count; i++) {
+    rolls.push(Math.floor(Math.random() * parsed.sides) + 1);
+  }
+  const sum = rolls.reduce((a, b) => a + b, 0);
+  const total = sum + parsed.modifier;
+  const modStr = parsed.modifier > 0 ? `+${parsed.modifier}` : parsed.modifier < 0 ? `${parsed.modifier}` : "";
+  const notation = `${parsed.count}d${parsed.sides}${modStr}`;
+  const output = `[${rolls.join(", ")}]${modStr ? ` ${modStr}` : ""}`;
+  return { rolls, total, output, notation };
+}
 
 // ─── Config ──────────────────────────────────────────────
 const PORT = parseInt(process.env.PORT || "3001", 10);
@@ -118,15 +141,23 @@ io.on("connection", (socket) => {
     const sessionId = socket.data.sessionId;
     if (!sessionId || !notation.trim()) return;
 
-    try {
-      const roll = new DiceRoll(notation.trim());
+    const parsed = parseDiceNotation(notation.trim());
+    if (!parsed) {
+      socket.emit("dice:error", {
+        message: "Geçersiz zar notasyonu. Örnek: 2d6+3, 1d20, 4d8",
+      });
+      return;
+    }
 
+    const roll = rollDice(parsed);
+
+    try {
       const diceRoll = await prisma.diceRoll.create({
         data: {
           sessionId,
           userId: socket.data.userId,
           notation: roll.notation,
-          results: JSON.parse(JSON.stringify(roll.rolls)),
+          results: roll.rolls,
           total: roll.total,
         },
       });
@@ -164,9 +195,10 @@ io.on("connection", (socket) => {
         content: chatMsg.content,
         createdAt: chatMsg.createdAt.toISOString(),
       });
-    } catch {
+    } catch (err) {
+      console.error("[dice] DB error:", err);
       socket.emit("dice:error", {
-        message: "Geçersiz zar notasyonu. Örnek: 2d6+3, 1d20, 4d8",
+        message: "Zar atılırken bir hata oluştu.",
       });
     }
   });

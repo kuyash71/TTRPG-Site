@@ -179,6 +179,7 @@ export function GamesetEditor({ gameset }: { gameset: GamesetData }) {
             gamesetId={data.id}
             classes={data.classes}
             races={data.races}
+            hpSystem={(data.config?.hpSystem as string) || "hit-die"}
             onUpdateClasses={(classes) =>
               setData((prev) => ({ ...prev, classes }))
             }

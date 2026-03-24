@@ -39,6 +39,9 @@ export async function PATCH(
       ...(body.stackable !== undefined && { stackable: body.stackable }),
       ...(body.maxStack !== undefined && { maxStack: body.maxStack }),
       ...(body.rarity !== undefined && { rarity: body.rarity }),
+      ...(body.usable !== undefined && { usable: body.usable }),
+      ...(body.useStatReq !== undefined && { useStatReq: body.useStatReq }),
+      ...(body.useTextReq !== undefined && { useTextReq: body.useTextReq }),
       ...(body.iconUrl !== undefined && { iconUrl: body.iconUrl || null }),
     },
   });

@@ -11,6 +11,7 @@ import { CharacterDetailPanel } from "./character-detail-panel";
 import Link from "next/link";
 import { useLocale, TranslationKey } from "@/lib/locale";
 import { Icon } from "@/components/icon";
+import type { RealisticHpState, HpSystemType } from "@/types/gameset-config";
 
 interface InventoryItemInfo {
   id: string;
@@ -49,15 +50,34 @@ interface CharacterInfo {
   userId: string;
   name: string;
   username: string;
+  classId: string | null;
   className: string | null;
   raceName: string | null;
   level: number;
   publicData: Record<string, unknown>;
   privateData: Record<string, unknown>;
   stats: { name: string; baseValue: number; currentValue: number; maxValue: number | null; isPublic: boolean }[];
+  skillUnlocks?: { nodeId: string; currentLevel: number }[];
   equippedItems?: { name: string; slot: string; rarity: string }[];
   inventoryItems?: InventoryItemInfo[];
   spells?: SpellInfo[];
+}
+
+interface SkillTreeNodeInfo {
+  id: string;
+  name: string;
+  description: string;
+  classId: string | null;
+  posX: number;
+  posY: number;
+  maxLevel: number;
+  costPerLevel: number;
+  unlockLevel: number;
+  prerequisites: string[];
+  statBonusesPerLevel: Record<string, number>;
+  effect: unknown;
+  nodeType: string;
+  spellDefinitionId: string | null;
 }
 
 interface Props {
@@ -69,6 +89,9 @@ interface Props {
   gm: { id: string; username: string };
   players: { id: string; username: string }[];
   characters: CharacterInfo[];
+  skillTreeNodes: SkillTreeNodeInfo[];
+  hpSystem: HpSystemType;
+  realisticHpStates: RealisticHpState[];
   manaLabel: string;
   currentUser: { id: string; username: string; isGm: boolean };
   hasCharacter: boolean;
@@ -90,6 +113,9 @@ export function SessionRoom({
   gm,
   players,
   characters,
+  skillTreeNodes,
+  hpSystem,
+  realisticHpStates,
   manaLabel,
   currentUser,
   hasCharacter,
@@ -104,6 +130,7 @@ export function SessionRoom({
   const [isPendingApproval, setIsPendingApproval] = useState(pendingApproval);
   const [hasChar, setHasChar] = useState(hasCharacter);
   const [rejectionReason, setRejectionReason] = useState<string | null>(null);
+  const [codeCopied, setCodeCopied] = useState(false);
 
   // Socket: onay/red bildirimleri
   useEffect(() => {
@@ -177,11 +204,15 @@ export function SessionRoom({
                 <>
                   {" "}&middot;{" "}
                   <button
-                    onClick={() => navigator.clipboard.writeText(inviteCode)}
+                    onClick={() => {
+                      navigator.clipboard.writeText(inviteCode);
+                      setCodeCopied(true);
+                      setTimeout(() => setCodeCopied(false), 2000);
+                    }}
                     className="font-mono text-gold-400 hover:text-gold-300"
                     title={t("room.clickToCopy")}
                   >
-                    {inviteCode}
+                    {codeCopied ? "Kopyalandı!" : inviteCode}
                   </button>
                 </>
               )}
@@ -290,6 +321,10 @@ export function SessionRoom({
                     isGm={currentUser.isGm}
                     isOwn={detailViewCharacter.userId === currentUser.id}
                     manaLabel={manaLabel}
+                    hpSystem={hpSystem}
+                    realisticHpStates={realisticHpStates}
+                    skillTreeNodes={skillTreeNodes}
+                    socket={socket}
                     onClose={() => setDetailViewUserId(null)}
                   />
                 </div>
@@ -333,6 +368,10 @@ export function SessionRoom({
                 isGm={currentUser.isGm}
                 isOwn={selectedCharacter.userId === currentUser.id}
                 manaLabel={manaLabel}
+                hpSystem={hpSystem}
+                realisticHpStates={realisticHpStates}
+                skillTreeNodes={skillTreeNodes}
+                socket={socket}
                 onClose={() => {
                   setSelectedPlayerId(null);
                   setMobileTab("players");
@@ -345,6 +384,10 @@ export function SessionRoom({
                 isGm={false}
                 isOwn={true}
                 manaLabel={manaLabel}
+                hpSystem={hpSystem}
+                realisticHpStates={realisticHpStates}
+                skillTreeNodes={skillTreeNodes}
+                socket={socket}
                 onClose={() => setMobileTab("chat")}
               />
             )}
@@ -359,6 +402,10 @@ export function SessionRoom({
               isGm={currentUser.isGm}
               isOwn={selectedCharacter.userId === currentUser.id}
               manaLabel={manaLabel}
+              hpSystem={hpSystem}
+              realisticHpStates={realisticHpStates}
+              skillTreeNodes={skillTreeNodes}
+              socket={socket}
               onClose={() => setSelectedPlayerId(null)}
             />
           </aside>

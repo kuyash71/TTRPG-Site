@@ -179,19 +179,54 @@ export function WizardStepSkills({
               )}
             </div>
           ) : (
-            <div className="h-[500px] overflow-hidden rounded-lg border border-border">
-              <SkillTreeViewer
-                nodes={availableNodes}
-                unlockedMap={new Map(
-                  Object.entries(skillAllocations).filter(([, v]) => v > 0)
-                )}
-                onNodeClick={(nodeId) => {
-                  const node = availableNodes.find((n) => n.id === nodeId);
-                  if (node && canAllocate(node)) {
-                    allocate(nodeId, 1);
-                  }
-                }}
-              />
+            <div className="space-y-4">
+              {commonNodes.length > 0 && (
+                <div>
+                  <h3 className="heading-gothic mb-2 border-b border-border pb-1 text-xs font-semibold text-zinc-400">
+                    Ortak Ağaç
+                  </h3>
+                  <div className="h-[300px] overflow-hidden rounded-lg border border-border">
+                    <SkillTreeViewer
+                      nodes={commonNodes}
+                      unlockedMap={new Map(
+                        Object.entries(skillAllocations).filter(([, v]) => v > 0)
+                      )}
+                      onNodeClick={(nodeId) => {
+                        const node = commonNodes.find((n) => n.id === nodeId);
+                        if (node && canAllocate(node)) {
+                          allocate(nodeId, 1);
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+              {classNodes.length > 0 && (
+                <div>
+                  <h3 className="heading-gothic mb-2 border-b border-gold-900/30 pb-1 text-xs font-semibold text-gold-400">
+                    Sınıf Ağacı
+                  </h3>
+                  <div className="h-[300px] overflow-hidden rounded-lg border border-border">
+                    <SkillTreeViewer
+                      nodes={classNodes}
+                      unlockedMap={new Map(
+                        Object.entries(skillAllocations).filter(([, v]) => v > 0)
+                      )}
+                      onNodeClick={(nodeId) => {
+                        const node = classNodes.find((n) => n.id === nodeId);
+                        if (node && canAllocate(node)) {
+                          allocate(nodeId, 1);
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+              {availableNodes.length === 0 && (
+                <p className="py-10 text-center text-sm text-zinc-500">
+                  Henüz skill tree node&apos;u tanımlanmamış.
+                </p>
+              )}
             </div>
           )}
         </div>

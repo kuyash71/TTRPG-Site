@@ -62,6 +62,9 @@ export async function POST(
       stackable: body.stackable ?? false,
       maxStack: body.maxStack ?? 1,
       rarity: body.rarity || "COMMON",
+      usable: body.usable ?? false,
+      useStatReq: body.useStatReq ?? null,
+      useTextReq: body.useTextReq ?? null,
       iconUrl: body.iconUrl || null,
     },
   });
