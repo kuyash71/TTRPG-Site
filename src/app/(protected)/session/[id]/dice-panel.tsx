@@ -18,6 +18,7 @@ interface DiceResult {
 
 interface Props {
   socket: Socket | null;
+  connected?: boolean;
   currentUser: { id: string; username: string; isGm: boolean };
 }
 
@@ -31,7 +32,7 @@ const QUICK_ROLLS = [
   { notation: "1d100", icon: "d100" },
 ];
 
-export function DicePanel({ socket, currentUser }: Props) {
+export function DicePanel({ socket, connected: connectedProp, currentUser }: Props) {
   const { t } = useLocale();
   const [rolls, setRolls] = useState<DiceResult[]>([]);
   const [notation, setNotation] = useState("");
@@ -78,7 +79,7 @@ export function DicePanel({ socket, currentUser }: Props) {
     setTitle("");
   }
 
-  const isConnected = !!socket;
+  const isConnected = connectedProp ?? !!socket?.connected;
 
   return (
     <div className="flex h-full flex-col">

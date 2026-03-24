@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "tsx watch index.ts",
-    "start": "tsx index.ts"
+    "dev": "tsx watch --env-file=../.env index.ts",
+    "start": "tsx --env-file=../.env index.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.5.0",

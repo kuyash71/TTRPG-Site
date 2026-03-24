@@ -22,9 +22,11 @@ interface Props {
   unlockedMap?: Map<string, number>;
   /** Node tıklandığında (örn. skill açma butonu) */
   onNodeClick?: (nodeId: string) => void;
+  /** true ise ReactFlow scroll yakalamaz, parent scroll çalışır */
+  preventScrolling?: boolean;
 }
 
-export function SkillTreeViewer({ nodes: dbNodes, unlockedMap, onNodeClick }: Props) {
+export function SkillTreeViewer({ nodes: dbNodes, unlockedMap, onNodeClick, preventScrolling = true }: Props) {
   const { nodes, edges } = toReactFlowData(dbNodes, unlockedMap);
 
   return (
@@ -38,6 +40,9 @@ export function SkillTreeViewer({ nodes: dbNodes, unlockedMap, onNodeClick }: Pr
         nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable={false}
+        preventScrolling={preventScrolling}
+        zoomOnScroll={!preventScrolling ? false : undefined}
+        panOnScroll={false}
         className="bg-void"
         proOptions={{ hideAttribution: true }}
       >

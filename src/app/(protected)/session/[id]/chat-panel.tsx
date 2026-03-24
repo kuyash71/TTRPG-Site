@@ -17,10 +17,11 @@ interface ChatMsg {
 interface Props {
   sessionId: string;
   socket: Socket | null;
+  connected?: boolean;
   currentUser: { id: string; username: string; isGm: boolean };
 }
 
-export function ChatPanel({ sessionId, socket, currentUser }: Props) {
+export function ChatPanel({ sessionId, socket, connected: connectedProp, currentUser }: Props) {
   const { t, locale } = useLocale();
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [channel, setChannel] = useState<"IC" | "OOC">("OOC");
@@ -48,9 +49,11 @@ export function ChatPanel({ sessionId, socket, currentUser }: Props) {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const isConnected = connectedProp ?? !!socket?.connected;
+
   function handleSend(e: FormEvent) {
     e.preventDefault();
-    if (!socket || !input.trim()) return;
+    if (!socket || !isConnected || !input.trim()) return;
     socket.emit("chat:send", { content: input.trim(), channel });
     setInput("");
   }
@@ -112,7 +115,8 @@ export function ChatPanel({ sessionId, socket, currentUser }: Props) {
           />
           <button
             type="submit"
-            className="rounded-md bg-lavender-400 px-4 py-2 text-sm font-medium text-void transition-colors hover:bg-lavender-500"
+            disabled={!isConnected}
+            className="rounded-md bg-lavender-400 px-4 py-2 text-sm font-medium text-void transition-colors hover:bg-lavender-500 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {t("common.send")}
           </button>

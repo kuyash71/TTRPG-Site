@@ -704,10 +704,11 @@ export function CharacterDetailPanel({
               {commonSkillNodes.length > 0 && (
                 <div>
                   <h5 className="mb-1 text-[9px] font-semibold text-zinc-400">Ortak Ağaç</h5>
-                  <div className="h-[250px] overflow-hidden rounded-lg border border-border">
+                  <div className="h-[250px] rounded-lg border border-border">
                     <SkillTreeViewer
                       nodes={commonSkillNodes as Parameters<typeof SkillTreeViewer>[0]["nodes"]}
                       unlockedMap={unlockedMap}
+                      preventScrolling={false}
                     />
                   </div>
                 </div>
@@ -715,10 +716,11 @@ export function CharacterDetailPanel({
               {classSkillNodes.length > 0 && (
                 <div>
                   <h5 className="mb-1 text-[9px] font-semibold text-gold-400">Sınıf Ağacı</h5>
-                  <div className="h-[250px] overflow-hidden rounded-lg border border-border">
+                  <div className="h-[250px] rounded-lg border border-border">
                     <SkillTreeViewer
                       nodes={classSkillNodes as Parameters<typeof SkillTreeViewer>[0]["nodes"]}
                       unlockedMap={unlockedMap}
+                      preventScrolling={false}
                     />
                   </div>
                 </div>

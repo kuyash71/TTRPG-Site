@@ -333,6 +333,7 @@ export function SessionRoom({
               <ChatPanel
                 sessionId={sessionId}
                 socket={socket}
+                connected={connected}
                 currentUser={currentUser}
               />
             )}
@@ -344,6 +345,7 @@ export function SessionRoom({
               <ChatPanel
                 sessionId={sessionId}
                 socket={socket}
+                connected={connected}
                 currentUser={currentUser}
               />
             )}
@@ -360,7 +362,7 @@ export function SessionRoom({
               />
             )}
             {mobileTab === "dice" && (
-              <DicePanel socket={socket} currentUser={currentUser} />
+              <DicePanel socket={socket} connected={connected} currentUser={currentUser} />
             )}
             {mobileTab === "character" && selectedCharacter && (
               <CharacterDetailPanel
@@ -411,7 +413,7 @@ export function SessionRoom({
           </aside>
         ) : (
           <aside className="hidden w-72 flex-shrink-0 border-l border-border bg-surface lg:block">
-            <DicePanel socket={socket} currentUser={currentUser} />
+            <DicePanel socket={socket} connected={connected} currentUser={currentUser} />
           </aside>
         )}
       </div>
