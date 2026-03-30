@@ -21,6 +21,7 @@ export default async function SessionPage({
       gm: { select: { id: true, username: true } },
       gameset: {
         select: {
+          id: true,
           name: true,
           config: true,
           skillTreeNodes: {
@@ -89,6 +90,12 @@ export default async function SessionPage({
         id: p.user.id,
         username: p.user.username,
       }))}
+      gamesetId={gameSession.gameset.id}
+      inventoryGridWidth={config.inventoryGridWidth}
+      inventoryGridHeight={config.inventoryGridHeight}
+      equipmentSlotsEnabled={config.equipmentSlotsEnabled}
+      inventoryCapacityStat={config.inventoryCapacityStat}
+      inventoryCapacityRowsPerPoint={config.inventoryCapacityRowsPerPoint}
       characters={gameSession.characters.map((c) => ({
         id: c.id,
         userId: c.user.id,

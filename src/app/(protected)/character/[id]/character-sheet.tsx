@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { InventoryPanel } from "./inventory-panel";
+import { InventoryPanel } from "@/components/inventory-panel";
 import { SpellPanel } from "./spell-panel";
 
 interface Stat {

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/icon";
 import { SkillTreeViewer } from "@/components/skill-tree/skill-tree-viewer";
+import { InventoryPanel } from "@/components/inventory-panel";
 import type { Socket } from "socket.io-client";
 import type { RealisticHpState, HpSystemType } from "@/types/gameset-config";
 
@@ -80,6 +81,18 @@ interface CharacterInfo {
   spells?: SpellInfo[];
 }
 
+interface GamesetItemInfo {
+  id: string;
+  name: string;
+  description: string | null;
+  category: string;
+  gridWidth: number;
+  gridHeight: number;
+  equipmentSlot: string | null;
+  statBonuses: Record<string, number>;
+  rarity: string;
+}
+
 interface Props {
   character: CharacterInfo;
   isGm: boolean;
@@ -89,6 +102,10 @@ interface Props {
   realisticHpStates: RealisticHpState[];
   skillTreeNodes: SkillTreeNodeInfo[];
   socket: Socket | null;
+  gamesetId: string;
+  inventoryGridWidth: number;
+  inventoryGridHeight: number;
+  equipmentSlotsEnabled: boolean;
   onClose: () => void;
 }
 
@@ -153,6 +170,10 @@ export function CharacterDetailPanel({
   realisticHpStates,
   skillTreeNodes,
   socket,
+  gamesetId,
+  inventoryGridWidth,
+  inventoryGridHeight,
+  equipmentSlotsEnabled,
   onClose,
 }: Props) {
   const router = useRouter();
@@ -179,6 +200,67 @@ export function CharacterDetailPanel({
   // Tabs: stats | skills | inventory | spells
   const [tab, setTab] = useState<"stats" | "skills" | "inventory" | "spells">("stats");
   const [skillViewMode, setSkillViewMode] = useState<"list" | "map">("list");
+
+  // GM item giving
+  const [gamesetItems, setGamesetItems] = useState<GamesetItemInfo[]>([]);
+  const [showGiveItem, setShowGiveItem] = useState(false);
+  const [itemSearch, setItemSearch] = useState("");
+  const [givingItemId, setGivingItemId] = useState<string | null>(null);
+  const [givingBusy, setGivingBusy] = useState(false);
+
+  useEffect(() => {
+    if (!isGm || !showGiveItem || gamesetItems.length > 0) return;
+    fetch(`/api/gamesets/${gamesetId}/items`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data.items)) setGamesetItems(data.items);
+      });
+  }, [isGm, showGiveItem, gamesetId, gamesetItems.length]);
+
+  async function handleGiveItem() {
+    if (!givingItemId || givingBusy) return;
+    setGivingBusy(true);
+    const res = await fetch(`/api/characters/${character.id}/inventory`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ itemDefinitionId: givingItemId, quantity: 1 }),
+    });
+    if (res.ok) {
+      showToast("Eşya verildi");
+      setShowGiveItem(false);
+      setGivingItemId(null);
+      setItemSearch("");
+      router.refresh();
+    } else {
+      showToast("Hata oluştu");
+    }
+    setGivingBusy(false);
+  }
+
+  // Reshape flat InventoryItemInfo → InventoryPanel format
+  const inventoryPanelItems = useMemo(() => {
+    return (character.inventoryItems ?? []).map((item) => ({
+      id: item.id,
+      itemDefinitionId: "",
+      posX: item.posX,
+      posY: item.posY,
+      quantity: item.quantity,
+      isEquipped: item.isEquipped,
+      equippedSlot: item.equippedSlot,
+      itemDefinition: {
+        id: "",
+        name: item.name,
+        description: item.description,
+        category: item.category,
+        gridWidth: item.gridWidth,
+        gridHeight: item.gridHeight,
+        equipmentSlot: item.equipmentSlot,
+        statBonuses: item.statBonuses,
+        rarity: item.rarity,
+        iconUrl: null,
+      },
+    }));
+  }, [character.inventoryItems]);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -737,52 +819,95 @@ export function CharacterDetailPanel({
 
       {/* ─── INVENTORY TAB ─── */}
       {tab === "inventory" && (
-        <div className="space-y-2">
-          <h4 className="text-[10px] font-semibold text-zinc-500">
-            Envanter ({inventoryItems.length} eşya)
-          </h4>
-          {inventoryItems.length === 0 ? (
-            <p className="py-4 text-center text-[10px] text-zinc-600">Envanter boş.</p>
+        <div className="space-y-3">
+          {/* GM eşya verme */}
+          {isGm && (
+            <div>
+              {!showGiveItem ? (
+                <button
+                  onClick={() => setShowGiveItem(true)}
+                  className="flex w-full items-center justify-center gap-1 rounded border border-dashed border-gold-400/40 py-1.5 text-[10px] text-gold-400 hover:border-gold-400/70 hover:bg-gold-900/10"
+                >
+                  <Icon name="Editpen" size={11} /> Eşya Ver
+                </button>
+              ) : (
+                <div className="rounded border border-gold-900/40 bg-gold-900/10 p-2">
+                  <div className="mb-1.5 flex items-center justify-between">
+                    <span className="text-[10px] font-medium text-gold-400">Eşya Ver</span>
+                    <button onClick={() => { setShowGiveItem(false); setGivingItemId(null); setItemSearch(""); }} className="text-zinc-500 hover:text-zinc-300 text-xs">&times;</button>
+                  </div>
+                  <input
+                    value={itemSearch}
+                    onChange={(e) => setItemSearch(e.target.value)}
+                    placeholder="Eşya ara..."
+                    className="mb-1.5 w-full rounded border border-border bg-void px-2 py-1 text-[10px] text-zinc-200 placeholder-zinc-600 focus:border-gold-400 focus:outline-none"
+                  />
+                  <div className="max-h-32 overflow-y-auto space-y-0.5">
+                    {gamesetItems.length === 0 && (
+                      <p className="text-center text-[9px] text-zinc-600 py-2">Yükleniyor...</p>
+                    )}
+                    {gamesetItems
+                      .filter((i) => i.name.toLowerCase().includes(itemSearch.toLowerCase()))
+                      .map((i) => (
+                        <button
+                          key={i.id}
+                          onClick={() => setGivingItemId(i.id)}
+                          className={`w-full rounded px-2 py-1 text-left text-[10px] transition-colors ${
+                            givingItemId === i.id
+                              ? "bg-gold-400/20 text-gold-300"
+                              : "text-zinc-300 hover:bg-surface-raised"
+                          }`}
+                        >
+                          {i.name}
+                          <span className="ml-1 text-[9px] text-zinc-500">{i.category}</span>
+                        </button>
+                      ))}
+                  </div>
+                  <button
+                    onClick={handleGiveItem}
+                    disabled={!givingItemId || givingBusy}
+                    className="mt-1.5 w-full rounded bg-gold-400 py-1 text-[10px] font-medium text-void disabled:opacity-40"
+                  >
+                    {givingBusy ? "..." : "Ver"}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Tam grid envanter (owner veya GM) */}
+          {canSeeAll ? (
+            <div className="-mx-4 overflow-x-auto px-4">
+              <InventoryPanel
+                characterId={character.id}
+                items={inventoryPanelItems}
+                gridWidth={inventoryGridWidth}
+                gridHeight={inventoryGridHeight}
+                equipmentSlotsEnabled={equipmentSlotsEnabled}
+                isOwner={isOwn}
+                isGm={isGm}
+              />
+            </div>
           ) : (
             <div className="space-y-1.5">
-              {inventoryItems.map((item) => (
-                <div
-                  key={item.id}
-                  className={`rounded border ${RARITY_BORDER[item.rarity] ?? "border-border"} bg-void p-2`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className={`text-[10px] font-medium ${RARITY_COLOR[item.rarity] ?? "text-zinc-300"}`}>
-                      {item.name}
-                      {item.quantity > 1 && (
-                        <span className="ml-1 text-zinc-500">x{item.quantity}</span>
-                      )}
-                    </span>
-                    <div className="flex items-center gap-1">
-                      {item.isEquipped && (
-                        <span className="rounded bg-lavender-900/50 px-1 py-0.5 text-[8px] text-lavender-400">
-                          {item.equippedSlot ?? "Kuşanılmış"}
-                        </span>
-                      )}
+              {inventoryItems.length === 0 ? (
+                <p className="py-4 text-center text-[10px] text-zinc-600">Envanter boş.</p>
+              ) : (
+                inventoryItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className={`rounded border ${RARITY_BORDER[item.rarity] ?? "border-border"} bg-void p-2`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className={`text-[10px] font-medium ${RARITY_COLOR[item.rarity] ?? "text-zinc-300"}`}>
+                        {item.name}
+                        {item.quantity > 1 && <span className="ml-1 text-zinc-500">x{item.quantity}</span>}
+                      </span>
                       <span className="text-[8px] text-zinc-600">{item.category}</span>
                     </div>
                   </div>
-                  {item.description && (
-                    <p className="mt-0.5 text-[9px] text-zinc-500">{item.description}</p>
-                  )}
-                  {Object.keys(item.statBonuses).length > 0 && (
-                    <div className="mt-1 flex flex-wrap gap-1">
-                      {Object.entries(item.statBonuses).map(([key, val]) => (
-                        <span
-                          key={key}
-                          className={`rounded px-1 py-0.5 text-[8px] ${val > 0 ? "bg-green-900/30 text-green-400" : "bg-red-900/30 text-red-400"}`}
-                        >
-                          {key}: {val > 0 ? "+" : ""}{val}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+                ))
+              )}
             </div>
           )}
         </div>

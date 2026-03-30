@@ -39,6 +39,11 @@ export function GeneralTab({
     hpSystem: parsed.hpSystem as HpSystemType,
     realisticHpStates: parsed.realisticHpStates as RealisticHpState[],
     hitDieLevelsPerRoll: parsed.hitDieLevelsPerRoll,
+    inventoryGridWidth: parsed.inventoryGridWidth,
+    inventoryGridHeight: parsed.inventoryGridHeight,
+    equipmentSlotsEnabled: parsed.equipmentSlotsEnabled,
+    inventoryCapacityStat: parsed.inventoryCapacityStat ?? "",
+    inventoryCapacityRowsPerPoint: parsed.inventoryCapacityRowsPerPoint,
   });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -56,6 +61,11 @@ export function GeneralTab({
       hpSystem: form.hpSystem,
       realisticHpStates: form.realisticHpStates,
       hitDieLevelsPerRoll: form.hitDieLevelsPerRoll,
+      inventoryGridWidth: form.inventoryGridWidth,
+      inventoryGridHeight: form.inventoryGridHeight,
+      equipmentSlotsEnabled: form.equipmentSlotsEnabled,
+      inventoryCapacityStat: form.inventoryCapacityStat.trim() || null,
+      inventoryCapacityRowsPerPoint: form.inventoryCapacityRowsPerPoint,
     };
 
     const res = await fetch(`/api/gamesets/${gamesetId}`, {
@@ -324,6 +334,67 @@ export function GeneralTab({
             )}
           </div>
         )}
+      </div>
+
+      <hr className="border-border" />
+
+      <h3 className="heading-gothic text-sm font-semibold text-zinc-300">
+        Envanter Sistemi
+      </h3>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="mb-1 block text-sm text-zinc-400">Grid Genişliği (sütun)</label>
+          <input
+            type="number" min={1} max={20}
+            value={form.inventoryGridWidth}
+            onChange={(e) => setForm((f) => ({ ...f, inventoryGridWidth: +e.target.value }))}
+            className="w-full rounded-md border border-border bg-void px-3 py-2 text-sm text-zinc-100 focus:border-lavender-400 focus:outline-none"
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-sm text-zinc-400">Grid Yüksekliği (satır)</label>
+          <input
+            type="number" min={1} max={20}
+            value={form.inventoryGridHeight}
+            onChange={(e) => setForm((f) => ({ ...f, inventoryGridHeight: +e.target.value }))}
+            className="w-full rounded-md border border-border bg-void px-3 py-2 text-sm text-zinc-100 focus:border-lavender-400 focus:outline-none"
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-sm text-zinc-400">Kapasite Statı (opsiyonel)</label>
+          <input
+            type="text"
+            value={form.inventoryCapacityStat}
+            onChange={(e) => setForm((f) => ({ ...f, inventoryCapacityStat: e.target.value }))}
+            placeholder="Ör: Güç, Dayanıklılık"
+            className="w-full rounded-md border border-border bg-void px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:border-lavender-400 focus:outline-none"
+          />
+          <p className="mt-1 text-[11px] text-zinc-500">Bu stat değerine göre ek satır eklenir.</p>
+        </div>
+        <div>
+          <label className="mb-1 block text-sm text-zinc-400">Stat Başına Ek Satır</label>
+          <input
+            type="number" min={0} max={5} step={0.1}
+            value={form.inventoryCapacityRowsPerPoint}
+            onChange={(e) => setForm((f) => ({ ...f, inventoryCapacityRowsPerPoint: +e.target.value }))}
+            className="w-full rounded-md border border-border bg-void px-3 py-2 text-sm text-zinc-100 focus:border-lavender-400 focus:outline-none"
+          />
+          <p className="mt-1 text-[11px] text-zinc-500">0 = stat bağlı kapasite yok.</p>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <input
+          type="checkbox"
+          id="equipSlots"
+          checked={form.equipmentSlotsEnabled}
+          onChange={(e) => setForm((f) => ({ ...f, equipmentSlotsEnabled: e.target.checked }))}
+          className="rounded border-border"
+        />
+        <label htmlFor="equipSlots" className="text-sm text-zinc-400">
+          Ekipman slotları aktif
+        </label>
       </div>
 
       {/* Save */}

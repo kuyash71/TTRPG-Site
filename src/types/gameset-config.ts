@@ -16,6 +16,9 @@ export interface GamesetConfig {
   equipmentSlotsEnabled: boolean;
   // Sprint 7
   maxSpellSlots: number;
+  // Inventory capacity
+  inventoryCapacityStat: string | null;
+  inventoryCapacityRowsPerPoint: number;
   // HP System
   hpSystem: HpSystemType;
   realisticHpStates: RealisticHpState[];
@@ -38,6 +41,8 @@ export const DEFAULT_GAMESET_CONFIG: GamesetConfig = {
   inventoryGridHeight: 6,
   equipmentSlotsEnabled: true,
   maxSpellSlots: 4,
+  inventoryCapacityStat: null,
+  inventoryCapacityRowsPerPoint: 0,
   hpSystem: "hit-die",
   realisticHpStates: DEFAULT_REALISTIC_HP_STATES,
   hitDieLevelsPerRoll: 1,
@@ -81,6 +86,14 @@ export function parseGamesetConfig(raw: unknown): GamesetConfig {
       typeof obj.maxSpellSlots === "number"
         ? obj.maxSpellSlots
         : DEFAULT_GAMESET_CONFIG.maxSpellSlots,
+    inventoryCapacityStat:
+      typeof obj.inventoryCapacityStat === "string"
+        ? obj.inventoryCapacityStat
+        : DEFAULT_GAMESET_CONFIG.inventoryCapacityStat,
+    inventoryCapacityRowsPerPoint:
+      typeof obj.inventoryCapacityRowsPerPoint === "number"
+        ? obj.inventoryCapacityRowsPerPoint
+        : DEFAULT_GAMESET_CONFIG.inventoryCapacityRowsPerPoint,
     hpSystem:
       obj.hpSystem === "realistic" || obj.hpSystem === "hit-die"
         ? obj.hpSystem

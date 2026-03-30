@@ -84,6 +84,7 @@ interface Props {
   sessionId: string;
   sessionName: string;
   gamesetName: string;
+  gamesetId: string;
   status: string;
   inviteCode: string;
   gm: { id: string; username: string };
@@ -93,6 +94,11 @@ interface Props {
   hpSystem: HpSystemType;
   realisticHpStates: RealisticHpState[];
   manaLabel: string;
+  inventoryGridWidth: number;
+  inventoryGridHeight: number;
+  equipmentSlotsEnabled: boolean;
+  inventoryCapacityStat: string | null;
+  inventoryCapacityRowsPerPoint: number;
   currentUser: { id: string; username: string; isGm: boolean };
   hasCharacter: boolean;
   pendingApproval: boolean;
@@ -108,6 +114,7 @@ export function SessionRoom({
   sessionId,
   sessionName,
   gamesetName,
+  gamesetId,
   status,
   inviteCode,
   gm,
@@ -117,6 +124,11 @@ export function SessionRoom({
   hpSystem,
   realisticHpStates,
   manaLabel,
+  inventoryGridWidth,
+  inventoryGridHeight,
+  equipmentSlotsEnabled,
+  inventoryCapacityStat,
+  inventoryCapacityRowsPerPoint,
   currentUser,
   hasCharacter,
   pendingApproval,
@@ -165,6 +177,13 @@ export function SessionRoom({
   const selectedCharacter = selectedPlayerId
     ? characters.find((c) => c.userId === selectedPlayerId) ?? null
     : null;
+
+  function getCharInventoryHeight(char: CharacterInfo) {
+    if (!inventoryCapacityStat || inventoryCapacityRowsPerPoint === 0) return inventoryGridHeight;
+    const stat = char.stats.find((s) => s.name === inventoryCapacityStat);
+    const bonus = stat ? Math.floor(stat.currentValue * inventoryCapacityRowsPerPoint) : 0;
+    return inventoryGridHeight + bonus;
+  }
 
   const myCharacter = characters.find((c) => c.userId === currentUser.id) ?? null;
   const detailViewCharacter = detailViewUserId
@@ -325,6 +344,10 @@ export function SessionRoom({
                     realisticHpStates={realisticHpStates}
                     skillTreeNodes={skillTreeNodes}
                     socket={socket}
+                    gamesetId={gamesetId}
+                    inventoryGridWidth={inventoryGridWidth}
+                    inventoryGridHeight={getCharInventoryHeight(detailViewCharacter)}
+                    equipmentSlotsEnabled={equipmentSlotsEnabled}
                     onClose={() => setDetailViewUserId(null)}
                   />
                 </div>
@@ -374,6 +397,10 @@ export function SessionRoom({
                 realisticHpStates={realisticHpStates}
                 skillTreeNodes={skillTreeNodes}
                 socket={socket}
+                gamesetId={gamesetId}
+                inventoryGridWidth={inventoryGridWidth}
+                inventoryGridHeight={getCharInventoryHeight(selectedCharacter)}
+                equipmentSlotsEnabled={equipmentSlotsEnabled}
                 onClose={() => {
                   setSelectedPlayerId(null);
                   setMobileTab("players");
@@ -390,6 +417,10 @@ export function SessionRoom({
                 realisticHpStates={realisticHpStates}
                 skillTreeNodes={skillTreeNodes}
                 socket={socket}
+                gamesetId={gamesetId}
+                inventoryGridWidth={inventoryGridWidth}
+                inventoryGridHeight={getCharInventoryHeight(myCharacter)}
+                equipmentSlotsEnabled={equipmentSlotsEnabled}
                 onClose={() => setMobileTab("chat")}
               />
             )}
@@ -408,6 +439,10 @@ export function SessionRoom({
               realisticHpStates={realisticHpStates}
               skillTreeNodes={skillTreeNodes}
               socket={socket}
+              gamesetId={gamesetId}
+              inventoryGridWidth={inventoryGridWidth}
+              inventoryGridHeight={getCharInventoryHeight(selectedCharacter)}
+              equipmentSlotsEnabled={equipmentSlotsEnabled}
               onClose={() => setSelectedPlayerId(null)}
             />
           </aside>
