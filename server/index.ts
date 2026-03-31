@@ -390,6 +390,251 @@ io.on("connection", (socket) => {
     }
   );
 
+  // ─── Loot Pool ──────────────────────────────────────
+  socket.on(
+    "loot:add",
+    async ({ itemDefinitionId, quantity = 1 }: { itemDefinitionId: string; quantity?: number }) => {
+      const sessionId = socket.data.sessionId;
+      if (!sessionId) return;
+
+      try {
+        const lootItem = await prisma.sessionLootItem.create({
+          data: { sessionId, itemDefinitionId, quantity },
+          include: {
+            itemDefinition: {
+              select: { id: true, name: true, description: true, category: true, gridWidth: true, gridHeight: true, equipmentSlot: true, statBonuses: true, rarity: true, iconUrl: true },
+            },
+          },
+        });
+        io.to(`session:${sessionId}`).emit("loot:pool_updated", { action: "add", lootItem });
+      } catch (err) {
+        console.error("[loot:add]", err);
+      }
+    }
+  );
+
+  socket.on("loot:remove", async ({ lootId }: { lootId: string }) => {
+    const sessionId = socket.data.sessionId;
+    if (!sessionId) return;
+
+    try {
+      await prisma.sessionLootItem.delete({ where: { id: lootId } });
+      io.to(`session:${sessionId}`).emit("loot:pool_updated", { action: "remove", lootId });
+    } catch (err) {
+      console.error("[loot:remove]", err);
+    }
+  });
+
+  socket.on(
+    "loot:take",
+    async ({ lootId, characterId }: { lootId: string; characterId: string }) => {
+      const sessionId = socket.data.sessionId;
+      if (!sessionId) return;
+
+      try {
+        const lootItem = await prisma.sessionLootItem.findUnique({
+          where: { id: lootId },
+          include: { itemDefinition: true },
+        });
+        if (!lootItem) return;
+
+        // Grid boyutunu al
+        const gameSession = await prisma.session.findUnique({
+          where: { id: sessionId },
+          include: { gameset: { select: { config: true } } },
+        });
+        const config = (gameSession?.gameset?.config ?? {}) as Record<string, unknown>;
+        const gridW = typeof config.inventoryGridWidth === "number" ? config.inventoryGridWidth : 10;
+        const gridH = typeof config.inventoryGridHeight === "number" ? config.inventoryGridHeight : 6;
+
+        // Boş yer bul
+        const existing = await prisma.characterInventoryItem.findMany({
+          where: { characterId, isEquipped: false },
+        });
+
+        const iDef = lootItem.itemDefinition;
+        let posX = 0, posY = 0, placed = false;
+        outer: for (let y = 0; y <= gridH - iDef.gridHeight; y++) {
+          for (let x = 0; x <= gridW - iDef.gridWidth; x++) {
+            const collision = existing.some(
+              (e) =>
+                x < e.posX + iDef.gridWidth &&
+                x + iDef.gridWidth > e.posX &&
+                y < e.posY + iDef.gridHeight &&
+                y + iDef.gridHeight > e.posY
+            );
+            if (!collision) { posX = x; posY = y; placed = true; break outer; }
+          }
+        }
+
+        // Loot al, envantere ekle
+        const newItem = await prisma.characterInventoryItem.create({
+          data: {
+            characterId,
+            itemDefinitionId: lootItem.itemDefinitionId,
+            posX: placed ? posX : 0,
+            posY: placed ? posY : 0,
+            quantity: lootItem.quantity,
+          },
+        });
+
+        // Miktar 1'den fazlaysa sadece 1 düş; eğer bittiyse sil
+        if (lootItem.quantity <= 1) {
+          await prisma.sessionLootItem.delete({ where: { id: lootId } });
+          io.to(`session:${sessionId}`).emit("loot:pool_updated", { action: "remove", lootId });
+        } else {
+          const updated = await prisma.sessionLootItem.update({
+            where: { id: lootId },
+            data: { quantity: { decrement: 1 } },
+            include: { itemDefinition: { select: { id: true, name: true, description: true, category: true, gridWidth: true, gridHeight: true, equipmentSlot: true, statBonuses: true, rarity: true, iconUrl: true } } },
+          });
+          io.to(`session:${sessionId}`).emit("loot:pool_updated", { action: "update", lootItem: updated });
+        }
+
+        io.to(`session:${sessionId}`).emit("inv:item_added", { characterId, item: newItem });
+      } catch (err) {
+        console.error("[loot:take]", err);
+      }
+    }
+  );
+
+  // ─── Store ───────────────────────────────────────────
+  socket.on("store:activate", async ({ storeId }: { storeId: string }) => {
+    const sessionId = socket.data.sessionId;
+    if (!sessionId) return;
+
+    try {
+      // Diğer aktif mağazaları kapat
+      await prisma.store.updateMany({ where: { sessionId, isActive: true }, data: { isActive: false } });
+
+      const store = await prisma.store.update({
+        where: { id: storeId },
+        data: { isActive: true },
+        include: {
+          items: {
+            include: {
+              itemDefinition: { select: { id: true, name: true, description: true, category: true, gridWidth: true, gridHeight: true, equipmentSlot: true, statBonuses: true, rarity: true, iconUrl: true } },
+            },
+          },
+        },
+      });
+
+      io.to(`session:${sessionId}`).emit("store:activated", { store });
+    } catch (err) {
+      console.error("[store:activate]", err);
+    }
+  });
+
+  socket.on("store:deactivate", async ({ storeId }: { storeId: string }) => {
+    const sessionId = socket.data.sessionId;
+    if (!sessionId) return;
+
+    try {
+      await prisma.store.update({ where: { id: storeId }, data: { isActive: false } });
+      io.to(`session:${sessionId}`).emit("store:deactivated", { storeId });
+    } catch (err) {
+      console.error("[store:deactivate]", err);
+    }
+  });
+
+  socket.on(
+    "store:offer",
+    async ({ storeId, storeItemId, characterId, offeredPrice }: { storeId: string; storeItemId: string; characterId: string; offeredPrice: number }) => {
+      const sessionId = socket.data.sessionId;
+      if (!sessionId) return;
+
+      try {
+        const tx = await prisma.pendingTransaction.create({
+          data: { storeId, storeItemId, characterId, offeredPrice, status: "PENDING" },
+          include: {
+            storeItem: { include: { itemDefinition: { select: { id: true, name: true, category: true, rarity: true, gridWidth: true, gridHeight: true } } } },
+            character: { select: { id: true, name: true, user: { select: { username: true } } } },
+          },
+        });
+
+        // Sadece GM'e bildir
+        io.to(`session:${sessionId}`).emit("store:new_offer", { transaction: tx });
+      } catch (err) {
+        console.error("[store:offer]", err);
+      }
+    }
+  );
+
+  socket.on(
+    "store:approve_offer",
+    async ({ txId, sessionId: sid }: { txId: string; sessionId: string }) => {
+      if (!sid) return;
+
+      try {
+        const tx = await prisma.pendingTransaction.findUnique({
+          where: { id: txId },
+          include: {
+            storeItem: { include: { itemDefinition: true } },
+            character: { include: { wallet: true, inventoryItems: true } },
+          },
+        });
+        if (!tx || tx.status !== "PENDING") return;
+
+        const wallet = tx.character.wallet;
+        if (!wallet || wallet.gold < tx.offeredPrice) {
+          socket.emit("store:offer_result", { txId, status: "ERROR", message: "Yetersiz altın" });
+          return;
+        }
+
+        const iDef = tx.storeItem.itemDefinition;
+        const config = { gridW: 10, gridH: 6 };
+
+        const existing = tx.character.inventoryItems.filter((i) => !i.isEquipped);
+        let posX = 0, posY = 0, placed = false;
+        outer: for (let y = 0; y <= config.gridH - iDef.gridHeight; y++) {
+          for (let x = 0; x <= config.gridW - iDef.gridWidth; x++) {
+            const collision = existing.some(
+              (e) =>
+                x < e.posX + iDef.gridWidth &&
+                x + iDef.gridWidth > e.posX &&
+                y < e.posY + iDef.gridHeight &&
+                y + iDef.gridHeight > e.posY
+            );
+            if (!collision) { posX = x; posY = y; placed = true; break outer; }
+          }
+        }
+
+        const [, newItem] = await prisma.$transaction([
+          prisma.characterWallet.update({
+            where: { characterId: tx.characterId },
+            data: { gold: { decrement: tx.offeredPrice } },
+          }),
+          prisma.characterInventoryItem.create({
+            data: { characterId: tx.characterId, itemDefinitionId: iDef.id, posX: placed ? posX : 0, posY: placed ? posY : 0, quantity: 1 },
+          }),
+          prisma.pendingTransaction.update({ where: { id: txId }, data: { status: "APPROVED" } }),
+        ]);
+
+        io.to(`session:${sid}`).emit("store:offer_result", { txId, status: "APPROVED", characterId: tx.characterId, newItem });
+      } catch (err) {
+        console.error("[store:approve_offer]", err);
+      }
+    }
+  );
+
+  socket.on(
+    "store:reject_offer",
+    async ({ txId, sessionId: sid }: { txId: string; sessionId: string }) => {
+      if (!sid) return;
+
+      try {
+        const tx = await prisma.pendingTransaction.update({
+          where: { id: txId },
+          data: { status: "REJECTED" },
+          select: { characterId: true },
+        });
+        io.to(`session:${sid}`).emit("store:offer_result", { txId, status: "REJECTED", characterId: tx.characterId });
+      } catch (err) {
+        console.error("[store:reject_offer]", err);
+      }
+    }
+  );
+
   // ─── Disconnect ─────────────────────────────────────
   socket.on("disconnect", () => {
     const sessionId = socket.data.sessionId;

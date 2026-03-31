@@ -78,6 +78,32 @@ export default async function SessionPage({
       }))
     : false;
 
+  // Loot pool ve mağazalar
+  const [lootItemsRaw, storesRaw] = await Promise.all([
+    prisma.sessionLootItem.findMany({
+      where: { sessionId: gameSession.id },
+      include: {
+        itemDefinition: {
+          select: { id: true, name: true, description: true, category: true, gridWidth: true, gridHeight: true, equipmentSlot: true, statBonuses: true, rarity: true, iconUrl: true },
+        },
+      },
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.store.findMany({
+      where: { sessionId: gameSession.id },
+      include: {
+        items: {
+          include: {
+            itemDefinition: {
+              select: { id: true, name: true, description: true, category: true, gridWidth: true, gridHeight: true, equipmentSlot: true, statBonuses: true, rarity: true, iconUrl: true },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: "asc" },
+    }),
+  ]);
+
   return (
     <SessionRoom
       sessionId={gameSession.id}
@@ -182,6 +208,44 @@ export default async function SessionPage({
       manaLabel={config.manaLabel}
       hasCharacter={hasCharacter}
       pendingApproval={pendingApproval}
+      initialLootItems={lootItemsRaw.map((i) => ({
+        id: i.id,
+        quantity: i.quantity,
+        itemDefinition: {
+          id: i.itemDefinition.id,
+          name: i.itemDefinition.name,
+          description: i.itemDefinition.description,
+          category: i.itemDefinition.category,
+          gridWidth: i.itemDefinition.gridWidth,
+          gridHeight: i.itemDefinition.gridHeight,
+          equipmentSlot: i.itemDefinition.equipmentSlot,
+          statBonuses: (i.itemDefinition.statBonuses as Record<string, number>) ?? {},
+          rarity: i.itemDefinition.rarity,
+          iconUrl: i.itemDefinition.iconUrl,
+        },
+      }))}
+      initialStores={storesRaw.map((s) => ({
+        id: s.id,
+        name: s.name,
+        isActive: s.isActive,
+        items: s.items.map((i) => ({
+          id: i.id,
+          basePrice: i.basePrice,
+          stock: i.stock,
+          itemDefinition: {
+            id: i.itemDefinition.id,
+            name: i.itemDefinition.name,
+            description: i.itemDefinition.description,
+            category: i.itemDefinition.category,
+            gridWidth: i.itemDefinition.gridWidth,
+            gridHeight: i.itemDefinition.gridHeight,
+            equipmentSlot: i.itemDefinition.equipmentSlot,
+            statBonuses: (i.itemDefinition.statBonuses as Record<string, number>) ?? {},
+            rarity: i.itemDefinition.rarity,
+            iconUrl: i.itemDefinition.iconUrl,
+          },
+        })),
+      }))}
     />
   );
 }

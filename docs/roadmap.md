@@ -167,23 +167,23 @@
 
 ### Mağaza Sistemi
 
-- [ ] `stores`, `store_items`, `session_store_state`, `pending_transactions` tabloları
-- [ ] Mağaza UI — GM panel entegrasyonu GM, oda içindeki panelinden mağaza presetleri oluşturabilecek. Bu presetler odaya bağlı olacak ve 6 tane buyable ürün içerecek. GM aynı zamanda bu ürünlere fiyat atayacak. Alışveriş turu geldiğinde gm, arayüzü aracılığı ile alışveriş turunu başlatacak ve her oyuncuya bunun bildirimi düşecek.
-- [ ] Transaction onay akışı (buy + sell), GM temel fiyat belirleyecek ancak, kullanıcı satın alırken fiyat teklifinde bulunmak zorunda olacak. Gelen alışveriş bildirimine ise GM olumlu/olumsuz yanıt vererek alışveriş rp'si gerçekleştirilecek.
-- [ ] Ekonomi güvenlik kontrolleri (SELECT FOR UPDATE)
+- [x] `stores`, `store_items`, `pending_transactions` tabloları (DB schema + migration)
+- [x] Mağaza UI — GM, session odasında "Mağaza" butonundan mağaza presetleri oluşturur (maks. 6 ürün), fiyat atar, aktifleştirir. Oyunculara socket bildirimi gider.
+- [x] Transaction onay akışı: oyuncu fiyat teklifi verir → GM onaylar/reddeder (socket real-time) → onayda altın düşer, eşya envantere eklenir.
+- [ ] Ekonomi güvenlik kontrolleri (SELECT FOR UPDATE — v2)
 
 ### Envanter Sistemi
 
-- [ ] Kullanıcıların kendi envanterlerini grid sisteminde görüntülemesi ve griddeki konumlarını düzenleyebilmesi.
+- [x] Kullanıcıların kendi envanterlerini grid sisteminde görüntülemesi ve griddeki konumlarını düzenleyebilmesi. (Session odasında CharacterDetailPanel içinde InventoryPanel, karakter sayfasında da gösterildi)
 
-- [ ] Kullanıcılara eklenen eşyaların, grid envanter sistemine uygun eklenmesi
+- [x] Kullanıcılara eklenen eşyaların, grid envanter sistemine uygun eklenmesi (GM, oyuncu detayları kısmından eşya verebiliyor; eşya grid'e uygun formatta ekleniyor)
 
-- [ ] Kullanıcıların envanterlerinin kapasitesinin stata bağlanabilmesi. (Ruleset oluşturulurken
-      Gm isterse önceden belirlenmiş, isterse de oluşturulan statlara bağlı dinamik bir yapıda sunması. Eğer dinamik ise de kullanıcının stat dağıtmasının ardındna envanter boyutunun refresh olması.)
+- [x] Kullanıcıların envanterlerinin kapasitesinin stata bağlanabilmesi. (Ruleset oluşturulurken
+      Gm isterse önceden belirlenmiş, isterse de oluşturulan statlara bağlı dinamik bir yapıda sunması. Eğer dinamik ise de kullanıcının stat dağıtmasının ardındna envanter boyutunun refresh olması.) (`inventoryCapacityStat` + `inventoryCapacityRowsPerPoint` gameset config'e eklendi)
 
 - [x] Envanter sisteminde tamamen EFT, Unturned gibi sistemlerden ilham alınacak olup yönetimi de aynı şekilde olacaktır.
 
-- [ ] Oyun içi loot bulunması takdirinde (Alışverişlerde de satın alım sonrası ürünün envantere yerleşimi de bu sistem ile uygulanacaktır) envanterin sağında (lootables) alanından eşyalar sürükle bırak ile alınacak. Oyun içinde RP-Ye dayalı olarak GM, isterse eşyaları oyuncularına, oyuncu detayları kısmından eşya verebilecek.
+- [x] Oyun içi loot bulunması takdirinde envanterin altında (lootables) alanından eşyalar "Al" butonu ile alınacak. GM loot havuzuna eşya ekler, oyuncular kendi karakter panellerinden alır. (Drag-drop yerine buton tabanlı; socket ile real-time)
 
 ### Export & Cron
 

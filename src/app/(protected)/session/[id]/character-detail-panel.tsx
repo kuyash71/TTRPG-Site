@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Icon } from "@/components/icon";
 import { SkillTreeViewer } from "@/components/skill-tree/skill-tree-viewer";
 import { InventoryPanel } from "@/components/inventory-panel";
+import { LootPanel, type LootItem } from "@/components/loot-panel";
 import type { Socket } from "socket.io-client";
 import type { RealisticHpState, HpSystemType } from "@/types/gameset-config";
 
@@ -106,6 +107,8 @@ interface Props {
   inventoryGridWidth: number;
   inventoryGridHeight: number;
   equipmentSlotsEnabled: boolean;
+  lootItems?: LootItem[];
+  onAddLoot?: () => void;
   onClose: () => void;
 }
 
@@ -174,6 +177,8 @@ export function CharacterDetailPanel({
   inventoryGridWidth,
   inventoryGridHeight,
   equipmentSlotsEnabled,
+  lootItems = [],
+  onAddLoot,
   onClose,
 }: Props) {
   const router = useRouter();
@@ -888,7 +893,24 @@ export function CharacterDetailPanel({
                 isGm={isGm}
               />
             </div>
-          ) : (
+          ) : null}
+
+          {/* Loot Havuzu — tüm karakterin sahibi ve GM görebilir */}
+          {canSeeAll && (
+            <div className="mt-4 border-t border-border pt-3">
+              <LootPanel
+                lootItems={lootItems}
+                characterId={isOwn ? character.id : null}
+                sessionId={gamesetId}
+                gamesetId={gamesetId}
+                isGm={isGm}
+                socket={socket}
+                onAddLoot={onAddLoot}
+              />
+            </div>
+          )}
+
+          {!canSeeAll && !isOwn && (
             <div className="space-y-1.5">
               {inventoryItems.length === 0 ? (
                 <p className="py-4 text-center text-[10px] text-zinc-600">Envanter boş.</p>

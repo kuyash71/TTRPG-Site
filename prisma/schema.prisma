@@ -146,6 +146,8 @@ model Session {
   diceRolls        DiceRoll[]
   characters       Character[]
   approvalRequests CharacterApprovalRequest[]
+  lootItems        SessionLootItem[]
+  stores           Store[]
 
   @@map("sessions")
 }
@@ -223,6 +225,7 @@ model Character {
   skillUnlocks CharacterSkillUnlock[]
   inventoryItems CharacterInventoryItem[]
   spells         CharacterSpell[]
+  pendingTransactions PendingTransaction[]
 
   @@unique([sessionId, userId])
   @@map("characters")
@@ -410,6 +413,8 @@ model ItemDefinition {
 
   gameset        Gameset                 @relation(fields: [gamesetId], references: [id], onDelete: Cascade)
   inventoryItems CharacterInventoryItem[]
+  lootItems      SessionLootItem[]
+  storeItems     StoreItem[]
 
   @@map("item_definitions")
 }
@@ -428,6 +433,65 @@ model CharacterInventoryItem {
   itemDefinition ItemDefinition @relation(fields: [itemDefinitionId], references: [id], onDelete: Cascade)
 
   @@map("character_inventory_items")
+}
+
+// ─── Sprint 8: Loot Pool + Store ────────────────────────
+
+model SessionLootItem {
+  id               String         @id @default(uuid()) @db.Uuid
+  sessionId        String         @map("session_id") @db.Uuid
+  itemDefinitionId String         @map("item_definition_id") @db.Uuid
+  quantity         Int            @default(1)
+  createdAt        DateTime       @default(now()) @map("created_at") @db.Timestamptz()
+
+  session        Session        @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  itemDefinition ItemDefinition @relation(fields: [itemDefinitionId], references: [id], onDelete: Cascade)
+
+  @@map("session_loot_items")
+}
+
+model Store {
+  id        String   @id @default(uuid()) @db.Uuid
+  sessionId String   @map("session_id") @db.Uuid
+  name      String
+  isActive  Boolean  @default(false) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  session      Session              @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  items        StoreItem[]
+  transactions PendingTransaction[]
+
+  @@map("stores")
+}
+
+model StoreItem {
+  id               String   @id @default(uuid()) @db.Uuid
+  storeId          String   @map("store_id") @db.Uuid
+  itemDefinitionId String   @map("item_definition_id") @db.Uuid
+  basePrice        Int      @default(0) @map("base_price")
+  stock            Int?
+
+  store          Store                @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  itemDefinition ItemDefinition       @relation(fields: [itemDefinitionId], references: [id], onDelete: Cascade)
+  transactions   PendingTransaction[]
+
+  @@map("store_items")
+}
+
+model PendingTransaction {
+  id           String   @id @default(uuid()) @db.Uuid
+  storeId      String   @map("store_id") @db.Uuid
+  storeItemId  String   @map("store_item_id") @db.Uuid
+  characterId  String   @map("character_id") @db.Uuid
+  offeredPrice Int      @map("offered_price")
+  status       String   @default("PENDING")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  store     Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  storeItem StoreItem @relation(fields: [storeItemId], references: [id], onDelete: Cascade)
+  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  @@map("pending_transactions")
 }
 
 // ─── Sprint 7: Spell System ─────────────────────────────

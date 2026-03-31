@@ -8,6 +8,9 @@ import { DicePanel } from "./dice-panel";
 import { PlayerList } from "./player-list";
 import { ApprovalPanel } from "./approval-panel";
 import { CharacterDetailPanel } from "./character-detail-panel";
+import { StoreManager, type StoreData } from "@/components/store-manager";
+import { StorePanel } from "@/components/store-panel";
+import { type LootItem } from "@/components/loot-panel";
 import Link from "next/link";
 import { useLocale, TranslationKey } from "@/lib/locale";
 import { Icon } from "@/components/icon";
@@ -102,6 +105,8 @@ interface Props {
   currentUser: { id: string; username: string; isGm: boolean };
   hasCharacter: boolean;
   pendingApproval: boolean;
+  initialLootItems: LootItem[];
+  initialStores: StoreData[];
 }
 
 const STATUS_KEYS: Record<string, { label: TranslationKey; color: string }> = {
@@ -132,6 +137,8 @@ export function SessionRoom({
   currentUser,
   hasCharacter,
   pendingApproval,
+  initialLootItems,
+  initialStores,
 }: Props) {
   const { t } = useLocale();
   const router = useRouter();
@@ -143,6 +150,18 @@ export function SessionRoom({
   const [hasChar, setHasChar] = useState(hasCharacter);
   const [rejectionReason, setRejectionReason] = useState<string | null>(null);
   const [codeCopied, setCodeCopied] = useState(false);
+
+  // Loot & Store state
+  const [lootItems, setLootItems] = useState<LootItem[]>(initialLootItems);
+  const [stores, setStores] = useState<StoreData[]>(initialStores);
+  const [activeStore, setActiveStore] = useState<StoreData | null>(initialStores.find((s) => s.isActive) ?? null);
+  const [showStoreManager, setShowStoreManager] = useState(false);
+  const [showStorePanel, setShowStorePanel] = useState(false);
+  const [myOfferResults, setMyOfferResults] = useState<Record<string, "APPROVED" | "REJECTED">>({});
+  const [showLootAdd, setShowLootAdd] = useState(false);
+  const [lootAddSearch, setLootAddSearch] = useState("");
+  const [lootGamesetItems, setLootGamesetItems] = useState<{ id: string; name: string; category: string; rarity: string }[]>([]);
+  const [lootAddBusy, setLootAddBusy] = useState(false);
 
   // Socket: onay/red bildirimleri
   useEffect(() => {
@@ -168,11 +187,71 @@ export function SessionRoom({
     socket.on("session:character_approved", handleApproved);
     socket.on("char:approval_rejected", handleRejected);
 
+    // Loot events
+    function handleLootUpdated({ action, lootItem, lootId }: {
+      action: "add" | "remove" | "update";
+      lootItem?: LootItem;
+      lootId?: string;
+    }) {
+      if (action === "add" && lootItem) {
+        setLootItems((prev) => [...prev, lootItem]);
+      } else if (action === "remove" && lootId) {
+        setLootItems((prev) => prev.filter((i) => i.id !== lootId));
+      } else if (action === "update" && lootItem) {
+        setLootItems((prev) => prev.map((i) => i.id === lootItem.id ? lootItem : i));
+      }
+    }
+    socket.on("loot:pool_updated", handleLootUpdated);
+
+    // Store events
+    function handleStoreActivated({ store }: { store: StoreData }) {
+      setActiveStore(store);
+      setStores((prev) => prev.map((s) => s.id === store.id ? store : s.isActive ? { ...s, isActive: false } : s));
+      if (!currentUser.isGm) setShowStorePanel(true);
+    }
+    function handleStoreDeactivated({ storeId }: { storeId: string }) {
+      setActiveStore(null);
+      setStores((prev) => prev.map((s) => s.id === storeId ? { ...s, isActive: false } : s));
+      setShowStorePanel(false);
+    }
+    function handleOfferResult({ txId, status, characterId: cid }: { txId: string; status: "APPROVED" | "REJECTED"; characterId: string }) {
+      if (cid === myCharacter?.id) {
+        setMyOfferResults((prev) => ({ ...prev, [txId]: status }));
+        if (status === "APPROVED") router.refresh();
+      }
+    }
+    socket.on("store:activated", handleStoreActivated);
+    socket.on("store:deactivated", handleStoreDeactivated);
+    socket.on("store:offer_result", handleOfferResult);
+
     return () => {
       socket.off("session:character_approved", handleApproved);
       socket.off("char:approval_rejected", handleRejected);
+      socket.off("loot:pool_updated", handleLootUpdated);
+      socket.off("store:activated", handleStoreActivated);
+      socket.off("store:deactivated", handleStoreDeactivated);
+      socket.off("store:offer_result", handleOfferResult);
     };
-  }, [socket, currentUser.id, router]);
+  }, [socket, currentUser.id, currentUser.isGm, router]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // GM: Loot'a eşya ekle
+  async function handleAddToLoot(itemDefinitionId: string) {
+    if (lootAddBusy || !socket) return;
+    setLootAddBusy(true);
+    socket.emit("loot:add", { itemDefinitionId, quantity: 1 });
+    setLootAddSearch("");
+    setShowLootAdd(false);
+    setLootAddBusy(false);
+  }
+
+  async function loadLootGamesetItems() {
+    if (lootGamesetItems.length > 0) return;
+    const res = await fetch(`/api/gamesets/${gamesetId}/items`);
+    if (res.ok) {
+      const d = await res.json();
+      if (Array.isArray(d.items)) setLootGamesetItems(d.items);
+    }
+  }
 
   const selectedCharacter = selectedPlayerId
     ? characters.find((c) => c.userId === selectedPlayerId) ?? null
@@ -294,10 +373,42 @@ export function SessionRoom({
         </div>
       )}
 
-      {/* GM: Onay paneli */}
+      {/* GM: Onay paneli + Araçlar */}
       {currentUser.isGm && (
         <div className="border-b border-border px-4 py-3">
-          <ApprovalPanel sessionId={sessionId} socket={socket} />
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1">
+              <ApprovalPanel sessionId={sessionId} socket={socket} />
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <button
+                onClick={() => { setShowStoreManager(true); }}
+                className="flex items-center gap-1 rounded border border-gold-400/40 px-2.5 py-1 text-[10px] text-gold-400 hover:border-gold-400/70 hover:bg-gold-900/10"
+              >
+                <Icon name="Inventory" size={11} /> Mağaza
+                {stores.some((s) => s.isActive) && (
+                  <span className="ml-0.5 h-1.5 w-1.5 rounded-full bg-gold-400" />
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Oyuncu: Aktif mağaza bildirimi */}
+      {!currentUser.isGm && activeStore && (
+        <div className="border-b border-gold-900/50 bg-gold-900/10 px-4 py-2">
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] text-gold-400">
+              🛒 &nbsp;<span className="font-semibold">{activeStore.name}</span> mağazası açıldı!
+            </p>
+            <button
+              onClick={() => setShowStorePanel(true)}
+              className="rounded bg-gold-400 px-2.5 py-1 text-[10px] font-medium text-void hover:bg-gold-500"
+            >
+              Alışveriş
+            </button>
+          </div>
         </div>
       )}
 
@@ -348,6 +459,8 @@ export function SessionRoom({
                     inventoryGridWidth={inventoryGridWidth}
                     inventoryGridHeight={getCharInventoryHeight(detailViewCharacter)}
                     equipmentSlotsEnabled={equipmentSlotsEnabled}
+                    lootItems={lootItems}
+                    onAddLoot={currentUser.isGm ? () => { setShowLootAdd(true); loadLootGamesetItems(); } : undefined}
                     onClose={() => setDetailViewUserId(null)}
                   />
                 </div>
@@ -401,6 +514,8 @@ export function SessionRoom({
                 inventoryGridWidth={inventoryGridWidth}
                 inventoryGridHeight={getCharInventoryHeight(selectedCharacter)}
                 equipmentSlotsEnabled={equipmentSlotsEnabled}
+                lootItems={lootItems}
+                onAddLoot={currentUser.isGm ? () => { setShowLootAdd(true); loadLootGamesetItems(); } : undefined}
                 onClose={() => {
                   setSelectedPlayerId(null);
                   setMobileTab("players");
@@ -421,6 +536,7 @@ export function SessionRoom({
                 inventoryGridWidth={inventoryGridWidth}
                 inventoryGridHeight={getCharInventoryHeight(myCharacter)}
                 equipmentSlotsEnabled={equipmentSlotsEnabled}
+                lootItems={lootItems}
                 onClose={() => setMobileTab("chat")}
               />
             )}
@@ -443,6 +559,8 @@ export function SessionRoom({
               inventoryGridWidth={inventoryGridWidth}
               inventoryGridHeight={getCharInventoryHeight(selectedCharacter)}
               equipmentSlotsEnabled={equipmentSlotsEnabled}
+              lootItems={lootItems}
+              onAddLoot={currentUser.isGm ? () => { setShowLootAdd(true); loadLootGamesetItems(); } : undefined}
               onClose={() => setSelectedPlayerId(null)}
             />
           </aside>
@@ -452,6 +570,75 @@ export function SessionRoom({
           </aside>
         )}
       </div>
+
+      {/* GM: Mağaza Yönetimi Modal */}
+      {showStoreManager && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="relative flex h-[90vh] w-full max-w-md flex-col rounded-lg border border-border bg-surface shadow-2xl">
+            <StoreManager
+              sessionId={sessionId}
+              gamesetId={gamesetId}
+              socket={socket}
+              stores={stores}
+              onStoresChange={setStores}
+              onClose={() => setShowStoreManager(false)}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Oyuncu: Mağaza Paneli Modal */}
+      {showStorePanel && activeStore && myCharacter && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="relative flex h-[85vh] w-full max-w-sm flex-col rounded-lg border border-border bg-surface shadow-2xl">
+            <StorePanel
+              store={activeStore}
+              characterId={myCharacter.id}
+              sessionId={sessionId}
+              socket={socket}
+              onClose={() => setShowStorePanel(false)}
+              myOfferResults={myOfferResults}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* GM: Loot Havuzuna Eşya Ekle Modal */}
+      {showLootAdd && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="relative w-full max-w-sm rounded-lg border border-border bg-surface p-4 shadow-2xl">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-zinc-100">Loot Havuzuna Ekle</h3>
+              <button onClick={() => setShowLootAdd(false)} className="text-zinc-500 hover:text-zinc-300">✕</button>
+            </div>
+            <input
+              value={lootAddSearch}
+              onChange={(e) => setLootAddSearch(e.target.value)}
+              placeholder="Eşya ara..."
+              onFocus={loadLootGamesetItems}
+              className="mb-2 w-full rounded border border-border bg-void px-2 py-1.5 text-[10px] text-zinc-200 placeholder-zinc-600 focus:border-gold-400 focus:outline-none"
+            />
+            <div className="max-h-64 overflow-y-auto space-y-0.5">
+              {lootGamesetItems.length === 0 && (
+                <p className="py-3 text-center text-[9px] text-zinc-600">Yükleniyor...</p>
+              )}
+              {lootGamesetItems
+                .filter((i) => i.name.toLowerCase().includes(lootAddSearch.toLowerCase()))
+                .map((item) => (
+                  <button
+                    key={item.id}
+                    disabled={lootAddBusy}
+                    onClick={() => handleAddToLoot(item.id)}
+                    className="w-full rounded px-2 py-1.5 text-left text-[10px] text-zinc-300 hover:bg-surface-raised"
+                  >
+                    {item.name}
+                    <span className="ml-1 text-[9px] text-zinc-500">{item.category}</span>
+                  </button>
+                ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Mobile tab bar */}
       <nav className="flex border-t border-border bg-surface md:hidden">

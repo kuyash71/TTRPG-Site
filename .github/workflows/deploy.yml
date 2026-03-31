@@ -19,6 +19,8 @@ jobs:
             cd /opt/TTRPG-Site
             git pull origin main
             npm install
+            export DATABASE_URL=$(node -e "const c=require('./server/ecosystem.config.cjs'); console.log(c.apps[0].env.DATABASE_URL)")
+            DATABASE_URL=$DATABASE_URL npx prisma migrate deploy
             npm run build
             cd server && npm install && cd ..
             pm2 restart all
