@@ -93,7 +93,7 @@ export async function POST(
 
     // 3. Wallet oluştur
     await tx.characterWallet.create({
-      data: { characterId: char.id, gold: 0, silver: 0, copper: 0 },
+      data: { characterId: char.id, balances: {} },
     });
 
     // 4. İsteği onayla

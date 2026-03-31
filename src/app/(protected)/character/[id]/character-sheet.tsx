@@ -72,7 +72,7 @@ interface Props {
     skillPoints: number;
   };
   stats: Stat[];
-  wallet: { gold: number; silver: number; copper: number } | null;
+  wallet: { balances: Record<string, number> } | null;
   inventory: InventoryItem[];
   inventoryGridWidth: number;
   inventoryGridHeight: number;
@@ -247,28 +247,16 @@ export function CharacterSheet({
             <h2 className="heading-gothic mb-4 text-sm font-semibold text-zinc-400">
               Cüzdan
             </h2>
-            <div className="flex gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-gold-400">&#9679;</span>
-                <span className="font-mono text-sm text-zinc-200">
-                  {wallet.gold}
-                </span>
-                <span className="text-xs text-zinc-500">altın</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-zinc-400">&#9679;</span>
-                <span className="font-mono text-sm text-zinc-200">
-                  {wallet.silver}
-                </span>
-                <span className="text-xs text-zinc-500">gümüş</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-amber-700">&#9679;</span>
-                <span className="font-mono text-sm text-zinc-200">
-                  {wallet.copper}
-                </span>
-                <span className="text-xs text-zinc-500">bakır</span>
-              </div>
+            <div className="flex flex-wrap gap-4">
+              {Object.entries(wallet.balances).map(([code, amount]) => (
+                <div key={code} className="flex items-center gap-2">
+                  <span className="font-mono text-sm text-zinc-200">{amount}</span>
+                  <span className="text-xs text-zinc-500">{code}</span>
+                </div>
+              ))}
+              {Object.keys(wallet.balances).length === 0 && (
+                <span className="text-xs text-zinc-600">Cüzdan boş</span>
+              )}
             </div>
           </div>
         )}

@@ -107,15 +107,13 @@ export async function PATCH(
     });
   }
 
-  // Update wallet if provided (GM only)
-  if (wallet && isGm && updated.wallet) {
+  // Update wallet if provided (GM or owner)
+  if (wallet && (isGm || isOwner) && updated.wallet) {
+    const currentBalances = (updated.wallet.balances as Record<string, number>) ?? {};
+    const newBalances = { ...currentBalances, ...wallet };
     updated.wallet = await prisma.characterWallet.update({
       where: { characterId: id },
-      data: {
-        ...(wallet.gold !== undefined && { gold: wallet.gold }),
-        ...(wallet.silver !== undefined && { silver: wallet.silver }),
-        ...(wallet.copper !== undefined && { copper: wallet.copper }),
-      },
+      data: { balances: newBalances },
     });
   }
 

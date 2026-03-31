@@ -5,6 +5,14 @@ export interface RealisticHpState {
   color: string; // tailwind color class
 }
 
+export interface CurrencyDef {
+  code: string;       // unique key, e.g. "gold"
+  name: string;       // display name, e.g. "Altın"
+  symbol: string;     // short symbol, e.g. "🪙" or "G"
+  rate: number;       // value relative to base (first) currency = 1
+  sortOrder: number;
+}
+
 export interface GamesetConfig {
   maxLevel: number;
   startingSkillPoints: number;
@@ -23,7 +31,15 @@ export interface GamesetConfig {
   hpSystem: HpSystemType;
   realisticHpStates: RealisticHpState[];
   hitDieLevelsPerRoll: number; // kaç level'da bir hit-die atılır
+  // Economy
+  currencies: CurrencyDef[];
 }
+
+export const DEFAULT_CURRENCIES: CurrencyDef[] = [
+  { code: "gold", name: "Altın", symbol: "🪙", rate: 1, sortOrder: 0 },
+  { code: "silver", name: "Gümüş", symbol: "🥈", rate: 0.1, sortOrder: 1 },
+  { code: "copper", name: "Bakır", symbol: "🟤", rate: 0.01, sortOrder: 2 },
+];
 
 export const DEFAULT_REALISTIC_HP_STATES: RealisticHpState[] = [
   { label: "DIVINE", color: "text-yellow-400" },
@@ -46,6 +62,7 @@ export const DEFAULT_GAMESET_CONFIG: GamesetConfig = {
   hpSystem: "hit-die",
   realisticHpStates: DEFAULT_REALISTIC_HP_STATES,
   hitDieLevelsPerRoll: 1,
+  currencies: DEFAULT_CURRENCIES,
 };
 
 export function parseGamesetConfig(raw: unknown): GamesetConfig {
@@ -106,5 +123,9 @@ export function parseGamesetConfig(raw: unknown): GamesetConfig {
       typeof obj.hitDieLevelsPerRoll === "number"
         ? obj.hitDieLevelsPerRoll
         : DEFAULT_GAMESET_CONFIG.hitDieLevelsPerRoll,
+    currencies:
+      Array.isArray(obj.currencies) && obj.currencies.length > 0
+        ? (obj.currencies as CurrencyDef[])
+        : DEFAULT_GAMESET_CONFIG.currencies,
   };
 }

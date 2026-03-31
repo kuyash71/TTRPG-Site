@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { Socket } from "socket.io-client";
+import type { CurrencyDef } from "@/types/gameset-config";
 
 const RARITY_COLOR: Record<string, string> = {
   LEGENDARY: "text-yellow-400",
@@ -51,11 +52,13 @@ interface Props {
   gamesetId: string;
   socket: Socket | null;
   stores: StoreData[];
+  currencies: CurrencyDef[];
   onStoresChange: (stores: StoreData[]) => void;
   onClose: () => void;
 }
 
-export function StoreManager({ sessionId, gamesetId, socket, stores, onStoresChange, onClose }: Props) {
+export function StoreManager({ sessionId, gamesetId, socket, stores, currencies, onStoresChange, onClose }: Props) {
+  const currencySymbol = currencies[0]?.symbol ?? "🪙";
   const [tab, setTab] = useState<"stores" | "offers">("stores");
   const [gamesetItems, setGamesetItems] = useState<ItemDefinitionMini[]>([]);
   const [loadingItems, setLoadingItems] = useState(false);
@@ -272,7 +275,7 @@ export function StoreManager({ sessionId, gamesetId, socket, stores, onStoresCha
                   <div className="mt-2 flex flex-wrap gap-1">
                     {store.items.map((i) => (
                       <span key={i.id} className={`rounded bg-zinc-800 px-1.5 py-0.5 text-[9px] ${RARITY_COLOR[i.itemDefinition.rarity] ?? "text-zinc-300"}`}>
-                        {i.itemDefinition.name} — {i.basePrice}g
+                        {i.itemDefinition.name} — {currencySymbol}{i.basePrice}
                       </span>
                     ))}
                   </div>
@@ -326,7 +329,7 @@ export function StoreManager({ sessionId, gamesetId, socket, stores, onStoresCha
                 <div key={item.itemDefinitionId} className="flex items-center gap-2 rounded border border-border bg-void px-2 py-1.5">
                   <span className={`flex-1 text-[10px] ${RARITY_COLOR[item.rarity] ?? "text-zinc-300"}`}>{item.name}</span>
                   <div className="flex items-center gap-1">
-                    <span className="text-[9px] text-zinc-500">Fiyat (altın):</span>
+                    <span className="text-[9px] text-zinc-500">Fiyat ({currencies[0]?.name ?? "Para"}):</span>
                     <input
                       type="number"
                       min="0"
@@ -426,8 +429,8 @@ export function StoreManager({ sessionId, gamesetId, socket, stores, onStoresCha
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-[11px] font-bold text-gold-400">{tx.offeredPrice}g</p>
-                      <p className="text-[9px] text-zinc-600">Taban: {tx.storeItem.basePrice}g</p>
+                      <p className="text-[11px] font-bold text-gold-400">{currencySymbol}{tx.offeredPrice}</p>
+                      <p className="text-[9px] text-zinc-600">Taban: {currencySymbol}{tx.storeItem.basePrice}</p>
                     </div>
                   </div>
                   <div className="flex gap-2">

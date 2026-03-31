@@ -148,6 +148,7 @@ model Session {
   approvalRequests CharacterApprovalRequest[]
   lootItems        SessionLootItem[]
   stores           Store[]
+  moneyTransfers   MoneyTransfer[]
 
   @@map("sessions")
 }
@@ -226,6 +227,8 @@ model Character {
   inventoryItems CharacterInventoryItem[]
   spells         CharacterSpell[]
   pendingTransactions PendingTransaction[]
+  transfersSent     MoneyTransfer[] @relation("transfers_sent")
+  transfersReceived MoneyTransfer[] @relation("transfers_received")
 
   @@unique([sessionId, userId])
   @@map("characters")
@@ -249,9 +252,7 @@ model CharacterStat {
 model CharacterWallet {
   id          String @id @default(uuid()) @db.Uuid
   characterId String @unique @map("character_id") @db.Uuid
-  gold        Int    @default(0)
-  silver      Int    @default(0)
-  copper      Int    @default(0)
+  balances    Json   @default("{}") // { "gold": 100, "silver": 50 }
 
   character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
 
@@ -406,6 +407,7 @@ model ItemDefinition {
   stackable     Boolean        @default(false)
   maxStack      Int            @default(1) @map("max_stack")
   rarity        ItemRarity     @default(COMMON)
+  price         Json           @default("{}") // { "gold": 10, "silver": 5 }
   usable        Boolean        @default(false)
   useStatReq    Json?          @map("use_stat_req")
   useTextReq    String?        @map("use_text_req")
@@ -492,6 +494,22 @@ model PendingTransaction {
   character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
 
   @@map("pending_transactions")
+}
+
+model MoneyTransfer {
+  id             String   @id @default(uuid()) @db.Uuid
+  sessionId      String   @map("session_id") @db.Uuid
+  fromCharId     String   @map("from_char_id") @db.Uuid
+  toCharId       String   @map("to_char_id") @db.Uuid
+  amounts        Json     // { "gold": 10, "silver": 5 }
+  status         String   @default("PENDING") // PENDING | ACCEPTED | REJECTED
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  session   Session   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  fromChar  Character @relation("transfers_sent", fields: [fromCharId], references: [id], onDelete: Cascade)
+  toChar    Character @relation("transfers_received", fields: [toCharId], references: [id], onDelete: Cascade)
+
+  @@map("money_transfers")
 }
 
 // ─── Sprint 7: Spell System ─────────────────────────────

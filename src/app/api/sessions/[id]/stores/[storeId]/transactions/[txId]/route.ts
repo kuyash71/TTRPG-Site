@@ -52,9 +52,12 @@ export async function PATCH(
     const wallet = character.wallet;
     const itemDef = tx.storeItem.itemDefinition;
 
-    // Yeterli altın var mı?
-    if (!wallet || wallet.gold < tx.offeredPrice) {
-      return NextResponse.json({ error: "Insufficient gold" }, { status: 422 });
+    // Yeterli bakiye var mı?
+    const balances = (wallet?.balances as Record<string, number>) ?? {};
+    const primaryCurrency = Object.keys(balances)[0] ?? "gold";
+    const currentAmount = balances[primaryCurrency] ?? 0;
+    if (!wallet || currentAmount < tx.offeredPrice) {
+      return NextResponse.json({ error: "Insufficient balance" }, { status: 422 });
     }
 
     // Envanterde boş yer bul
@@ -92,11 +95,12 @@ export async function PATCH(
       }
     }
 
-    // Altın düş, eşyayı ekle, işlemi kapat
+    // Bakiye düş, eşyayı ekle, işlemi kapat
+    const newBalances = { ...balances, [primaryCurrency]: currentAmount - tx.offeredPrice };
     const [, newItem] = await prisma.$transaction([
       prisma.characterWallet.update({
         where: { characterId: character.id },
-        data: { gold: { decrement: tx.offeredPrice } },
+        data: { balances: newBalances },
       }),
       prisma.characterInventoryItem.create({
         data: {

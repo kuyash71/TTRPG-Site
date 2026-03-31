@@ -35,6 +35,7 @@ export default async function SessionPage({
       characters: {
         include: {
           stats: true,
+          wallet: true,
           user: { select: { id: true, username: true } },
           class: { select: { name: true } },
           race: { select: { name: true } },
@@ -131,6 +132,7 @@ export default async function SessionPage({
         className: c.class?.name ?? null,
         raceName: c.race?.name ?? null,
         level: c.level,
+        walletBalances: (c.wallet?.balances as Record<string, number>) ?? {},
         publicData: c.publicData as Record<string, unknown>,
         privateData: c.privateData as Record<string, unknown>,
         stats: c.stats.map((s) => ({
@@ -205,6 +207,7 @@ export default async function SessionPage({
         username: session.user.username,
         isGm,
       }}
+      currencies={config.currencies}
       manaLabel={config.manaLabel}
       hasCharacter={hasCharacter}
       pendingApproval={pendingApproval}

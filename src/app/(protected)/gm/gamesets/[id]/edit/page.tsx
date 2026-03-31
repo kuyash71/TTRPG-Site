@@ -108,6 +108,7 @@ export default async function GamesetEditPage({
           gridHeight: i.gridHeight,
           equipmentSlot: i.equipmentSlot,
           statBonuses: i.statBonuses,
+          price: (i.price as Record<string, number>) ?? {},
           stackable: i.stackable,
           maxStack: i.maxStack,
           rarity: i.rarity,

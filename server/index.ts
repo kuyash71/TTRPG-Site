@@ -498,6 +498,113 @@ io.on("connection", (socket) => {
     }
   );
 
+  // ─── Wallet ──────────────────────────────────────────
+  socket.on("wallet:update", async ({ characterId, balances }: { characterId: string; balances: Record<string, number> }) => {
+    const sessionId = socket.data.sessionId;
+    if (!sessionId) return;
+    try {
+      io.to(`session:${sessionId}`).emit("wallet:updated", { characterId, balances });
+    } catch (err) {
+      console.error("[wallet:update]", err);
+    }
+  });
+
+  // ─── Money Transfer ──────────────────────────────────
+  socket.on("money:send_request", async ({ fromCharId, toCharId, amounts }: { fromCharId: string; toCharId: string; amounts: Record<string, number> }) => {
+    const sessionId = socket.data.sessionId;
+    if (!sessionId) return;
+    try {
+      const transfer = await prisma.moneyTransfer.create({
+        data: { sessionId, fromCharId, toCharId, amounts, status: "PENDING" },
+        include: {
+          fromChar: { select: { id: true, name: true, user: { select: { username: true } } } },
+          toChar: { select: { id: true, name: true, user: { select: { username: true, id: true } } } },
+        },
+      });
+      io.to(`session:${sessionId}`).emit("money:transfer_request", {
+        id: transfer.id,
+        fromChar: transfer.fromChar,
+        toChar: transfer.toChar,
+        amounts: transfer.amounts,
+        status: "PENDING",
+      });
+    } catch (err) {
+      console.error("[money:send_request]", err);
+    }
+  });
+
+  socket.on("money:accept_transfer", async ({ transferId }: { transferId: string }) => {
+    const sessionId = socket.data.sessionId;
+    if (!sessionId) return;
+    try {
+      const transfer = await prisma.moneyTransfer.findUnique({
+        where: { id: transferId },
+        include: {
+          fromChar: { include: { wallet: true } },
+          toChar: { include: { wallet: true } },
+        },
+      });
+      if (!transfer || transfer.status !== "PENDING") return;
+
+      const amounts = transfer.amounts as Record<string, number>;
+      const fromBalances = (transfer.fromChar.wallet?.balances as Record<string, number>) ?? {};
+      const toBalances = (transfer.toChar.wallet?.balances as Record<string, number>) ?? {};
+
+      // Check sufficient funds
+      for (const [code, amount] of Object.entries(amounts)) {
+        if ((fromBalances[code] ?? 0) < amount) {
+          socket.emit("money:transfer_error", { transferId, message: "Yetersiz bakiye" });
+          return;
+        }
+      }
+
+      // Deduct from sender, add to receiver
+      const newFromBalances = { ...fromBalances };
+      const newToBalances = { ...toBalances };
+      for (const [code, amount] of Object.entries(amounts)) {
+        newFromBalances[code] = (newFromBalances[code] ?? 0) - amount;
+        newToBalances[code] = (newToBalances[code] ?? 0) + amount;
+      }
+
+      await prisma.$transaction([
+        prisma.characterWallet.update({ where: { characterId: transfer.fromCharId }, data: { balances: newFromBalances } }),
+        prisma.characterWallet.update({ where: { characterId: transfer.toCharId }, data: { balances: newToBalances } }),
+        prisma.moneyTransfer.update({ where: { id: transferId }, data: { status: "ACCEPTED" } }),
+      ]);
+
+      io.to(`session:${sessionId}`).emit("money:transfer_result", {
+        transferId,
+        status: "ACCEPTED",
+        fromCharId: transfer.fromCharId,
+        toCharId: transfer.toCharId,
+        fromBalances: newFromBalances,
+        toBalances: newToBalances,
+      });
+    } catch (err) {
+      console.error("[money:accept_transfer]", err);
+    }
+  });
+
+  socket.on("money:reject_transfer", async ({ transferId }: { transferId: string }) => {
+    const sessionId = socket.data.sessionId;
+    if (!sessionId) return;
+    try {
+      const transfer = await prisma.moneyTransfer.update({
+        where: { id: transferId },
+        data: { status: "REJECTED" },
+        select: { fromCharId: true, toCharId: true },
+      });
+      io.to(`session:${sessionId}`).emit("money:transfer_result", {
+        transferId,
+        status: "REJECTED",
+        fromCharId: transfer.fromCharId,
+        toCharId: transfer.toCharId,
+      });
+    } catch (err) {
+      console.error("[money:reject_transfer]", err);
+    }
+  });
+
   // ─── Store ───────────────────────────────────────────
   socket.on("store:activate", async ({ storeId }: { storeId: string }) => {
     const sessionId = socket.data.sessionId;
@@ -576,8 +683,11 @@ io.on("connection", (socket) => {
         if (!tx || tx.status !== "PENDING") return;
 
         const wallet = tx.character.wallet;
-        if (!wallet || wallet.gold < tx.offeredPrice) {
-          socket.emit("store:offer_result", { txId, status: "ERROR", message: "Yetersiz altın" });
+        const balances = (wallet?.balances as Record<string, number>) ?? {};
+        const primaryCurrency = Object.keys(balances)[0] ?? "gold";
+        const currentAmount = balances[primaryCurrency] ?? 0;
+        if (!wallet || currentAmount < tx.offeredPrice) {
+          socket.emit("store:offer_result", { txId, status: "ERROR", message: "Yetersiz bakiye" });
           return;
         }
 
@@ -599,10 +709,11 @@ io.on("connection", (socket) => {
           }
         }
 
+        const newBalances = { ...balances, [primaryCurrency]: currentAmount - tx.offeredPrice };
         const [, newItem] = await prisma.$transaction([
           prisma.characterWallet.update({
             where: { characterId: tx.characterId },
-            data: { gold: { decrement: tx.offeredPrice } },
+            data: { balances: newBalances },
           }),
           prisma.characterInventoryItem.create({
             data: { characterId: tx.characterId, itemDefinitionId: iDef.id, posX: placed ? posX : 0, posY: placed ? posY : 0, quantity: 1 },

@@ -164,6 +164,9 @@
 - [ ] Mobile-first responsive layout (4 sekme)
 - [ ] Tüm ekranlar için loading/error state'leri
 - [ ] Toast bildirimleri sistemi
+- [x] Karakter detayları artık sağ panelde (zar kısmı) değil, ortadaki ana alanda gösteriliyor
+- [x] Zar paneli her zaman sağ sidebar'da sabit — karakter detayı açıldığında kaybolmuyor
+- [x] Ortadaki ana alan scroll düzeltmesi (flexbox min-h-0 fix)
 
 ### Mağaza Sistemi
 

@@ -97,11 +97,7 @@ export default async function CharacterPage({
         wallet={
           isOwner || isGm
             ? character.wallet
-              ? {
-                  gold: character.wallet.gold,
-                  silver: character.wallet.silver,
-                  copper: character.wallet.copper,
-                }
+              ? { balances: (character.wallet.balances as Record<string, number>) ?? {} }
               : null
             : null
         }

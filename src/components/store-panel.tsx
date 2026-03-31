@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Socket } from "socket.io-client";
 import type { StoreData } from "./store-manager";
+import type { CurrencyDef } from "@/types/gameset-config";
 
 const RARITY_COLOR: Record<string, string> = {
   LEGENDARY: "text-yellow-400",
@@ -25,11 +26,13 @@ interface Props {
   characterId: string;
   sessionId: string;
   socket: Socket | null;
+  currencies: CurrencyDef[];
   onClose: () => void;
   myOfferResults: Record<string, "APPROVED" | "REJECTED">; // txId → sonuç
 }
 
-export function StorePanel({ store, characterId, socket, onClose, myOfferResults }: Props) {
+export function StorePanel({ store, characterId, socket, currencies, onClose, myOfferResults }: Props) {
+  const currencySymbol = currencies[0]?.symbol ?? "🪙";
   const [offerPrices, setOfferPrices] = useState<Record<string, string>>({});
   const [submittedItems, setSubmittedItems] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
@@ -86,7 +89,7 @@ export function StorePanel({ store, characterId, socket, onClose, myOfferResults
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-[11px] font-bold text-gold-400">{item.basePrice}g</p>
+                      <p className="text-[11px] font-bold text-gold-400">{currencySymbol}{item.basePrice}</p>
                       <p className="text-[9px] text-zinc-600">Taban fiyat</p>
                     </div>
                   </div>
@@ -107,7 +110,7 @@ export function StorePanel({ store, characterId, socket, onClose, myOfferResults
                           onChange={(e) => setOfferPrices((prev) => ({ ...prev, [item.id]: e.target.value }))}
                           className="flex-1 bg-transparent text-[10px] text-zinc-200 focus:outline-none"
                         />
-                        <span className="text-[9px] text-gold-400">g</span>
+                        <span className="text-[9px] text-gold-400">{currencySymbol}</span>
                       </div>
                       <button
                         onClick={() => handleOffer(item.id)}

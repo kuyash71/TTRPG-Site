@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
         ],
       },
       wallet: {
-        create: { gold: 0, silver: 0, copper: 0 },
+        create: { balances: {} },
       },
     },
     include: { stats: true, wallet: true },

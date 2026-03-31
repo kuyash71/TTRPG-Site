@@ -64,6 +64,7 @@ export interface ItemDefinitionData {
   gridHeight: number;
   equipmentSlot: string | null;
   statBonuses: unknown;
+  price: Record<string, number>;
   stackable: boolean;
   maxStack: number;
   rarity: string;
@@ -211,6 +212,7 @@ export function GamesetEditor({ gameset }: { gameset: GamesetData }) {
             gamesetId={data.id}
             items={data.itemDefinitions}
             statGroups={data.statGroups}
+            config={data.config}
             onUpdate={(itemDefinitions) =>
               setData((prev) => ({ ...prev, itemDefinitions }))
             }

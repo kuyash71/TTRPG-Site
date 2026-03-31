@@ -7,7 +7,7 @@ import { SkillTreeViewer } from "@/components/skill-tree/skill-tree-viewer";
 import { InventoryPanel } from "@/components/inventory-panel";
 import { LootPanel, type LootItem } from "@/components/loot-panel";
 import type { Socket } from "socket.io-client";
-import type { RealisticHpState, HpSystemType } from "@/types/gameset-config";
+import type { RealisticHpState, HpSystemType, CurrencyDef } from "@/types/gameset-config";
 
 interface EquippedItemInfo {
   name: string;
@@ -73,6 +73,7 @@ interface CharacterInfo {
   className: string | null;
   raceName: string | null;
   level: number;
+  walletBalances: Record<string, number>;
   publicData: Record<string, unknown>;
   privateData: Record<string, unknown>;
   stats: { name: string; baseValue: number; currentValue: number; maxValue: number | null; isPublic: boolean }[];
@@ -107,6 +108,8 @@ interface Props {
   inventoryGridWidth: number;
   inventoryGridHeight: number;
   equipmentSlotsEnabled: boolean;
+  currencies: CurrencyDef[];
+  otherCharacters?: { id: string; name: string; userId: string }[];
   lootItems?: LootItem[];
   onAddLoot?: () => void;
   onClose: () => void;
@@ -177,6 +180,8 @@ export function CharacterDetailPanel({
   inventoryGridWidth,
   inventoryGridHeight,
   equipmentSlotsEnabled,
+  currencies,
+  otherCharacters = [],
   lootItems = [],
   onAddLoot,
   onClose,
@@ -201,6 +206,42 @@ export function CharacterDetailPanel({
     const hpStat = character.publicData?.realisticHpState;
     return typeof hpStat === "string" ? hpStat : realisticHpStates[0]?.label ?? "";
   });
+
+  // Wallet
+  const [walletBalances, setWalletBalances] = useState<Record<string, number>>(character.walletBalances ?? {});
+  const [walletEditing, setWalletEditing] = useState(false);
+  const [walletDraft, setWalletDraft] = useState<Record<string, number>>({});
+  const [walletSaving, setWalletSaving] = useState(false);
+
+  // Money transfer
+  const [showTransfer, setShowTransfer] = useState(false);
+  const [transferTarget, setTransferTarget] = useState("");
+  const [transferAmounts, setTransferAmounts] = useState<Record<string, number>>({});
+  const [transferBusy, setTransferBusy] = useState(false);
+  const [pendingTransfers, setPendingTransfers] = useState<{ id: string; fromChar: { id: string; name: string }; toChar: { id: string; name: string }; amounts: Record<string, number>; status: string }[]>([]);
+
+  // Listen for transfer events
+  useEffect(() => {
+    if (!socket) return;
+    function handleTransferRequest(data: { id: string; fromChar: { id: string; name: string }; toChar: { id: string; name: string; user: { id: string } }; amounts: Record<string, number>; status: string }) {
+      if (data.fromChar.id === character.id || data.toChar.id === character.id) {
+        setPendingTransfers((prev) => [...prev, data]);
+      }
+    }
+    function handleTransferResult(data: { transferId: string; status: string; fromCharId?: string; toCharId?: string; fromBalances?: Record<string, number>; toBalances?: Record<string, number> }) {
+      setPendingTransfers((prev) => prev.filter((t) => t.id !== data.transferId));
+      if (data.status === "ACCEPTED") {
+        if (data.fromCharId === character.id && data.fromBalances) setWalletBalances(data.fromBalances);
+        if (data.toCharId === character.id && data.toBalances) setWalletBalances(data.toBalances);
+      }
+    }
+    socket.on("money:transfer_request", handleTransferRequest);
+    socket.on("money:transfer_result", handleTransferResult);
+    return () => {
+      socket.off("money:transfer_request", handleTransferRequest);
+      socket.off("money:transfer_result", handleTransferResult);
+    };
+  }, [socket, character.id]);
 
   // Tabs: stats | skills | inventory | spells
   const [tab, setTab] = useState<"stats" | "skills" | "inventory" | "spells">("stats");
@@ -825,6 +866,188 @@ export function CharacterDetailPanel({
       {/* ─── INVENTORY TAB ─── */}
       {tab === "inventory" && (
         <div className="space-y-3">
+          {/* Para (Cüzdan) */}
+          {canSeeAll && currencies.length > 0 && (
+            <div className="rounded border border-border bg-void p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <h4 className="text-[11px] font-semibold text-zinc-400">Para</h4>
+                {(isGm || isOwn) && !walletEditing && (
+                  <button
+                    onClick={() => { setWalletEditing(true); setWalletDraft({ ...walletBalances }); }}
+                    className="text-[10px] text-lavender-400 hover:text-lavender-300"
+                  >
+                    Düzenle
+                  </button>
+                )}
+              </div>
+              {!walletEditing ? (
+                <div className="flex flex-wrap gap-3">
+                  {currencies.map((cur) => (
+                    <div key={cur.code} className="flex items-center gap-1">
+                      <span className="text-sm">{cur.symbol}</span>
+                      <span className="font-mono text-sm font-bold text-zinc-100">{walletBalances[cur.code] ?? 0}</span>
+                      <span className="text-[10px] text-zinc-500">{cur.name}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex flex-wrap gap-2">
+                    {currencies.map((cur) => (
+                      <div key={cur.code} className="flex items-center gap-1">
+                        <span className="text-sm">{cur.symbol}</span>
+                        <input
+                          type="number"
+                          min={0}
+                          value={walletDraft[cur.code] ?? 0}
+                          onChange={(e) => setWalletDraft((prev) => ({ ...prev, [cur.code]: +e.target.value }))}
+                          className="w-20 rounded border border-border bg-surface px-2 py-1 text-xs text-zinc-100 focus:border-lavender-400 focus:outline-none"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      disabled={walletSaving}
+                      onClick={async () => {
+                        setWalletSaving(true);
+                        const res = await fetch(`/api/characters/${character.id}`, {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ wallet: walletDraft }),
+                        });
+                        if (res.ok) {
+                          setWalletBalances(walletDraft);
+                          setWalletEditing(false);
+                          if (socket) socket.emit("wallet:update", { characterId: character.id, balances: walletDraft });
+                        }
+                        setWalletSaving(false);
+                      }}
+                      className="rounded bg-gold-400 px-3 py-1 text-[10px] font-medium text-void disabled:opacity-40"
+                    >
+                      {walletSaving ? "..." : "Kaydet"}
+                    </button>
+                    <button
+                      onClick={() => setWalletEditing(false)}
+                      className="rounded bg-surface-raised px-3 py-1 text-[10px] text-zinc-400 hover:text-zinc-200"
+                    >
+                      Vazgeç
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Gelen transfer istekleri */}
+          {pendingTransfers.filter((t) => t.toChar.id === character.id && t.status === "PENDING").map((t) => (
+            <div key={t.id} className="rounded border border-lavender-400/30 bg-lavender-900/10 p-2">
+              <p className="mb-1 text-[10px] text-lavender-400">
+                <span className="font-semibold">{t.fromChar.name}</span> sana para göndermek istiyor:
+              </p>
+              <div className="mb-1.5 flex flex-wrap gap-2">
+                {Object.entries(t.amounts).filter(([, v]) => v > 0).map(([code, val]) => {
+                  const cur = currencies.find((c) => c.code === code);
+                  return <span key={code} className="text-[10px] font-mono text-zinc-200">{cur?.symbol} {val}</span>;
+                })}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => socket?.emit("money:accept_transfer", { transferId: t.id })}
+                  className="rounded bg-green-600 px-2.5 py-0.5 text-[10px] font-medium text-white hover:bg-green-500"
+                >
+                  Kabul Et
+                </button>
+                <button
+                  onClick={() => socket?.emit("money:reject_transfer", { transferId: t.id })}
+                  className="rounded bg-red-600/80 px-2.5 py-0.5 text-[10px] font-medium text-white hover:bg-red-500"
+                >
+                  Reddet
+                </button>
+              </div>
+            </div>
+          ))}
+
+          {/* Gönderilen bekleyen transferler */}
+          {pendingTransfers.filter((t) => t.fromChar.id === character.id && t.status === "PENDING").map((t) => (
+            <div key={t.id} className="rounded border border-gold-400/20 bg-gold-900/10 p-2">
+              <p className="text-[10px] text-gold-400">
+                <span className="font-semibold">{t.toChar.name}</span>&apos;a transfer bekleniyor...
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {Object.entries(t.amounts).filter(([, v]) => v > 0).map(([code, val]) => {
+                  const cur = currencies.find((c) => c.code === code);
+                  return <span key={code} className="text-[10px] font-mono text-zinc-500">{cur?.symbol} {val}</span>;
+                })}
+              </div>
+            </div>
+          ))}
+
+          {/* Para Gönder (kendi karakteri ise) */}
+          {isOwn && otherCharacters.length > 0 && currencies.length > 0 && (
+            <div>
+              {!showTransfer ? (
+                <button
+                  onClick={() => setShowTransfer(true)}
+                  className="flex w-full items-center justify-center gap-1 rounded border border-dashed border-lavender-400/40 py-1.5 text-[10px] text-lavender-400 hover:border-lavender-400/70 hover:bg-lavender-900/10"
+                >
+                  Para Gönder
+                </button>
+              ) : (
+                <div className="rounded border border-lavender-900/40 bg-lavender-900/10 p-2 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-medium text-lavender-400">Para Gönder</span>
+                    <button onClick={() => { setShowTransfer(false); setTransferTarget(""); setTransferAmounts({}); }} className="text-zinc-500 hover:text-zinc-300 text-xs">&times;</button>
+                  </div>
+                  <select
+                    value={transferTarget}
+                    onChange={(e) => setTransferTarget(e.target.value)}
+                    className="w-full rounded border border-border bg-void px-2 py-1 text-[10px] text-zinc-200"
+                  >
+                    <option value="">Karakter seç...</option>
+                    {otherCharacters.filter((c) => c.id !== character.id).map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                  <div className="flex flex-wrap gap-2">
+                    {currencies.map((cur) => (
+                      <div key={cur.code} className="flex items-center gap-1">
+                        <span className="text-sm">{cur.symbol}</span>
+                        <input
+                          type="number"
+                          min={0}
+                          max={walletBalances[cur.code] ?? 0}
+                          value={transferAmounts[cur.code] ?? 0}
+                          onChange={(e) => setTransferAmounts((prev) => ({ ...prev, [cur.code]: +e.target.value }))}
+                          className="w-16 rounded border border-border bg-void px-2 py-1 text-[10px] text-zinc-100 focus:border-lavender-400 focus:outline-none"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    disabled={!transferTarget || transferBusy || Object.values(transferAmounts).every((v) => !v)}
+                    onClick={() => {
+                      if (!socket || !transferTarget) return;
+                      setTransferBusy(true);
+                      const clean: Record<string, number> = {};
+                      for (const [k, v] of Object.entries(transferAmounts)) {
+                        if (v > 0) clean[k] = v;
+                      }
+                      socket.emit("money:send_request", { fromCharId: character.id, toCharId: transferTarget, amounts: clean });
+                      setTransferBusy(false);
+                      setShowTransfer(false);
+                      setTransferTarget("");
+                      setTransferAmounts({});
+                    }}
+                    className="w-full rounded bg-lavender-400 py-1 text-[10px] font-medium text-void disabled:opacity-40"
+                  >
+                    {transferBusy ? "..." : "Gönder"}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* GM eşya verme */}
           {isGm && (
             <div>

@@ -14,7 +14,7 @@ import { type LootItem } from "@/components/loot-panel";
 import Link from "next/link";
 import { useLocale, TranslationKey } from "@/lib/locale";
 import { Icon } from "@/components/icon";
-import type { RealisticHpState, HpSystemType } from "@/types/gameset-config";
+import type { RealisticHpState, HpSystemType, CurrencyDef } from "@/types/gameset-config";
 
 interface InventoryItemInfo {
   id: string;
@@ -57,6 +57,7 @@ interface CharacterInfo {
   className: string | null;
   raceName: string | null;
   level: number;
+  walletBalances: Record<string, number>;
   publicData: Record<string, unknown>;
   privateData: Record<string, unknown>;
   stats: { name: string; baseValue: number; currentValue: number; maxValue: number | null; isPublic: boolean }[];
@@ -102,6 +103,7 @@ interface Props {
   equipmentSlotsEnabled: boolean;
   inventoryCapacityStat: string | null;
   inventoryCapacityRowsPerPoint: number;
+  currencies: CurrencyDef[];
   currentUser: { id: string; username: string; isGm: boolean };
   hasCharacter: boolean;
   pendingApproval: boolean;
@@ -134,6 +136,7 @@ export function SessionRoom({
   equipmentSlotsEnabled,
   inventoryCapacityStat,
   inventoryCapacityRowsPerPoint,
+  currencies,
   currentUser,
   hasCharacter,
   pendingApproval,
@@ -224,6 +227,13 @@ export function SessionRoom({
     socket.on("store:deactivated", handleStoreDeactivated);
     socket.on("store:offer_result", handleOfferResult);
 
+    // Wallet updates
+    function handleWalletUpdated({ characterId, balances }: { characterId: string; balances: Record<string, number> }) {
+      const char = characters.find((c) => c.id === characterId);
+      if (char) char.walletBalances = balances;
+    }
+    socket.on("wallet:updated", handleWalletUpdated);
+
     return () => {
       socket.off("session:character_approved", handleApproved);
       socket.off("char:approval_rejected", handleRejected);
@@ -231,6 +241,7 @@ export function SessionRoom({
       socket.off("store:activated", handleStoreActivated);
       socket.off("store:deactivated", handleStoreDeactivated);
       socket.off("store:offer_result", handleOfferResult);
+      socket.off("wallet:updated", handleWalletUpdated);
     };
   }, [socket, currentUser.id, currentUser.isGm, router]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -468,6 +479,8 @@ export function SessionRoom({
                     inventoryGridWidth={inventoryGridWidth}
                     inventoryGridHeight={getCharInventoryHeight(centerCharacter)}
                     equipmentSlotsEnabled={equipmentSlotsEnabled}
+                    currencies={currencies}
+                    otherCharacters={characters.map((c) => ({ id: c.id, name: c.name, userId: c.userId }))}
                     lootItems={lootItems}
                     onAddLoot={currentUser.isGm ? () => { setShowLootAdd(true); loadLootGamesetItems(); } : undefined}
                     onClose={() => {
@@ -526,6 +539,8 @@ export function SessionRoom({
                 inventoryGridWidth={inventoryGridWidth}
                 inventoryGridHeight={getCharInventoryHeight(selectedCharacter)}
                 equipmentSlotsEnabled={equipmentSlotsEnabled}
+                currencies={currencies}
+                otherCharacters={characters.map((c) => ({ id: c.id, name: c.name, userId: c.userId }))}
                 lootItems={lootItems}
                 onAddLoot={currentUser.isGm ? () => { setShowLootAdd(true); loadLootGamesetItems(); } : undefined}
                 onClose={() => {
@@ -548,6 +563,8 @@ export function SessionRoom({
                 inventoryGridWidth={inventoryGridWidth}
                 inventoryGridHeight={getCharInventoryHeight(myCharacter)}
                 equipmentSlotsEnabled={equipmentSlotsEnabled}
+                currencies={currencies}
+                otherCharacters={characters.map((c) => ({ id: c.id, name: c.name, userId: c.userId }))}
                 lootItems={lootItems}
                 onClose={() => setMobileTab("chat")}
               />
@@ -570,6 +587,7 @@ export function SessionRoom({
               gamesetId={gamesetId}
               socket={socket}
               stores={stores}
+              currencies={currencies}
               onStoresChange={setStores}
               onClose={() => setShowStoreManager(false)}
             />
@@ -586,6 +604,7 @@ export function SessionRoom({
               characterId={myCharacter.id}
               sessionId={sessionId}
               socket={socket}
+              currencies={currencies}
               onClose={() => setShowStorePanel(false)}
               myOfferResults={myOfferResults}
             />

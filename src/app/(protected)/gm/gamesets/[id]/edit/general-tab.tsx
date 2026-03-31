@@ -4,8 +4,10 @@ import { useState } from "react";
 import {
   parseGamesetConfig,
   DEFAULT_REALISTIC_HP_STATES,
+  DEFAULT_CURRENCIES,
   type HpSystemType,
   type RealisticHpState,
+  type CurrencyDef,
 } from "@/types/gameset-config";
 
 interface Props {
@@ -44,6 +46,7 @@ export function GeneralTab({
     equipmentSlotsEnabled: parsed.equipmentSlotsEnabled,
     inventoryCapacityStat: parsed.inventoryCapacityStat ?? "",
     inventoryCapacityRowsPerPoint: parsed.inventoryCapacityRowsPerPoint,
+    currencies: parsed.currencies as CurrencyDef[],
   });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -66,6 +69,7 @@ export function GeneralTab({
       equipmentSlotsEnabled: form.equipmentSlotsEnabled,
       inventoryCapacityStat: form.inventoryCapacityStat.trim() || null,
       inventoryCapacityRowsPerPoint: form.inventoryCapacityRowsPerPoint,
+      currencies: form.currencies,
     };
 
     const res = await fetch(`/api/gamesets/${gamesetId}`, {
@@ -395,6 +399,97 @@ export function GeneralTab({
         <label htmlFor="equipSlots" className="text-sm text-zinc-400">
           Ekipman slotları aktif
         </label>
+      </div>
+
+      <hr className="border-border" />
+
+      <h3 className="heading-gothic text-sm font-semibold text-zinc-300">
+        Para Birimleri
+      </h3>
+      <p className="text-[11px] text-zinc-500">
+        Oyun ekonomisinde kullanılacak para birimlerini tanımlayın. İlk birim ana para birimidir (oran 1). Diğer birimlerin oranları ana birime göre belirlenir.
+      </p>
+
+      <div className="space-y-2">
+        {form.currencies.map((cur, idx) => (
+          <div key={idx} className="flex items-center gap-2">
+            <input
+              type="text"
+              value={cur.symbol}
+              onChange={(e) => {
+                const next = [...form.currencies];
+                next[idx] = { ...next[idx], symbol: e.target.value };
+                setForm((f) => ({ ...f, currencies: next }));
+              }}
+              className="w-12 rounded border border-border bg-void px-2 py-1.5 text-center text-sm text-zinc-100 focus:border-lavender-400 focus:outline-none"
+              placeholder="🪙"
+              title="Sembol"
+            />
+            <input
+              type="text"
+              value={cur.name}
+              onChange={(e) => {
+                const next = [...form.currencies];
+                next[idx] = { ...next[idx], name: e.target.value, code: e.target.value.toLowerCase().replace(/\s+/g, "_") };
+                setForm((f) => ({ ...f, currencies: next }));
+              }}
+              className="flex-1 rounded border border-border bg-void px-2 py-1.5 text-sm text-zinc-100 focus:border-lavender-400 focus:outline-none"
+              placeholder="Para birimi adı"
+            />
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] text-zinc-500">Oran:</span>
+              <input
+                type="number"
+                min={0.001}
+                step={0.01}
+                value={cur.rate}
+                onChange={(e) => {
+                  const next = [...form.currencies];
+                  next[idx] = { ...next[idx], rate: +e.target.value };
+                  setForm((f) => ({ ...f, currencies: next }));
+                }}
+                className="w-20 rounded border border-border bg-void px-2 py-1.5 text-sm text-zinc-100 focus:border-lavender-400 focus:outline-none"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                const next = form.currencies.filter((_, i) => i !== idx);
+                setForm((f) => ({ ...f, currencies: next }));
+              }}
+              className="text-xs text-red-400 hover:text-red-300"
+              title="Sil"
+            >
+              &times;
+            </button>
+          </div>
+        ))}
+      </div>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() =>
+            setForm((f) => ({
+              ...f,
+              currencies: [
+                ...f.currencies,
+                { code: "", name: "", symbol: "", rate: 1, sortOrder: f.currencies.length },
+              ],
+            }))
+          }
+          className="rounded bg-surface-raised px-3 py-1 text-xs text-zinc-400 hover:text-zinc-200"
+        >
+          + Para Birimi Ekle
+        </button>
+        {form.currencies.length === 0 && (
+          <button
+            type="button"
+            onClick={() => setForm((f) => ({ ...f, currencies: DEFAULT_CURRENCIES }))}
+            className="rounded bg-surface-raised px-3 py-1 text-xs text-lavender-400 hover:text-lavender-300"
+          >
+            Varsayılanları Yükle
+          </button>
+        )}
       </div>
 
       {/* Save */}

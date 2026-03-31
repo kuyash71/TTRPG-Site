@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { parseGamesetConfig } from "@/types/gameset-config";
 import type { ItemDefinitionData, StatGroupData } from "./gameset-editor";
 
 const CATEGORIES = [
@@ -36,6 +37,7 @@ interface Props {
   gamesetId: string;
   items: ItemDefinitionData[];
   statGroups: StatGroupData[];
+  config: Record<string, unknown>;
   onUpdate: (items: ItemDefinitionData[]) => void;
 }
 
@@ -50,12 +52,14 @@ const emptyForm = {
   stackable: false,
   maxStack: 1,
   rarity: "COMMON" as string,
+  price: {} as Record<string, number>,
   usable: false,
   useStatReq: null as { stat: string; min: number } | null,
   useTextReq: "",
 };
 
-export function ItemsTab({ gamesetId, items, statGroups, onUpdate }: Props) {
+export function ItemsTab({ gamesetId, items, statGroups, config, onUpdate }: Props) {
+  const currencies = parseGamesetConfig(config).currencies;
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [bonusKey, setBonusKey] = useState("");
@@ -82,6 +86,7 @@ export function ItemsTab({ gamesetId, items, statGroups, onUpdate }: Props) {
       gridHeight: item.gridHeight,
       equipmentSlot: item.equipmentSlot || "",
       statBonuses: { ...(item.statBonuses as Record<string, number>) },
+      price: { ...((item as unknown as Record<string, unknown>).price as Record<string, number> ?? {}) },
       stackable: item.stackable,
       maxStack: item.maxStack,
       rarity: item.rarity,
@@ -110,8 +115,15 @@ export function ItemsTab({ gamesetId, items, statGroups, onUpdate }: Props) {
   }
 
   async function handleSubmit() {
+    // Remove zero-value prices
+    const cleanPrice: Record<string, number> = {};
+    for (const [k, v] of Object.entries(form.price)) {
+      if (v > 0) cleanPrice[k] = v;
+    }
+
     const body = {
       ...form,
+      price: cleanPrice,
       equipmentSlot: form.equipmentSlot || null,
       useStatReq: form.usable && form.useStatReq?.stat ? form.useStatReq : null,
       useTextReq: form.usable && form.useTextReq.trim() ? form.useTextReq.trim() : null,
@@ -365,6 +377,33 @@ export function ItemsTab({ gamesetId, items, statGroups, onUpdate }: Props) {
           </div>
         </div>
 
+        {/* Fiyat */}
+        {currencies.length > 0 && (
+          <div>
+            <label className="mb-1 block text-xs text-zinc-500">Fiyat</label>
+            <div className="flex flex-wrap gap-2">
+              {currencies.map((cur) => (
+                <div key={cur.code} className="flex items-center gap-1">
+                  <span className="text-sm" title={cur.name}>{cur.symbol}</span>
+                  <input
+                    type="number"
+                    min={0}
+                    value={form.price[cur.code] || 0}
+                    onChange={(e) =>
+                      setForm((p) => ({
+                        ...p,
+                        price: { ...p.price, [cur.code]: +e.target.value },
+                      }))
+                    }
+                    className="w-20 rounded border border-border bg-void px-2 py-1 text-xs text-zinc-100 focus:border-lavender-400 focus:outline-none"
+                  />
+                </div>
+              ))}
+            </div>
+            <p className="mt-1 text-[10px] text-zinc-600">0 = fiyatsız. Mağazada satılırken referans fiyat olarak kullanılır.</p>
+          </div>
+        )}
+
         <div className="flex gap-2">
           <button
             onClick={handleSubmit}
@@ -413,6 +452,25 @@ export function ItemsTab({ gamesetId, items, statGroups, onUpdate }: Props) {
               {item.description && (
                 <p className="mt-1 text-[11px] text-zinc-400 line-clamp-2">{item.description}</p>
               )}
+
+              {(() => {
+                const p = (item as unknown as Record<string, unknown>).price as Record<string, number> | undefined;
+                if (!p) return null;
+                const entries = Object.entries(p).filter(([, v]) => v > 0);
+                if (entries.length === 0) return null;
+                return (
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    {entries.map(([code, val]) => {
+                      const cur = currencies.find((c) => c.code === code);
+                      return (
+                        <span key={code} className="rounded bg-gold-900/30 px-1.5 py-0.5 text-[10px] text-gold-400">
+                          {cur?.symbol ?? code} {val}
+                        </span>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
 
               {Boolean((item as unknown as Record<string, unknown>).usable) && (
                 <div className="mt-1 space-y-0.5">
