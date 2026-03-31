@@ -385,7 +385,7 @@ export function SessionRoom({
                 onClick={() => { setShowStoreManager(true); }}
                 className="flex items-center gap-1 rounded border border-gold-400/40 px-2.5 py-1 text-[10px] text-gold-400 hover:border-gold-400/70 hover:bg-gold-900/10"
               >
-                <Icon name="Inventory" size={11} /> Mağaza
+                <Icon name="Inventory" size={11} />Mağaza
                 {stores.some((s) => s.isActive) && (
                   <span className="ml-0.5 h-1.5 w-1.5 rounded-full bg-gold-400" />
                 )}
@@ -611,30 +611,39 @@ export function SessionRoom({
               <h3 className="text-sm font-semibold text-zinc-100">Loot Havuzuna Ekle</h3>
               <button onClick={() => setShowLootAdd(false)} className="text-zinc-500 hover:text-zinc-300">✕</button>
             </div>
-            <input
-              value={lootAddSearch}
-              onChange={(e) => setLootAddSearch(e.target.value)}
-              placeholder="Eşya ara..."
-              onFocus={loadLootGamesetItems}
-              className="mb-2 w-full rounded border border-border bg-void px-2 py-1.5 text-[10px] text-zinc-200 placeholder-zinc-600 focus:border-gold-400 focus:outline-none"
-            />
-            <div className="max-h-64 overflow-y-auto space-y-0.5">
-              {lootGamesetItems.length === 0 && (
-                <p className="py-3 text-center text-[9px] text-zinc-600">Yükleniyor...</p>
+            <div className="relative mb-2">
+              <input
+                value={lootAddSearch}
+                onChange={(e) => setLootAddSearch(e.target.value)}
+                placeholder="Eşya ara... (boş bırakın = tümü)"
+                autoFocus
+                className="w-full rounded border border-border bg-void px-2 py-1.5 text-[10px] text-zinc-200 placeholder-zinc-600 focus:border-gold-400 focus:outline-none"
+              />
+              {lootAddSearch && (
+                <button
+                  onClick={() => setLootAddSearch("")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-zinc-500 hover:text-zinc-300"
+                >✕</button>
               )}
-              {lootGamesetItems
-                .filter((i) => i.name.toLowerCase().includes(lootAddSearch.toLowerCase()))
-                .map((item) => (
-                  <button
-                    key={item.id}
-                    disabled={lootAddBusy}
-                    onClick={() => handleAddToLoot(item.id)}
-                    className="w-full rounded px-2 py-1.5 text-left text-[10px] text-zinc-300 hover:bg-surface-raised"
-                  >
-                    {item.name}
-                    <span className="ml-1 text-[9px] text-zinc-500">{item.category}</span>
-                  </button>
-                ))}
+            </div>
+            <div className="max-h-64 overflow-y-auto rounded border border-border">
+              {lootGamesetItems.length === 0 ? (
+                <p className="py-3 text-center text-[9px] text-zinc-600">Yükleniyor...</p>
+              ) : (
+                lootGamesetItems
+                  .filter((i) => i.name.toLowerCase().includes(lootAddSearch.toLowerCase()))
+                  .map((item) => (
+                    <button
+                      key={item.id}
+                      disabled={lootAddBusy}
+                      onClick={() => handleAddToLoot(item.id)}
+                      className="flex w-full items-center justify-between px-2 py-1.5 text-left text-[10px] text-zinc-300 hover:bg-surface-raised border-b border-border/50 last:border-0"
+                    >
+                      <span>{item.name}</span>
+                      <span className="text-[9px] text-zinc-500">{item.category}</span>
+                    </button>
+                  ))
+              )}
             </div>
           </div>
         </div>

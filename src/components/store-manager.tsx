@@ -58,6 +58,7 @@ interface Props {
 export function StoreManager({ sessionId, gamesetId, socket, stores, onStoresChange, onClose }: Props) {
   const [tab, setTab] = useState<"stores" | "offers">("stores");
   const [gamesetItems, setGamesetItems] = useState<ItemDefinitionMini[]>([]);
+  const [loadingItems, setLoadingItems] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [newStoreName, setNewStoreName] = useState("");
   const [editingStore, setEditingStore] = useState<StoreData | null>(null);
@@ -69,9 +70,11 @@ export function StoreManager({ sessionId, gamesetId, socket, stores, onStoresCha
   // Gameset ürünlerini yükle
   useEffect(() => {
     if (gamesetItems.length > 0) return;
+    setLoadingItems(true);
     fetch(`/api/gamesets/${gamesetId}/items`)
       .then((r) => r.json())
-      .then((d) => { if (Array.isArray(d.items)) setGamesetItems(d.items); });
+      .then((d) => { if (Array.isArray(d.items)) setGamesetItems(d.items); })
+      .finally(() => setLoadingItems(false));
   }, [gamesetId, gamesetItems.length]);
 
   // Bekleyen teklifleri yükle (aktif mağaza varsa)
@@ -344,28 +347,55 @@ export function StoreManager({ sessionId, gamesetId, socket, stores, onStoresCha
             </div>
 
             {/* Eşya ara ve ekle */}
-            {editItems.length < 6 && (
-              <div>
+            <div>
+              <div className="relative mb-1.5">
                 <input
                   value={itemSearch}
                   onChange={(e) => setItemSearch(e.target.value)}
-                  placeholder="Eşya ara..."
-                  className="mb-1.5 w-full rounded border border-border bg-void px-2 py-1.5 text-[10px] text-zinc-200 placeholder-zinc-600 focus:border-gold-400 focus:outline-none"
+                  placeholder="Eşya ara... (boş bırakın = tümü)"
+                  className="w-full rounded border border-border bg-void px-2 py-1.5 text-[10px] text-zinc-200 placeholder-zinc-600 focus:border-gold-400 focus:outline-none"
+                  disabled={editItems.length >= 6}
                 />
-                <div className="max-h-36 overflow-y-auto space-y-0.5">
-                  {filteredItems.filter((i) => !editItems.find((e) => e.itemDefinitionId === i.id)).map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => addEditItem(item)}
-                      className="w-full rounded px-2 py-1 text-left text-[10px] text-zinc-300 hover:bg-surface-raised"
-                    >
-                      <span className={RARITY_COLOR[item.rarity] ?? "text-zinc-300"}>{item.name}</span>
-                      <span className="ml-1 text-[9px] text-zinc-500">{item.category}</span>
-                    </button>
-                  ))}
-                </div>
+                {itemSearch && (
+                  <button
+                    onClick={() => setItemSearch("")}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-zinc-500 hover:text-zinc-300"
+                  >
+                    ✕
+                  </button>
+                )}
               </div>
-            )}
+
+              {editItems.length >= 6 ? (
+                <p className="py-2 text-center text-[9px] text-zinc-500">Maksimum 6 ürüne ulaşıldı.</p>
+              ) : loadingItems ? (
+                <p className="py-3 text-center text-[9px] text-zinc-600">Eşyalar yükleniyor...</p>
+              ) : (
+                <>
+                  {(() => {
+                    const available = filteredItems.filter((i) => !editItems.find((e) => e.itemDefinitionId === i.id));
+                    return available.length === 0 ? (
+                      <p className="py-2 text-center text-[9px] text-zinc-600">
+                        {gamesetItems.length === 0 ? "Bu gameset'te henüz eşya yok." : "Eşya bulunamadı."}
+                      </p>
+                    ) : (
+                      <div className="max-h-48 overflow-y-auto rounded border border-border">
+                        {available.map((item) => (
+                          <button
+                            key={item.id}
+                            onClick={() => addEditItem(item)}
+                            className="flex w-full items-center justify-between px-2 py-1.5 text-left text-[10px] hover:bg-surface-raised border-b border-border/50 last:border-0"
+                          >
+                            <span className={RARITY_COLOR[item.rarity] ?? "text-zinc-300"}>{item.name}</span>
+                            <span className="text-[9px] text-zinc-500">{item.category}</span>
+                          </button>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </>
+              )}
+            </div>
 
             <button
               onClick={handleSaveEdit}
