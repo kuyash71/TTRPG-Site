@@ -43,7 +43,7 @@ export async function GET(
     orderBy: { name: "asc" },
   });
 
-  return NextResponse.json(items);
+  return NextResponse.json({ items });
 }
 
 // POST /api/gamesets/[id]/items
