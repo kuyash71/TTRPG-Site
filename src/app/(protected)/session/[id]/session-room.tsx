@@ -435,12 +435,12 @@ export function SessionRoom({
         </aside>
 
         {/* Center: active mobile tab or chat on desktop */}
-        <main className="flex flex-1 flex-col">
+        <main className="flex min-h-0 flex-1 flex-col">
           {/* Desktop: chat + optional detail view tabs */}
-          <div className="hidden flex-1 flex-col md:flex">
+          <div className="hidden min-h-0 flex-1 flex-col md:flex">
             {centerCharacter ? (
-              <div className="flex h-full flex-col">
-                <div className="flex items-center gap-2 border-b border-border bg-surface px-4 py-2">
+              <div className="flex h-full min-h-0 flex-col">
+                <div className="flex shrink-0 items-center gap-2 border-b border-border bg-surface px-4 py-2">
                   <button
                     onClick={() => {
                       if (centerCharacterIsDetailView) setDetailViewUserId(null);
@@ -454,7 +454,7 @@ export function SessionRoom({
                     {centerCharacter.name} — Detaylar
                   </span>
                 </div>
-                <div className="flex-1 overflow-y-auto">
+                <div className="min-h-0 flex-1">
                   <CharacterDetailPanel
                     character={centerCharacter}
                     isGm={currentUser.isGm}
