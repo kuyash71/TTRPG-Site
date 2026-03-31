@@ -269,7 +269,12 @@ export function SessionRoom({
     ? characters.find((c) => c.userId === detailViewUserId) ?? null
     : null;
 
+  // Center panel shows character detail for either selected player or GM detail view
+  const centerCharacter = detailViewCharacter ?? selectedCharacter;
+  const centerCharacterIsDetailView = !!detailViewCharacter;
+
   function handlePlayerClick(userId: string) {
+    setDetailViewUserId(null); // Clear GM detail view if open
     setSelectedPlayerId((prev) => (prev === userId ? null : userId));
     // Mobilde karakter tab'ına geç
     if (window.innerWidth < 768) {
@@ -278,6 +283,7 @@ export function SessionRoom({
   }
 
   function handleDetailView(userId: string) {
+    setSelectedPlayerId(null); // Clear player selection if open
     setDetailViewUserId(userId);
   }
 
@@ -432,24 +438,27 @@ export function SessionRoom({
         <main className="flex flex-1 flex-col">
           {/* Desktop: chat + optional detail view tabs */}
           <div className="hidden flex-1 flex-col md:flex">
-            {detailViewCharacter ? (
+            {centerCharacter ? (
               <div className="flex h-full flex-col">
                 <div className="flex items-center gap-2 border-b border-border bg-surface px-4 py-2">
                   <button
-                    onClick={() => setDetailViewUserId(null)}
+                    onClick={() => {
+                      if (centerCharacterIsDetailView) setDetailViewUserId(null);
+                      else setSelectedPlayerId(null);
+                    }}
                     className="text-xs text-zinc-500 hover:text-zinc-300"
                   >
                     &larr; {t("room.chatTab")}
                   </button>
                   <span className="text-xs text-zinc-400">
-                    {detailViewCharacter.name} — Detaylar
+                    {centerCharacter.name} — Detaylar
                   </span>
                 </div>
                 <div className="flex-1 overflow-y-auto">
                   <CharacterDetailPanel
-                    character={detailViewCharacter}
+                    character={centerCharacter}
                     isGm={currentUser.isGm}
-                    isOwn={detailViewCharacter.userId === currentUser.id}
+                    isOwn={centerCharacter.userId === currentUser.id}
                     manaLabel={manaLabel}
                     hpSystem={hpSystem}
                     realisticHpStates={realisticHpStates}
@@ -457,11 +466,14 @@ export function SessionRoom({
                     socket={socket}
                     gamesetId={gamesetId}
                     inventoryGridWidth={inventoryGridWidth}
-                    inventoryGridHeight={getCharInventoryHeight(detailViewCharacter)}
+                    inventoryGridHeight={getCharInventoryHeight(centerCharacter)}
                     equipmentSlotsEnabled={equipmentSlotsEnabled}
                     lootItems={lootItems}
                     onAddLoot={currentUser.isGm ? () => { setShowLootAdd(true); loadLootGamesetItems(); } : undefined}
-                    onClose={() => setDetailViewUserId(null)}
+                    onClose={() => {
+                      if (centerCharacterIsDetailView) setDetailViewUserId(null);
+                      else setSelectedPlayerId(null);
+                    }}
                   />
                 </div>
               </div>
@@ -543,32 +555,10 @@ export function SessionRoom({
           </div>
         </main>
 
-        {/* Right: Character detail or Dice — desktop only */}
-        {selectedCharacter ? (
-          <aside className="hidden w-72 flex-shrink-0 border-l border-border bg-surface lg:block">
-            <CharacterDetailPanel
-              character={selectedCharacter}
-              isGm={currentUser.isGm}
-              isOwn={selectedCharacter.userId === currentUser.id}
-              manaLabel={manaLabel}
-              hpSystem={hpSystem}
-              realisticHpStates={realisticHpStates}
-              skillTreeNodes={skillTreeNodes}
-              socket={socket}
-              gamesetId={gamesetId}
-              inventoryGridWidth={inventoryGridWidth}
-              inventoryGridHeight={getCharInventoryHeight(selectedCharacter)}
-              equipmentSlotsEnabled={equipmentSlotsEnabled}
-              lootItems={lootItems}
-              onAddLoot={currentUser.isGm ? () => { setShowLootAdd(true); loadLootGamesetItems(); } : undefined}
-              onClose={() => setSelectedPlayerId(null)}
-            />
-          </aside>
-        ) : (
-          <aside className="hidden w-72 flex-shrink-0 border-l border-border bg-surface lg:block">
-            <DicePanel socket={socket} connected={connected} currentUser={currentUser} />
-          </aside>
-        )}
+        {/* Right: Dice panel — always visible on desktop */}
+        <aside className="hidden w-72 flex-shrink-0 border-l border-border bg-surface lg:block">
+          <DicePanel socket={socket} connected={connected} currentUser={currentUser} />
+        </aside>
       </div>
 
       {/* GM: Mağaza Yönetimi Modal */}
