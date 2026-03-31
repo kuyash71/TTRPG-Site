@@ -288,7 +288,7 @@ export function CharacterSheet({
       )}
 
       {/* Inventory */}
-      {inventory.length > 0 && (
+      {(inventory.length > 0 || isOwner || isGm) && (
         <div className="mt-6 rounded-lg border border-border bg-surface p-5">
           <InventoryPanel
             characterId={character.id}

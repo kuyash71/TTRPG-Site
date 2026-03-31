@@ -372,7 +372,7 @@ export function CharacterDetailPanel({
   const tabItems = [
     { key: "stats" as const, label: "Statlar", icon: "stats" },
     ...(hasSkills ? [{ key: "skills" as const, label: "Kabiliyetler", icon: "scroll" }] : []),
-    ...(inventoryItems.length > 0 ? [{ key: "inventory" as const, label: "Envanter", icon: "Inventory" }] : []),
+    ...((inventoryItems.length > 0 || canSeeAll) ? [{ key: "inventory" as const, label: "Envanter", icon: "Inventory" }] : []),
     ...(spells.length > 0 ? [{ key: "spells" as const, label: "Büyüler", icon: "Spellbook" }] : []),
   ];
 
