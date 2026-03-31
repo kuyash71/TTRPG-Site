@@ -21,8 +21,22 @@ export async function GET(
   if (!session) return NextResponse.json({ error: "Giriş yapılmadı." }, { status: 401 });
 
   const { id } = await params;
-  const err = await verifyOwnership(id, session.user.id, session.user.role);
-  if (err) return NextResponse.json({ error: err.error }, { status: err.status });
+
+  // Gameset sahibi veya admin → tam erişim
+  // Bu gamesetin bağlı olduğu bir session'da GM olan kullanıcılar da erişebilir
+  const gameset = await prisma.gameset.findUnique({
+    where: { id },
+    include: { sessions: { select: { gmId: true } } },
+  });
+  if (!gameset) return NextResponse.json({ error: "Gameset bulunamadı." }, { status: 404 });
+
+  const isOwner = gameset.createdById === session.user.id;
+  const isAdmin = session.user.role === "ADMIN";
+  const isSessionGm = gameset.sessions.some((s) => s.gmId === session.user.id);
+
+  if (!isOwner && !isAdmin && !isSessionGm) {
+    return NextResponse.json({ error: "Yetkiniz yok." }, { status: 403 });
+  }
 
   const items = await prisma.itemDefinition.findMany({
     where: { gamesetId: id },
