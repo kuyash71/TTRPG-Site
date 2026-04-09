@@ -173,7 +173,7 @@
 - [x] `stores`, `store_items`, `pending_transactions` tabloları (DB schema + migration)
 - [x] Mağaza UI — GM, session odasında "Mağaza" butonundan mağaza presetleri oluşturur (maks. 6 ürün), fiyat atar, aktifleştirir. Oyunculara socket bildirimi gider.
 - [x] Transaction onay akışı: oyuncu fiyat teklifi verir → GM onaylar/reddeder (socket real-time) → onayda altın düşer, eşya envantere eklenir.
-- [ ] Ekonomi güvenlik kontrolleri (SELECT FOR UPDATE — v2)
+- [x] Ekonomi güvenlik kontrolleri — Dinamik para birimi sistemi (GM tanımlı), JSON wallet balances, eşya fiyatlandırma, oyuncular arası para transferi (istek/kabul/ret), mağaza dinamik para birimi desteği
 
 ### Envanter Sistemi
 

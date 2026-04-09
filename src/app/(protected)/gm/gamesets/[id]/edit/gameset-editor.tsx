@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useLocale, TranslationKey } from "@/lib/locale";
 import { LocaleSwitcher } from "@/components/locale-switcher";
@@ -114,11 +115,57 @@ type TabKey = (typeof TAB_KEYS)[number]["key"];
 
 export function GamesetEditor({ gameset }: { gameset: GamesetData }) {
   const { t } = useLocale();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabKey>("general");
   const [data, setData] = useState<GamesetData>(gameset);
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleExport() {
+    window.open(`/api/gamesets/${data.id}/export`, "_blank");
+  }
+
+  async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImporting(true);
+    try {
+      const text = await file.text();
+      const json = JSON.parse(text);
+
+      const res = await fetch("/api/gamesets/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(json),
+      });
+
+      if (res.ok) {
+        const result = await res.json();
+        router.push(`/gm/gamesets/${result.id}/edit`);
+      } else {
+        const err = await res.json();
+        alert(err.error || "Import başarısız.");
+      }
+    } catch {
+      alert("Dosya okunamadı veya geçersiz JSON formatı.");
+    } finally {
+      setImporting(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
 
   return (
     <div className="flex h-screen flex-col bg-void">
+      {/* Hidden file input for import */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json"
+        className="hidden"
+        onChange={handleImport}
+      />
+
       {/* Header */}
       <header className="flex items-center justify-between border-b border-border bg-surface px-4 py-3">
         <div className="flex items-center gap-4">
@@ -135,7 +182,22 @@ export function GamesetEditor({ gameset }: { gameset: GamesetData }) {
             {t("editor.badge")}
           </span>
         </div>
-        <LocaleSwitcher />
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleExport}
+            className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:border-zinc-500 hover:text-zinc-100"
+          >
+            Export
+          </button>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={importing}
+            className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:border-zinc-500 hover:text-zinc-100 disabled:opacity-50"
+          >
+            {importing ? "Importing..." : "Import"}
+          </button>
+          <LocaleSwitcher />
+        </div>
       </header>
 
       {/* Tab Bar */}
