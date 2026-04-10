@@ -23,11 +23,21 @@ interface ItemDefinitionMini {
   statBonuses: Record<string, number>;
   description: string | null;
   iconUrl: string | null;
+  price?: Record<string, number>;
+}
+
+function formatPrice(price: Record<string, number>, currencies: CurrencyDef[]): string {
+  const parts: string[] = [];
+  for (const cur of currencies) {
+    const amount = price[cur.code];
+    if (amount && amount > 0) parts.push(`${amount}${cur.symbol}`);
+  }
+  return parts.length ? parts.join(" ") : "—";
 }
 
 interface StoreItemData {
   id: string;
-  basePrice: number;
+  basePrice: Record<string, number>;
   stock: number | null;
   itemDefinition: ItemDefinitionMini;
 }
@@ -41,10 +51,10 @@ export interface StoreData {
 
 interface PendingTx {
   id: string;
-  offeredPrice: number;
+  offeredPrice: Record<string, number>;
   status: string;
   character: { id: string; name: string; user: { username: string } };
-  storeItem: { id: string; basePrice: number; itemDefinition: { name: string; rarity: string } };
+  storeItem: { id: string; basePrice: Record<string, number>; itemDefinition: { name: string; rarity: string } };
 }
 
 interface Props {
@@ -58,16 +68,16 @@ interface Props {
 }
 
 export function StoreManager({ sessionId, gamesetId, socket, stores, currencies, onStoresChange, onClose }: Props) {
-  const currencySymbol = currencies[0]?.symbol ?? "🪙";
   const [tab, setTab] = useState<"stores" | "offers">("stores");
   const [gamesetItems, setGamesetItems] = useState<ItemDefinitionMini[]>([]);
   const [loadingItems, setLoadingItems] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [newStoreName, setNewStoreName] = useState("");
   const [editingStore, setEditingStore] = useState<StoreData | null>(null);
-  const [editItems, setEditItems] = useState<{ itemDefinitionId: string; basePrice: number; stock: number | null; name: string; rarity: string }[]>([]);
+  const [editItems, setEditItems] = useState<{ itemDefinitionId: string; basePrice: Record<string, number>; stock: number | null; name: string; rarity: string }[]>([]);
   const [itemSearch, setItemSearch] = useState("");
   const [pendingTxs, setPendingTxs] = useState<PendingTx[]>([]);
+  const [offerError, setOfferError] = useState<{ txId: string; message: string } | null>(null);
   const [busy, setBusy] = useState(false);
 
   // Gameset ürünlerini yükle
@@ -101,8 +111,14 @@ export function StoreManager({ sessionId, gamesetId, socket, stores, currencies,
     function handleNewOffer({ transaction }: { transaction: PendingTx }) {
       setPendingTxs((prev) => [...prev, transaction]);
     }
-    function handleOfferResult({ txId }: { txId: string }) {
+    function handleOfferResult({ txId, status, message }: { txId: string; status: "APPROVED" | "REJECTED" | "ERROR"; message?: string }) {
+      if (status === "ERROR") {
+        // Bekleyen tekliflerden silme — GM düzeltip yeniden onaylayabilsin
+        setOfferError({ txId, message: message ?? "Bilinmeyen hata" });
+        return;
+      }
       setPendingTxs((prev) => prev.filter((t) => t.id !== txId));
+      setOfferError((prev) => (prev?.txId === txId ? null : prev));
     }
     socket.on("store:new_offer", handleNewOffer);
     socket.on("store:offer_result", handleOfferResult);
@@ -153,7 +169,7 @@ export function StoreManager({ sessionId, gamesetId, socket, stores, currencies,
     setEditingStore(store);
     setEditItems(store.items.map((i) => ({
       itemDefinitionId: i.itemDefinition.id,
-      basePrice: i.basePrice,
+      basePrice: { ...((i.basePrice as Record<string, number>) ?? {}) },
       stock: i.stock,
       name: i.itemDefinition.name,
       rarity: i.itemDefinition.rarity,
@@ -163,7 +179,25 @@ export function StoreManager({ sessionId, gamesetId, socket, stores, currencies,
   function addEditItem(item: ItemDefinitionMini) {
     if (editItems.length >= 6) return;
     if (editItems.find((e) => e.itemDefinitionId === item.id)) return;
-    setEditItems((prev) => [...prev, { itemDefinitionId: item.id, basePrice: 0, stock: null, name: item.name, rarity: item.rarity }]);
+    // Default price from item definition
+    const defaultPrice = { ...(item.price ?? {}) };
+    setEditItems((prev) => [...prev, { itemDefinitionId: item.id, basePrice: defaultPrice, stock: null, name: item.name, rarity: item.rarity }]);
+  }
+
+  function setEditItemPrice(idx: number, code: string, value: string) {
+    setEditItems((prev) =>
+      prev.map((it, i) => {
+        if (i !== idx) return it;
+        const next = { ...it.basePrice };
+        const n = parseInt(value);
+        if (isNaN(n) || n <= 0) {
+          delete next[code];
+        } else {
+          next[code] = n;
+        }
+        return { ...it, basePrice: next };
+      })
+    );
   }
 
   async function handleSaveEdit() {
@@ -184,8 +218,10 @@ export function StoreManager({ sessionId, gamesetId, socket, stores, currencies,
 
   async function handleApproveOffer(txId: string) {
     if (!socket || busy) return;
+    // Optimistic kaldırma yapma — server APPROVED veya ERROR ile cevap verecek.
+    // ERROR durumunda teklif listede kalsın ki GM düzeltip tekrar deneyebilsin.
+    setOfferError((prev) => (prev?.txId === txId ? null : prev));
     socket.emit("store:approve_offer", { txId, sessionId });
-    setPendingTxs((prev) => prev.filter((t) => t.id !== txId));
   }
 
   async function handleRejectOffer(txId: string) {
@@ -275,7 +311,7 @@ export function StoreManager({ sessionId, gamesetId, socket, stores, currencies,
                   <div className="mt-2 flex flex-wrap gap-1">
                     {store.items.map((i) => (
                       <span key={i.id} className={`rounded bg-zinc-800 px-1.5 py-0.5 text-[9px] ${RARITY_COLOR[i.itemDefinition.rarity] ?? "text-zinc-300"}`}>
-                        {i.itemDefinition.name} — {currencySymbol}{i.basePrice}
+                        {i.itemDefinition.name} — {formatPrice((i.basePrice as Record<string, number>) ?? {}, currencies)}
                       </span>
                     ))}
                   </div>
@@ -324,24 +360,31 @@ export function StoreManager({ sessionId, gamesetId, socket, stores, currencies,
             </div>
 
             {/* Seçili ürünler */}
-            <div className="space-y-1">
+            <div className="space-y-2">
               {editItems.map((item, idx) => (
-                <div key={item.itemDefinitionId} className="flex items-center gap-2 rounded border border-border bg-void px-2 py-1.5">
-                  <span className={`flex-1 text-[10px] ${RARITY_COLOR[item.rarity] ?? "text-zinc-300"}`}>{item.name}</span>
-                  <div className="flex items-center gap-1">
-                    <span className="text-[9px] text-zinc-500">Fiyat ({currencies[0]?.name ?? "Para"}):</span>
-                    <input
-                      type="number"
-                      min="0"
-                      value={item.basePrice}
-                      onChange={(e) => setEditItems((prev) => prev.map((it, i) => i === idx ? { ...it, basePrice: Math.max(0, parseInt(e.target.value) || 0) } : it))}
-                      className="w-14 rounded border border-border bg-surface px-1.5 py-0.5 text-[10px] text-zinc-200 focus:border-gold-400 focus:outline-none"
-                    />
+                <div key={item.itemDefinitionId} className="rounded border border-border bg-void p-2">
+                  <div className="mb-1.5 flex items-center justify-between gap-2">
+                    <span className={`text-[10px] ${RARITY_COLOR[item.rarity] ?? "text-zinc-300"}`}>{item.name}</span>
+                    <button
+                      onClick={() => setEditItems((prev) => prev.filter((_, i) => i !== idx))}
+                      className="text-[9px] text-zinc-600 hover:text-red-400"
+                    >✕</button>
                   </div>
-                  <button
-                    onClick={() => setEditItems((prev) => prev.filter((_, i) => i !== idx))}
-                    className="text-[9px] text-zinc-600 hover:text-red-400"
-                  >✕</button>
+                  <div className="grid grid-cols-2 gap-1">
+                    {currencies.map((cur) => (
+                      <div key={cur.code} className="flex items-center gap-1 rounded border border-border bg-surface px-1.5 py-0.5">
+                        <span className="text-[10px]">{cur.symbol}</span>
+                        <input
+                          type="number"
+                          min="0"
+                          placeholder="0"
+                          value={item.basePrice[cur.code] ?? ""}
+                          onChange={(e) => setEditItemPrice(idx, cur.code, e.target.value)}
+                          className="w-full bg-transparent text-[10px] text-zinc-200 focus:outline-none"
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ))}
               {editItems.length === 0 && (
@@ -413,11 +456,26 @@ export function StoreManager({ sessionId, gamesetId, socket, stores, currencies,
         {/* ─── TEKLİFLER ─── */}
         {tab === "offers" && (
           <div className="space-y-2">
+            {offerError && (
+              <div className="flex items-start justify-between gap-2 rounded border border-amber-700/60 bg-amber-900/20 px-2 py-1.5 text-[10px] text-amber-300">
+                <span>⚠ Onay başarısız: {offerError.message}</span>
+                <button
+                  onClick={() => setOfferError(null)}
+                  className="text-amber-400 hover:text-amber-200"
+                  aria-label="Hatayı kapat"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
             {pendingTxs.length === 0 ? (
               <p className="py-6 text-center text-[10px] text-zinc-600">Bekleyen teklif yok.</p>
             ) : (
               pendingTxs.map((tx) => (
-                <div key={tx.id} className="rounded border border-gold-900/40 bg-gold-900/10 p-3">
+                <div
+                  key={tx.id}
+                  className={`rounded border p-3 ${offerError?.txId === tx.id ? "border-amber-700/60 bg-amber-900/10" : "border-gold-900/40 bg-gold-900/10"}`}
+                >
                   <div className="mb-1.5 flex items-start justify-between">
                     <div>
                       <p className="text-[10px] font-semibold text-zinc-100">
@@ -429,8 +487,8 @@ export function StoreManager({ sessionId, gamesetId, socket, stores, currencies,
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-[11px] font-bold text-gold-400">{currencySymbol}{tx.offeredPrice}</p>
-                      <p className="text-[9px] text-zinc-600">Taban: {currencySymbol}{tx.storeItem.basePrice}</p>
+                      <p className="text-[11px] font-bold text-gold-400">{formatPrice((tx.offeredPrice as Record<string, number>) ?? {}, currencies)}</p>
+                      <p className="text-[9px] text-zinc-600">Taban: {formatPrice((tx.storeItem.basePrice as Record<string, number>) ?? {}, currencies)}</p>
                     </div>
                   </div>
                   <div className="flex gap-2">

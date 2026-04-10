@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { checkCollision, type GridItem } from "@/lib/inventory-grid";
 
@@ -86,6 +86,20 @@ export function InventoryPanel({
   const [hoverCell, setHoverCell] = useState<{ x: number; y: number } | null>(null);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [busy, setBusy] = useState(false);
+
+  // Merge-sync from props: pick up newly-added items (e.g. store purchase, loot)
+  // and remove items that no longer exist, while preserving local positions for
+  // items already known (so in-flight drag results aren't reverted).
+  useEffect(() => {
+    setItems((prev) => {
+      const prevById = new Map(prev.map((i) => [i.id, i]));
+      const initIds = new Set(initialItems.map((i) => i.id));
+      const kept = prev.filter((i) => initIds.has(i.id));
+      const added = initialItems.filter((i) => !prevById.has(i.id));
+      if (added.length === 0 && kept.length === prev.length) return prev;
+      return [...kept, ...added];
+    });
+  }, [initialItems]);
 
   const canEdit = isOwner || isGm;
   const gridItems = items.filter((i) => !i.isEquipped);

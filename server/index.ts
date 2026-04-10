@@ -646,20 +646,33 @@ io.on("connection", (socket) => {
 
   socket.on(
     "store:offer",
-    async ({ storeId, storeItemId, characterId, offeredPrice }: { storeId: string; storeItemId: string; characterId: string; offeredPrice: number }) => {
+    async ({ storeId, storeItemId, characterId, offeredPrice }: { storeId: string; storeItemId: string; characterId: string; offeredPrice: Record<string, number> }) => {
       const sessionId = socket.data.sessionId;
       if (!sessionId) return;
 
       try {
+        // Sanitize: drop non-positive entries
+        const cleaned: Record<string, number> = {};
+        if (offeredPrice && typeof offeredPrice === "object") {
+          for (const [k, v] of Object.entries(offeredPrice)) {
+            const n = Number(v);
+            if (Number.isFinite(n) && n > 0) cleaned[k] = Math.floor(n);
+          }
+        }
+        if (Object.keys(cleaned).length === 0) {
+          socket.emit("store:offer_error", { message: "En az bir para birimi miktarı girilmelidir." });
+          return;
+        }
+
         const tx = await prisma.pendingTransaction.create({
-          data: { storeId, storeItemId, characterId, offeredPrice, status: "PENDING" },
+          data: { storeId, storeItemId, characterId, offeredPrice: cleaned, status: "PENDING" },
           include: {
             storeItem: { include: { itemDefinition: { select: { id: true, name: true, category: true, rarity: true, gridWidth: true, gridHeight: true } } } },
             character: { select: { id: true, name: true, user: { select: { username: true } } } },
           },
         });
 
-        // Sadece GM'e bildir
+        // Sadece GM'e bildir (room geneli — istemci tarafında GM filter)
         io.to(`session:${sessionId}`).emit("store:new_offer", { transaction: tx });
       } catch (err) {
         console.error("[store:offer]", err);
@@ -684,20 +697,47 @@ io.on("connection", (socket) => {
 
         const wallet = tx.character.wallet;
         const balances = (wallet?.balances as Record<string, number>) ?? {};
-        const primaryCurrency = Object.keys(balances)[0] ?? "gold";
-        const currentAmount = balances[primaryCurrency] ?? 0;
-        if (!wallet || currentAmount < tx.offeredPrice) {
-          socket.emit("store:offer_result", { txId, status: "ERROR", message: "Yetersiz bakiye" });
+        const offered = (tx.offeredPrice as Record<string, number>) ?? {};
+
+        // Multi-currency balance check — broadcast errors to room so the
+        // buyer also sees them; keep the pending tx alive in DB so the GM can
+        // retry after fixing the player's balance.
+        if (!wallet) {
+          io.to(`session:${sid}`).emit("store:offer_result", {
+            txId,
+            status: "ERROR",
+            characterId: tx.characterId,
+            message: "Cüzdan bulunamadı",
+          });
           return;
+        }
+        for (const [code, amount] of Object.entries(offered)) {
+          if ((balances[code] ?? 0) < amount) {
+            io.to(`session:${sid}`).emit("store:offer_result", {
+              txId,
+              status: "ERROR",
+              characterId: tx.characterId,
+              message: `Yetersiz bakiye (${code})`,
+            });
+            return;
+          }
         }
 
         const iDef = tx.storeItem.itemDefinition;
-        const config = { gridW: 10, gridH: 6 };
+
+        // Fetch grid size from session's gameset config
+        const gameSession = await prisma.session.findUnique({
+          where: { id: sid },
+          include: { gameset: { select: { config: true } } },
+        });
+        const cfg = (gameSession?.gameset?.config ?? {}) as Record<string, unknown>;
+        const gridW = typeof cfg.inventoryGridWidth === "number" ? cfg.inventoryGridWidth : 10;
+        const gridH = typeof cfg.inventoryGridHeight === "number" ? cfg.inventoryGridHeight : 6;
 
         const existing = tx.character.inventoryItems.filter((i) => !i.isEquipped);
         let posX = 0, posY = 0, placed = false;
-        outer: for (let y = 0; y <= config.gridH - iDef.gridHeight; y++) {
-          for (let x = 0; x <= config.gridW - iDef.gridWidth; x++) {
+        outer: for (let y = 0; y <= gridH - iDef.gridHeight; y++) {
+          for (let x = 0; x <= gridW - iDef.gridWidth; x++) {
             const collision = existing.some(
               (e) =>
                 x < e.posX + iDef.gridWidth &&
@@ -709,7 +749,12 @@ io.on("connection", (socket) => {
           }
         }
 
-        const newBalances = { ...balances, [primaryCurrency]: currentAmount - tx.offeredPrice };
+        // Multi-currency deduction
+        const newBalances = { ...balances };
+        for (const [code, amount] of Object.entries(offered)) {
+          newBalances[code] = (newBalances[code] ?? 0) - amount;
+        }
+
         const [, newItem] = await prisma.$transaction([
           prisma.characterWallet.update({
             where: { characterId: tx.characterId },
@@ -717,11 +762,19 @@ io.on("connection", (socket) => {
           }),
           prisma.characterInventoryItem.create({
             data: { characterId: tx.characterId, itemDefinitionId: iDef.id, posX: placed ? posX : 0, posY: placed ? posY : 0, quantity: 1 },
+            include: {
+              itemDefinition: {
+                select: { id: true, name: true, description: true, category: true, gridWidth: true, gridHeight: true, equipmentSlot: true, statBonuses: true, rarity: true, iconUrl: true },
+              },
+            },
           }),
           prisma.pendingTransaction.update({ where: { id: txId }, data: { status: "APPROVED" } }),
         ]);
 
+        // Notify room: offer result + wallet sync + inventory sync
         io.to(`session:${sid}`).emit("store:offer_result", { txId, status: "APPROVED", characterId: tx.characterId, newItem });
+        io.to(`session:${sid}`).emit("wallet:updated", { characterId: tx.characterId, balances: newBalances });
+        io.to(`session:${sid}`).emit("inv:item_added", { characterId: tx.characterId, item: newItem });
       } catch (err) {
         console.error("[store:approve_offer]", err);
       }
@@ -742,6 +795,90 @@ io.on("connection", (socket) => {
         io.to(`session:${sid}`).emit("store:offer_result", { txId, status: "REJECTED", characterId: tx.characterId });
       } catch (err) {
         console.error("[store:reject_offer]", err);
+      }
+    }
+  );
+
+  // ─── Combat Log (GM only) ───────────────────────────
+  socket.on(
+    "combat:log_send",
+    async ({ content, targetCharacterIds }: { content: string; targetCharacterIds?: string[] }) => {
+      const sessionId = socket.data.sessionId;
+      if (!sessionId || !content?.trim()) return;
+
+      // Sadece GM'ler gönderebilir
+      if (socket.data.role !== "GM" && socket.data.role !== "ADMIN") {
+        // Ek kontrol: gerçekten bu session'ın GM'i mi?
+        const gameSession = await prisma.session.findUnique({
+          where: { id: sessionId },
+          select: { gmId: true },
+        });
+        if (!gameSession || gameSession.gmId !== socket.data.userId) {
+          socket.emit("combat:log_error", { message: "Sadece GM combat log mesajı gönderebilir." });
+          return;
+        }
+      } else {
+        // GM rolündeki kullanıcı bile bu session'ın GM'i olmayabilir; yine doğrula
+        const gameSession = await prisma.session.findUnique({
+          where: { id: sessionId },
+          select: { gmId: true },
+        });
+        if (!gameSession || gameSession.gmId !== socket.data.userId) {
+          socket.emit("combat:log_error", { message: "Sadece bu oturumun GM'i combat log mesajı gönderebilir." });
+          return;
+        }
+      }
+
+      const cleanedTargets = Array.isArray(targetCharacterIds)
+        ? targetCharacterIds.filter((id) => typeof id === "string" && id.length > 0)
+        : [];
+
+      try {
+        const entry = await prisma.combatLogEntry.create({
+          data: {
+            sessionId,
+            gmUserId: socket.data.userId,
+            content: content.trim().slice(0, 2000),
+            targetCharacterIds: cleanedTargets,
+          },
+        });
+
+        io.to(`session:${sessionId}`).emit("combat:log_entry", {
+          id: entry.id,
+          gmUserId: entry.gmUserId,
+          gmUsername: socket.data.username,
+          content: entry.content,
+          targetCharacterIds: entry.targetCharacterIds,
+          createdAt: entry.createdAt.toISOString(),
+        });
+      } catch (err) {
+        console.error("[combat:log_send]", err);
+        socket.emit("combat:log_error", { message: "Combat log kaydedilemedi." });
+      }
+    }
+  );
+
+  socket.on(
+    "combat:log_delete",
+    async ({ entryId }: { entryId: string }) => {
+      const sessionId = socket.data.sessionId;
+      if (!sessionId || !entryId) return;
+
+      try {
+        const entry = await prisma.combatLogEntry.findUnique({
+          where: { id: entryId },
+          select: { sessionId: true, session: { select: { gmId: true } } },
+        });
+        if (!entry || entry.sessionId !== sessionId) return;
+        if (entry.session.gmId !== socket.data.userId) {
+          socket.emit("combat:log_error", { message: "Sadece bu oturumun GM'i silebilir." });
+          return;
+        }
+
+        await prisma.combatLogEntry.delete({ where: { id: entryId } });
+        io.to(`session:${sessionId}`).emit("combat:log_deleted", { entryId });
+      } catch (err) {
+        console.error("[combat:log_delete]", err);
       }
     }
   );

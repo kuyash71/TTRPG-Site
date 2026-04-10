@@ -233,7 +233,7 @@ export default async function SessionPage({
         isActive: s.isActive,
         items: s.items.map((i) => ({
           id: i.id,
-          basePrice: i.basePrice,
+          basePrice: (i.basePrice as Record<string, number>) ?? {},
           stock: i.stock,
           itemDefinition: {
             id: i.itemDefinition.id,

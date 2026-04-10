@@ -96,6 +96,7 @@ model User {
   diceRolls        DiceRoll[]
   characters       Character[]
   approvalRequests CharacterApprovalRequest[]
+  combatLogEntries CombatLogEntry[] @relation("combat_log_gm")
 
   @@map("users")
 }
@@ -149,6 +150,7 @@ model Session {
   lootItems        SessionLootItem[]
   stores           Store[]
   moneyTransfers   MoneyTransfer[]
+  combatLogEntries CombatLogEntry[]
 
   @@map("sessions")
 }
@@ -197,6 +199,23 @@ model DiceRoll {
 
   @@index([sessionId, createdAt])
   @@map("dice_rolls")
+}
+
+// ─── Sprint 9: Combat / Action Log ──────────────────────
+
+model CombatLogEntry {
+  id                 String   @id @default(uuid()) @db.Uuid
+  sessionId          String   @map("session_id") @db.Uuid
+  gmUserId           String   @map("gm_user_id") @db.Uuid
+  content            String
+  targetCharacterIds String[] @default([]) @map("target_character_ids") @db.Uuid
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  gmUser  User    @relation("combat_log_gm", fields: [gmUserId], references: [id])
+
+  @@index([sessionId, createdAt])
+  @@map("combat_log_entries")
 }
 
 // ─── Sprint 4: Characters ───────────────────────────────
@@ -470,7 +489,7 @@ model StoreItem {
   id               String   @id @default(uuid()) @db.Uuid
   storeId          String   @map("store_id") @db.Uuid
   itemDefinitionId String   @map("item_definition_id") @db.Uuid
-  basePrice        Int      @default(0) @map("base_price")
+  basePrice        Json     @default("{}") @map("base_price") // { "gold": 10, "silver": 5 }
   stock            Int?
 
   store          Store                @relation(fields: [storeId], references: [id], onDelete: Cascade)
@@ -485,7 +504,7 @@ model PendingTransaction {
   storeId      String   @map("store_id") @db.Uuid
   storeItemId  String   @map("store_item_id") @db.Uuid
   characterId  String   @map("character_id") @db.Uuid
-  offeredPrice Int      @map("offered_price")
+  offeredPrice Json     @default("{}") @map("offered_price") // { "gold": 10, "silver": 5 }
   status       String   @default("PENDING")
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
 

@@ -213,6 +213,13 @@ export function CharacterDetailPanel({
   const [walletDraft, setWalletDraft] = useState<Record<string, number>>({});
   const [walletSaving, setWalletSaving] = useState(false);
 
+  // Re-sync local wallet when parent character prop updates (e.g. wallet:updated socket event)
+  useEffect(() => {
+    if (!walletEditing) {
+      setWalletBalances(character.walletBalances ?? {});
+    }
+  }, [character.walletBalances, walletEditing]);
+
   // Money transfer
   const [showTransfer, setShowTransfer] = useState(false);
   const [transferTarget, setTransferTarget] = useState("");

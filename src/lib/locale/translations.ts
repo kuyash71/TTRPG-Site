@@ -155,8 +155,25 @@ export const translations = {
     en: "Your character request was rejected.",
   },
   "room.chatTab": { tr: "Sohbet", en: "Chat" },
+  "room.combatLogTab": { tr: "Combat Log", en: "Combat Log" },
   "room.playersTab": { tr: "Oyuncular", en: "Players" },
   "room.diceTab": { tr: "Zar", en: "Dice" },
+
+  // ─── Combat Log ────────────────────────────────────────
+  "combatLog.title": { tr: "Combat Log", en: "Combat Log" },
+  "combatLog.empty": {
+    tr: "Henüz combat log girdisi yok. GM bir şey yazınca burada görünecek.",
+    en: "No combat log entries yet. GM messages will appear here.",
+  },
+  "combatLog.placeholder": {
+    tr: "Combat olayı yaz... (örn: Aragorn orkun başına 12 hasar verdi)",
+    en: "Write a combat event... (e.g. Aragorn dealt 12 damage to the orc)",
+  },
+  "combatLog.gmOnly": { tr: "Sadece GM yazabilir", en: "GM only" },
+  "combatLog.filter": { tr: "Filtre", en: "Filter" },
+  "combatLog.filterAll": { tr: "Tümü", en: "All" },
+  "combatLog.targets": { tr: "Hedefler", en: "Targets" },
+  "combatLog.delete": { tr: "Sil", en: "Delete" },
 
   // ─── Chat ──────────────────────────────────────────────
   "chat.ic": { tr: "Karakter Olarak", en: "In-Character" },

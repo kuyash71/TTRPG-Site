@@ -55,13 +55,19 @@ export async function POST(
   if (!character) return NextResponse.json({ error: "No character" }, { status: 403 });
 
   const body = await req.json();
-  const { storeItemId, offeredPrice } = body as { storeItemId: string; offeredPrice: number };
+  const { storeItemId, offeredPrice } = body as { storeItemId: string; offeredPrice: Record<string, number> };
 
-  if (!storeItemId || offeredPrice == null)
+  if (!storeItemId || !offeredPrice || typeof offeredPrice !== "object")
     return NextResponse.json({ error: "storeItemId and offeredPrice required" }, { status: 400 });
 
-  if (offeredPrice < 0)
-    return NextResponse.json({ error: "offeredPrice must be >= 0" }, { status: 400 });
+  // Sanitize: drop non-positive entries
+  const cleaned: Record<string, number> = {};
+  for (const [k, v] of Object.entries(offeredPrice)) {
+    const n = Number(v);
+    if (Number.isFinite(n) && n > 0) cleaned[k] = Math.floor(n);
+  }
+  if (Object.keys(cleaned).length === 0)
+    return NextResponse.json({ error: "Offer must contain at least one currency amount" }, { status: 400 });
 
   // Mağaza ürünü var mı ve storeId uyuşuyor mu?
   const storeItem = await prisma.storeItem.findFirst({
@@ -75,7 +81,7 @@ export async function POST(
       storeId,
       storeItemId,
       characterId: character.id,
-      offeredPrice,
+      offeredPrice: cleaned,
       status: "PENDING",
     },
     include: {

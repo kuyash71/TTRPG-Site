@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSocket } from "@/hooks/use-socket";
 import { ChatPanel } from "./chat-panel";
+import { CombatLogPanel } from "./combat-log-panel";
 import { DicePanel } from "./dice-panel";
 import { PlayerList } from "./player-list";
 import { ApprovalPanel } from "./approval-panel";
@@ -126,7 +127,7 @@ export function SessionRoom({
   inviteCode,
   gm,
   players,
-  characters,
+  characters: charactersProp,
   skillTreeNodes,
   hpSystem,
   realisticHpStates,
@@ -146,7 +147,16 @@ export function SessionRoom({
   const { t } = useLocale();
   const router = useRouter();
   const { socket, connected } = useSocket(sessionId);
-  const [mobileTab, setMobileTab] = useState<"chat" | "players" | "dice" | "character" | "myChar">("chat");
+
+  // Local mutable state for characters so wallet/inventory updates re-render
+  const [characters, setCharacters] = useState<CharacterInfo[]>(charactersProp);
+
+  // Re-sync when prop changes (e.g. after router.refresh())
+  useEffect(() => {
+    setCharacters(charactersProp);
+  }, [charactersProp]);
+  const [mobileTab, setMobileTab] = useState<"chat" | "combatLog" | "players" | "dice" | "character" | "myChar">("chat");
+  const [centerChatTab, setCenterChatTab] = useState<"chat" | "combatLog">("chat");
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   const [detailViewUserId, setDetailViewUserId] = useState<string | null>(null);
   const [isPendingApproval, setIsPendingApproval] = useState(pendingApproval);
@@ -160,7 +170,7 @@ export function SessionRoom({
   const [activeStore, setActiveStore] = useState<StoreData | null>(initialStores.find((s) => s.isActive) ?? null);
   const [showStoreManager, setShowStoreManager] = useState(false);
   const [showStorePanel, setShowStorePanel] = useState(false);
-  const [myOfferResults, setMyOfferResults] = useState<Record<string, "APPROVED" | "REJECTED">>({});
+  const [myOfferResults, setMyOfferResults] = useState<Record<string, { status: "APPROVED" | "REJECTED" | "ERROR"; message?: string }>>({});
   const [showLootAdd, setShowLootAdd] = useState(false);
   const [lootAddSearch, setLootAddSearch] = useState("");
   const [lootGamesetItems, setLootGamesetItems] = useState<{ id: string; name: string; category: string; rarity: string }[]>([]);
@@ -217,22 +227,57 @@ export function SessionRoom({
       setStores((prev) => prev.map((s) => s.id === storeId ? { ...s, isActive: false } : s));
       setShowStorePanel(false);
     }
-    function handleOfferResult({ txId, status, characterId: cid }: { txId: string; status: "APPROVED" | "REJECTED"; characterId: string }) {
-      if (cid === myCharacter?.id) {
-        setMyOfferResults((prev) => ({ ...prev, [txId]: status }));
-        if (status === "APPROVED") router.refresh();
-      }
+    function handleOfferResult({ txId, status, characterId: cid, message }: { txId: string; status: "APPROVED" | "REJECTED" | "ERROR"; characterId: string; message?: string }) {
+      // Track result against my character for the toast/result panel
+      setCharacters((prev) => {
+        const myChar = prev.find((c) => c.userId === currentUser.id);
+        if (cid === myChar?.id) {
+          setMyOfferResults((r) => ({ ...r, [txId]: { status, message } }));
+        }
+        return prev;
+      });
     }
     socket.on("store:activated", handleStoreActivated);
     socket.on("store:deactivated", handleStoreDeactivated);
     socket.on("store:offer_result", handleOfferResult);
 
-    // Wallet updates
+    // Wallet updates — functional setState so we always update the latest state
     function handleWalletUpdated({ characterId, balances }: { characterId: string; balances: Record<string, number> }) {
-      const char = characters.find((c) => c.id === characterId);
-      if (char) char.walletBalances = balances;
+      setCharacters((prev) =>
+        prev.map((c) => (c.id === characterId ? { ...c, walletBalances: balances } : c))
+      );
     }
     socket.on("wallet:updated", handleWalletUpdated);
+
+    // Inventory item added (from store purchase, GM gift, etc.)
+    function handleItemAdded({ characterId, item }: { characterId: string; item: { id: string; posX: number; posY: number; quantity: number; isEquipped?: boolean; equippedSlot?: string | null; itemDefinition: { name: string; description: string | null; category: string; equipmentSlot: string | null; rarity: string; statBonuses: unknown; gridWidth: number; gridHeight: number } } }) {
+      if (!item || !item.itemDefinition) return;
+      setCharacters((prev) =>
+        prev.map((c) => {
+          if (c.id !== characterId) return c;
+          // Skip if item already in inventory (e.g. local optimistic update)
+          if ((c.inventoryItems ?? []).some((i) => i.id === item.id)) return c;
+          const newInvItem: InventoryItemInfo = {
+            id: item.id,
+            name: item.itemDefinition.name,
+            description: item.itemDefinition.description,
+            category: item.itemDefinition.category,
+            equipmentSlot: item.itemDefinition.equipmentSlot,
+            rarity: item.itemDefinition.rarity,
+            statBonuses: (item.itemDefinition.statBonuses as Record<string, number>) ?? {},
+            gridWidth: item.itemDefinition.gridWidth,
+            gridHeight: item.itemDefinition.gridHeight,
+            posX: item.posX,
+            posY: item.posY,
+            quantity: item.quantity,
+            isEquipped: item.isEquipped ?? false,
+            equippedSlot: item.equippedSlot ?? null,
+          };
+          return { ...c, inventoryItems: [...(c.inventoryItems ?? []), newInvItem] };
+        })
+      );
+    }
+    socket.on("inv:item_added", handleItemAdded);
 
     return () => {
       socket.off("session:character_approved", handleApproved);
@@ -242,6 +287,7 @@ export function SessionRoom({
       socket.off("store:deactivated", handleStoreDeactivated);
       socket.off("store:offer_result", handleOfferResult);
       socket.off("wallet:updated", handleWalletUpdated);
+      socket.off("inv:item_added", handleItemAdded);
     };
   }, [socket, currentUser.id, currentUser.isGm, router]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -491,12 +537,51 @@ export function SessionRoom({
                 </div>
               </div>
             ) : (
-              <ChatPanel
-                sessionId={sessionId}
-                socket={socket}
-                connected={connected}
-                currentUser={currentUser}
-              />
+              <div className="flex h-full min-h-0 flex-col">
+                {/* Chat / Combat Log tab toggle */}
+                <div className="flex shrink-0 border-b border-border bg-surface">
+                  <button
+                    onClick={() => setCenterChatTab("chat")}
+                    className={`flex items-center gap-1.5 px-4 py-2 text-xs font-medium transition-colors ${
+                      centerChatTab === "chat"
+                        ? "border-b-2 border-lavender-400 text-lavender-400"
+                        : "text-zinc-500 hover:text-zinc-300"
+                    }`}
+                  >
+                    <Icon name="chat" size={14} />
+                    {t("room.chatTab")}
+                  </button>
+                  <button
+                    onClick={() => setCenterChatTab("combatLog")}
+                    className={`flex items-center gap-1.5 px-4 py-2 text-xs font-medium transition-colors ${
+                      centerChatTab === "combatLog"
+                        ? "border-b-2 border-red-400 text-red-400"
+                        : "text-zinc-500 hover:text-zinc-300"
+                    }`}
+                  >
+                    <Icon name="skull" size={14} />
+                    {t("room.combatLogTab")}
+                  </button>
+                </div>
+                <div className="flex min-h-0 flex-1 flex-col">
+                  {centerChatTab === "chat" ? (
+                    <ChatPanel
+                      sessionId={sessionId}
+                      socket={socket}
+                      connected={connected}
+                      currentUser={currentUser}
+                    />
+                  ) : (
+                    <CombatLogPanel
+                      sessionId={sessionId}
+                      socket={socket}
+                      connected={connected}
+                      currentUser={currentUser}
+                      characters={characters.map((c) => ({ id: c.id, name: c.name, userId: c.userId }))}
+                    />
+                  )}
+                </div>
+              </div>
             )}
           </div>
 
@@ -508,6 +593,15 @@ export function SessionRoom({
                 socket={socket}
                 connected={connected}
                 currentUser={currentUser}
+              />
+            )}
+            {mobileTab === "combatLog" && (
+              <CombatLogPanel
+                sessionId={sessionId}
+                socket={socket}
+                connected={connected}
+                currentUser={currentUser}
+                characters={characters.map((c) => ({ id: c.id, name: c.name, userId: c.userId }))}
               />
             )}
             {mobileTab === "players" && (
@@ -662,6 +756,7 @@ export function SessionRoom({
       <nav className="flex border-t border-border bg-surface md:hidden">
         {([
           { key: "chat" as const, label: t("room.chatTab"), icon: "chat" },
+          { key: "combatLog" as const, label: t("room.combatLogTab"), icon: "skull" },
           { key: "players" as const, label: t("room.playersTab"), icon: "user" },
           { key: "dice" as const, label: t("room.diceTab"), icon: "d20" },
           ...(!currentUser.isGm && myCharacter

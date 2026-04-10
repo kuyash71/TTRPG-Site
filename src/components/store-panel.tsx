@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Socket } from "socket.io-client";
 import type { StoreData } from "./store-manager";
 import type { CurrencyDef } from "@/types/gameset-config";
@@ -28,27 +28,81 @@ interface Props {
   socket: Socket | null;
   currencies: CurrencyDef[];
   onClose: () => void;
-  myOfferResults: Record<string, "APPROVED" | "REJECTED">; // txId → sonuç
+  myOfferResults: Record<string, { status: "APPROVED" | "REJECTED" | "ERROR"; message?: string }>; // txId → sonuç
+}
+
+function formatPrice(price: Record<string, number>, currencies: CurrencyDef[]): string {
+  const parts: string[] = [];
+  for (const cur of currencies) {
+    const amount = price[cur.code];
+    if (amount && amount > 0) parts.push(`${amount}${cur.symbol}`);
+  }
+  return parts.length ? parts.join(" ") : "—";
 }
 
 export function StorePanel({ store, characterId, socket, currencies, onClose, myOfferResults }: Props) {
-  const currencySymbol = currencies[0]?.symbol ?? "🪙";
-  const [offerPrices, setOfferPrices] = useState<Record<string, string>>({});
+  // offerPrices[storeItemId][currencyCode] = string input
+  const [offerPrices, setOfferPrices] = useState<Record<string, Record<string, string>>>({});
   const [submittedItems, setSubmittedItems] = useState<string[]>([]);
+  const [pendingTxByItem, setPendingTxByItem] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
+
+  // store:new_offer'ı dinleyerek storeItemId → txId mapping'i kur
+  // (server txId'yi üretiyor, biz player olarak room broadcast'ından yakalıyoruz)
+  useEffect(() => {
+    if (!socket) return;
+    function handleNewOffer({ transaction }: { transaction: { id: string; storeItemId: string; characterId: string } }) {
+      if (transaction.characterId !== characterId) return;
+      setPendingTxByItem((prev) => ({ ...prev, [transaction.storeItemId]: transaction.id }));
+    }
+    socket.on("store:new_offer", handleNewOffer);
+    return () => {
+      socket.off("store:new_offer", handleNewOffer);
+    };
+  }, [socket, characterId]);
+
+  // ERROR sonucunda submit kilidini aç ki oyuncu yeniden teklif verebilsin
+  useEffect(() => {
+    setSubmittedItems((prev) => {
+      if (prev.length === 0) return prev;
+      const erroredItemIds = new Set<string>();
+      for (const [itemId, txId] of Object.entries(pendingTxByItem)) {
+        const result = myOfferResults[txId];
+        if (result?.status === "ERROR") erroredItemIds.add(itemId);
+      }
+      if (erroredItemIds.size === 0) return prev;
+      return prev.filter((id) => !erroredItemIds.has(id));
+    });
+  }, [myOfferResults, pendingTxByItem]);
+
+  function setOfferAmount(storeItemId: string, code: string, value: string) {
+    setOfferPrices((prev) => ({
+      ...prev,
+      [storeItemId]: { ...(prev[storeItemId] ?? {}), [code]: value },
+    }));
+  }
+
+  function getOfferRecord(storeItemId: string): Record<string, number> {
+    const raw = offerPrices[storeItemId] ?? {};
+    const out: Record<string, number> = {};
+    for (const [code, str] of Object.entries(raw)) {
+      const n = parseInt(str);
+      if (!isNaN(n) && n > 0) out[code] = n;
+    }
+    return out;
+  }
 
   async function handleOffer(storeItemId: string) {
     if (!socket || busy) return;
-    const priceStr = offerPrices[storeItemId] ?? "";
-    const price = parseInt(priceStr);
-    if (isNaN(price) || price < 0) return;
+    const offered = getOfferRecord(storeItemId);
+    if (Object.keys(offered).length === 0) return;
 
     setBusy(true);
     socket.emit("store:offer", {
       storeId: store.id,
       storeItemId,
       characterId,
-      offeredPrice: price,
+      offeredPrice: offered,
     });
     setSubmittedItems((prev) => [...prev, storeItemId]);
     setBusy(false);
@@ -73,6 +127,8 @@ export function StorePanel({ store, characterId, socket, currencies, onClose, my
           <div className="space-y-3">
             {store.items.map((item) => {
               const isSubmitted = submittedItems.includes(item.id);
+              const basePrice = (item.basePrice as Record<string, number>) ?? {};
+              const hasAnyAmount = Object.keys(getOfferRecord(item.id)).length > 0;
 
               return (
                 <div
@@ -89,7 +145,7 @@ export function StorePanel({ store, characterId, socket, currencies, onClose, my
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-[11px] font-bold text-gold-400">{currencySymbol}{item.basePrice}</p>
+                      <p className="text-[11px] font-bold text-gold-400">{formatPrice(basePrice, currencies)}</p>
                       <p className="text-[9px] text-zinc-600">Taban fiyat</p>
                     </div>
                   </div>
@@ -99,23 +155,30 @@ export function StorePanel({ store, characterId, socket, currencies, onClose, my
                       Teklifiniz GM&apos;e iletildi...
                     </div>
                   ) : (
-                    <div className="flex gap-2">
-                      <div className="flex flex-1 items-center gap-1 rounded border border-border bg-surface px-2 py-1">
-                        <span className="text-[9px] text-zinc-500">Teklifiniz:</span>
-                        <input
-                          type="number"
-                          min="0"
-                          placeholder={String(item.basePrice)}
-                          value={offerPrices[item.id] ?? ""}
-                          onChange={(e) => setOfferPrices((prev) => ({ ...prev, [item.id]: e.target.value }))}
-                          className="flex-1 bg-transparent text-[10px] text-zinc-200 focus:outline-none"
-                        />
-                        <span className="text-[9px] text-gold-400">{currencySymbol}</span>
+                    <div className="space-y-1.5">
+                      <p className="text-[9px] uppercase tracking-wide text-zinc-500">Teklifiniz</p>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        {currencies.map((cur) => (
+                          <div
+                            key={cur.code}
+                            className="flex items-center gap-1 rounded border border-border bg-surface px-2 py-1"
+                          >
+                            <span className="text-[10px]">{cur.symbol}</span>
+                            <input
+                              type="number"
+                              min="0"
+                              placeholder={String(basePrice[cur.code] ?? 0)}
+                              value={offerPrices[item.id]?.[cur.code] ?? ""}
+                              onChange={(e) => setOfferAmount(item.id, cur.code, e.target.value)}
+                              className="w-full bg-transparent text-[10px] text-zinc-200 focus:outline-none"
+                            />
+                          </div>
+                        ))}
                       </div>
                       <button
                         onClick={() => handleOffer(item.id)}
-                        disabled={busy || !(offerPrices[item.id]?.trim())}
-                        className="rounded bg-gold-400 px-3 py-1 text-[10px] font-medium text-void hover:bg-gold-500 disabled:opacity-40"
+                        disabled={busy || !hasAnyAmount}
+                        className="w-full rounded bg-gold-400 px-3 py-1.5 text-[10px] font-medium text-void hover:bg-gold-500 disabled:opacity-40"
                       >
                         Teklif Ver
                       </button>
@@ -132,14 +195,25 @@ export function StorePanel({ store, characterId, socket, currencies, onClose, my
       {Object.keys(myOfferResults).length > 0 && (
         <div className="border-t border-border p-3">
           <p className="mb-1 text-[9px] font-semibold uppercase tracking-wide text-zinc-500">Sonuçlar</p>
-          {Object.entries(myOfferResults).map(([txId, status]) => (
-            <div
-              key={txId}
-              className={`mb-1 rounded px-2 py-1 text-[10px] ${status === "APPROVED" ? "bg-green-900/30 text-green-400" : "bg-red-900/30 text-red-400"}`}
-            >
-              {status === "APPROVED" ? "✓ Teklifiniz kabul edildi! Eşya envanterinize eklendi." : "✗ Teklifiniz reddedildi."}
-            </div>
-          ))}
+          {Object.entries(myOfferResults).map(([txId, result]) => {
+            const cls =
+              result.status === "APPROVED"
+                ? "bg-green-900/30 text-green-400"
+                : result.status === "ERROR"
+                  ? "bg-amber-900/30 text-amber-300"
+                  : "bg-red-900/30 text-red-400";
+            const text =
+              result.status === "APPROVED"
+                ? "✓ Teklifiniz kabul edildi! Eşya envanterinize eklendi."
+                : result.status === "ERROR"
+                  ? `⚠ Hata: ${result.message ?? "Bilinmeyen hata"}`
+                  : "✗ Teklifiniz reddedildi.";
+            return (
+              <div key={txId} className={`mb-1 rounded px-2 py-1 text-[10px] ${cls}`}>
+                {text}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

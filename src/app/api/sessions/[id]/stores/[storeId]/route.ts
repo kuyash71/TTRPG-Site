@@ -3,6 +3,16 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
+function sanitizePrice(price: unknown): Record<string, number> {
+  if (!price || typeof price !== "object") return {};
+  const out: Record<string, number> = {};
+  for (const [k, v] of Object.entries(price as Record<string, unknown>)) {
+    const n = Number(v);
+    if (Number.isFinite(n) && n > 0) out[k] = Math.floor(n);
+  }
+  return out;
+}
+
 // PATCH /api/sessions/[id]/stores/[storeId] — GM mağazayı günceller (isim, aktiflik, ürünler)
 export async function PATCH(
   req: Request,
@@ -35,12 +45,12 @@ export async function PATCH(
   if (body.items !== undefined) {
     await prisma.storeItem.deleteMany({ where: { storeId } });
     await prisma.storeItem.createMany({
-      data: (body.items as { itemDefinitionId: string; basePrice: number; stock?: number | null }[])
+      data: (body.items as { itemDefinitionId: string; basePrice: Record<string, number>; stock?: number | null }[])
         .slice(0, 6)
         .map((i) => ({
           storeId,
           itemDefinitionId: i.itemDefinitionId,
-          basePrice: Math.max(0, i.basePrice ?? 0),
+          basePrice: sanitizePrice(i.basePrice),
           stock: i.stock ?? null,
         })),
     });

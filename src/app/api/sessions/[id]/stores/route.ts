@@ -3,6 +3,17 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
+// Drop non-numeric / non-positive entries from a price record
+function sanitizePrice(price: unknown): Record<string, number> {
+  if (!price || typeof price !== "object") return {};
+  const out: Record<string, number> = {};
+  for (const [k, v] of Object.entries(price as Record<string, unknown>)) {
+    const n = Number(v);
+    if (Number.isFinite(n) && n > 0) out[k] = Math.floor(n);
+  }
+  return out;
+}
+
 // GET /api/sessions/[id]/stores — Session'ın mağazalarını listele
 export async function GET(
   _req: Request,
@@ -72,7 +83,7 @@ export async function POST(
   const body = await req.json();
   const { name, items = [] } = body as {
     name: string;
-    items: { itemDefinitionId: string; basePrice: number; stock?: number | null }[];
+    items: { itemDefinitionId: string; basePrice: Record<string, number>; stock?: number | null }[];
   };
 
   if (!name?.trim()) return NextResponse.json({ error: "name required" }, { status: 400 });
@@ -84,7 +95,7 @@ export async function POST(
       items: {
         create: items.slice(0, 6).map((i) => ({
           itemDefinitionId: i.itemDefinitionId,
-          basePrice: Math.max(0, i.basePrice ?? 0),
+          basePrice: sanitizePrice(i.basePrice),
           stock: i.stock ?? null,
         })),
       },
