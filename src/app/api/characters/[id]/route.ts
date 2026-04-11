@@ -69,7 +69,19 @@ export async function PATCH(
   }
 
   const body = await req.json();
-  const { name, avatarUrl, publicData, privateData, stats, wallet } = body;
+  const { name, avatarUrl, publicData, privateData, stats, wallet, level, skillPoints } = body;
+
+  // Level/skillPoints are GM-only and clamped to [1, maxLevel]
+  let levelUpdate: number | undefined;
+  let skillPointsUpdate: number | undefined;
+  if (isGm && typeof level === "number") {
+    const n = Math.floor(level);
+    if (Number.isFinite(n) && n >= 1) levelUpdate = n;
+  }
+  if (isGm && typeof skillPoints === "number") {
+    const n = Math.floor(skillPoints);
+    if (Number.isFinite(n) && n >= 0) skillPointsUpdate = n;
+  }
 
   // Update character base fields
   const updated = await prisma.character.update({
@@ -79,6 +91,8 @@ export async function PATCH(
       ...(avatarUrl !== undefined && { avatarUrl }),
       ...(publicData !== undefined && { publicData }),
       ...((isOwner || isGm) && privateData !== undefined && { privateData }),
+      ...(levelUpdate !== undefined && { level: levelUpdate }),
+      ...(skillPointsUpdate !== undefined && { skillPoints: skillPointsUpdate }),
     },
     include: { stats: true, wallet: true, user: { select: { username: true } } },
   });

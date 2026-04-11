@@ -123,7 +123,9 @@ export default async function SessionPage({
       equipmentSlotsEnabled={config.equipmentSlotsEnabled}
       inventoryCapacityStat={config.inventoryCapacityStat}
       inventoryCapacityRowsPerPoint={config.inventoryCapacityRowsPerPoint}
-      characters={gameSession.characters.map((c) => ({
+      characters={gameSession.characters.map((c) => {
+        const canSeePrivate = isGm || c.userId === session.user.id;
+        return ({
         id: c.id,
         userId: c.user.id,
         name: c.name,
@@ -132,9 +134,10 @@ export default async function SessionPage({
         className: c.class?.name ?? null,
         raceName: c.race?.name ?? null,
         level: c.level,
+        skillPoints: c.skillPoints,
         walletBalances: (c.wallet?.balances as Record<string, number>) ?? {},
         publicData: c.publicData as Record<string, unknown>,
-        privateData: c.privateData as Record<string, unknown>,
+        privateData: (canSeePrivate ? c.privateData : {}) as Record<string, unknown>,
         stats: c.stats.map((s) => ({
           name: s.name,
           baseValue: s.baseValue,
@@ -183,7 +186,8 @@ export default async function SessionPage({
             requiredLevel: s.spellDefinition.requiredLevel,
           },
         })),
-      }))}
+      });
+      })}
       skillTreeNodes={gameSession.gameset.skillTreeNodes.map((n) => ({
         id: n.id,
         name: n.name,

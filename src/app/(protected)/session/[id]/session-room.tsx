@@ -58,6 +58,7 @@ interface CharacterInfo {
   className: string | null;
   raceName: string | null;
   level: number;
+  skillPoints?: number;
   walletBalances: Record<string, number>;
   publicData: Record<string, unknown>;
   privateData: Record<string, unknown>;

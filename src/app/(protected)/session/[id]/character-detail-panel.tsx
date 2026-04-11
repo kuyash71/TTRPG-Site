@@ -73,6 +73,7 @@ interface CharacterInfo {
   className: string | null;
   raceName: string | null;
   level: number;
+  skillPoints?: number;
   walletBalances: Record<string, number>;
   publicData: Record<string, unknown>;
   privateData: Record<string, unknown>;
@@ -195,11 +196,32 @@ export function CharacterDetailPanel({
 
   const customFields: CustomFieldEntry[] = getCustomFields(character.publicData, character.privateData, canSeeAll);
 
-  // GM stat editing
+  // GM/Owner stat editing
   const [editMode, setEditMode] = useState(false);
   const [statChanges, setStatChanges] = useState<Record<string, number>>({});
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+
+  // Level editing (GM only)
+  const [levelSaving, setLevelSaving] = useState(false);
+
+  // Notebook editing
+  const initialPublicNotes = typeof character.publicData?.notebook === "string" ? (character.publicData.notebook as string) : "";
+  const initialPrivateNotes = typeof character.privateData?.notebook === "string" ? (character.privateData.notebook as string) : "";
+  const [publicNotesDraft, setPublicNotesDraft] = useState(initialPublicNotes);
+  const [privateNotesDraft, setPrivateNotesDraft] = useState(initialPrivateNotes);
+  const [publicNotesSaving, setPublicNotesSaving] = useState(false);
+  const [privateNotesSaving, setPrivateNotesSaving] = useState(false);
+
+  // Re-sync notebook drafts when character prop updates (e.g. after router.refresh)
+  useEffect(() => {
+    const pub = typeof character.publicData?.notebook === "string" ? (character.publicData.notebook as string) : "";
+    setPublicNotesDraft(pub);
+  }, [character.publicData]);
+  useEffect(() => {
+    const priv = typeof character.privateData?.notebook === "string" ? (character.privateData.notebook as string) : "";
+    setPrivateNotesDraft(priv);
+  }, [character.privateData]);
 
   // Realistic HP state for GM
   const [realisticHpValue, setRealisticHpValue] = useState<string>(() => {
@@ -250,8 +272,8 @@ export function CharacterDetailPanel({
     };
   }, [socket, character.id]);
 
-  // Tabs: stats | skills | inventory | spells
-  const [tab, setTab] = useState<"stats" | "skills" | "inventory" | "spells">("stats");
+  // Tabs: stats | skills | inventory | spells | notes
+  const [tab, setTab] = useState<"stats" | "skills" | "inventory" | "spells" | "notes">("stats");
   const [skillViewMode, setSkillViewMode] = useState<"list" | "map">("list");
 
   // GM item giving
@@ -386,6 +408,69 @@ export function CharacterDetailPanel({
     setSaving(false);
   }
 
+  async function handleLevelChange(delta: number) {
+    if (!isGm || levelSaving) return;
+    const nextLevel = Math.max(1, character.level + delta);
+    if (nextLevel === character.level) return;
+    setLevelSaving(true);
+    const res = await fetch(`/api/characters/${character.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ level: nextLevel }),
+    });
+    if (res.ok) {
+      showToast(delta > 0 ? `Seviye ${nextLevel}` : `Seviye ${nextLevel}`);
+      if (socket) {
+        socket.emit("character:update", {
+          characterId: character.id,
+          stats: [{ name: "level", currentValue: nextLevel }],
+        });
+      }
+      router.refresh();
+    } else {
+      showToast("Hata oluştu");
+    }
+    setLevelSaving(false);
+  }
+
+  async function savePublicNotes() {
+    if (publicNotesSaving) return;
+    setPublicNotesSaving(true);
+    const res = await fetch(`/api/characters/${character.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        publicData: { ...character.publicData, notebook: publicNotesDraft },
+      }),
+    });
+    if (res.ok) {
+      showToast("Not kaydedildi");
+      router.refresh();
+    } else {
+      showToast("Hata oluştu");
+    }
+    setPublicNotesSaving(false);
+  }
+
+  async function savePrivateNotes() {
+    if (privateNotesSaving) return;
+    setPrivateNotesSaving(true);
+    const res = await fetch(`/api/characters/${character.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        privateData: { ...character.privateData, notebook: privateNotesDraft },
+      }),
+    });
+    if (res.ok) {
+      showToast("Özel not kaydedildi");
+      router.refresh();
+    } else {
+      showToast("Hata oluştu");
+    }
+    setPrivateNotesSaving(false);
+  }
+
   async function updateRealisticHp(newState: string) {
     setRealisticHpValue(newState);
     const res = await fetch(`/api/characters/${character.id}`, {
@@ -427,6 +512,7 @@ export function CharacterDetailPanel({
     ...(hasSkills ? [{ key: "skills" as const, label: "Kabiliyetler", icon: "scroll" }] : []),
     ...((inventoryItems.length > 0 || canSeeAll) ? [{ key: "inventory" as const, label: "Envanter", icon: "Inventory" }] : []),
     ...(spells.length > 0 ? [{ key: "spells" as const, label: "Büyüler", icon: "Spellbook" }] : []),
+    { key: "notes" as const, label: "Notlar", icon: "scroll" },
   ];
 
   return (
@@ -474,9 +560,39 @@ export function CharacterDetailPanel({
             {character.className}
           </span>
         )}
-        <span className="rounded bg-surface-raised px-2 py-1 text-xs text-zinc-400">
-          Lv {character.level}
-        </span>
+        {isGm ? (
+          <div className="flex items-center gap-1 rounded bg-surface-raised px-2 py-1 text-xs text-zinc-300">
+            <button
+              onClick={() => handleLevelChange(-1)}
+              disabled={levelSaving || character.level <= 1}
+              className="rounded px-1 text-red-400 hover:bg-red-900/30 disabled:opacity-30"
+              title="Seviye azalt"
+            >
+              −
+            </button>
+            <span className="min-w-[40px] text-center font-semibold">Lv {character.level}</span>
+            <button
+              onClick={() => handleLevelChange(1)}
+              disabled={levelSaving}
+              className="rounded px-1 text-green-400 hover:bg-green-900/30 disabled:opacity-30"
+              title="Seviye artır"
+            >
+              +
+            </button>
+          </div>
+        ) : (
+          <span className="rounded bg-surface-raised px-2 py-1 text-xs text-zinc-400">
+            Lv {character.level}
+          </span>
+        )}
+        {typeof character.skillPoints === "number" && character.skillPoints > 0 && canSeeAll && (
+          <span
+            className="rounded bg-lavender-900/30 px-2 py-1 text-xs text-lavender-300"
+            title="Harcanabilir yetenek puanı"
+          >
+            ✦ {character.skillPoints} puan
+          </span>
+        )}
       </div>
 
       {/* HP System Display */}
@@ -637,7 +753,75 @@ export function CharacterDetailPanel({
             </div>
           )}
 
-          {/* Save / Cancel buttons */}
+          {/* Attributes */}
+          {attributeStats.length > 0 && (
+            <div className="mb-4">
+              <div className="mb-1 flex items-center justify-between">
+                <h4 className="text-[10px] font-semibold text-zinc-500">Nitelikler</h4>
+                {(isGm || isOwn) && !editMode && (
+                  <button
+                    onClick={() => setEditMode(true)}
+                    className="flex items-center gap-0.5 text-[9px] text-lavender-400 hover:text-lavender-300"
+                  >
+                    <Icon name="Editpen" size={10} /> Düzenle
+                  </button>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
+                {attributeStats.map((stat) => {
+                  const hidden = !stat.isPublic && !canSeeAll;
+                  const currentVal = statChanges[stat.name] ?? stat.currentValue;
+                  return (
+                    <div
+                      key={stat.name}
+                      className="rounded border border-border bg-void px-2 py-1"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] text-zinc-400">{stat.name}</span>
+                        <span className="font-mono text-xs font-bold text-zinc-100">
+                          {hidden ? "XXX" : currentVal}
+                        </span>
+                      </div>
+                      {editMode && !hidden && (
+                        <div className="mt-1 flex items-center justify-center gap-1">
+                          <button
+                            onClick={() => handleStatDelta(stat.name, -1, stat.maxValue)}
+                            className="rounded bg-red-900/30 px-1.5 py-0.5 text-[9px] text-red-400 hover:bg-red-900/50"
+                          >
+                            −1
+                          </button>
+                          <button
+                            onClick={() => handleStatDelta(stat.name, 1, stat.maxValue)}
+                            className="rounded bg-green-900/30 px-1.5 py-0.5 text-[9px] text-green-400 hover:bg-green-900/50"
+                          >
+                            +1
+                          </button>
+                          {isGm && (
+                            <>
+                              <button
+                                onClick={() => handleStatDelta(stat.name, -5, stat.maxValue)}
+                                className="rounded bg-red-900/30 px-1.5 py-0.5 text-[9px] text-red-400 hover:bg-red-900/50"
+                              >
+                                −5
+                              </button>
+                              <button
+                                onClick={() => handleStatDelta(stat.name, 5, stat.maxValue)}
+                                className="rounded bg-green-900/30 px-1.5 py-0.5 text-[9px] text-green-400 hover:bg-green-900/50"
+                              >
+                                +5
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Save / Cancel buttons — shared between resource + attribute edits */}
           {editMode && (
             <div className="mb-4 flex gap-2">
               <button
@@ -653,29 +837,6 @@ export function CharacterDetailPanel({
               >
                 İptal
               </button>
-            </div>
-          )}
-
-          {/* Attributes */}
-          {attributeStats.length > 0 && (
-            <div className="mb-4">
-              <h4 className="mb-1 text-[10px] font-semibold text-zinc-500">Nitelikler</h4>
-              <div className="grid grid-cols-2 gap-1.5">
-                {attributeStats.map((stat) => {
-                  const hidden = !stat.isPublic && !canSeeAll;
-                  return (
-                    <div
-                      key={stat.name}
-                      className="flex items-center justify-between rounded border border-border bg-void px-2 py-1"
-                    >
-                      <span className="text-[10px] text-zinc-400">{stat.name}</span>
-                      <span className="font-mono text-xs font-bold text-zinc-100">
-                        {hidden ? "XXX" : stat.currentValue}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
             </div>
           )}
 
@@ -1202,6 +1363,74 @@ export function CharacterDetailPanel({
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ─── NOTES TAB ─── */}
+      {tab === "notes" && (
+        <div className="space-y-4">
+          {/* Public notes — everyone can read, owner + GM can edit */}
+          <div>
+            <div className="mb-1 flex items-center justify-between">
+              <h4 className="flex items-center gap-1 text-[10px] font-semibold text-zinc-500">
+                <Icon name="scroll" size={12} /> Herkese Açık Not
+              </h4>
+              {canSeeAll && publicNotesDraft !== initialPublicNotes && (
+                <button
+                  onClick={savePublicNotes}
+                  disabled={publicNotesSaving}
+                  className="rounded bg-lavender-400 px-2 py-0.5 text-[9px] font-medium text-void hover:bg-lavender-500 disabled:opacity-50"
+                >
+                  {publicNotesSaving ? "..." : "Kaydet"}
+                </button>
+              )}
+            </div>
+            {canSeeAll ? (
+              <textarea
+                value={publicNotesDraft}
+                onChange={(e) => setPublicNotesDraft(e.target.value)}
+                placeholder="Herkesin görebileceği notlar... (örn. karakter özellikleri, açık geçmiş)"
+                rows={6}
+                className="w-full resize-y rounded border border-border bg-void px-2 py-1.5 text-[11px] leading-relaxed text-zinc-200 placeholder-zinc-600 focus:border-lavender-400 focus:outline-none"
+              />
+            ) : publicNotesDraft ? (
+              <div className="whitespace-pre-wrap rounded border border-border bg-void px-2 py-1.5 text-[11px] leading-relaxed text-zinc-300">
+                {publicNotesDraft}
+              </div>
+            ) : (
+              <p className="py-2 text-center text-[10px] text-zinc-600">Henüz açık not yok.</p>
+            )}
+          </div>
+
+          {/* Private notes — owner + GM only */}
+          {canSeeAll && (
+            <div>
+              <div className="mb-1 flex items-center justify-between">
+                <h4 className="flex items-center gap-1 text-[10px] font-semibold text-zinc-500">
+                  <Icon name="scroll" size={12} /> Özel Not
+                  <span className="rounded bg-red-900/30 px-1 py-0.5 text-[8px] text-red-400">
+                    {isOwn ? "Sen + GM" : "Karakter sahibi + GM"}
+                  </span>
+                </h4>
+                {privateNotesDraft !== initialPrivateNotes && (
+                  <button
+                    onClick={savePrivateNotes}
+                    disabled={privateNotesSaving}
+                    className="rounded bg-lavender-400 px-2 py-0.5 text-[9px] font-medium text-void hover:bg-lavender-500 disabled:opacity-50"
+                  >
+                    {privateNotesSaving ? "..." : "Kaydet"}
+                  </button>
+                )}
+              </div>
+              <textarea
+                value={privateNotesDraft}
+                onChange={(e) => setPrivateNotesDraft(e.target.value)}
+                placeholder="Sadece sen ve GM'in görebileceği notlar... (örn. gizli motivasyonlar, GM ile paylaşılan bilgiler)"
+                rows={6}
+                className="w-full resize-y rounded border border-red-900/40 bg-red-950/10 px-2 py-1.5 text-[11px] leading-relaxed text-zinc-200 placeholder-zinc-600 focus:border-red-500/60 focus:outline-none"
+              />
             </div>
           )}
         </div>
