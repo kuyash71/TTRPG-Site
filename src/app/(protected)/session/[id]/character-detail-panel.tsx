@@ -364,9 +364,6 @@ export function CharacterDetailPanel({
     return characterClassNodes.filter((n) => unlockedMap.has(n.id));
   }, [characterClassNodes, unlockedMap]);
 
-  const commonUnlockedNodes = useMemo(() => unlockedNodes.filter((n) => !n.classId), [unlockedNodes]);
-  const classUnlockedNodes = useMemo(() => unlockedNodes.filter((n) => !!n.classId), [unlockedNodes]);
-
   function handleStatDelta(statName: string, delta: number, maxValue: number | null) {
     const current = statChanges[statName] ?? character.stats.find((s) => s.name === statName)?.currentValue ?? 0;
     let newVal = current + delta;
@@ -406,6 +403,28 @@ export function CharacterDetailPanel({
       showToast("Hata oluştu");
     }
     setSaving(false);
+  }
+
+  // Skill unlock (owner + GM)
+  const [unlockingNodeId, setUnlockingNodeId] = useState<string | null>(null);
+
+  async function handleUnlockSkill(nodeId: string) {
+    if (!(isOwn || isGm) || unlockingNodeId) return;
+    setUnlockingNodeId(nodeId);
+    const res = await fetch(`/api/characters/${character.id}/skill-unlock`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nodeId }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      showToast(`Seviye ${data.newLevel} · Kalan: ${data.remainingPoints}`);
+      router.refresh();
+    } else {
+      const err = await res.json().catch(() => ({ error: "Hata oluştu" }));
+      showToast(err.error ?? "Hata oluştu");
+    }
+    setUnlockingNodeId(null);
   }
 
   async function handleLevelChange(delta: number) {
@@ -938,65 +957,121 @@ export function CharacterDetailPanel({
           </div>
 
           {skillViewMode === "list" ? (
-            <div className="space-y-3">
-              {unlockedNodes.length === 0 && (
-                <p className="py-4 text-center text-[10px] text-zinc-600">
-                  Açılmış kabiliyet yok.
-                </p>
-              )}
-              {commonUnlockedNodes.length > 0 && (
-                <div>
-                  <h5 className="mb-1 border-b border-border pb-0.5 text-[9px] font-semibold text-zinc-400">
-                    Ortak Ağaç
-                  </h5>
-                  <div className="space-y-1">
-                    {commonUnlockedNodes.map((node) => (
-                      <div
-                        key={node.id}
-                        className="flex items-center justify-between rounded border border-gold-400/30 bg-gold-900/10 px-2 py-1"
-                      >
-                        <div>
+            (() => {
+              const canEditSkills = isOwn || isGm;
+              const availablePoints = character.skillPoints ?? 0;
+              const renderNode = (node: typeof characterClassNodes[number], accent: "common" | "class") => {
+                const currentNodeLevel = unlockedMap.get(node.id) ?? 0;
+                const isUnlocked = currentNodeLevel > 0;
+                const isMaxed = currentNodeLevel >= node.maxLevel;
+                const meetsLevel = character.level >= node.unlockLevel;
+                const meetsPrereqs = node.prerequisites.every((pid) => unlockedMap.has(pid));
+                const canAfford = availablePoints >= node.costPerLevel;
+                const canUnlock = canEditSkills && !isMaxed && meetsLevel && meetsPrereqs && canAfford;
+
+                let blockReason: string | null = null;
+                if (isMaxed) blockReason = "Maksimum";
+                else if (!meetsLevel) blockReason = `Lv ${node.unlockLevel} gerekli`;
+                else if (!meetsPrereqs) blockReason = "Ön koşul eksik";
+                else if (!canAfford) blockReason = "Puan yetmiyor";
+
+                const borderCls =
+                  accent === "class"
+                    ? isUnlocked ? "border-lavender-400/40 bg-lavender-900/10" : "border-border bg-void"
+                    : isUnlocked ? "border-gold-400/40 bg-gold-900/10" : "border-border bg-void";
+                const levelColor = accent === "class" ? "text-lavender-400" : "text-gold-400";
+
+                return (
+                  <div key={node.id} className={`rounded border ${borderCls} px-2 py-1.5`}>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1">
                           <span className="text-[10px] font-medium text-zinc-100">{node.name}</span>
-                          {node.description && (
-                            <p className="text-[9px] text-zinc-500">{node.description}</p>
+                          {node.nodeType === "SPELL_UNLOCK" && (
+                            <span className="rounded bg-blue-900/40 px-1 py-0.5 text-[8px] text-blue-300">Büyü</span>
                           )}
                         </div>
-                        <span className="font-mono text-[10px] text-gold-400">
-                          Lv {unlockedMap.get(node.id) ?? 0}/{node.maxLevel}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {classUnlockedNodes.length > 0 && (
-                <div>
-                  <h5 className="mb-1 border-b border-gold-900/30 pb-0.5 text-[9px] font-semibold text-gold-400">
-                    Sınıf Ağacı
-                  </h5>
-                  <div className="space-y-1">
-                    {classUnlockedNodes.map((node) => (
-                      <div
-                        key={node.id}
-                        className="flex items-center justify-between rounded border border-lavender-400/30 bg-lavender-900/10 px-2 py-1"
-                      >
-                        <div>
-                          <span className="text-[10px] font-medium text-zinc-100">{node.name}</span>
-                          {node.description && (
-                            <p className="text-[9px] text-zinc-500">{node.description}</p>
-                          )}
+                        {node.description && (
+                          <p className="mt-0.5 text-[9px] leading-tight text-zinc-500">{node.description}</p>
+                        )}
+                        <div className="mt-0.5 flex flex-wrap gap-1.5 text-[8px] text-zinc-600">
+                          <span>Maliyet: {node.costPerLevel}</span>
+                          <span>Min Lv: {node.unlockLevel}</span>
                         </div>
-                        <span className="font-mono text-[10px] text-lavender-400">
-                          Lv {unlockedMap.get(node.id) ?? 0}/{node.maxLevel}
-                        </span>
                       </div>
-                    ))}
+                      <div className="flex flex-col items-end gap-1">
+                        <span className={`font-mono text-[10px] ${levelColor}`}>
+                          {currentNodeLevel}/{node.maxLevel}
+                        </span>
+                        {canEditSkills && !isMaxed && (
+                          <button
+                            onClick={() => handleUnlockSkill(node.id)}
+                            disabled={!canUnlock || unlockingNodeId === node.id}
+                            className="rounded bg-lavender-400 px-2 py-0.5 text-[9px] font-medium text-void hover:bg-lavender-500 disabled:bg-zinc-800 disabled:text-zinc-600"
+                            title={blockReason ?? `-${node.costPerLevel} puan`}
+                          >
+                            {unlockingNodeId === node.id ? "..." : isUnlocked ? "+1" : "Aç"}
+                          </button>
+                        )}
+                        {isMaxed && (
+                          <span className="rounded bg-green-900/30 px-1.5 py-0.5 text-[8px] text-green-400">Maks.</span>
+                        )}
+                      </div>
+                    </div>
                   </div>
+                );
+              };
+
+              return (
+                <div className="space-y-3">
+                  {canEditSkills && (
+                    <div className="flex items-center justify-between rounded border border-lavender-400/30 bg-lavender-900/10 px-2 py-1">
+                      <span className="text-[10px] text-zinc-400">Harcanabilir puan</span>
+                      <span className="font-mono text-[11px] font-semibold text-lavender-300">
+                        ✦ {availablePoints}
+                      </span>
+                    </div>
+                  )}
+                  {characterClassNodes.length === 0 && (
+                    <p className="py-4 text-center text-[10px] text-zinc-600">
+                      Skill ağacı tanımlanmamış.
+                    </p>
+                  )}
+                  {commonSkillNodes.length > 0 && (
+                    <div>
+                      <h5 className="mb-1 border-b border-border pb-0.5 text-[9px] font-semibold text-zinc-400">
+                        Ortak Ağaç
+                      </h5>
+                      <div className="space-y-1">
+                        {commonSkillNodes.map((node) => renderNode(node, "common"))}
+                      </div>
+                    </div>
+                  )}
+                  {classSkillNodes.length > 0 && (
+                    <div>
+                      <h5 className="mb-1 border-b border-lavender-900/30 pb-0.5 text-[9px] font-semibold text-lavender-400">
+                        Sınıf Ağacı
+                      </h5>
+                      <div className="space-y-1">
+                        {classSkillNodes.map((node) => renderNode(node, "class"))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              );
+            })()
           ) : (
             <div className="space-y-3">
+              {(isOwn || isGm) && (
+                <div className="flex items-center justify-between rounded border border-lavender-400/30 bg-lavender-900/10 px-2 py-1">
+                  <span className="text-[10px] text-zinc-400">
+                    Harcanabilir puan — node&apos;a tıklayıp puan harcayabilirsin
+                  </span>
+                  <span className="font-mono text-[11px] font-semibold text-lavender-300">
+                    ✦ {character.skillPoints ?? 0}
+                  </span>
+                </div>
+              )}
               {commonSkillNodes.length > 0 && (
                 <div>
                   <h5 className="mb-1 text-[9px] font-semibold text-zinc-400">Ortak Ağaç</h5>
@@ -1004,6 +1079,7 @@ export function CharacterDetailPanel({
                     <SkillTreeViewer
                       nodes={commonSkillNodes as Parameters<typeof SkillTreeViewer>[0]["nodes"]}
                       unlockedMap={unlockedMap}
+                      onNodeClick={(isOwn || isGm) ? handleUnlockSkill : undefined}
                       preventScrolling={false}
                     />
                   </div>
@@ -1016,6 +1092,7 @@ export function CharacterDetailPanel({
                     <SkillTreeViewer
                       nodes={classSkillNodes as Parameters<typeof SkillTreeViewer>[0]["nodes"]}
                       unlockedMap={unlockedMap}
+                      onNodeClick={(isOwn || isGm) ? handleUnlockSkill : undefined}
                       preventScrolling={false}
                     />
                   </div>
