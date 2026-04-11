@@ -205,6 +205,18 @@ export function CharacterDetailPanel({
   // Level editing (GM only)
   const [levelSaving, setLevelSaving] = useState(false);
 
+  // Optimistic overrides for level and skillPoints — give instant feedback
+  // even if router.refresh() is slow or the server-component data is cached.
+  // Cleared automatically when the parent pushes updated props for this character.
+  const [levelOverride, setLevelOverride] = useState<number | null>(null);
+  const [skillPointsOverride, setSkillPointsOverride] = useState<number | null>(null);
+  useEffect(() => {
+    setLevelOverride(null);
+    setSkillPointsOverride(null);
+  }, [character.id, character.level, character.skillPoints]);
+  const displayLevel = levelOverride ?? character.level;
+  const displaySkillPoints = skillPointsOverride ?? character.skillPoints ?? 0;
+
   // Notebook editing
   const initialPublicNotes = typeof character.publicData?.notebook === "string" ? (character.publicData.notebook as string) : "";
   const initialPrivateNotes = typeof character.privateData?.notebook === "string" ? (character.privateData.notebook as string) : "";
@@ -418,6 +430,8 @@ export function CharacterDetailPanel({
     });
     if (res.ok) {
       const data = await res.json();
+      // Optimistically update skillPoints so the UI reflects spending immediately.
+      setSkillPointsOverride(data.remainingPoints);
       showToast(`Seviye ${data.newLevel} · Kalan: ${data.remainingPoints}`);
       router.refresh();
     } else {
@@ -439,6 +453,9 @@ export function CharacterDetailPanel({
       });
       if (res.ok) {
         const data = await res.json();
+        // Optimistic local update — don't wait for router.refresh()
+        setLevelOverride(data.newLevel);
+        setSkillPointsOverride(data.skillPoints);
         showToast(`Seviye ${data.newLevel} · +${data.addedPoints} puan (toplam ${data.skillPoints})`);
         if (socket) {
           socket.emit("character:update", {
@@ -454,8 +471,8 @@ export function CharacterDetailPanel({
     } else {
       // Seviye düşürme — PATCH ile sadece level. skillPoints'e dokunmuyoruz
       // çünkü oyuncu o puanları zaten harcamış olabilir.
-      const nextLevel = Math.max(1, character.level + delta);
-      if (nextLevel === character.level) {
+      const nextLevel = Math.max(1, (levelOverride ?? character.level) + delta);
+      if (nextLevel === (levelOverride ?? character.level)) {
         setLevelSaving(false);
         return;
       }
@@ -465,6 +482,7 @@ export function CharacterDetailPanel({
         body: JSON.stringify({ level: nextLevel }),
       });
       if (res.ok) {
+        setLevelOverride(nextLevel);
         showToast(`Seviye ${nextLevel}`);
         if (socket) {
           socket.emit("character:update", {
@@ -612,13 +630,13 @@ export function CharacterDetailPanel({
           <div className="flex items-center gap-1 rounded bg-surface-raised px-2 py-1 text-xs text-zinc-300">
             <button
               onClick={() => handleLevelChange(-1)}
-              disabled={levelSaving || character.level <= 1}
+              disabled={levelSaving || displayLevel <= 1}
               className="rounded px-1 text-red-400 hover:bg-red-900/30 disabled:opacity-30"
               title="Seviye azalt"
             >
               −
             </button>
-            <span className="min-w-[40px] text-center font-semibold">Lv {character.level}</span>
+            <span className="min-w-[40px] text-center font-semibold">Lv {displayLevel}</span>
             <button
               onClick={() => handleLevelChange(1)}
               disabled={levelSaving}
@@ -630,15 +648,15 @@ export function CharacterDetailPanel({
           </div>
         ) : (
           <span className="rounded bg-surface-raised px-2 py-1 text-xs text-zinc-400">
-            Lv {character.level}
+            Lv {displayLevel}
           </span>
         )}
-        {typeof character.skillPoints === "number" && character.skillPoints > 0 && canSeeAll && (
+        {displaySkillPoints > 0 && canSeeAll && (
           <span
             className="rounded bg-lavender-900/30 px-2 py-1 text-xs text-lavender-300"
             title="Harcanabilir yetenek puanı"
           >
-            ✦ {character.skillPoints} puan
+            ✦ {displaySkillPoints} puan
           </span>
         )}
       </div>
@@ -988,12 +1006,12 @@ export function CharacterDetailPanel({
           {skillViewMode === "list" ? (
             (() => {
               const canEditSkills = isOwn || isGm;
-              const availablePoints = character.skillPoints ?? 0;
+              const availablePoints = displaySkillPoints;
               const renderNode = (node: typeof characterClassNodes[number], accent: "common" | "class") => {
                 const currentNodeLevel = unlockedMap.get(node.id) ?? 0;
                 const isUnlocked = currentNodeLevel > 0;
                 const isMaxed = currentNodeLevel >= node.maxLevel;
-                const meetsLevel = character.level >= node.unlockLevel;
+                const meetsLevel = displayLevel >= node.unlockLevel;
                 const meetsPrereqs = node.prerequisites.every((pid) => unlockedMap.has(pid));
                 const canAfford = availablePoints >= node.costPerLevel;
                 const canUnlock = canEditSkills && !isMaxed && meetsLevel && meetsPrereqs && canAfford;
@@ -1097,7 +1115,7 @@ export function CharacterDetailPanel({
                     Harcanabilir puan — node&apos;a tıklayıp puan harcayabilirsin
                   </span>
                   <span className="font-mono text-[11px] font-semibold text-lavender-300">
-                    ✦ {character.skillPoints ?? 0}
+                    ✦ {displaySkillPoints}
                   </span>
                 </div>
               )}
