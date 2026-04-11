@@ -429,26 +429,55 @@ export function CharacterDetailPanel({
 
   async function handleLevelChange(delta: number) {
     if (!isGm || levelSaving) return;
-    const nextLevel = Math.max(1, character.level + delta);
-    if (nextLevel === character.level) return;
+    if (delta === 0) return;
     setLevelSaving(true);
-    const res = await fetch(`/api/characters/${character.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ level: nextLevel }),
-    });
-    if (res.ok) {
-      showToast(delta > 0 ? `Seviye ${nextLevel}` : `Seviye ${nextLevel}`);
-      if (socket) {
-        socket.emit("character:update", {
-          characterId: character.id,
-          stats: [{ name: "level", currentValue: nextLevel }],
-        });
+
+    if (delta > 0) {
+      // Seviye artışı — level-up endpoint skillPoints de veriyor (config.skillPointsPerLevel)
+      const res = await fetch(`/api/characters/${character.id}/level-up`, {
+        method: "POST",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        showToast(`Seviye ${data.newLevel} · +${data.addedPoints} puan (toplam ${data.skillPoints})`);
+        if (socket) {
+          socket.emit("character:update", {
+            characterId: character.id,
+            stats: [{ name: "level", currentValue: data.newLevel }],
+          });
+        }
+        router.refresh();
+      } else {
+        const err = await res.json().catch(() => ({ error: "Hata oluştu" }));
+        showToast(err.error ?? "Hata oluştu");
       }
-      router.refresh();
     } else {
-      showToast("Hata oluştu");
+      // Seviye düşürme — PATCH ile sadece level. skillPoints'e dokunmuyoruz
+      // çünkü oyuncu o puanları zaten harcamış olabilir.
+      const nextLevel = Math.max(1, character.level + delta);
+      if (nextLevel === character.level) {
+        setLevelSaving(false);
+        return;
+      }
+      const res = await fetch(`/api/characters/${character.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ level: nextLevel }),
+      });
+      if (res.ok) {
+        showToast(`Seviye ${nextLevel}`);
+        if (socket) {
+          socket.emit("character:update", {
+            characterId: character.id,
+            stats: [{ name: "level", currentValue: nextLevel }],
+          });
+        }
+        router.refresh();
+      } else {
+        showToast("Hata oluştu");
+      }
     }
+
     setLevelSaving(false);
   }
 
