@@ -135,7 +135,15 @@ h3 {
   @apply bg-danger/15 text-danger;
 }
 .prose-shz .stat-name {
-  @apply font-semibold text-accent;
+  @apply cursor-help font-semibold text-accent;
+}
+/* tıklanınca açıklama balonu açılan sözlük terimleri (Corruption, Cower…) */
+.prose-shz .term {
+  @apply cursor-help underline decoration-warn/60 decoration-dotted underline-offset-[3px];
+}
+.prose-shz .term:hover,
+.prose-shz .stat-name:hover {
+  @apply text-warn;
 }
 .prose-shz .dice {
   @apply rounded bg-surface2 px-1 font-mono text-[0.9em] text-ink;

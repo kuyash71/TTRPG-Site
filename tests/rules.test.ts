@@ -135,7 +135,23 @@ test("İçerik zenginleştirme stat etkilerini işaretler", () => {
   assert.match(h, /stat-mod pos">\+2 Rede/);
   assert.match(h, /stat-mod neg">−1 Korp/);
   assert.match(h, /class="dice">d20/);
-  assert.match(h, /stat-name">Krach/);
+  assert.match(h, /class="stat-name" data-tip-kind="stats" data-tip-key="krach"[^>]*>Krach/);
+});
+
+test("İçerik zenginleştirme sözlük terimlerini tıklanabilir yapar", () => {
+  const h = enrichContent('<p>Corruption artar, Cower olursun; Death Save Throw atarsın. <a href="#x">Ubermann</a></p>');
+  assert.match(h, /data-tip-key="corruption"[^>]*>Corruption</);
+  assert.match(h, /data-tip-key="cower"[^>]*>Cower</);
+  assert.match(h, /data-tip-key="death-save"[^>]*>Death Save Throw</);
+  assert.doesNotMatch(h, /data-tip-key="uber"/);
+});
+
+test("ipuçları: tüm yetenek, augment, perk ve ağaçların Türkçe karşılığı var", async () => {
+  const { tipFor } = await import("../src/lib/shz/tips");
+  for (const k of Object.keys(data.abilities)) assert.ok(tipFor("abilities", k)?.meaning, k);
+  for (const a of data.augments) assert.ok(tipFor("augments", a.key)?.summary, a.key);
+  for (const p of data.perks) assert.ok(tipFor("perks", p.key)?.summary, p.key);
+  for (const t of data.trees) assert.ok(tipFor("trees", t.key)?.summary, t.key);
 });
 
 // ---- Kriegsversehrt ve başlangıç augment'i

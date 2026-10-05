@@ -2,9 +2,10 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { PageGlyph, TreeIcon } from "@/components/content/icons";
 import { cx } from "@/components/ui";
 
-export function RulesNav({ groups }: { groups: { title: string; items: { href: string; label: string }[] }[] }) {
+export function RulesNav({ groups }: { groups: { title: string; items: { href: string; label: string; icon?: string; tree?: string }[] }[] }) {
   const path = usePathname();
   const router = useRouter();
   const [q, setQ] = useState("");
@@ -34,8 +35,13 @@ export function RulesNav({ groups }: { groups: { title: string; items: { href: s
                     <Link
                       href={i.href}
                       onClick={() => setOpen(false)}
-                      className={cx("block rounded-md px-2 py-1.5 text-sm transition", active ? "bg-accent/15 text-ink" : "text-muted hover:bg-surface2 hover:text-ink")}
+                      className={cx("flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition", active ? "bg-accent/15 text-ink" : "text-muted hover:bg-surface2 hover:text-ink")}
                     >
+                      {i.tree ? (
+                        <TreeIcon treeKey={i.tree} className="h-5 w-5 rounded-md" />
+                      ) : (
+                        <span className="grid h-5 w-5 place-items-center text-accent">{i.icon && <PageGlyph page={i.icon} className="h-4 w-4" />}</span>
+                      )}
                       {i.label}
                     </Link>
                   </li>

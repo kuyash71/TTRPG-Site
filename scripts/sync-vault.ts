@@ -444,8 +444,16 @@ for (const t of rawTrees) {
     for (const [key, txt] of secs) {
       if (key === "AÇIKLAMA") continue;
       if (key.startsWith("SEVİYE ETK")) {
-        for (const lm of txt.matchAll(/^\*\*SEVİYE\s*(\d+)\*\*\s*:?\s*(.*)$/gm))
-          levelEffects.push({ level: Number(lm[1]), html: inline(lm[2]) });
+        // Seviye metni birden fazla satıra yayılabilir: bir sonraki "**SEVİYE n**" başlığına kadar her şey o seviyeye aittir.
+        const marks = [...txt.matchAll(/^\*\*SEVİYE\s*(\d+)\*\*\s*:?[ \t]*/gm)];
+        marks.forEach((m, i) => {
+          const end = i + 1 < marks.length ? marks[i + 1].index! : txt.length;
+          const body = txt
+            .slice(m.index! + m[0].length, end)
+            .trim()
+            .replace(/\s*\n\s*/g, " ");
+          levelEffects.push({ level: Number(m[1]), html: inline(body) });
+        });
         continue;
       }
       if (key === "SİNERJİ")

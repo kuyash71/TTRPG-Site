@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AugmentCard } from "@/components/content/cards";
+import { PageIcon } from "@/components/content/icons";
 import { PageHeader } from "@/components/ui";
 import { content } from "@/lib/shz/content";
 
@@ -10,7 +11,15 @@ export default function AugmentsPage() {
   const tiers = ["T1", "T2", "T3"] as const;
   return (
     <div>
-      <PageHeader kicker="Örnekler" title="Augmentasyonlar">
+      <PageHeader
+        kicker="Örnekler"
+        title={
+          <span className="flex items-center gap-3">
+            <PageIcon page="augmentler" />
+            Augmentasyonlar
+          </span>
+        }
+      >
         Augment kullanma becerisi Klang ile ölçülür; her uzuv slotuna 1 augment takılabilir. T1 augmentler hafif ve yaygın, T3 augmentler güçlü ama ağır bedellidir. Stat etkileri karakter
         kağıdında otomatik hesaplanır.
       </PageHeader>

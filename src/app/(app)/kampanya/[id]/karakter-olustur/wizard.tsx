@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { AbilityCard, AugmentCard, Html, PerkCard, branchLabel } from "@/components/content/cards";
 import { TreeIcon } from "@/components/content/icons";
+import { Meaning, TipButton } from "@/components/content/tip";
 import { useAction } from "@/components/interactive";
 import { Badge, Button, Card, Field, cx } from "@/components/ui";
 import { api } from "@/lib/client";
@@ -208,7 +209,11 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
                     <div className="flex items-center gap-4">
                       <TreeIcon treeKey={t.key} className="h-14 w-14" />
                       <div>
-                        <p className="font-serif text-xl text-ink">{t.name}</p>
+                        <p className="flex items-center gap-2 font-serif text-xl text-ink">
+                          {t.name}
+                          <TipButton kind="trees" id={t.key} title={t.name} />
+                        </p>
+                        <Meaning kind="trees" id={t.key} className="block" />
                         <p className="text-xs text-muted">
                           Ağaç stat&apos;ı: <span className="text-accent">{STAT_LABELS[t.stat]}</span> (+2)
                         </p>

@@ -1,6 +1,6 @@
 {
- "generatedAt": "2026-10-04T17:01:04.000Z",
- "hash": "aed01155ab66",
+ "generatedAt": "2026-10-05T16:39:52.365Z",
+ "hash": "b380b5719701",
  "docs": [
   {
    "key": "temel-kurallar",
@@ -1906,7 +1906,7 @@
    "levelEffects": [
     {
      "level": 1,
-     "html": "Bir ceset üzerinde d20 + Wissen atarsın. "
+     "html": "Bir ceset üzerinde d20 + Wissen atarsın. <strong>Kolay</strong>: ölüm sebebini öğrenirsin. <strong>Orta</strong>: son anlarından bir görüntü görürsün. <strong>Zor</strong>: GM'in evet/hayır ile cevaplayacağı bir soru sorarsın."
     },
     {
      "level": 2,
@@ -1934,7 +1934,7 @@
     "verhormeister"
    ],
    "flavorHtml": "<p>Ölüler konuşmaz. Ama hatırlarlar.</p>",
-   "searchText": "extracio aus ss schwarzesonne aktif yok totenkult bir ceset üzerinde d20 + wissen atarsın. zor sonuçta 2 soru sorabilirsin. zor veya daha yüksek eşikli denemelerde +1 corruption. bu yeteneğin zarları kara büyü zarıdır; corruption kaynaklı kara büyü etkileri uygulanır. verhörmeister ile: ölüden öğrenilen bilgiyle sorgulanan kişinin zarlarına -2. ölüler konuşmaz. ama hatırlarlar."
+   "searchText": "extracio aus ss schwarzesonne aktif yok totenkult bir ceset üzerinde d20 + wissen atarsın. kolay : ölüm sebebini öğrenirsin. orta : son anlarından bir görüntü görürsün. zor : gm'in evet/hayır ile cevaplayacağı bir soru sorarsın. zor sonuçta 2 soru sorabilirsin. zor veya daha yüksek eşikli denemelerde +1 corruption. bu yeteneğin zarları kara büyü zarıdır; corruption kaynaklı kara büyü etkileri uygulanır. verhörmeister ile: ölüden öğrenilen bilgiyle sorgulanan kişinin zarlarına -2. ölüler konuşmaz. ama hatırlarlar."
   },
   "kluger-kopf": {
    "key": "kluger-kopf",
@@ -2040,7 +2040,7 @@
    "levelEffects": [
     {
      "level": 1,
-     "html": "Görüş alanındaki bir hedefi (kendin dahil) boşluk rünü ile işaretlersin: "
+     "html": "Görüş alanındaki bir hedefi (kendin dahil) boşluk rünü ile işaretlersin: d20 + Wissen ≥ Orta. Başarıda hedef 1 tur boyunca yara almaz."
     },
     {
      "level": 2,
@@ -2065,7 +2065,7 @@
    ],
    "synergies": [],
    "flavorHtml": "<p>Yeni Düzen ile gelen rün sanatı. Boşluğun işaretini taşıyana hiçbir şey dokunamaz.</p>",
-   "searchText": "siegel der leere schwarzesonne aktif wissen 3 runen görüş alanındaki bir hedefi (kendin dahil) boşluk rünü ile işaretlersin: 2 tur. 3 tur. her kullanımda +1 corruption. çatışma başına 1 kez. bu yeteneğin zarları kara büyü zarıdır; corruption kaynaklı kara büyü etkileri uygulanır. yeni düzen ile gelen rün sanatı. boşluğun işaretini taşıyana hiçbir şey dokunamaz."
+   "searchText": "siegel der leere schwarzesonne aktif wissen 3 runen görüş alanındaki bir hedefi (kendin dahil) boşluk rünü ile işaretlersin: d20 + wissen ≥ orta. başarıda hedef 1 tur boyunca yara almaz. 2 tur. 3 tur. her kullanımda +1 corruption. çatışma başına 1 kez. bu yeteneğin zarları kara büyü zarıdır; corruption kaynaklı kara büyü etkileri uygulanır. yeni düzen ile gelen rün sanatı. boşluğun işaretini taşıyana hiçbir şey dokunamaz."
   },
   "siegel-der-verdamm": {
    "key": "siegel-der-verdamm",
@@ -2092,7 +2092,7 @@
    "levelEffects": [
     {
      "level": 1,
-     "html": "Lanetlinin rününü canlı bir hedefin bir uzvuna, etine çizersin. Hedef etkisiz ya da boğuşma halinde olmalıdır (değilse önce Orta eşikli bir Krach veya Agil zarı). "
+     "html": "Lanetlinin rününü canlı bir hedefin bir uzvuna, etine çizersin. Hedef etkisiz ya da boğuşma halinde olmalıdır (değilse önce Orta eşikli bir Krach veya Agil zarı). Ardından d20 + Wissen ≥ Orta. Başarıda rünlü uzvun yarası her turun sonunda 1 kademe ilerler; 2 tur sürer."
     },
     {
      "level": 2,
@@ -2124,7 +2124,7 @@
     "wurgegriff"
    ],
    "flavorHtml": "<p>Rün etten silinmez. Taşıyanı yavaşça içten yer.</p>",
-   "searchText": "siegel der verdamm schwarzesonne aktif wissen 4, sanita 2 runen lanetlinin rününü canlı bir hedefin bir uzvuna, etine çizersin. hedef etkisiz ya da boğuşma halinde olmalıdır (değilse önce orta eşikli bir krach veya agil zarı). 3 tur. 4 tur. her kullanımda +1 corruption. hedef her turun başında d20 + sanita ≥ zor atarak rünü kırabilir. bu yeteneğin zarları kara büyü zarıdır; corruption kaynaklı kara büyü etkileri uygulanır. würgegriff ile: kilitlediğin hedefe rün çizmek için ayrıca krach veya agil zarı gerekmez. rün etten silinmez. taşıyanı yavaşça içten yer."
+   "searchText": "siegel der verdamm schwarzesonne aktif wissen 4, sanita 2 runen lanetlinin rününü canlı bir hedefin bir uzvuna, etine çizersin. hedef etkisiz ya da boğuşma halinde olmalıdır (değilse önce orta eşikli bir krach veya agil zarı). ardından d20 + wissen ≥ orta. başarıda rünlü uzvun yarası her turun sonunda 1 kademe ilerler; 2 tur sürer. 3 tur. 4 tur. her kullanımda +1 corruption. hedef her turun başında d20 + sanita ≥ zor atarak rünü kırabilir. bu yeteneğin zarları kara büyü zarıdır; corruption kaynaklı kara büyü etkileri uygulanır. würgegriff ile: kilitlediğin hedefe rün çizmek için ayrıca krach veya agil zarı gerekmez. rün etten silinmez. taşıyanı yavaşça içten yer."
   },
   "totenruf": {
    "key": "totenruf",
@@ -2537,7 +2537,7 @@
    "levelEffects": [
     {
      "level": 1,
-     "html": "Augmentini aşırı yüklersin: bir sonraki augment aksiyonunun zarına "
+     "html": "Augmentini aşırı yüklersin: bir sonraki augment aksiyonunun zarına +Klang/2 (aşağı yuvarla) bonus alır, isabette yara 1 kademe fazla ilerler. Ardından d20 + Klang ≥ Zor atılır; başarısızlıkta augmentli uzuv 1 kademe hasar alır."
     },
     {
      "level": 2,
@@ -2551,7 +2551,7 @@
    "sections": [],
    "synergies": [],
    "flavorHtml": "<p>Sigortalar atana kadar. Belki biraz daha fazla.</p>",
-   "searchText": "überladung metallkorp aktif klang 4 waffenarm augmentini aşırı yüklersin: bir sonraki augment aksiyonunun zarına kontrol zarı orta eşikte atılır. kontrol zarı kolay eşikte atılır. sigortalar atana kadar. belki biraz daha fazla."
+   "searchText": "überladung metallkorp aktif klang 4 waffenarm augmentini aşırı yüklersin: bir sonraki augment aksiyonunun zarına +klang/2 (aşağı yuvarla) bonus alır, isabette yara 1 kademe fazla ilerler. ardından d20 + klang ≥ zor atılır; başarısızlıkta augmentli uzuv 1 kademe hasar alır. kontrol zarı orta eşikte atılır. kontrol zarı kolay eşikte atılır. sigortalar atana kadar. belki biraz daha fazla."
   }
  },
  "perks": [

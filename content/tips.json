@@ -1,0 +1,782 @@
+{
+ "abilities": {
+  "kampfmedizin": {
+   "meaning": "Savaş tıbbı",
+   "say": "kampf-meditsin",
+   "summary": "Kendi yaralarını çatışmanın ortasında sararsın; üst seviyelerde sarma tur harcamaz ve yaranın derecesini bile düşürebilirsin."
+  },
+  "grosse-macht": {
+   "meaning": "Büyük güç",
+   "say": "grose maht",
+   "summary": "Kapı kırma, kaldırma, boğuşma gibi kaba kuvvet işlerinde Krach zarlarına bonus alırsın."
+  },
+  "sturmbrecher": {
+   "meaning": "Fırtına kıran",
+   "say": "ştuırm-breher",
+   "summary": "Koşarak düşmana hücum edip onu yere serersin; üst seviyede yolundaki ikinci kişiyi de devirebilirsin."
+  },
+  "titan": {
+   "meaning": "Titan",
+   "say": "titan",
+   "summary": "Çatışmada bir kez, zarsız isabet eden ve yarayı 2 kademe ilerleten yıkıcı bir darbe vurursun; sonraki tur dinlenmen gerekir."
+  },
+  "wurgegriff": {
+   "meaning": "Boğma tutuşu",
+   "say": "vürge-grif",
+   "summary": "Bir düşmanı kilitleyip saldırmasını engellersin; iki tur tutarsan sessizce bayılır."
+  },
+  "herr-der-toten": {
+   "meaning": "Ölülerin efendisi",
+   "say": "her der toten",
+   "summary": "Öldürdüğün her düşman sana bir Ölüm Yükü verir; bunları harcayarak aldığın yaraları hafifletirsin."
+  },
+  "mein-liebe": {
+   "meaning": "Aşkım",
+   "say": "mayn libe",
+   "summary": "Hafif yaraların cezalarını hiç hissetmez, ağır yaraları daha az hissedersin. Karşılığında Death Save hakkını kalıcı olarak kaybedersin."
+  },
+  "endsieg-der-mann": {
+   "meaning": "Adamın nihai zaferi",
+   "say": "endzik der man",
+   "summary": "Öldüğün anda 2 tur daha savaşırsın; bu sürede seni öldüreni öldürürsen hayatta kalırsın."
+  },
+  "kampfveteran": {
+   "meaning": "Savaş gazisi",
+   "say": "kampf-veteran",
+   "summary": "Yaralıyken de isabetli ateş edersin; üst seviyelerde panik (Cower) zarlarına da bonus alırsın."
+  },
+  "snipe": {
+   "meaning": "Keskin nişancı atışı",
+   "say": "snayp",
+   "summary": "Bir tur nişan alıp sonraki atışını güçlendirirsin ve isabet ederse vurduğun uzvu sen seçersin."
+  },
+  "lauerstellung": {
+   "meaning": "Pusu mevzisi",
+   "say": "lauer-ştelung",
+   "summary": "Gizli bir mevziden ateş ettiğinde düşmanın yerini bulması çok zorlaşır."
+  },
+  "ein-schuss": {
+   "meaning": "Tek atış",
+   "say": "ayn şus",
+   "summary": "Kritik bir Snipe atışı sıradan bir düşmanı anında etkisiz bırakır; elit hedeflerde yara 3 kademe ilerler."
+  },
+  "feuerleitung": {
+   "meaning": "Ateş yönetimi",
+   "say": "foyer-laytung",
+   "summary": "Bir hedefi işaretlersin; takım arkadaşlarının o hedefe atışları kolaylaşır."
+  },
+  "zweihandler": {
+   "meaning": "İki tabancalı",
+   "say": "tsvay-hendler",
+   "summary": "Aynı turda iki tek elli silahla iki ayrı atış yaparsın; seviye arttıkça ceza kalkar."
+  },
+  "panzerknacker": {
+   "meaning": "Tank kırıcı",
+   "say": "pantser-knaker",
+   "summary": "Araçlara, zırhlılara ve augmentli uzuvlara isabet eden atışların daha fazla yara verir."
+  },
+  "engel-des-todes": {
+   "meaning": "Ölüm meleği",
+   "say": "engel des todes",
+   "summary": "Her öldürmede Aim zarların güçlenir; ancak fazla birikimle biten çatışma Corruption getirir."
+  },
+  "silent-step-low-profile": {
+   "meaning": "Sessiz adım, alçak profil",
+   "say": "sayılınt step, lov profayl",
+   "summary": "Gizli hareket ederken Leis zarlarına bonus alırsın."
+  },
+  "throwing-expertise": {
+   "meaning": "Fırlatma ustalığı",
+   "say": "srouing ekspörtiz",
+   "summary": "Bıçak gibi fırlatılan silahlarla Aim yerine Leis kullanırsın; fark edilmeden vurursan daha çok yaralarsın."
+  },
+  "giftmischer": {
+   "meaning": "Zehir karıştırıcı",
+   "say": "gift-mişer",
+   "summary": "Zehir hazırlarsın: silahına sürer, bayıltıcı yapar ya da yemeğe karıştırırsın."
+  },
+  "silent-takedown": {
+   "meaning": "Sessiz etkisiz bırakma",
+   "say": "sayılınt teykdaun",
+   "summary": "Fark edilmeden yaklaştığın bir düşmanı tek hamlede sessizce etkisiz bırakırsın."
+  },
+  "dunkelhand": {
+   "meaning": "Karanlık el",
+   "say": "dunkel-hand",
+   "summary": "Yankesicilikte ve çalmada ustalaşırsın; hedefin üzerine bir şey bile bırakabilirsin."
+  },
+  "the-great-pretender": {
+   "meaning": "Büyük taklitçi",
+   "say": "dı greyt pritendır",
+   "summary": "Kıyafet ve belgeyle başka birinin kılığına girersin; üst seviyede hazırlıksız bile yaparsın."
+  },
+  "der-maulwurf": {
+   "meaning": "Köstebek",
+   "say": "der maul-vurf",
+   "summary": "Bir fraksiyonda kalıcı sahte kimlik kurup içeriden bilgi alırsın."
+  },
+  "saboteur": {
+   "meaning": "Sabotajcı",
+   "say": "sabotör",
+   "summary": "Araç, silah ve makineleri fark edilmeden bozarsın; üst seviyede arızanın ne zaman çıkacağını sen seçersin."
+  },
+  "geist-la-resistance": {
+   "meaning": "Direnişin ruhu",
+   "say": "gayst la rezistans"
+  },
+  "authority-like-herr-a": {
+   "meaning": "Herr A gibi otorite",
+   "say": "otorati layk her a"
+  },
+  "volksredner": {
+   "meaning": "Halk hatibi",
+   "say": "folks-redner",
+   "summary": "Müttefiklerine seslenip paniklerini (Cower) bitirir, zarlarını güçlendirirsin."
+  },
+  "fahnentrager": {
+   "meaning": "Bayraktar",
+   "say": "fanen-treger",
+   "summary": "Seansta bir kez bir kalabalığı ya da küçük bir birliği bir amaç için harekete geçirirsin."
+  },
+  "ihr-preis": {
+   "meaning": "Onların bedeli",
+   "say": "ir prays",
+   "summary": "Rüşvet vermek sana daha ucuza gelir."
+  },
+  "see-through-em": {
+   "meaning": "Onların içini görmek",
+   "say": "si sru em",
+   "summary": "Konuştuğun kişinin niyetini, yalanını ve zaafını okursun."
+  },
+  "schlangenzunge": {
+   "meaning": "Yılan dili",
+   "say": "şlangen-tsunge",
+   "summary": "Yalanların daha inandırıcı olur; ortaya çıkan bir yalanı yeni bir yalanla kurtarabilirsin."
+  },
+  "verhormeister": {
+   "meaning": "Sorgu ustası",
+   "say": "fer-hör-mayster",
+   "summary": "Etkisiz bir kişiyi konuşturup sorularına doğru cevap alırsın (işkence içermez)."
+  },
+  "kriegsengineer": {
+   "meaning": "Savaş mühendisi",
+   "say": "kriks-enciniır",
+   "summary": "Bozuk ekipmanı tamir edersin; üst seviyelerde çatışma ortasında ve augmentleri de."
+  },
+  "maschinengehirn": {
+   "meaning": "Makine beyni",
+   "say": "maşinen-gehirn",
+   "summary": "Makinelerin ve augmentli düşmanların zayıf noktalarını bulup daha çok yara verirsin."
+  },
+  "sprengmeister": {
+   "meaning": "Patlayıcı ustası",
+   "say": "şpreng-mayster",
+   "summary": "Patlayıcı hazırlayıp yerleştirirsin; zamanlayıcı, tuzak ve yönlü patlayıcı kurabilirsin."
+  },
+  "eiserner-kamerad": {
+   "meaning": "Demir yoldaş",
+   "say": "ayzerner kamerat",
+   "summary": "Kampanyada bir kez sana eşlik eden küçük bir savaş robotu yaparsın."
+  },
+  "panzerschrauber": {
+   "meaning": "Tank tamircisi",
+   "say": "pantser-şrauber",
+   "summary": "Askerî araçları daha iyi sürer, sahada tamir eder, araç silahlarını Werk ile kullanırsın."
+  },
+  "knowledge-of-future": {
+   "meaning": "Geleceğin bilgisi",
+   "say": "nalıc of fyuçır",
+   "summary": "Bilinmeyen deneysel cihazları (Wunderwaffe) çözmeyi ve kullanmayı kolaylaştırır."
+  },
+  "kriegssheilung": {
+   "meaning": "Savaş iyileştirmesi",
+   "say": "kriks-haylung",
+   "summary": "Başkalarına yaptığın sargılar daha etkili olur; çatışma dışında yaraları iyileştirebilirsin."
+  },
+  "aryan-cryptology": {
+   "meaning": "Aryan kriptolojisi (SS şifre bilimi)",
+   "say": "eriyın kriptolıci",
+   "summary": "Şifreli SS bilim metinlerini çözüp sır ve planlar öğrenirsin; bedeli Corruption."
+  },
+  "kluger-kopf": {
+   "meaning": "Akıllı kafa",
+   "say": "klüger kopf",
+   "summary": "Uzun dinlenmede Corruption'ını düşürmeye çalışırsın."
+  },
+  "siegel-der-leere": {
+   "meaning": "Boşluk mührü",
+   "say": "zigel der lere",
+   "summary": "Bir hedefi boşluk rünüyle işaretleyen kara büyü; her kullanım Corruption verir."
+  },
+  "siegel-der-verdamm": {
+   "meaning": "Lanetlinin mührü",
+   "say": "zigel der ferdam",
+   "summary": "Etkisiz bir düşmanın etine lanet rünü çizersin; her kullanım Corruption verir."
+  },
+  "grosses-siegel": {
+   "meaning": "Büyük mühür",
+   "say": "groses zigel",
+   "summary": "Zemine büyük bir rün çizip alanı ya korursun ya da lanetlersin; ağır Corruption bedeli vardır."
+  },
+  "extracio-aus-ss": {
+   "meaning": "Ölüden çıkarım",
+   "say": "ekstrasyo aus es-es",
+   "summary": "Bir cesede soru sorup bilgi alırsın (kara büyü)."
+  },
+  "totenruf": {
+   "meaning": "Ölü çağrısı",
+   "say": "toten-ruf",
+   "summary": "Yeni ölmüş birinin ruhunu çağırıp duvarlardan geçen görünmez bir gözcü olarak kullanırsın."
+  },
+  "toter-soldaten": {
+   "meaning": "Ölü askerler",
+   "say": "toter zoldaten",
+   "summary": "Bir cesedi basit emirlere uyan bir hizmetkâr olarak diriltirsin; bedeli ağır Corruption."
+  },
+  "blutopfer": {
+   "meaning": "Kan kurbanı",
+   "say": "blut-opfer",
+   "summary": "Kendi uzvunu yaralayarak bir kara büyü zarını güçlendirirsin."
+  },
+  "stahlnerv": {
+   "meaning": "Çelik sinir",
+   "say": "ştal-nerf",
+   "summary": "Augmentlerinin negatif stat etkilerini azaltır."
+  },
+  "zweite-haut": {
+   "meaning": "İkinci deri",
+   "say": "tsvayte haut",
+   "summary": "Augmentli uzuvların yaralara karşı dayanıklı olur ve kopmaz, tamir edilebilir."
+  },
+  "kalte-seele": {
+   "meaning": "Soğuk ruh",
+   "say": "kalte zele",
+   "summary": "Corruption'ın Klang bonusundan daha erken yararlanır, panik zarlarında Klang kullanırsın; augment arttıkça konuşman zorlaşır."
+  },
+  "neuer-mensch": {
+   "meaning": "Yeni insan",
+   "say": "noyer menş",
+   "summary": "Bir uzvuna ikinci augment takabilirsin; çok augmentle Death Save'i geçmen kolaylaşır."
+  },
+  "ersatzteil": {
+   "meaning": "Yedek parça",
+   "say": "ersats-tayl",
+   "summary": "Augmentlerini sahada söküp takar, tamir eder ya da başka bir uzva aktarırsın."
+  },
+  "uberladung": {
+   "meaning": "Aşırı yükleme",
+   "say": "über-ladung",
+   "summary": "Bir augmentini aşırı yükleyip sonraki augment aksiyonunu güçlendirirsin; kontrol zarı gerekir."
+  },
+  "schnittstelle": {
+   "meaning": "Arayüz",
+   "say": "şnit-ştele",
+   "summary": "Augmentli elini ya da kolunu araç ve makinelere bağlayıp doğrudan kontrol edersin."
+  },
+  "kriegsmaschine": {
+   "meaning": "Savaş makinesi",
+   "say": "kriks-maşine",
+   "summary": "Çatışmada bir kez, 2 tur boyunca tüm augmentlerini zarsız aşırı yükler ve fazladan aksiyon yaparsın."
+  }
+ },
+ "augments": {
+  "federfuss": {
+   "meaning": "Tüy ayak",
+   "say": "feder-fus",
+   "summary": "Yaylı ayak protezi: koşarken sessiz kalırsın, düşmelerde daha az yaralanırsın."
+  },
+  "funkohr": {
+   "meaning": "Telsiz kulak",
+   "say": "funk-or",
+   "summary": "Kafana yerleşik telsiz: açık frekansları dinler, aynı augmente sahip olanlarla sessizce haberleşirsin."
+  },
+  "glasauge": {
+   "meaning": "Cam göz",
+   "say": "glas-auge",
+   "summary": "Uzaktaki ayrıntıları daha iyi görürsün; ani parlak ışıkta bir tur körleşirsin."
+  },
+  "laufwerk": {
+   "meaning": "Yürüyüş mekanizması",
+   "say": "lauf-verk",
+   "summary": "Motorlu bacak iskeleti: koşma, zıplama ve tırmanma kolaylaşır. Akku (pil) biterse ceza alırsın."
+  },
+  "stahlfinger": {
+   "meaning": "Çelik parmaklar",
+   "say": "ştal-finger",
+   "summary": "Tuttuğunu bırakmazsın, sıkma ve koparma güçlenir; ince el işlerinde zorlanırsın."
+  },
+  "akkutrager": {
+   "meaning": "Pil taşıyıcı",
+   "say": "aku-treger",
+   "summary": "Beline takılan büyük pil, Akku kullanan augmentlerine ek şarj verir; ağır yarada patlayabilir."
+  },
+  "klingenarm": {
+   "meaning": "Bıçak kol",
+   "say": "klingen-arm",
+   "summary": "Koluna gizlenmiş bıçak: aranınca bulunması zordur, yakın dövüşte daha çok yaralar."
+  },
+  "panzerhaut": {
+   "meaning": "Zırh deri",
+   "say": "pantser-haut",
+   "summary": "Üst gövdeni zırhla kaplar, daha az yaralanırsın; ama hantallaşırsın ve yüzmekte zorlanırsın."
+  },
+  "sturmarm": {
+   "meaning": "Hücum kolu",
+   "say": "ştuırm-arm",
+   "summary": "Güçlü motorlu kol: pil harcayarak çok sert vurur, ağır nesneleri kaldırırsın."
+  },
+  "geistauge": {
+   "meaning": "Ruh gözü",
+   "say": "gayst-auge",
+   "summary": "Duvarların ardındaki canlıları görür, kara büyüye bonus alırsın; her kullanım Corruption riski taşır."
+  },
+  "gletschkanon": {
+   "meaning": "Buzul topu",
+   "say": "gleç-kanon",
+   "summary": "Kola entegre ağır bir Gletschmetall top. Büyük ateş gücü karşılığında çok ağır stat cezaları getirir (özellikle -5 Werk)."
+  },
+  "schwarzes-herz": {
+   "meaning": "Kara kalp",
+   "say": "şvartses herts",
+   "summary": "Ölümden bir kez kurtarır ve yaraları iyileştirir; her kullanım Corruption verir."
+  }
+ },
+ "trees": {
+  "ubermann": {
+   "meaning": "Üstün adam",
+   "say": "über-man",
+   "summary": "Beden gücü ağacı (Korp): yakın dövüş, dayanıklılık ve ölmemek."
+  },
+  "stahlkrieg": {
+   "meaning": "Çelik savaşı",
+   "say": "ştal-krik",
+   "summary": "Nişancılık ağacı (Aim): keskin nişancılık, ateş desteği ve hücum birlikleri."
+  },
+  "spionage": {
+   "meaning": "Casusluk",
+   "say": "şpiyonaje",
+   "summary": "Gizlilik ağacı (Leis): suikast, kılık değiştirme ve sabotaj."
+  },
+  "diplomat": {
+   "meaning": "Diplomat",
+   "say": "diplomat",
+   "summary": "İletişim ağacı (Rede): ikna, liderlik, yalan ve sorgu."
+  },
+  "wunderwaffe": {
+   "meaning": "Mucize silah",
+   "say": "vunder-vafe",
+   "summary": "Mühendislik ağacı (Werk): tamir, patlayıcı, araçlar ve deneysel teknoloji."
+  },
+  "schwarzesonne": {
+   "meaning": "Kara güneş",
+   "say": "şvartse-zone",
+   "summary": "Kara büyü ağacı (Wissen): rünler ve ölüler. Güçlüdür ama Corruption bedeli vardır."
+  },
+  "metallkorp": {
+   "meaning": "Metal beden",
+   "say": "metal-korp",
+   "summary": "Augment ağacı (Klang): makineyle bütünleşmiş bir beden."
+  }
+ },
+ "branches": {
+  "Koloss": "Dev",
+  "Ringer": "Güreşçi",
+  "Unkaputtbar": "Kırılmaz",
+  "Scharfschütze": "Keskin nişancı",
+  "Spotter": "Gözcü",
+  "Sturmtruppe": "Hücum birliği",
+  "Schatten": "Gölge",
+  "Maske": "Maske",
+  "Sabotage": "Sabotaj",
+  "Demagog": "Kitle hatibi",
+  "Unterhändler": "Müzakereci",
+  "Verhör": "Sorgu",
+  "Maschinen": "Makineler",
+  "Fahrzeug": "Araç",
+  "Labor": "Laboratuvar",
+  "Runen": "Rünler",
+  "Totenkult": "Ölü kültü",
+  "Blut": "Kan",
+  "Panzerung": "Zırhlanma",
+  "Feldumbau": "Saha dönüşümü",
+  "Waffenarm": "Silah kol"
+ },
+ "perks": {
+  "careful-runner": {
+   "meaning": "Dikkatli koşucu",
+   "summary": "Hızlı koşarken daha az düşer ve çarparsın; karanlıkta hızlı koşamazsın."
+  },
+  "one-hander": {
+   "meaning": "Tek elli",
+   "summary": "Tek elli yakın dövüş silahlarında iyi, çift ellilerde kötüsün."
+  },
+  "speed-demon": {
+   "meaning": "Hız şeytanı",
+   "summary": "Araçları çok hızlı sürersin."
+  },
+  "two-hander": {
+   "meaning": "Çift elli",
+   "summary": "Çift elli yakın dövüş silahlarında iyi, tek ellilerde kötüsün."
+  },
+  "kench": {
+   "meaning": "Sağlam mide",
+   "summary": "Gıda zehirlenmesine dayanıklısın."
+  },
+  "bladesmith": {
+   "meaning": "Bıçak ustası",
+   "summary": "Kısa bıçaklarla daha başarılısın."
+  },
+  "eisblut": {
+   "meaning": "Buz kan",
+   "summary": "Frenzy (kudurma) zarlarını otomatik geçersin."
+  },
+  "falscher": {
+   "meaning": "Sahtekâr",
+   "summary": "Belge, mühür ve kimlik sahteciliğinde ustasın."
+  },
+  "feldsanitater": {
+   "meaning": "Sahra sıhhiyecisi",
+   "summary": "Yaptığın sargılar kirlenmez."
+  },
+  "katze": {
+   "meaning": "Kedi",
+   "summary": "Karanlıkta daha iyi görürsün."
+  },
+  "ortskundig": {
+   "meaning": "Yöreyi bilen",
+   "summary": "Seçtiğin bir bölgede yol bulma ve yerel halkla iletişim kolaylaşır."
+  },
+  "schwarzmarkt": {
+   "meaning": "Karaborsa",
+   "summary": "Yasak ve kıt malları bulman kolaylaşır, fiyatlar ucuzlar."
+  },
+  "trilingual": {
+   "meaning": "Üç dilli",
+   "summary": "Oyuna 3 dil bilerek başlarsın."
+  },
+  "adlerauge": {
+   "meaning": "Kartal göz",
+   "summary": "Daha hızlı nişan alır, daha sık kritik vurursun."
+  },
+  "extrovert": {
+   "meaning": "Dışa dönük",
+   "summary": "+2 Rede: yabancılarla kolay iletişim kurarsın."
+  },
+  "gluckspilz": {
+   "meaning": "Şanslı",
+   "summary": "Seansta bir kez attığın Nat1'i Inspiration harcamadan yeniden atarsın."
+  },
+  "heimwerker": {
+   "meaning": "Kendin yap ustası",
+   "summary": "Makine işlerinde zarların kolaylaşır."
+  },
+  "runenkundig": {
+   "meaning": "Rün bilgini",
+   "summary": "Siegel (rün) yeteneklerinde kara büyü zarların kolaylaşır."
+  },
+  "schnell": {
+   "meaning": "Hızlı",
+   "summary": "Stres altında daha hızlı hareket edersin."
+  },
+  "tesla": {
+   "meaning": "Tesla",
+   "summary": "Elektronik işlerinde zarların kolaylaşır."
+  },
+  "cheetah": {
+   "meaning": "Çita",
+   "summary": "+2 Agil: hızlı koşar, parkur yaparsın."
+  },
+  "follower-of-dreamer": {
+   "meaning": "Rüyacının takipçisi",
+   "summary": "+1 Inspiration puanı."
+  },
+  "metallvertraglich": {
+   "meaning": "Metale uyumlu",
+   "summary": "+2 Klang: augmentlere daha kolay uyum sağlarsın."
+  },
+  "ruthig": {
+   "meaning": "Sakin",
+   "summary": "Gizli hareket etmen kolaylaşır."
+  },
+  "beherzt": {
+   "meaning": "Yürekli",
+   "summary": "Corruption'ın daha zor artar."
+  },
+  "tdt-teich-der-toten": {
+   "meaning": "Ölüler gölü",
+   "summary": "Yaraların çok daha hızlı iyileşir."
+  },
+  "adaptable": {
+   "meaning": "Uyum sağlayan",
+   "summary": "Sıcak, soğuk gibi çevre koşullarından çok daha az etkilenirsin."
+  },
+  "ubermuscler": {
+   "meaning": "Üstün kaslı",
+   "summary": "Çok ağır şeyleri kaldırır, ağır silahları daha rahat kullanırsın."
+  },
+  "ubermensch": {
+   "meaning": "Üstinsan",
+   "summary": "Fiziksel zarların kolaylaşır ve daha az yara alırsın."
+  },
+  "veteran-of-47": {
+   "meaning": "47 gazisi",
+   "summary": "Psikolojik durum etkilerinden (panik, şok) etkilenmezsin."
+  },
+  "sunday-driver": {
+   "meaning": "Pazar şoförü",
+   "summary": "Araçları çok yavaş sürersin."
+  },
+  "tiryaki": {
+   "summary": "Sigara bağımlılığı: bağımlılık arttıkça Corruption alırsın."
+  },
+  "analphabet": {
+   "meaning": "Okuma yazma bilmeyen",
+   "summary": "Okuyamazsın; Aryan Cryptology yeteneğini alamazsın."
+  },
+  "ayyas": {
+   "summary": "Alkol bağımlılığı: bağımlılık arttıkça Corruption alırsın."
+  },
+  "empfi": {
+   "meaning": "Hassas",
+   "summary": "Midesi hassas: gıda zehirlenmesine yatkınsın."
+  },
+  "kurzsichtig": {
+   "meaning": "Miyop",
+   "summary": "Gözlüğün yokken uzaktaki hedeflere karşı Sicht ve Aim zarlarına -2."
+  },
+  "monolingual": {
+   "meaning": "Tek dilli",
+   "summary": "Oyuna tek dil bilerek başlarsın."
+  },
+  "verschuldet": {
+   "meaning": "Borçlu",
+   "summary": "Parasız başlarsın ve peşinde bir alacaklı vardır."
+  },
+  "blutscheu": {
+   "meaning": "Kandan korkan",
+   "summary": "Ağır yaralar görünce sarsılırsın, ilk yardımda zorlanırsın."
+  },
+  "ehrenkodex": {
+   "meaning": "Onur yasası",
+   "summary": "Teslim olmuş ya da silahsız birine zarar verirsen +2 Corruption alırsın."
+  },
+  "gesucht": {
+   "meaning": "Aranan",
+   "summary": "Bir fraksiyon seni arıyor; onların bölgesinde tanınabilirsin."
+  },
+  "klaustrophob": {
+   "meaning": "Klostrofobik",
+   "summary": "Dar ve kapalı alanlarda tüm zarlara -1."
+  },
+  "oaf": {
+   "meaning": "Sakar",
+   "summary": "Sakarsın, hatalı hareketler yapabilirsin."
+  },
+  "okkultphobie": {
+   "meaning": "Okült fobisi",
+   "summary": "Kara büyü görünce paniğe (Cower) kapılabilirsin."
+  },
+  "schlaflos": {
+   "meaning": "Uykusuz",
+   "summary": "Kötü uyursan bir sonraki uzun dinlenmeye kadar tüm zarlara -1."
+  },
+  "gottesfurchtig": {
+   "meaning": "Tanrı korkusu olan",
+   "summary": "Kara büyüde çok zorlanırsın ve fazladan Corruption alırsın."
+  },
+  "introvert": {
+   "meaning": "İçe dönük",
+   "summary": "-2 Rede: yabancılarla iletişimde zorlanırsın."
+  },
+  "kriegszitterer": {
+   "meaning": "Savaş travmalı",
+   "summary": "Patlama ve top seslerinde paniğe (Cower) kapılabilirsin."
+  },
+  "laut": {
+   "meaning": "Gürültücü",
+   "summary": "Gizli hareket etmen çok zorlaşır."
+  },
+  "recovered": {
+   "meaning": "İyileşmiş (eski bağımlı)",
+   "summary": "Uyuşturucu, alkol ve tütün kullanırsan doğrudan Corruption alırsın."
+  },
+  "delicate": {
+   "meaning": "Narin",
+   "summary": "Daha kolay yaralanır, daha geç iyileşirsin."
+  },
+  "metallabstossung": {
+   "meaning": "Metal reddi",
+   "summary": "-2 Klang: bedenin augmentleri reddeder, her takılışta yaralanma riski."
+  },
+  "runenblind": {
+   "meaning": "Rün körü",
+   "summary": "Siegel yeteneklerini alamaz, kara büyüde zorlanırsın."
+  },
+  "such-tiger": {
+   "meaning": "Bağımlı",
+   "summary": "Pervitin bağımlılığı: Krach'ını etkiler, bağımlılık arttıkça Corruption alırsın."
+  },
+  "unthermo": {
+   "meaning": "Sıcaklığa dayanıksız",
+   "summary": "Sıcak ve soğuktan çok etkilenirsin."
+  },
+  "scheu": {
+   "meaning": "Ürkek",
+   "summary": "Corruption'ın daha kolay artar."
+  },
+  "kriegsversehrt": {
+   "meaning": "Savaş malulü",
+   "summary": "Bir ya da iki uzvun kopuk başlar; tek uzuv 4, iki uzuv 7 perk puanı kazandırır."
+  },
+  "zargana": {
+   "summary": "Fiziksel zarların zorlaşır ve daha çok yara alırsın."
+  },
+  "schizo": {
+   "meaning": "Şizofren",
+   "summary": "Olmayan şeyler görürsün; -2 Rede, -2 Leis."
+  },
+  "pressured-pacifism": {
+   "meaning": "Zorunlu barışseverlik",
+   "summary": "Birine zarar verirsen Corruption alırsın, öldürürsen +3."
+  }
+ },
+ "stats": {
+  "korp": {
+   "meaning": "Beden (Körper)",
+   "say": "korp",
+   "summary": "Fiziksel direnç: yaralara, zehre ve yorgunluğa dayanma."
+  },
+  "krach": {
+   "meaning": "Gümbürtü, şiddet",
+   "say": "krah",
+   "summary": "Fiziksel güç: yakın dövüş ve kaba kuvvet."
+  },
+  "klang": {
+   "meaning": "Tını, ses",
+   "say": "klang",
+   "summary": "Augment uyumu: augmentleri kaldırma ve kullanma becerisi. Herkes 2 ile başlar."
+  },
+  "sanita": {
+   "meaning": "Akıl sağlığı (Lat. sanitas)",
+   "say": "sanita",
+   "summary": "Zihinsel direnç: korku, panik ve dehşete dayanma."
+  },
+  "rede": {
+   "meaning": "Söz, konuşma",
+   "say": "rede",
+   "summary": "İletişim: ikna, yalan, pazarlık ve liderlik."
+  },
+  "wissen": {
+   "meaning": "Bilgi",
+   "say": "visen",
+   "summary": "Bilgi birikimi; Schwarzesonne kara büyüsü de bu statla atılır."
+  },
+  "sicht": {
+   "meaning": "Görüş",
+   "say": "ziht",
+   "summary": "Fark etme, ayrıntı yakalama, saklanan birini bulma."
+  },
+  "agil": {
+   "meaning": "Çevik",
+   "say": "agil",
+   "summary": "Çeviklik: koşma, tırmanma, kaçma."
+  },
+  "werk": {
+   "meaning": "İş, atölye",
+   "say": "verk",
+   "summary": "Mühendislik ve el becerisi: tamir, patlayıcı, makine."
+  },
+  "leis": {
+   "meaning": "Sessiz",
+   "say": "lays",
+   "summary": "Gizlilik: fark edilmeden hareket etme, yankesicilik."
+  },
+  "aim": {
+   "meaning": "Nişan (İng.)",
+   "say": "eym",
+   "summary": "Nişan alma: ateşli ve fırlatılan silahlarla isabet."
+  }
+ },
+ "terms": {
+  "corruption": {
+   "meaning": "Yozlaşma",
+   "summary": "Kara güçlerin karakteri kemirmesi. 0–13 arasıdır; arttıkça yeni etkiler açılır, 13'te karakter ölür. 7'ye ulaşınca bir daha 7'nin altına inmez.",
+   "match": [
+    "Corruption"
+   ]
+  },
+  "cower": {
+   "meaning": "Sinme, panik",
+   "summary": "Korkuyla sinme durumu (Corruption 5'te açılır). Kurtulmak için Sanita zarı atılır.",
+   "match": [
+    "Cower"
+   ]
+  },
+  "frenzy": {
+   "meaning": "Kudurma",
+   "summary": "Düşman öldürünce kendini kaybetme durumu (Corruption 9'da açılır).",
+   "match": [
+    "Frenzy"
+   ]
+  },
+  "nat20": {
+   "meaning": "Doğal 20",
+   "summary": "d20'de 20 gelmesi: kritik başarı.",
+   "match": [
+    "Nat20",
+    "Nat 20"
+   ]
+  },
+  "nat1": {
+   "meaning": "Doğal 1",
+   "summary": "d20'de 1 gelmesi: kritik başarısızlık.",
+   "match": [
+    "Nat1",
+    "Nat 1"
+   ]
+  },
+  "death-save": {
+   "meaning": "Ölüm kurtarma zarı",
+   "summary": "Ölümcül yara aldığında hayatta kalıp kalmadığını belirleyen zar.",
+   "match": [
+    "Death Save Throw",
+    "Death Save"
+   ]
+  },
+  "inspiration": {
+   "meaning": "İlham",
+   "summary": "GM'in verdiği puan; harcayarak bir zarı yeniden atabilirsin.",
+   "match": [
+    "Inspiration"
+   ]
+  },
+  "pervitin": {
+   "meaning": "Pervitin",
+   "summary": "Askerlere verilen metamfetamin hapı. Corruption'ı etkiler ve bağımlılık yapar; yalnızca GM isteğiyle kullanılır.",
+   "match": [
+    "Pervitin"
+   ]
+  },
+  "akku": {
+   "meaning": "Pil",
+   "summary": "Bazı augmentlerin ve makinelerin şarjı; yalnızca şebeke elektriği olan bir yerde dolar.",
+   "match": [
+    "Akku"
+   ]
+  },
+  "gletschmetall": {
+   "meaning": "Buzul metali",
+   "summary": "Almanların Narvik'te geliştirdiği, hafif ama son derece sert, doğaüstü metal.",
+   "match": [
+    "Gletschmetall"
+   ]
+  },
+  "uber": {
+   "meaning": "Üstün",
+   "summary": "En yüksek zorluk eşiği (22). Normalde imkânsız sayılan işler için.",
+   "match": [
+    "Uber"
+   ]
+  }
+ }
+}

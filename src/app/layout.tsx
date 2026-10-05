@@ -9,6 +9,7 @@ import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import { ToastProvider } from "@/components/interactive";
+import { TipLayer } from "@/components/tip-layer";
 
 export const metadata: Metadata = {
   title: { default: "Schwarzesonne", template: "%s · Schwarzesonne" },
@@ -23,7 +24,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="tr">
       <body>
-        <ToastProvider>{children}</ToastProvider>
+        <ToastProvider>
+          {children}
+          <TipLayer />
+        </ToastProvider>
       </body>
     </html>
   );

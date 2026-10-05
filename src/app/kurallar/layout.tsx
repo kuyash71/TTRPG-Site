@@ -8,16 +8,22 @@ export default async function RulesLayout({ children }: { children: React.ReactN
   const user = await currentUser();
   const c = content();
   const groups = [
-    { title: "Kurallar", items: c.docs.map((d) => ({ href: `/kurallar/${d.key}`, label: d.title })) },
+    {
+      title: "Kurallar",
+      items: [...c.docs.map((d) => ({ href: `/kurallar/${d.key}`, label: d.title, icon: d.key })), { href: "/kurallar/sozluk", label: "Sözlük", icon: "sozluk" }],
+    },
     {
       title: "Karakter",
       items: [
-        { href: "/kurallar/perkler", label: "Perkler" },
-        { href: "/kurallar/augmentler", label: "Augmentasyonlar" },
+        { href: "/kurallar/perkler", label: "Perkler", icon: "perkler" },
+        { href: "/kurallar/augmentler", label: "Augmentasyonlar", icon: "augmentler" },
       ],
     },
-    { title: "Yetenek ağaçları", items: [{ href: "/kurallar/yetenekler", label: "Tüm ağaçlar" }, ...c.trees.map((t) => ({ href: `/kurallar/yetenekler/${t.key}`, label: t.name }))] },
-    { title: "Dünya", items: [{ href: "/kurallar/kampanyalar", label: "Kampanyalar" }] },
+    {
+      title: "Yetenek ağaçları",
+      items: [{ href: "/kurallar/yetenekler", label: "Tüm ağaçlar", icon: "yetenekler" }, ...c.trees.map((t) => ({ href: `/kurallar/yetenekler/${t.key}`, label: t.name, tree: t.key }))],
+    },
+    { title: "Dünya", items: [{ href: "/kurallar/kampanyalar", label: "Kampanyalar", icon: "kampanyalar" }] },
   ];
   return (
     <>

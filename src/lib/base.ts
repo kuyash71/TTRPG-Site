@@ -1,3 +1,5 @@
+import { TERM_TIPS } from "./shz/tips";
+
 /** Uygulamanın yayınlandığı alt yol (umbracaelis.com/schwarzesonne). */
 export const BASE_PATH = "/schwarzesonne";
 
@@ -21,6 +23,13 @@ const MOD_BEFORE = new RegExp(`([+\\-−]\\s?\\d+)(\\s+)(${STAT_RX})\\b`, "gi");
 const MOD_AFTER = new RegExp(`\\b(${STAT_RX})(\\s+)([+\\-−]\\s?\\d+)(?![\\d%])`, "gi");
 const STAT_ONLY = new RegExp(`\\b(${STAT_RX})\\b`, "g");
 const DICE = /\b(\d*d(?:4|6|8|10|12|20))\b/g;
+// Sözlük terimleri (Corruption, Cower…): en uzun eşleşme önce
+const TERM_LIST = Object.entries(TERM_TIPS)
+  .flatMap(([key, t]) => t.match.map((m) => [m, key] as const))
+  .sort((a, b) => b[0].length - a[0].length);
+const TERM_KEY = new Map(TERM_LIST.map(([m, k]) => [m.toLowerCase(), k]));
+const TERMS = new RegExp(`\\b(${TERM_LIST.map(([m]) => m.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b`, "g");
+const attr = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
 
 /**
  * İçerik metnini okunaklı hale getirir: stat etkileri renkli rozet, stat adları vurgulu,
@@ -36,7 +45,10 @@ export function enrichContent(html: string) {
       let t = seg
         .replace(MOD_BEFORE, (_m, n: string, sp: string, st: string) => keep(`<span class="stat-mod ${/^[+]/.test(n) ? "pos" : "neg"}">${n.replace("-", "−")}${sp}${st}</span>`))
         .replace(MOD_AFTER, (_m, st: string, sp: string, n: string) => keep(`<span class="stat-mod ${/^[+]/.test(n) ? "pos" : "neg"}">${st}${sp}${n.replace("-", "−")}</span>`));
-      t = t.replace(STAT_ONLY, (s) => keep(`<span class="stat-name">${s}</span>`)).replace(DICE, (s) => keep(`<span class="dice">${s}</span>`));
+      t = t
+        .replace(STAT_ONLY, (s) => keep(`<span class="stat-name" data-tip-kind="stats" data-tip-key="${s.toLowerCase()}" data-tip-title="${attr(s)}">${s}</span>`))
+        .replace(TERMS, (s) => keep(`<span class="term" data-tip-kind="terms" data-tip-key="${TERM_KEY.get(s.toLowerCase())}" data-tip-title="${attr(s)}">${s}</span>`))
+        .replace(DICE, (s) => keep(`<span class="dice">${s}</span>`));
       return t.replace(/\u0000(\d+)\u0000/g, (_m, i: string) => marks[Number(i)]);
     })
     .join("");

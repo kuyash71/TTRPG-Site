@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Html } from "@/components/content/cards";
+import { PageIcon } from "@/components/content/icons";
 import { PageHeader } from "@/components/ui";
 import { content } from "@/lib/shz/content";
 
@@ -15,7 +16,15 @@ export default async function DocPage({ params }: { params: Promise<{ doc: strin
   if (!d) notFound();
   return (
     <article className="max-w-3xl">
-      <PageHeader kicker="Kurallar" title={d.title} />
+      <PageHeader
+        kicker="Kurallar"
+        title={
+          <span className="flex items-center gap-3">
+            <PageIcon page={d.key} />
+            {d.title}
+          </span>
+        }
+      />
       <Html html={d.html} />
     </article>
   );

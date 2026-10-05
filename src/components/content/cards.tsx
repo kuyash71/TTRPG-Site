@@ -3,7 +3,9 @@ import { enrichContent } from "@/lib/base";
 import { KRIEGSVERSEHRT, STAT_LABELS, bodyPartLabel } from "@/lib/shz/constants";
 import type { Ability, Augment, Perk } from "@/lib/shz/content-types";
 import { Badge, cx } from "../ui";
-import { PerkIcon } from "./icons";
+import { branchMeaning } from "@/lib/shz/tips";
+import { AbilityIcon, AugmentIcon, PerkIcon } from "./icons";
+import { Meaning, TipButton } from "./tip";
 
 export function Html({ html, className }: { html: string; className?: string }) {
   if (!html) return null;
@@ -53,7 +55,16 @@ export function AbilityCard({
         </p>
       )}
       <div className="flex items-start justify-between gap-3">
-        <h3 className="font-serif text-lg leading-snug text-ink">{a.name}</h3>
+        <div className="flex min-w-0 items-start gap-3">
+          <AbilityIcon abilityKey={a.key} type={a.type} />
+          <div className="min-w-0">
+            <h3 className="flex flex-wrap items-center gap-x-2 gap-y-0.5 font-serif text-lg leading-snug text-ink">
+              {a.name}
+              <TipButton kind="abilities" id={a.key} title={a.name} />
+            </h3>
+            <Meaning kind="abilities" id={a.key} />
+          </div>
+        </div>
         {level ? (
           <span className="shrink-0 rounded-md bg-accent px-2 py-0.5 font-mono text-xs font-semibold text-onAccent">
             Sv {level}/{a.maxLevel}
@@ -64,7 +75,10 @@ export function AbilityCard({
       </div>
       <div className="mt-2 flex flex-wrap gap-1.5">
         <Badge tone={TYPE_TONE[a.type] ?? "neutral"}>{a.type}</Badge>
-        <Badge>{branchLabel(a)}</Badge>
+        <Badge>
+          {branchLabel(a)}
+          {branchMeaning(a.branchName) && <span className="font-normal text-muted">({branchMeaning(a.branchName)})</span>}
+        </Badge>
       </div>
       <p className="mt-2 text-xs text-muted">
         <span className="font-semibold uppercase tracking-wider">Gereksinim:</span>{" "}
@@ -134,6 +148,7 @@ export function PerkCard({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="font-serif text-base leading-snug text-ink">{p.name}</h3>
+            <TipButton kind="perks" id={p.key} title={p.name} />
             <span
               className={cx("rounded px-1.5 py-0.5 font-mono text-[11px] font-semibold", pos ? "bg-ok/15 text-ok" : "bg-danger/15 text-danger")}
               title={pos ? "Perk puanı harcar" : "Perk puanı kazandırır"}
@@ -142,6 +157,7 @@ export function PerkCard({
               {pointsLabel ?? (p.key === KRIEGSVERSEHRT.perk ? Object.values(KRIEGSVERSEHRT.points).join("/") : p.points)}
             </span>
           </div>
+          <Meaning kind="perks" id={p.key} className="block" />
           <Html html={p.html} className="mt-1 text-sm text-ink/80" />
           {exclusiveNames && exclusiveNames.length > 0 && (
             <p className={cx("mt-2 flex flex-wrap items-center gap-1.5 text-[11px]", blockedBy ? "text-danger" : "text-warn")}>
@@ -164,7 +180,16 @@ export function AugmentCard({ augment: a, action }: { augment: Augment; action?:
   return (
     <article id={a.key} className="card flex scroll-mt-24 flex-col p-4">
       <div className="flex items-start justify-between gap-3">
-        <h3 className="font-serif text-[17px] text-ink">{a.name}</h3>
+        <div className="flex min-w-0 items-start gap-3">
+          <AugmentIcon augmentKey={a.key} tier={a.tier ?? "T1"} />
+          <div className="min-w-0">
+            <h3 className="flex flex-wrap items-center gap-2 font-serif text-[17px] text-ink">
+              {a.name}
+              <TipButton kind="augments" id={a.key} title={a.name} />
+            </h3>
+            <Meaning kind="augments" id={a.key} />
+          </div>
+        </div>
         {a.tier && <Badge tone={a.tier === "T3" ? "danger" : a.tier === "T2" ? "warn" : "accent"}>{a.tier}</Badge>}
       </div>
       <div className="mt-2 flex flex-wrap gap-1.5">
