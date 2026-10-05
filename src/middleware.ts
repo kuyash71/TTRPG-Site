@@ -9,10 +9,15 @@ export function middleware(req: NextRequest) {
 
   // Kaba erişim kontrolü (asıl doğrulama sunucu tarafında yapılır).
   if (!PUBLIC.some((r) => r.test(path)) && !hasSession) {
-    const url = req.nextUrl.clone();
-    url.pathname = "/giris";
-    url.search = path !== "/" ? `?sonra=${encodeURIComponent(path)}` : "";
-    return NextResponse.redirect(url);
+    // Uygulama nginx arkasında 127.0.0.1'de çalıştığı için req.nextUrl iç adresi (https://localhost:3000/...)
+    // içerir ve kullanıcıyı yanlış yere atar. Adresi tarayıcının istediği Host ve şemadan kuruyoruz.
+    const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? req.nextUrl.host;
+    const proto = req.headers.get("x-forwarded-proto") ?? req.nextUrl.protocol.replace(":", "");
+    const target = new URL(`${req.nextUrl.basePath}/giris`, `${proto}://${host}`);
+    if (path !== "/") target.searchParams.set("sonra", path);
+    const res = NextResponse.redirect(target);
+    res.headers.set("Cache-Control", "no-store");
+    return res;
   }
 
   // İçerik Güvenliği Politikası: her istek için yeni nonce.
