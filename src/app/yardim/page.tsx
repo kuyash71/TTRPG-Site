@@ -296,6 +296,10 @@ export default async function HelpPage() {
                 uzuv seçmesi ve sonucu gizleme seçenekleri var. Bekleyen istekleri akışın altından iptal edebilirsin.
               </li>
               <li>
+                <strong>Odayı kapatma:</strong> Kampanya sayfasının en altındaki &quot;Odayı kapat&quot; kampanyayı karakterleri, sohbet ve zar geçmişiyle birlikte kalıcı olarak siler.
+                Kapatabilmek için önce tüm oyuncuları ve izleyicileri çıkarman gerekir. Yalnızca dondurmak istiyorsan ayarlardan durumu &quot;Arşiv&quot; yap.
+              </li>
+              <li>
                 <strong>Geçmişi silme:</strong> &quot;Seç&quot; ile mesaj ve zarları toplu seçip silebilirsin. &quot;Temizle&quot; düğmesi sahne mesajlarını, masa sohbetini, bir oyuncuyla
                 ya da tüm oyuncularla olan fısıltıları, zar geçmişini veya her şeyi tek seferde siler.
               </li>

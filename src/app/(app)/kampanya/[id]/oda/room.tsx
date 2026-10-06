@@ -249,6 +249,17 @@ export function Room({
       router.replace("/panel");
       router.refresh();
     });
+    s.on("campaign:closed", (p: { campaignId: string; campaignName: string }) => {
+      if (p.campaignId !== campaign.id) return;
+      toast(`${p.campaignName} odası kapatıldı.`, "error");
+      try {
+        sessionStorage.removeItem("shz:lastRoom");
+      } catch {
+        /* yok say */
+      }
+      router.replace("/panel");
+      router.refresh();
+    });
     s.on("character:deleted", ({ characterId }: { characterId: string }) => {
       setChars((list) => list.filter((e) => e.character.id !== characterId));
       setViewing((v) => (v === characterId ? null : v));

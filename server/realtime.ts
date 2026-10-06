@@ -302,6 +302,18 @@ function claim(req: PendingRequest, characterId: string) {
 // ---------------------------------------------------------------- işleyiciler
 export function attachRealtime(io: Server) {
   globalThis.__shzIO = io;
+  // GM odayı kapatınca (API): bekleyen zar isteklerini, varlık bilgisini ve soketlerin oda üyeliğini temizle.
+  globalThis.__shzCloseRoom = (cid) => {
+    pending.delete(cid);
+    presence.delete(cid);
+    const ns = io.of("/");
+    for (const sid of [...(ns.adapter.rooms.get(room(cid)) ?? [])]) {
+      const sock = ns.sockets.get(sid) as S | undefined;
+      if (!sock) continue;
+      sock.data.campaigns.delete(cid);
+      void Promise.all([sock.leave(room(cid)), sock.leave(gmRoom(cid)), sock.leave(userRoom(cid, sock.data.user.id))]);
+    }
+  };
   settleRequest = (cid, req) => {
     if (campaignRequests(cid).get(req.id) !== req) return; // bu sırada iptal edildi
     if (!req.remaining.length) {

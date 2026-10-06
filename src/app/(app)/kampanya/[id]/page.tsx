@@ -11,7 +11,7 @@ import { campaignAccess } from "@/lib/access";
 import { pageUser } from "@/lib/auth/session";
 import { resolveContentLinks } from "@/lib/base";
 import { content, getTree } from "@/lib/shz/content";
-import { ApprovalActions, JoinCodeBox, LevelUpPanel, MemberRoleToggle, RemoveMember } from "./gm-tools";
+import { ApprovalActions, CloseRoom, JoinCodeBox, LevelUpPanel, MemberRoleToggle, RemoveMember } from "./gm-tools";
 
 export const metadata: Metadata = { title: "Kampanya" };
 
@@ -161,6 +161,19 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
                   }}
                 />
               </Card>
+            </section>
+          )}
+
+          {isGM && (
+            <section>
+              <SectionTitle>Odayı kapat</SectionTitle>
+              <CloseRoom
+                campaignId={c.id}
+                name={c.name}
+                players={members.filter((m) => m.role === "PLAYER").length}
+                spectators={members.filter((m) => m.role === "SPECTATOR").length}
+                characters={chars.length}
+              />
             </section>
           )}
         </div>

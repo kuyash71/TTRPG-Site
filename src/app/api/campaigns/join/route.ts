@@ -16,7 +16,14 @@ export const POST = route({ body: z.object({ code: z.string().trim().min(4).max(
   const role = c.spectatorCode === code ? ("SPECTATOR" as const) : ("PLAYER" as const);
   if (c.gmId !== user.id) {
     // Zaten üyeyse rolü değişmez (izleyici kodu bir oyuncuyu izleyiciye düşürmez).
-    await db.insert(campaignMembers).values({ campaignId: c.id, userId: user.id, role }).onConflictDoNothing();
+    try {
+      await db.insert(campaignMembers).values({ campaignId: c.id, userId: user.id, role }).onConflictDoNothing();
+    } catch (e) {
+      // Bu sırada GM odayı kapattıysa (yabancı anahtar ihlali) kod artık geçersizdir.
+      const code = (e as { code?: string }).code ?? (e as { cause?: { code?: string } }).cause?.code;
+      if (code === "23503") throw bad("Kod geçersiz.");
+      throw e;
+    }
     notifyCampaign(c.id, "members:changed", {});
   }
   return { id: c.id, role };

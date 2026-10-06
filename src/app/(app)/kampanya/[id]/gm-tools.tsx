@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { CopyButton, Modal, useAction } from "@/components/interactive";
-import { Button, Card, Empty, cx } from "@/components/ui";
+import { Button, Card, Empty, Field, cx } from "@/components/ui";
 import { api } from "@/lib/client";
 import { STAT_KEYS, STAT_LABELS, STAT_MAX, type StatKey } from "@/lib/shz/constants";
 
@@ -269,6 +269,79 @@ export function LevelUpPanel({ campaignId, characters, levelCap }: { campaignId:
           {chosen.length ? `${chosen.length} karakteri seviye atlat` : "Karakter seç"}
         </Button>
       </div>
+    </Card>
+  );
+}
+
+/**
+ * Odayı kapat: kampanyayı tüm verisiyle kalıcı olarak siler.
+ * Odada oyuncu ya da izleyici kaldığı sürece düğme kapalıdır (sunucu da aynı kuralı uygular).
+ */
+export function CloseRoom({ campaignId, name, players, spectators, characters }: { campaignId: string; name: string; players: number; spectators: number; characters: number }) {
+  const router = useRouter();
+  const { busy, run } = useAction();
+  const [open, setOpen] = useState(false);
+  const [confirm, setConfirm] = useState("");
+  const left = players + spectators;
+  const who = [players > 0 && `${players} oyuncu`, spectators > 0 && `${spectators} izleyici`].filter(Boolean).join(" ve ");
+  return (
+    <Card className="border-danger/40 p-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="max-w-xl space-y-2 text-sm">
+          <p className="text-ink/90">
+            Kampanya; karakterleri, sohbet ve zar geçmişiyle birlikte kalıcı olarak silinir. Katılma kodları geçersiz olur, kullanılmamış davetler iptal edilir. Yalnızca
+            dondurmak istiyorsan ayarlardan durumu &quot;Arşiv&quot; yap.
+          </p>
+          {left > 0 ? (
+            <p className="text-warn" data-testid="close-room-blocked">
+              Kapatmak için önce tüm oyuncuları çıkar: {who} kaldı. &quot;Oyuncular ve izleyiciler&quot; listesindeki &quot;Çıkar&quot; ile çıkarabilirsin.
+            </p>
+          ) : (
+            <p className="text-muted">Odada kimse kalmadı; oda kapatılabilir.</p>
+          )}
+        </div>
+        <Button variant="danger" disabled={left > 0 || busy} onClick={() => setOpen(true)}>
+          Odayı kapat
+        </Button>
+      </div>
+      <Modal open={open} onClose={() => setOpen(false)} title="Odayı kapat">
+        <div className="space-y-4">
+          <p className="text-sm text-ink/90">
+            <strong>{name}</strong> kalıcı olarak kapatılacak.{" "}
+            {characters > 0 ? `${characters} karakter (portre ve kayıtlarıyla), sahne mesajları` : "Sahne mesajları"}, masa sohbeti, fısıltılar ve zar geçmişi silinir. Bu işlem geri
+            alınamaz.
+          </p>
+          <Field label="Onaylamak için kampanyanın adını yaz">
+            <input className="input" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder={name} autoComplete="off" />
+          </Field>
+          <div className="flex justify-end gap-2">
+            <Button onClick={() => setOpen(false)}>Vazgeç</Button>
+            <Button
+              variant="danger"
+              disabled={busy || confirm.trim() !== name.trim()}
+              onClick={async () => {
+                const ok = await run(() => api(`/api/campaigns/${campaignId}`, { method: "DELETE", body: { confirmName: confirm.trim() } }), "Oda kapatıldı.");
+                if (!ok) {
+                  // Bu arada biri katıldıysa sayfadaki listeyi tazele.
+                  setOpen(false);
+                  router.refresh();
+                  return;
+                }
+                try {
+                  const last = JSON.parse(sessionStorage.getItem("shz:lastRoom") ?? "null") as { id?: string } | null;
+                  if (last?.id === campaignId) sessionStorage.removeItem("shz:lastRoom");
+                } catch {
+                  /* yok say */
+                }
+                router.replace("/panel");
+                router.refresh();
+              }}
+            >
+              Kalıcı olarak kapat
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </Card>
   );
 }
