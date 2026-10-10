@@ -12,6 +12,8 @@
     "start": "NODE_ENV=production tsx server.ts",
     "sync": "tsx scripts/sync-vault.ts",
     "sync:check": "tsx scripts/sync-vault.ts --check",
+    "sync:uc": "tsx scripts/sync-uc.ts",
+    "sync:uc:check": "tsx scripts/sync-uc.ts --check",
     "create-gm": "tsx scripts/create-gm.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/migrate.ts",

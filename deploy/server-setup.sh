@@ -421,6 +421,20 @@ server {
         proxy_read_timeout 60s;
     }
 
+    # Umbra Caelis kuralları: aynı uygulama, adres /umbracaelis altında kalır (server.ts eşler)
+    location = /umbracaelis { return 301 /umbracaelis/kurallar; }
+    location ^~ /umbracaelis/ {
+        limit_req zone=shz_app burst=300 nodelay;
+        limit_req_status 429;
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$remote_addr;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_read_timeout 60s;
+    }
+
     location / {
         try_files \$uri =404;
     }

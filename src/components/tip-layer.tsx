@@ -1,13 +1,25 @@
 "use client";
 import { Lightbulb, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { tipFor, type TipKind } from "@/lib/shz/tips";
+import { tipFor, type Tip, type TipKind } from "@/lib/shz/tips";
+import { ucTipFor } from "@/lib/uc/tips";
 
 interface Open {
   title: string;
-  kind: TipKind;
-  key: string;
+  tip: Tip;
   el: HTMLElement;
+}
+
+/** data-tip-src="uc" olan öğeler Umbra Caelis ipuçlarından, diğerleri SHZ ipuçlarından okunur. */
+function lookup(el: HTMLElement): Tip | null {
+  const kind = el.dataset.tipKind ?? "";
+  const key = el.dataset.tipKey ?? "";
+  if (el.dataset.tipSrc === "uc") return ucTipFor(kind, key);
+  try {
+    return tipFor(kind as TipKind, key);
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -21,10 +33,9 @@ export function TipLayer() {
 
   useEffect(() => {
     const show = (el: HTMLElement) => {
-      const kind = el.dataset.tipKind as TipKind;
-      const key = el.dataset.tipKey ?? "";
-      if (!tipFor(kind, key)) return false;
-      setOpen({ kind, key, title: el.dataset.tipTitle || el.textContent || key, el });
+      const tip = lookup(el);
+      if (!tip) return false;
+      setOpen({ tip, title: el.dataset.tipTitle || el.textContent || "", el });
       return true;
     };
     const onClick = (e: MouseEvent) => {
@@ -81,7 +92,7 @@ export function TipLayer() {
   }, [open]);
 
   if (!open) return null;
-  const tip = tipFor(open.kind, open.key)!;
+  const tip = open.tip;
   return (
     <div
       ref={box}

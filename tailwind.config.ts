@@ -19,6 +19,7 @@ export default {
         danger: v("danger"),
         ok: v("ok"),
         warn: v("warn"),
+        lav: v("lav"),
       },
       fontFamily: {
         sans: ['"IBM Plex Sans"', "system-ui", "sans-serif"],

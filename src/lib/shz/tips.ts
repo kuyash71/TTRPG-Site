@@ -27,7 +27,7 @@ const data = raw as unknown as {
 };
 
 export function tipFor(kind: TipKind, key: string): Tip | null {
-  return (data[kind] as Record<string, Tip>)[key] ?? null;
+  return (data[kind] as Record<string, Tip> | undefined)?.[key] ?? null;
 }
 export function branchMeaning(name: string | null | undefined) {
   return name ? (data.branches[name] ?? null) : null;

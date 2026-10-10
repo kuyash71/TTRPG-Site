@@ -16,6 +16,7 @@
   --danger: 228 108 96;
   --ok: 122 196 154;
   --warn: 226 180 92;
+  --lav: 186 168 240;
   color-scheme: dark;
 }
 
@@ -194,4 +195,82 @@ h3 {
   .corr-clean-beam {
     animation: none;
   }
+}
+
+/* ---------------------------------------------------------------- Umbra Caelis (v3.1) */
+/* Yumuşak altın + lavanta, koyu ton. umbracaelis.com/umbracaelis altındaki sayfalar.
+   body:has(...) sayesinde sayfa dışında çizilen ipucu balonu da aynı renkleri alır. */
+.uc-theme,
+body:has(.uc-theme) {
+  --bg: 13 11 18;
+  --surface: 22 19 29;
+  --surface-2: 32 28 42;
+  --line: 54 47 66;
+  --ink: 245 240 231;
+  --muted: 170 160 186;
+  --accent: 226 199 142;
+  --accent-strong: 204 173 112;
+  --on-accent: 30 23 12;
+  --lav: 190 172 242;
+  --warn: 190 172 242;
+  --ok: 150 202 160;
+  --danger: 230 120 110;
+}
+body:has(.uc-theme) {
+  background-image: radial-gradient(70rem 30rem at 50% -14rem, rgb(var(--accent) / 0.09), transparent 65%),
+    radial-gradient(50rem 30rem at 100% 0, rgb(var(--lav) / 0.07), transparent 60%);
+  background-attachment: fixed;
+}
+.uc-theme .kicker {
+  @apply text-lav;
+}
+
+/* Kural metinlerinde tablo, kod bloğu, ayırıcı ve numaralı liste (UC kaynakları bunları kullanır) */
+.prose-shz h2 {
+  @apply mb-3 mt-9 border-b border-line pb-2 font-serif text-xl tracking-wide text-ink;
+}
+.prose-shz > h2:first-child,
+.prose-shz > h3:first-child,
+.prose-shz > h4:first-child {
+  @apply mt-0;
+}
+.prose-shz ol:not(.corr) {
+  @apply mb-3 list-decimal space-y-1 pl-5;
+}
+.prose-shz li > ul,
+.prose-shz li > ol {
+  @apply mb-1 mt-1;
+}
+.prose-shz hr {
+  @apply my-6 border-line;
+}
+.prose-shz pre.code {
+  @apply my-3 overflow-x-auto rounded-lg border border-line bg-surface2 px-4 py-3 font-mono text-[13px] leading-relaxed text-ink/90;
+}
+.prose-shz code {
+  @apply rounded bg-surface2 px-1 font-mono text-[0.88em];
+}
+.prose-shz .table-wrap {
+  @apply my-3 mb-5 overflow-x-auto rounded-lg border border-line;
+}
+.prose-shz table.uc-table {
+  @apply w-full border-collapse text-sm;
+}
+.prose-shz table.uc-table th {
+  @apply whitespace-nowrap border-b border-line bg-surface2 px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-muted;
+}
+.prose-shz table.uc-table td {
+  @apply border-b border-line/70 px-3 py-2 align-top;
+}
+.prose-shz table.uc-table tr:last-child td {
+  @apply border-b-0;
+}
+.prose-shz .thresholds {
+  @apply my-1 flex flex-wrap gap-1.5;
+}
+.prose-shz .thr {
+  @apply inline-flex items-center gap-1.5 rounded-md border border-line bg-surface2 px-2 py-0.5 text-[13px];
+}
+.prose-shz .thr b {
+  @apply font-mono font-semibold text-accent;
 }

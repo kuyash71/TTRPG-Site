@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 const SESSION_COOKIE = "shz_session";
-const PUBLIC = [/^\/giris(\/|$)/, /^\/kayit(\/|$)/, /^\/kurallar(\/|$)/, /^\/yardim(\/|$)/, /^\/icon/, /^\/api\//, /^\/emblems\//, /^\/favicon/];
+const PUBLIC = [/^\/giris(\/|$)/, /^\/kayit(\/|$)/, /^\/kurallar(\/|$)/, /^\/umbracaelis(\/|$)/, /^\/yardim(\/|$)/, /^\/icon/, /^\/api\//, /^\/emblems\//, /^\/favicon/];
 
 export function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname; // basePath hariç

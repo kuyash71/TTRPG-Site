@@ -1,0 +1,1211 @@
+{
+ "classes": {
+  "close-quarter": {
+   "meaning": "Yakın mesafe, göğüs göğüse dövüş",
+   "summary": "Kılıç, balta ya da yumrukla düşmanınla arandaki mesafeyi bir kol boyuna indirirsin. Saldırıların silaha göre Yalman (ağır silah, boğuşma) ya da Kaçınç (hafif silah, kılıç) ile atılır."
+  },
+  "hunter": {
+   "meaning": "Avcı",
+   "summary": "Savaşı kendi seçtiğin yerde ve zamanda yaparsın: iz sürer, pusu kurar, avlarsın. Menzilli saldırıların Görü ile atılır."
+  },
+  "priest": {
+   "meaning": "Rahip",
+   "summary": "İnancın ve iradenin taşıyıcısısın: ya tanrının gücüyle şifa verip kutsarsın ya da sözünle takımı coşturup insanların iradesini yönlendirirsin. Başta bir inanç seçersin."
+  },
+  "scholar": {
+   "meaning": "Âlim, bilgin",
+   "summary": "Manayı eğitimle öğrenmiş bir büyücüsün: rün kazır, iç mananla dış manayı tetikler, ruhunun dinamizmiyle boğuşursun. Büyü zarında Nat1 gelirse +1 Yozlaşma alırsın."
+  }
+ },
+ "dals": {
+  "brute": {
+   "meaning": "Kaba kuvvetli, iri yarı",
+   "summary": "İnceliği bırakıp ağırlık, kemik kırma ve iradeyle savaşırsın; sembol stat Yalman. İlk dal olarak seçersen oyuna +1 Sebahat ile başlarsın."
+  },
+  "swordsman": {
+   "meaning": "Kılıç ustası",
+   "summary": "İmparatorluk kılıç okulunun disipliniyle doğru duruş, mesafe ve savuşturmayla dövüşürsün; sembol stat Kaçınç. İlk dal olarak seçersen +1 Görü ile başlarsın."
+  },
+  "arcanist": {
+   "meaning": "Büyü bilen, gizemci",
+   "summary": "İç manayı bedeninden silahına akıtan savaş büyücüsüsün; kılıç darbelerin büyü kadar yıkıcı olur. Sembol stat Efsun."
+  },
+  "berserker": {
+   "meaning": "Gözü dönmüş savaşçı",
+   "summary": "İçinden taşan manayı kontrol etmeye çalışmaz, öfkeye teslim olursun; öfke silahın, acı yakıtın olur. Sembol stat Yalman."
+  },
+  "duelist": {
+   "meaning": "Düellocu",
+   "summary": "Savaşı hep iki kişilik bir sahneye indirir, rakibini okur ve ilk hatasını cezalandırırsın. Bire bir dövüşte en güçlü halindesin; sembol stat Kaçınç."
+  },
+  "shinigami": {
+   "meaning": "Ölüm tanrısı (Japonca)",
+   "say": "şi-ni-ga-mi",
+   "summary": "Ruh-kılıcınla (Animus) konuşur, adını öğrenir ve onu Erwachen ile Apotheosis olarak serbest bırakırsın; bunu Akış havuzunla açık tutarsın. Sembol stat Sebahat."
+  },
+  "lurcher": {
+   "meaning": "Pusuda bekleyen, sinsi sinsi dolaşan",
+   "summary": "Sabırla pusuya yatan, avını öğrenip doğru anda tek vuruşla indiren avcısın. Sembol stat Giz; ilk dal seçilirse +1 Kaçınç ile başlarsın."
+  },
+  "ranger": {
+   "meaning": "Korucu, iz sürücü",
+   "summary": "Yay ile doğa arasında yaşayan okçu ve iz sürücüsün; rüzgârı, izi ve okun düşeceği yeri okursun. Sembol stat Görü; ilk dal seçilirse +1 Hikmet ile başlarsın."
+  },
+  "artisan": {
+   "meaning": "Zanaatkâr, usta",
+   "summary": "Ellerine güvenirsin: tuzak, iksir, özel ok ve barut çömleği hazırlayan bir zanaatkâr avcısın. Sembol stat Marifet."
+  },
+  "shade": {
+   "meaning": "Gölge",
+   "summary": "Gölgeyi giyen casus ve suikastçısın: sahte yüz, zehirli kadeh, fısıldanan söylenti. Sembol stat Giz."
+  },
+  "slayer": {
+   "meaning": "Katil, canavar avcısı",
+   "summary": "Decayed Mana ile beslenen yaratıkları ve doğaüstü dehşetleri bilgiyle avlayan canavar avcısısın. Sembol stat Hikmet."
+  },
+  "stormer": {
+   "meaning": "Baskıncı, hücumcu",
+   "summary": "Duvara tırmanan, kapıyı kıran, hat yaran akıncısın; hep hareket hâlinde savaşırsın. Sembol stat Kaçınç."
+  },
+  "prayer": {
+   "meaning": "Dua",
+   "summary": "Duayla yara kapatan, müttefikleri kutsayan ve kötülüğe karşı alan koruyan şifacı rahipsin. Sembol stat Sebahat; ilk dal seçilirse +1 Hikmet ile başlarsın."
+  },
+  "preacher": {
+   "meaning": "Vaiz",
+   "summary": "Kelimeleri kılıcı olan vaizsin: kalabalığı ikna eder, takımı coşturur, itiraf aldırırsın. Sembol stat Cazibe; ilk dal seçilirse +1 Hakimiyet ile başlarsın."
+  },
+  "men-of-will": {
+   "meaning": "İrade adamları",
+   "summary": "Adamlarına irade veren önder rahipsin: müritler toplar, emir verir, takımı korkudan ve acıdan arındırırsın. Sembol stat Hakimiyet."
+  },
+  "will-of-god": {
+   "meaning": "Tanrının iradesi",
+   "summary": "Duayı zırha, inancı darbeye çeviren paladinsin: ağır zırhla ön safta durur, günahkârı yargılar, müttefiklerini korursun. Sembol stat Yalman."
+  },
+  "archpriest": {
+   "meaning": "Başrahip",
+   "summary": "Kutsal gücün zirvesisin: toplu şifa, Yozlaşma temizliği, aforoz, toprağı kutsama ve diriliş. Sembol stat Sebahat."
+  },
+  "occultist": {
+   "meaning": "Okültist",
+   "summary": "Men of Will'in karanlık sonusun: müritlerini kuklaya çevirir, rüyalara girer, zihinlere ip bağlarsın. Gücün yoz zarlara ve Yozlaşmaya dayanır. Sembol stat Hakimiyet."
+  },
+  "runecaster": {
+   "meaning": "Rün döken, rün ustası",
+   "summary": "Büyüyü kendi ruhundan değil dünyadan alırsın: rünlerle dış manayı yönlendirir, Blu Mana kristallerinde güç saklarsın. Yavaş ve sabırlı bir oyun; sembol stat Hikmet."
+  },
+  "wizard": {
+   "meaning": "Büyücü",
+   "summary": "Klasik büyücüsün: iç mananı bir uzuv gibi uzatıp dış manayı tetiklersin. Mana okları, elementler ve kalkanlarla oynarsın; sembol stat Efsun."
+  },
+  "shackled": {
+   "meaning": "Zincirlenmiş",
+   "summary": "Düşük dinamizmli, sakin ve verimli bir manan var. Manayı zincire vurur, başkalarının büyülerini susturur ve Yozlaşmaya karşı dayanıklı olursun; sembol stat Hikmet."
+  },
+  "unleashed": {
+   "meaning": "Serbest bırakılmış, dizginsiz",
+   "summary": "Yüksek dinamizmli manan patlayıcı ve kontrolsüzdür. Zarlarını güçlendirip patlamalar saçarsın ama geri tepme ve Yozlaşma riskini göze alırsın; sembol stat Efsun."
+  },
+  "catastrophe": {
+   "meaning": "Felaket, yıkım",
+   "summary": "Kullanılamaz denen Decayed Mana'yı silaha çevirirsin. Yoz zarlarla çürütür, emer ve yıkarsın; her gücün bedelini Yozlaşma ile ödersin. Sembol stat Efsun."
+  },
+  "divine": {
+   "meaning": "İlahi, tanrısal",
+   "summary": "Tanrılara ait sayılan Primordial Mana'yı ararsın. Işık, yaratma ve kehanetle oynarsın; bu güç yalnızca çürümemiş ruha cevap verir, Yozlaşman düşük kalmalı. Sembol stat Sebahat."
+  }
+ },
+ "abilities": {
+  "heavy-hands": {
+   "meaning": "Ağır eller",
+   "summary": "Kapı kırma, kaldırma, itme ve boğuşma gibi kaba kuvvet işlerinde Yalman zarlarına bonus alırsın. Üst seviyede imkânsız işleri GM onayıyla Uber eşikte deneyebilirsin."
+  },
+  "juggernaut": {
+   "meaning": "Durdurulamaz dev güç",
+   "summary": "Geri adım atmadan ilerledikçe İvme biriktirir, harcayıp saldırına +2 alırsın. Geri adım atar ya da bir tur saldırmazsan tüm İvme sıfırlanır."
+  },
+  "bonebreaker": {
+   "meaning": "Kemik kıran",
+   "summary": "İsabetten sonra Yalman zarıyla (Orta, zırhlıda Zor) hedefin uzvunu Kırık yaparsın; o uzvu kullanan zarlar ceza alır. Kırık sargıyla geçmez."
+  },
+  "thick-skin": {
+   "meaning": "Kalın deri",
+   "summary": "Çizik cezalarını yok sayar, Hafif Yaralı cezasını azaltırsın. Üst seviyede çatışma başına 1 kez Yalman (Zor) zarıyla bir yara ilerlemesini engellersin."
+  },
+  "mons-ferreus": {
+   "meaning": "Demir Dağ (Latince)",
+   "say": "mons fer-re-us",
+   "summary": "Çatışma başına 1 kez, iki elli ağır silahla zarsız isabet eden ve seçtiğin uzvu 2 kademe yaralayan bir darbe indirirsin; kalkan ve hafif zırh korumaz. Sonraki tur aksiyon alamazsın."
+  },
+  "stance-of-the-empire": {
+   "meaning": "İmparatorluk duruşu",
+   "summary": "Çatışma başında Saldırı ya da Savunma Duruşu seçersin: biri saldırıya bonus verirken diğerine -1 ceza getirir. Üst seviyede her tur başında bedavaya duruş değiştirirsin."
+  },
+  "parry": {
+   "meaning": "Savuşturma",
+   "summary": "Sana gelen yakın dövüş saldırısını Kaçınç zarıyla savuşturur, saldırganın zarına eşit ya da üstündeysen yara almazsın. Seviyeye göre çatışma başına 1-3 kez."
+  },
+  "riposte": {
+   "meaning": "Karşı hamle",
+   "summary": "Başarılı bir savuşturma ya da kaçınmanın hemen ardından tur harcamadan bonuslu bir karşı saldırı yaparsın. Üst seviyede saldırgan buna karşı kaçınamaz."
+  },
+  "measured-step": {
+   "meaning": "Ölçülü adım",
+   "summary": "Bire bir dövüşte mesafeyi sen belirlersin; uzaklaşan hedefi takip etmek tur harcamaz. Üst seviyede yaklaşan düşmana ilk vuruşu sen yaparsın (çatışma başına 2 kez)."
+  },
+  "filo-de-honor": {
+   "meaning": "Onurun Kılıcı (İspanyolca)",
+   "say": "fi-lo de o-nor",
+   "summary": "Tanıklar önünde resmi düello çağrısı yaparsın: kabul ederse ona karşı +3, o sana -2 alır; reddederse onun ve adamlarının Sebahat ve Hakimiyet zarları -2 olur. Kaçar ya da hile yaparsan seans boyunca kullanamazsın."
+  },
+  "mana-edge": {
+   "meaning": "Mana ağzı (silahın keskin ağzı)",
+   "summary": "Büyü zarıyla (Kolay) silahına iç mana akıtırsın; birkaç tur saldırılarına bonus alır, hafif zırhı yok sayarsın. En üst seviyede çatışma boyunca sürer."
+  },
+  "ember-brand": {
+   "meaning": "Kor damgası",
+   "summary": "Büyü zarıyla (Orta) silahını alevlendirirsin; sonraki isabette hedef uzuv yanar ve yarası tur sonunda 1 kademe daha ilerler. Üst seviyede yanık uzar ve ikinci hedefe sıçrayabilir."
+  },
+  "glockenschlag": {
+   "meaning": "Çan vuruşu (Almanca)",
+   "say": "glokın-şlag",
+   "summary": "Bir tur savunmasız kalıp çevredeki dış manayı toplar, sonraki tur bir şok dalgasıyla yakındakileri savurur, düşürür ve yaralarsın; müttefikler de etkilenir. Büyü zarı başarısızsa gövden yaralanır."
+  },
+  "mana-ward": {
+   "meaning": "Mana kalkanı",
+   "summary": "Sana gelen bir saldırıya karşı büyü zarı atarsın; saldırı zarına eşit ya da üstündeyse yara daha az ilerler. Çatışma başına 2 kez; üst seviyede büyüleri de saptırırsın."
+  },
+  "ignis-savarum": {
+   "meaning": "Savarum'un Ateşi (Latince)",
+   "say": "ig-nis sa-va-rum",
+   "summary": "Büyü zarıyla (Zor) kılıcının çevresinde alev girdabı yaratır, kaçamayan yakın düşmanları 2 kademe yaralayıp yakarsın. Çatışma başına 1 kez, her kullanımda +1 Yozlaşma."
+  },
+  "red-mist": {
+   "meaning": "Kızıl sis (gözü dönmek)",
+   "summary": "Birkaç tur öfkeye girersin: saldırıya +2, korku ve zihin kontrolüne bağışıklık, ama kaçınma ve savuşturmaya -2 ve geri çekilemezsin. Öfke bitince 1 tur tüm zarlara -2."
+  },
+  "pain-is-fuel": {
+   "meaning": "Acı yakıttır",
+   "summary": "Hafif Yaralı ya da daha kötü durumdaki her uzvun için saldırı zarlarına +1 alırsın; üst sınır seviyeyle artar. Ne kadar yaralıysan o kadar sert vurursun."
+  },
+  "blood-price": {
+   "meaning": "Kan bedeli",
+   "summary": "Saldırı zarından önce kendi uzvuna 1 kademe yara verip +3 (üst seviyede 2 kademeyle +6) alırsın. Her kullanımda Sebahat (Kolay) atarsın; başarısızlıkta +1 Yozlaşma."
+  },
+  "howl": {
+   "meaning": "Uluma",
+   "summary": "Savaş çığlığı atarsın; duyan düşmanlar Sebahat (Orta) zarında başarısız olursa 1 tur Sinme durumuna girer. Üst seviyede eşik Zor olur ve müttefiklerin sonraki zarına +1 alır."
+  },
+  "ira-aeterna": {
+   "meaning": "Sonsuz Öfke (Latince)",
+   "say": "i-ra e-ter-na",
+   "summary": "Çatışmada öldüğün an 2 tur yara cezalarını yok sayarak dövüşürsün; seni öldüreni öldürürsen kritik yaralı hayatta kalırsın. Seans başına 1 kez, +2 Yozlaşma."
+  },
+  "master-duelist": {
+   "meaning": "Usta düellocu",
+   "summary": "Yalnızca sen ve tek bir düşman birbirinize saldırırken çatışma zarlarına bonus alırsın (+2'den +5'e kadar)."
+  },
+  "prince-of-death": {
+   "meaning": "Ölüm prensi",
+   "summary": "Çatışmada öldürdüğün hedefler sana o çatışma boyunca kaçınma ve savuşturma bonusu verir. Her yeni bonus için gereken öldürme sayısı ikiye katlanır."
+  },
+  "charisma-of-steel": {
+   "meaning": "Çeliğin karizması",
+   "summary": "Bire bir düşman yendikçe Nam kazanır, harcayıp Cazibe veya Hakimiyet zarını zarsız Orta başarı sayarsın. Üst seviyede kılıcını çekerek ya da kınına sokarak düşmanları teslim olmaya zorlarsın."
+  },
+  "read-the-blade": {
+   "meaning": "Kılıcı okumak",
+   "summary": "Bir tur rakibini izleyip Görü (Orta) atarsın; başarıda sonraki saldırısından otomatik kaçınır ya da bedava karşı saldırı yaparsın. Çatışma başına 1 kez (üst seviyede 2)."
+  },
+  "una-vida": {
+   "meaning": "Tek Hayat (İspanyolca)",
+   "say": "u-na vi-da",
+   "summary": "Her isabetin hedefte Herida (yarık) bırakır. Çatışma başına 1 kez zarsız bir vuruşla hepsini patlatır, her 2 Herida için yarayı 1 kademe ilerletirsin; hedef ölmezse sana gelen ilk saldırı zarsız isabet eder."
+  },
+  "jinzen": {
+   "meaning": "Kılıç meditasyonu (Japonca)",
+   "say": "cin-zen",
+   "summary": "Uzun dinlenmede iç dünyana inip ruh-kılıçla konuşur, Rezonans kazanır ve adını öğrenirsin. Üst seviyede zor anlarda Kılıcın Sesi gelir; Öğüt ya da Güç seçersin."
+  },
+  "erwachen": {
+   "meaning": "Uyanış (Almanca)",
+   "say": "er-vah-ın",
+   "summary": "Kılıcın adını bildiğinde salınım sözünü söyleyip onu uyandırır, GM ile tasarladığın bütçedeki etkiyi kazanırsın. Açık olduğu her tur 1 Akış harcar."
+  },
+  "maiestas": {
+   "meaning": "Heybet (Latince)",
+   "say": "ma-yes-tas",
+   "summary": "Erwachen ya da Apotheosis açıkken Sebahat'i seninkinden düşük düşmanlar sana karşı zarlarında ceza alır. Üst seviyede çok düşük olanlar sana saldırmak için zar atmak zorundadır."
+  },
+  "shunpo": {
+   "meaning": "Anlık adım (Japonca)",
+   "say": "şun-po",
+   "summary": "Tur harcamadan yaklaşık 10 metrelik, gözle izlenemeyen bir adım atarsın; çatışma başına 2 kez. Üst seviyede salınım açıkken Akış harcayarak sınırsız kullanırsın."
+  },
+  "apotheosis": {
+   "meaning": "İlahlaşma (Yunanca)",
+   "say": "a-po-te-o-sis",
+   "summary": "Ruh-kılıcın nihai formunu açarsın: Erwachen etkileri ikiye katlanır ve nihai etki açılır, her tur 2 Akış harcar. Seans başına 1 kez, +2 Yozlaşma; zarları yoz zardır."
+  },
+  "low-profile": {
+   "meaning": "Göze batmamak",
+   "summary": "Hareket hâlindeyken attığın Giz zarlarına seviyeye göre bonus alırsın. Üst seviyede kalabalıkta gözden kaybolmak Kolay eşikte olur."
+  },
+  "patient-predator": {
+   "meaning": "Sabırlı yırtıcı",
+   "summary": "Pusuya yatıp kımıldamadan beklediğin her tur, pusudan ilk saldırına +1 biriktirirsin (seviyeye göre üst sınır artar)."
+  },
+  "silent-takedown": {
+   "meaning": "Sessiz etkisiz bırakma",
+   "summary": "Seni fark etmemiş bir hedefi arkadan yakalayıp d20 + Giz ile ses çıkarmadan bayıltırsın; üst seviyede öldürmeyi de seçebilirsin."
+  },
+  "stalker-s-eye": {
+   "meaning": "Takipçinin gözü",
+   "summary": "Bir hedefi zihninde işaretlersin; onu izlerken Giz ve Görü zarlarına +2 alırsın, onun seni fark etmesi zorlaşır."
+  },
+  "muerte-callada": {
+   "meaning": "Sessiz ölüm (İspanyolca)",
+   "say": "muerte kayada",
+   "summary": "Seni fark etmemiş hedefe pusudan ilk saldırın zarsız isabet eder, yara 2 kademe ilerler ve hedef susar. Çatışma başına 1 kez; sonraki tur Giz atamazsın."
+  },
+  "steady-draw": {
+   "meaning": "Sakin gerdiriş",
+   "summary": "O tur hareket etmediysen yay ve arbalet zarlarına seviyeye göre bonus alırsın; en üst seviyede hareket ederken de +1 alırsın."
+  },
+  "tracker": {
+   "meaning": "İz sürücü",
+   "summary": "d20 + Görü ile bir izi okursun; eşik ne kadar yüksekse yönü, sayıyı, yükü, zamanı ve kim olduklarını öğrenirsin."
+  },
+  "pinning-shot": {
+   "meaning": "Sabitleyen atış",
+   "summary": "Hedefin bacağına nişan alırsın (d20 + Görü ≥ Orta); başarıda hedef 1 tur hareket edemez ve uzvu 1 kademe yaralanır."
+  },
+  "child-of-the-wild": {
+   "meaning": "Vahşi doğanın çocuğu",
+   "summary": "Doğada yiyecek, su ve barınak bulmak Kolay olur, vahşi hayvanlar saldırmadan önce bir tur bekler. Üst seviyede bir hayvan yoldaşın olur."
+  },
+  "argentum-imber": {
+   "meaning": "Gümüş yağmur (Latince)",
+   "say": "argentum imber",
+   "summary": "Bir turda 3 ok atarsın; farklı hedeflere ya da uzuvlara, her biri ayrı zar ve -2 cezayla. Çatışma başına 1 kez."
+  },
+  "trapwright": {
+   "meaning": "Tuzak ustası",
+   "summary": "1 tur harcayıp d20 + Marifet ile tuzak kurarsın; basan hedefin uzvu yaralanır ve 1 tur hareket edemez. Fark etmek için Görü ≥ Zor gerekir."
+  },
+  "brewmaster": {
+   "meaning": "İksir ustası",
+   "summary": "Uzun dinlenmede malzeme harcayıp Merhem, Uyanış, Zehir gibi iksirler hazırlarsın; seviye arttıkça iksir sayısı ve tarifler (Düşotu vb.) artar."
+  },
+  "fletcher-s-secret": {
+   "meaning": "Okçu ustasının sırrı",
+   "summary": "Uzun dinlenmede özel oklar yaparsın (her tipten 2): Kanırtan, Islık, Işık, Halat; üst seviyede zırhı yok sayan Delici ok eklenir."
+  },
+  "powder-pot": {
+   "meaning": "Barut çömleği",
+   "summary": "Barut çömleği fırlatır ya da kapıya koyarsın; yakındakiler Kaçınç atar, başarısızlar düşer ve yaralanır. Barut güvenilmez: 1-3 gelirse söner ya da elinde patlar."
+  },
+  "meisterwerk": {
+   "meaning": "Başyapıt, usta eseri (Almanca)",
+   "say": "mayster-verk",
+   "summary": "Bir seanslık çalışma ve değerli malzemeyle başyapıt üretirsin: ilgili zarlara +2 ve GM ile seçilen bir özellik. Aynı anda yalnızca 1 tane olabilir."
+  },
+  "second-face": {
+   "meaning": "İkinci yüz",
+   "summary": "Kılık değiştirip Giz zarıyla insanları kandırırsın; tanıyanlar için eşik yükselir. Üst seviyede ses taklidi ve belirli bir kişiyi taklit açılır."
+  },
+  "poisoner": {
+   "meaning": "Zehirci",
+   "summary": "Silaha ya da yiyecek/içeceğe zehir katarsın; hedefin uzvu birkaç tur boyunca tur sonunda yaralanır. Hedef her tur Yalman ≥ Zor ile durdurabilir."
+  },
+  "shadowstep": {
+   "meaning": "Gölge adımı",
+   "summary": "Karanlık bir alana girince d20 + Giz ≥ Orta ile izini kaybettirirsin; gölgeye geçtikten sonraki ilk saldırın pusu sayılır."
+  },
+  "whisper-network": {
+   "meaning": "Fısıltı ağı",
+   "summary": "Girdiğin şehirde bir sahne harcayıp d20 + Giz ile söylentilere ulaşır, işe yarar bilgi alırsın. Üst seviyede hane sırları ve söylenti yayma açılır."
+  },
+  "nachtgericht": {
+   "meaning": "Gece mahkemesi (Almanca)",
+   "say": "naht-ge-riht",
+   "summary": "Uyuyan ya da yalnız bir hedefe GM onayıyla zarsız suikast yaparsın (önemli NPC'de Çok Zor) ve iz bırakmazsın. Seans başına 1 kez."
+  },
+  "bestiary": {
+   "meaning": "Canavar kitabı, bestiyer",
+   "summary": "Bir yaratığı bir tur gözlemleyip d20 + Hikmet atarsın; türünü, zayıf noktasını (o uzva saldırıya bonus) ya da özel yeteneğini öğrenirsin."
+  },
+  "silvered-steel": {
+   "meaning": "Gümüşlenmiş çelik",
+   "summary": "Silahını Blu Mana yağıyla kaplarsın; Decayed Mana varlıklarına, ruhlara ve diriltilmiş ölülere normal isabet eder ve bonus alırsın."
+  },
+  "grim-tonics": {
+   "meaning": "Karanlık tonikler",
+   "summary": "Avcı iksiri içip birkaç tur Yalman zarlarına +2 ve Sinme bağışıklığı alırsın. Etki bitince Sebahat (Kolay) atarsın; başarısızlıkta +1 Yozlaşma."
+  },
+  "mind-fortress": {
+   "meaning": "Zihin kalesi",
+   "summary": "Dehşet anları ve Yozlaşma artışlarında zarlarına bonus alır, Sinme'ye Kolay eşikte direnirsin. Üst seviyede çatışma başına 1 Yozlaşma artışını engellersin."
+  },
+  "ultima-venatio": {
+   "meaning": "Son av (Latince)",
+   "say": "ultima venatsiyo",
+   "summary": "Seans başına 1 kez bir hedefi Son Av ilan edersin: sahne boyunca ona karşı +4 ve daha ağır yaralar. Kaçarsa ya da ölürsen +2 Yozlaşma."
+  },
+  "breach": {
+   "meaning": "Gedik açmak, içeri dalmak",
+   "summary": "Kapı, pencere ya da gedikten tur harcamadan dalar, ilk saldırına +2 alırsın. Üst seviyede müttefiklerine bonus verir, içeridekileri Sinme'ye sokabilirsin."
+  },
+  "escalade": {
+   "meaning": "Sur tırmanışı",
+   "summary": "Duvar ve sur tırmanma zarların kolaylaşır, tırmanırken Giz'e +2 alırsın. Üst seviyede yüksekten hedefin üstüne atlayıp yere düşürürsün."
+  },
+  "fire-and-move": {
+   "meaning": "Ateş et ve ilerle",
+   "summary": "Hareket ettiğin turlarda saldırılarına ceza uygulanmaz; üst seviyede bonus alır, aynı turda hareket edip saldırıp siper alabilirsin."
+  },
+  "behind-the-lines": {
+   "meaning": "Hattın gerisinde",
+   "summary": "Düşman kontrolündeki bölgelerde Giz ve Kaçınç zarlarına +2 alırsın. Üst seviyede çatışmadan kaçmak Kolay olur ve bir müttefiği de çıkarırsın."
+  },
+  "sturmflut": {
+   "meaning": "Fırtına dalgası (Almanca)",
+   "say": "ştuurm-fluut",
+   "summary": "Bir turda 3 hedefe koşarak saldırırsın, her isabet sonrakine +1 ekler; düşenlerin yanındakiler Sinme'ye girebilir. Çatışma başına 1 kez; sonraki tur aksiyon alamazsın."
+  },
+  "close-the-wounds": {
+   "meaning": "Yaraları kapat",
+   "summary": "Bir uzva dokunup dua edersin (d20 + Sebahat ≥ Orta); başarıda yara 1 kademe düşer. Çatışma başına 2 kez. Üst seviyede Kullanılamaz uzuvlara da işler, Kopuk'a işlemez."
+  },
+  "blessing": {
+   "meaning": "Kutsama",
+   "summary": "Bir müttefike 1 tur, inancına göre bir alanda bonus verirsin (ör. Tenebri saldırı). Bonus +2'den +3'e çıkar; en üst seviyede 2 tur sürer ve iki müttefike verilebilir."
+  },
+  "sanctuary": {
+   "meaning": "Sığınak",
+   "summary": "Bir odayı ya da küçük alanı kutsarsın: sahne boyunca yoz zarlar zorlaşır, Decayed Mana varlıkları ve ruhlar girmek için Sebahat zarı atar. Seviye 2'de müttefikler Sinme'ye girmez."
+  },
+  "vigil": {
+   "meaning": "Nöbet (gece boyu dua)",
+   "summary": "Pasif: uzun dinlenmede bir müttefik için dua edersin; Sebahat zarı başarılıysa Yozlaşması 1 azalır. Seans başına 1 kez; üst seviyede eşik düşer ve iki kişi için dua edebilirsin."
+  },
+  "ultimo-aliento": {
+   "meaning": "Son nefes (İspanyolca)",
+   "say": "ultimo alyento",
+   "summary": "Bir müttefike 1 tur Son Nefes verirsin: o tur ölürse ve 2 tur içinde katilini öldürürse kritik yaralı olarak dirilir. Seans başına 1 kez; Death Save değildir."
+  },
+  "sermon": {
+   "meaning": "Vaaz",
+   "summary": "Kalabalığa vaaz verirsin (d20 + Cazibe): Kolay dikkat çeker, Orta basit bir eyleme ikna eder, Zor kalabalığı yanına çeker. Üst seviyede kalabalığı bir düşmana karşı döndürürsün."
+  },
+  "fiery-words": {
+   "meaning": "Ateşli sözler",
+   "summary": "Takımını coşturursun: seni duyan tüm müttefiklerin bir sonraki zarına +1 (seviyeyle +3'e çıkar). Çatışma başına 1 kez, seviye 3'te 2 kez."
+  },
+  "confession": {
+   "meaning": "İtiraf",
+   "summary": "Biriyle yalnız konuşup Cazibe ile onun Sebahat'ine karşı zar atarsın; başarıda sana bir sırrını itiraf eder. Seviye 2'de bir sahne boyunca sana yalan söyleyemez."
+  },
+  "shepherd-s-voice": {
+   "meaning": "Çobanın sesi",
+   "summary": "Pasif: sesini duyan müttefikler Sinme zarlarına +2 alır. Seviye 2'de Sinme'deki bir müttefiği tur harcamadan d20 + Cazibe ≥ Kolay ile kendine getirirsin."
+  },
+  "vox-dei": {
+   "meaning": "Tanrının sesi (Latince)",
+   "say": "voks de-i",
+   "summary": "Seni duyan herkes (düşmanlar dahil) Zor Sebahat zarı atar; başarısız olanlar 1 tur tek kelimelik emrine uyar (Dur, Düş, Kaç...). Seans başına 1 kez; ezoterik inançta +1 Yozlaşma."
+  },
+  "flock": {
+   "meaning": "Sürü",
+   "summary": "Pasif: sana bağlı müritler (NPC) olur; seni korur, mesaj taşır, yanında savaşırlar. 1 müritle başlar, 3'e çıkar. Ölen müridin yerine yenisini bulmak bir seans sürer."
+  },
+  "iron-conviction": {
+   "meaning": "Demir inanç",
+   "summary": "Bir müttefike d20 + Hakimiyet ≥ Kolay ile sahne boyu Sebahat zarlarına +2 verirsin. Üst seviyelerde bonus artar; korkuya, sonra zihin kontrolüne bağışık olur."
+  },
+  "commandment": {
+   "meaning": "Emir",
+   "summary": "Takımına tek bir emir verirsin (Saldır, Savun, Çekil, Tut); o tur emre uyan müttefikler ilgili zarlara +2 alır. Seviye 2'de tur harcamaz."
+  },
+  "rally": {
+   "meaning": "Toparlanma",
+   "summary": "Yaralı müttefiklerini toplarsın: sahne boyunca seni duyanlar Hafif Yaralı cezalarını yok sayar. Çatışma başına 1 kez; seviye 2'de Ağır Yaralı cezası -2'ye iner."
+  },
+  "voluntas-gregis": {
+   "meaning": "Sürünün iradesi (Latince)",
+   "say": "voluntas gregis",
+   "summary": "Tepki: bir müttefik ölür ya da Sinme'ye girerse tetiklenir; tüm müttefikler 2 tur yara cezalarını yok sayar ve saldırıya +2 alır. Seans başına 1 kez."
+  },
+  "divine-judgement": {
+   "meaning": "İlahi yargı",
+   "summary": "Pasif: GM'in günahkâr saydığı hedeflere saldırılarına +1 (seviyeyle +3). Seviye 3'te Orta Sebahat zarıyla hedefin günahkâr olup olmadığını sorabilirsin."
+  },
+  "holy-armor": {
+   "meaning": "Kutsal zırh",
+   "summary": "Pasif: ağır zırhla Kaçınç zarlarına ceza almazsın. Üst seviyelerde zırhın sana gelen bir yarayı 1 kademe azaltır (çatışma başına 1, sonra 2 kez)."
+  },
+  "aegis-of-faith": {
+   "meaning": "İnancın kalkanı",
+   "summary": "Tepki: yakınındaki bir müttefike yapılan saldırıyı üstüne alırsın. Çatışma başına 2 kez. Seviye 2'de Orta Yalman zarıyla yara 1 kademe az ilerler."
+  },
+  "smite": {
+   "meaning": "Kutsal darbe",
+   "summary": "Kutsal bir darbe indirirsin: isabette yara 1 kademe fazla, Decayed Mana varlıklarında 2 kademe fazla ilerler. Seviye 2'de hedef Sebahat zarını geçemezse 1 tur Sinme'ye girer."
+  },
+  "manus-dei": {
+   "meaning": "Tanrının eli (Latince)",
+   "say": "manus de-i",
+   "summary": "Bir sonraki saldırın zarsız isabet eder ve seçtiğin uzuvda yara 2 kademe ilerler. Seans başına 1 kez; ardından 1 tur aksiyon alamazsın."
+  },
+  "miracle-of-mending": {
+   "meaning": "Onarım mucizesi",
+   "summary": "Toplu dua (d20 + Sebahat ≥ Orta): görüş alanındaki tüm müttefiklerin bir uzvundaki yara 1 kademe düşer. Çatışma başına 1 kez; seviye 3'te seansta 1 kez Kopuk uzvu bağlarsın."
+  },
+  "excommunicate": {
+   "meaning": "Aforoz et",
+   "summary": "Bir hedefi aforoz edersin (Sebahat'e karşı Sebahat); başarıda sahne boyunca büyü ve yoz zarlarına -2 (seviyeyle -4). Seviye 3'te müttefikleri de ondan şüphe eder."
+  },
+  "purge": {
+   "meaning": "Arındırma",
+   "summary": "Bir müttefikin Yozlaşmasını Zor Sebahat zarıyla 2 azaltırsın; yarısı sana geçer. Seans başına 1 kez. Seviye 2'de sana geçmez ve son çatal kararını silebilirsin."
+  },
+  "consecrated-ground": {
+   "meaning": "Kutsanmış toprak",
+   "summary": "1 tur harcayıp ~20 metrelik alanı kutsarsın: sahne boyunca yoz zarlar Uber eşikte atılır, Decayed Mana temizlenir. Seviye 2'de müttefiklerin Yozlaşma artışı yarıya iner."
+  },
+  "resurrectio": {
+   "meaning": "Diriliş (Latince)",
+   "say": "rezurrekti-o",
+   "summary": "Son 1 saatte ölmüş birini Zor Sebahat zarıyla diriltirsin; kritik yaralı döner, +2 Yozlaşma alır ve Death Save hakkını kaybeder. Sana +2 Yozlaşma; her seferinde eşik yükselir."
+  },
+  "strings": {
+   "meaning": "İpler",
+   "summary": "Birinin zihnine ip bağlarsın (Hakimiyet'e karşı Sebahat); başarıda 1 tur basit emirlerine uyar (seviyeyle 3 tura çıkar). Yoz zardır; her kullanımda +1 Yozlaşma."
+  },
+  "dream-communion": {
+   "meaning": "Rüya birliği",
+   "summary": "Yakındaki uyuyan birinin rüyasına girip bilgi alır ya da kâbus gösterirsin. Yoz zardır, her kullanımda +1 Yozlaşma. Seviye 2'de tanıdığın biri için uzaklık sınırı yoktur."
+  },
+  "hollow-devotees": {
+   "meaning": "Boş müritler",
+   "summary": "Pasif: müritlerin korkmayan, Sinme'ye girmeyen, acı duymayan, konuşamayan kuklalara dönüşür. 1 kuklayla başlar, 3'e çıkar; kukla kazanmak RP sahnesi ve canlı insan ister."
+  },
+  "thousand-faces": {
+   "meaning": "Bin yüz",
+   "summary": "Pasif: Yozlaşman düşmanlara korku olarak yansır; Sebahat zarlarına Yozlaşma/3 ceza alırlar. Seviye 2'de ceza Yozlaşma/2 olur ve seni teşhis edemezler."
+  },
+  "marionetista": {
+   "meaning": "Kuklacı (İspanyolca)",
+   "say": "maryonetista",
+   "summary": "En fazla 3 hedefe ip bağlarsın (her biri Zor Hakimiyet zarı); başaranlar sahne sonuna kadar senin için savaşır. Seans başına 1 kez, +3 Yozlaşma; yoz zardır."
+  },
+  "rune-script": {
+   "meaning": "Rün yazısı",
+   "summary": "1 tur harcayıp bir nesneye rün kazırsın (Hikmet, Kolay): Işık, Kilit, Alarm ya da Isı. Seviye arttıkça daha çok rün bilir, rünlerin bir gün kalır."
+  },
+  "ward-rune": {
+   "meaning": "Koruma rünü",
+   "summary": "Kendine ya da bir müttefike koruma rünü çizersin (Hikmet, Orta). Taşıyanın aldığı sonraki yara 1 kademe az ilerler; üst seviyede bir yarayı tamamen engeller."
+  },
+  "mana-sense": {
+   "meaning": "Mana algısı",
+   "summary": "Pasif olarak çevredeki dış manayı okursun: büyü izlerini, rünleri, Decayed Mana bölgelerini ve kristalleri Görü yerine Hikmet ile fark edersin. Sonra canlıların dinamizmini de görürsün."
+  },
+  "crystal-binding": {
+   "meaning": "Kristal bağlama",
+   "summary": "Uzun dinlenmede bir Blu Mana kristaline mana doldurursun; kırdığında sonraki büyü ya da rün zarına +3 alırsın. Kristal bulmak RP gerektirir."
+  },
+  "runa-magna": {
+   "meaning": "Büyük rün (Latince)",
+   "say": "runa magna",
+   "summary": "1 tur harcayıp zemine dev bir rün çizersin (Hikmet, Zor): ~10 m alanda müttefikler 2 tur yara almaz ya da düşmanlar alandan çıkamaz. Seans başına 1 kez, +1 Yozlaşma."
+  },
+  "mana-bolt": {
+   "meaning": "Mana oku",
+   "summary": "Saf iç manadan bir ok fırlatırsın: büyü zarın hedefin d20 + Kaçınç zarını geçerse uzvundaki yara 1 kademe ilerler. Üst seviyede iki hedefe atabilirsin."
+  },
+  "kinesis": {
+   "meaning": "Hareket (kelime Yunanca kökenli)",
+   "summary": "Görüş alanındaki nesneleri manayla hareket ettirirsin. Seviye arttıkça insanları itip devirir, sonunda kapı, kaya kaldırır ve hedefi havaya kaldırıp düşürürsün."
+  },
+  "elemental-weave": {
+   "meaning": "Element örgüsü",
+   "summary": "Bir element seçersin (ateş, buz, şimşek, su) ve küçük etkiler yaratırsın. Çatışmada büyü zarıyla hedefe 1 turluk yanık, donma, şok ya da düşürme durumu verirsin."
+  },
+  "mana-shroud": {
+   "meaning": "Mana örtüsü",
+   "summary": "Tepki: sana gelen bir büyüye karşı büyü zarı atarsın; saldırganın zarını geçersen büyü etkisiz kalır. Çatışma başına 2 kez; üst seviyede büyüyü geri yansıtırsın."
+  },
+  "arcanum-maius": {
+   "meaning": "Büyük sır (Latince)",
+   "say": "arkanum ma-yus",
+   "summary": "Sonraki büyünün yara, alan, süre ya da bonusunu ikiye katlarsın. Çatışma başına 1 kez; o büyünün zarı bir kademe zorlaşır, başarısızlıkta +1 Yozlaşma."
+  },
+  "steady-flow": {
+   "meaning": "Düzenli akış",
+   "summary": "Pasif olarak büyü zarındaki Nat1'in bedelini azaltırsın: önce Sebahat zarıyla Yozlaşmadan kaçarsın, sonra hiç almazsın, en sonunda Nat1 sıradan bir başarısızlık olur."
+  },
+  "binding-chains": {
+   "meaning": "Bağlayan zincirler",
+   "summary": "Hedefi mana zincirleriyle bağlarsın: büyü zarın hedefin Kaçınç zarını geçerse hareket edip saldıramaz (Yalman Zor ile kurtulur). Süre seviyeyle uzar, sonunda büyüyü de keser."
+  },
+  "counterweave": {
+   "meaning": "Karşı örgü",
+   "summary": "Tepki: yapılmakta olan bir büyüyü çözersin; d20 + Hikmet büyücünün zarını geçerse büyü gerçekleşmez. Çatışma başına 1 kez, üst seviyede 2 kez ve büyücüye +1 Yozlaşma."
+  },
+  "soothing-mana": {
+   "meaning": "Yatıştırıcı mana",
+   "summary": "Sakin mananı bir müttefike akıtıp Sinme ve Kayıp An etkisini bitirirsin. Üst seviyede yüksek dinamizmin cezalarını hafifletir, seans başına 1 kez Yozlaşmayı 1 azaltırsın."
+  },
+  "pax-manae": {
+   "meaning": "Mananın barışı (Latince)",
+   "say": "paks ma-ne",
+   "summary": "~15 m alanda 2 tur boyunca kimse (sen dahil) büyü yapamaz ve süren büyüler biter; sen Hikmet ve Sebahat zarlarına +3 alırsın. Seans başına 1 kez."
+  },
+  "overcharge": {
+   "meaning": "Aşırı yükleme",
+   "summary": "Büyü zarından önce +2 eklemeye karar verirsin (seviyeyle +4'e kadar). Zarda 1-3 gelirse mana geri teper: +1 Yozlaşma ve büyü kolunda 1 kademe yara."
+  },
+  "mana-burst": {
+   "meaning": "Mana patlaması",
+   "summary": "Manayı bedeninden patlatırsın: yakınındaki herkes, müttefikler dahil, Kaçınç (Orta) atar; başarısızlar yere düşer ve 1 kademe yaralanır. Üst seviyede müttefikleri dışarıda tutarsın."
+  },
+  "chain-reaction": {
+   "meaning": "Zincirleme tepkime",
+   "summary": "Büyüde Nat20 attığında ya da büyüyle düşman öldürdüğünde, tur harcamadan bir Mana Bolt ya da aynı büyüyü tekrar yaparsın (-2). Tur başına 1 kez."
+  },
+  "volatile-regeneration": {
+   "meaning": "Değişken (oynak) yenilenme",
+   "summary": "Pasif olarak her çatışma sonunda bir uzvundaki yara 1 kademe iyileşir. Üst seviyede daha ağır yaralar düzelir ve Unleashed geri tepme yaraları tamamen iyileşir."
+  },
+  "entfesselt": {
+   "meaning": "Zincirlerinden kurtulmuş (Almanca)",
+   "say": "ent-fes-selt",
+   "summary": "3 tur boyunca büyü zarlarına +5 alırsın, tek hedefli büyülerin ikinci bir hedefe de değer; her tur Sebahat atmazsan +1 Yozlaşma. Seans başına 1 kez; sonra 1 tur aksiyon alamazsın."
+  },
+  "rot-touch": {
+   "meaning": "Çürük dokunuş",
+   "summary": "Decayed Mana ile bir hedefe dokunursun (yoz zar, Kaçınç'a karşı). Hedef sahne boyunca büyü zarlarına -2 alır ve uzvu 1 kademe yaralanır. Her kullanım +1 Yozlaşma."
+  },
+  "blight-field": {
+   "meaning": "Çürüme alanı",
+   "summary": "~10 m alanı Decayed Mana ile kirletirsin (yoz zar, Orta); sahne boyunca orada büyü yapan zarında 1-3 gelirse +1 Yozlaşma alır. Üst seviyede alan her tur yaralar. Her kullanım +1 Yozlaşma."
+  },
+  "mana-leech": {
+   "meaning": "Mana sülüğü",
+   "summary": "Pasif olarak Decayed Mana seni emmez, sen ondan beslenirsin: bu bölgelerde büyü ve yoz zarlarına +2 alırsın. Üst seviyede orada hiç Yozlaşma almazsın."
+  },
+  "unmaking": {
+   "meaning": "Yok etme, çözme",
+   "summary": "Bir nesnenin manasını dağıtıp onu parçalarsın; eşik nesneye göre değişir (silah Orta, kapı Zor, duvar Çok Zor). Üst seviyede büyüleri, rünleri ve kutsanmış alanları da çözersin."
+  },
+  "caida-carmesi": {
+   "meaning": "Kızıl düşüş (İspanyolca)",
+   "say": "ka-i-da karmesi",
+   "summary": "Kızıl Kıyamet'in bir yankısını indirirsin (yoz zar, Zor): ~30 m alanda herkes, müttefikler dahil, ağır yara alabilir ve alan bir gün Decayed Mana bölgesi olur. Seans başına 1 kez, +3 Yozlaşma."
+  },
+  "echo-of-the-first": {
+   "meaning": "İlk olanın yankısı",
+   "summary": "Pasif olarak sana gelen her Yozlaşma artışından önce Sebahat zarı atarsın; başarıda artış olmaz. Çatışma başına 1 kez; seviyeyle eşik kolaylaşır."
+  },
+  "halo": {
+   "meaning": "Hale, ışık halkası",
+   "summary": "Sahne boyunca bedeninden ışık yayarsın: karanlık dağılır, yanılsama ve kılık değiştirme çalışmaz, Decayed Mana varlıkları sana saldırırken ceza alır. Yozlaşman 5+ ise kullanamazsın."
+  },
+  "word-of-making": {
+   "meaning": "Yaratış sözü",
+   "summary": "Söylediğin bir kelimeyle basit bir nesneyi maddeleştirirsin (Sebahat, Orta); sahne sonunda yok olur. Üst seviyede silah, zırh ve köprü gibi büyük yapılar yaratırsın."
+  },
+  "heavenly-sight": {
+   "meaning": "Göksel görüş",
+   "summary": "Göğe bakıp bir soru sorarsın, GM evet ya da hayır der. Seans başına 1 kez. Yozlaşman 5+ ise cevabı God of Dreams verir ve doğru olup olmadığını bilemezsin."
+  },
+  "mana-primordialis": {
+   "meaning": "İlk mana, ilkel mana (Latince)",
+   "say": "mana primordiyalis",
+   "summary": "Tanrıların manasıyla bir gerçeği yeniden yazarsın: bir ölümü geri almak, bir laneti silmek gibi. Kampanya başına 1 kez; bir uzvun kalıcı olarak ışığa ya da taşa döner. Yozlaşma 4+ iken olmaz."
+  }
+ },
+ "perks": {
+  "born-in-the-saddle": {
+   "meaning": "Eyerde doğmuş",
+   "summary": "At sırtında büyüdün: binicilik zarların bir kademe kolaylaşır ve at üstündeyken saldırılarına ceza uygulanmaz."
+  },
+  "careful-runner": {
+   "meaning": "Dikkatli koşucu",
+   "summary": "Koşarken ve engebeli zeminde düşme zarlarını Kolay atarsın; ama karanlıkta hızlı hareket zarların bir kademe zorlaşır."
+  },
+  "blood-bond": {
+   "meaning": "Kan bağı",
+   "summary": "Başka bir oyuncuyla kan bağın var: aynı sahnede Sinme zarlarınıza +2, seans başına 1 kez birbiriniz yerine Esin harcayabilirsiniz."
+  },
+  "gambler-s-hand": {
+   "meaning": "Kumarbaz eli",
+   "summary": "Kumar zarlarında seans başına 1 kez yeniden atarsın; hile yapanı fark etmek için Görü zarlarını Kolay atarsın."
+  },
+  "heirloom": {
+   "meaning": "Aile yadigârı",
+   "summary": "Aileden kalan bir eşyayla başlarsın; onu kullanan zarlara +1 alırsın, ama GM eşyanın bir gün açığa çıkacak bir sırrını belirler."
+  },
+  "herbalist": {
+   "meaning": "Otacı",
+   "summary": "Şifalı otları, zehirleri ve Düşotu'nu tanırsın; doğada şifa malzemesi ararken eşik bir kademe düşer."
+  },
+  "kench": {
+   "meaning": "Sağlam mide",
+   "summary": "Miden kolay bozulmaz: bozuk yiyecek, kirli su ve zehir yutma zarlarına +3 alırsın."
+  },
+  "knifeplay": {
+   "meaning": "Bıçak oyunu",
+   "summary": "Hançer ve kısa bıçak zarların bir kademe kolaylaşır; bir bıçağı gizlemek için Giz zarlarına +2 alırsın."
+  },
+  "night-owl": {
+   "meaning": "Gece kuşu",
+   "summary": "Uykusuz geçen gecenin ertesi günü ceza almazsın; gece nöbetinde Görü zarlarına +2 alırsın."
+  },
+  "one-hander": {
+   "meaning": "Tek elci",
+   "summary": "Tek elle kullanılan yakın dövüş silahlarında zarların kolaylaşır, çift elli silahlarda ise zorlaşır."
+  },
+  "outward-soul": {
+   "meaning": "Dışa dönük ruh",
+   "summary": "Dış mana çeken yeteneklerine +2 alırsın; bedeli, yalnızca iç manalı büyülerde -1 ve Shinigami Akış havuzunun 1 eksik olması."
+  },
+  "pilgrim": {
+   "meaning": "Hacı",
+   "summary": "İnancının kilise ve manastırlarında barınak ve yiyecek bulursun; rahip ve hacılara karşı Cazibe zarlarına +2 alırsın."
+  },
+  "seafarer": {
+   "meaning": "Denizci",
+   "summary": "Güvertede denge, yüzme, düğüm ve yelken zarlarını Kolay atarsın; her limanda iş ve yatacak bir ranza bulursun."
+  },
+  "academy-graduate": {
+   "meaning": "Akademi mezunu",
+   "summary": "Mana teorisi, tarih ve hanelerle ilgili Hikmet zarlarında eşik bir kademe düşer; akademide seni hatırlayan bir hocan vardır."
+  },
+  "calm-mana": {
+   "meaning": "Sakin mana",
+   "summary": "Büyü geri tepmelerinde (Nat1, Overcharge) kollarına yara gelmez; Düşotu Yozlaşma zarlarına +2 alırsın."
+  },
+  "dreamer-s-favor": {
+   "meaning": "Düş Görenin lütfu",
+   "summary": "+1 Esin Puanı alırsın; karşılığında oyuna +1 Yozlaşma ile başlarsın ve God of Dreams seni fark etmiştir."
+  },
+  "ear-for-lies": {
+   "meaning": "Yalana kulak",
+   "summary": "Yalanı sezmek için Görü ya da Hikmet zarlarına +2 alırsın; Nat20'de yalanın ardındaki gerçeğin bir parçasını da sezersin."
+  },
+  "field-surgeon": {
+   "meaning": "Sahra cerrahı",
+   "summary": "Uyguladığın temiz sargılar çamur ve kanla kirlenmez; kırık bir uzva atel takmak için zar atmazsın."
+  },
+  "forger": {
+   "meaning": "Sahtekâr",
+   "summary": "Sahte evrak hazırlarken eşiğin bir kademe düşer; belgeni inceleyenin Görü eşiği bir kademe yükselir."
+  },
+  "local-knowledge": {
+   "meaning": "Yerel bilgi",
+   "summary": "Oyun başında bir bölge seçersin; orada yön bulma, kestirme yol ve yerel halkla iletişim zarlarında eşik bir kademe düşer."
+  },
+  "lucky": {
+   "meaning": "Şanslı",
+   "summary": "Seans başına 1 kez, attığın bir Nat1'i Esin harcamadan yeniden atabilirsin."
+  },
+  "mana-sensitive": {
+   "meaning": "Manaya duyarlı",
+   "summary": "Eğitimsiz de manayı hissedersin: yakında büyü yapıldığında, Decayed Mana bölgesinde ya da Blu Mana kristali olduğunda fark edersin."
+  },
+  "old-friend": {
+   "meaning": "Eski dost",
+   "summary": "GM ile belirlediğin bir dostundan seans başına 1 kez yardım alırsın; ama o da bir gün senden yardım isteyecektir."
+  },
+  "old-soldier": {
+   "meaning": "Eski asker",
+   "summary": "Bir birlikte hizmet ettin: o birliğin askerlerine Cazibe zarlarını Kolay atarsın, askerî konulardaki Hikmet zarlarına +2 alırsın."
+  },
+  "polyglot": {
+   "meaning": "Çok dilli",
+   "summary": "Oyuna 3 dil bilerek başlarsın."
+  },
+  "rune-literate": {
+   "meaning": "Rün okuryazarı",
+   "summary": "Eski rünlerin dilini bilirsin; rün yeteneklerinde ve eski yazıtları okumada eşik bir kademe düşer."
+  },
+  "smuggler-s-friend": {
+   "meaning": "Kaçakçı dostu",
+   "summary": "Karaborsada tanıdıkların var: yasak ya da kıt malları bulmak için Cazibe eşiğin bir kademe düşer, fiyatlar ucuzlayabilir."
+  },
+  "songkeeper": {
+   "meaning": "Şarkı bekçisi",
+   "summary": "Kalabalığı eğlendirmek ya da yumuşatmak için Cazibe zarlarına +2 alırsın; eski şarkılardan Hikmet zarıyla bilgi hatırlarsın."
+  },
+  "street-born": {
+   "meaning": "Sokakta doğmuş",
+   "summary": "Şehirde saklanma ve yankesicilik için Giz ve Kaçınç zarların kolaylaşır; seans başına 1 kez zarsız bir söylenti ipucu alırsın."
+  },
+  "sworn-sword": {
+   "meaning": "Yeminli kılıç",
+   "summary": "Soylun adına konuşurken Hakimiyet zarlarına +2 alırsın; o çağırınca gitmek zorundasın, yeminini bozarsan Exiled alırsın."
+  },
+  "tinkerer": {
+   "meaning": "Kurcalayıcı",
+   "summary": "Kilit, tuzak, düzenek ve silah-zırh tamiri gibi Marifet zarların bir kademe kolaylaşır."
+  },
+  "two-hander": {
+   "meaning": "Çift elci",
+   "summary": "Çift elle kullanılan yakın dövüş silahlarında zarların kolaylaşır, tek elli silahlarda ise zorlaşır."
+  },
+  "blu-bearer": {
+   "meaning": "Blu taşıyıcısı",
+   "summary": "Blu Mana kristalinden bir takıyla başlarsın; bir kez kırıp Yozlaşma arınması yapar ya da bir sahne Decayed Mana'dan korunursun."
+  },
+  "extrovert": {
+   "meaning": "Dışa dönük",
+   "summary": "Tanımadığın insanlarla kolay iletişim kurarsın: +2 Cazibe."
+  },
+  "frostblood": {
+   "meaning": "Buz kanlı",
+   "summary": "Sinme zarlarına +3 alırsın, soğuktan etkilenmezsin; Yozlaşmanın Kayıp An zarını iki kez atıp iyisini seçersin."
+  },
+  "hawkeye": {
+   "meaning": "Şahin gözü",
+   "summary": "Uzak mesafe menzilli saldırılarına ceza uygulanmaz; menzilli saldırılarda 19 da kritik başarı sayılır."
+  },
+  "hidden-heir": {
+   "meaning": "Gizli varis",
+   "summary": "GM gerçek soyunu gizlice belirler; kampanyada bir kez kanın açığa çıkınca büyük bir kapı açılır, ama düşmanlar da kazanırsın."
+  },
+  "katze": {
+   "meaning": "Kedi (Almanca)",
+   "say": "Katse",
+   "summary": "Karanlıkta iyi görürsün: loş ışıkta Görü cezası almazsın, zifiri karanlıkta ceza yarıya iner."
+  },
+  "noble-blood": {
+   "meaning": "Soylu kan",
+   "summary": "Hanene bağlı kişilere ve topraklarında Cazibe ve Hakimiyet eşiğin bir kademe düşer; ama hanenin düşmanları senin de düşmanındır."
+  },
+  "quick": {
+   "meaning": "Çevik",
+   "summary": "Çatışmanın ilk turunda her zaman ilk sen hareket edersin; pusuda ilk saldırıdan önce bir tepki hakkın olur."
+  },
+  "quiet": {
+   "meaning": "Sessiz",
+   "summary": "Yürürken ve koşarken atılan Giz zarlarına +2 alırsın."
+  },
+  "adaptable": {
+   "meaning": "Uyumlu",
+   "summary": "Soğuk, sıcak, açlık ve yorgunluk gibi çevresel etkilerin cezaları sende yarıya iner."
+  },
+  "ashblood": {
+   "meaning": "Kül kanlı",
+   "summary": "Her uzun dinlenmede bir uzvundaki yara ek 1 kademe düşer; kırık uzuvların iki kat hızlı iyileşir."
+  },
+  "cheetah": {
+   "meaning": "Çita",
+   "summary": "+2 Kaçınç alırsın; koşu ve tırmanma zarlarını Kolay atarsın."
+  },
+  "giant-s-back": {
+   "meaning": "Dev sırtı",
+   "summary": "Ağır silah ve ağır zırh kullanırken ceza almazsın; taşıma sınırın iki katına çıkar."
+  },
+  "steadfast": {
+   "meaning": "Sarsılmaz",
+   "summary": "Ruhun sağlamdır: Yozlaşma artışına karşı atılan tüm zarlara +2 alırsın."
+  },
+  "universal": {
+   "meaning": "Evrensel",
+   "summary": "Haneler, tarih, coğrafya, din ve ordularla ilgili Hikmet eşiğin düşer; seans başına 1 kez GM'den zarsız genel bir bilgi alırsın."
+  },
+  "titanborn": {
+   "meaning": "Titan doğumlu",
+   "summary": "Fiziksel aksiyonlarda Yalman zarlarına +2 alırsın ve Çizik cezalarını yok sayarsın."
+  },
+  "hardened-by-war": {
+   "meaning": "Savaşla pişmiş",
+   "summary": "Sinme durumuna hiçbir şekilde girmezsin ve korku etkilerinden etkilenmezsin."
+  },
+  "saddle-sore": {
+   "meaning": "Eyer yarası",
+   "summary": "Atlarla anlaşamazsın: binicilik zarların bir kademe zorlaşır."
+  },
+  "smoker": {
+   "meaning": "Tiryaki",
+   "summary": "Bir gün tütün içmezsen Sebahat (Kolay) atarsın; başarısızlıkta ertesi gün tüm zarlara -1, ceza her gün 1 artar."
+  },
+  "bastard": {
+   "meaning": "Piç",
+   "summary": "Bir soylunun tanınmamış çocuğusun: o haneye karşı Cazibe eşiğin bir kademe yükselir, soylular seni küçümser."
+  },
+  "dependent": {
+   "meaning": "Bakmakla yükümlü",
+   "summary": "Bakmakla yükümlü olduğun biri var; GM onu hikâye kancası olarak kullanır ve tehlikedeyken onu bırakamazsın."
+  },
+  "drunkard": {
+   "meaning": "Ayyaş",
+   "summary": "Bir gün içmezsen Sebahat (Orta) atarsın, başarısızlıkta tüm zarlara -1; içtiğin gün Cazibe +1, Kaçınç ve Görü -1."
+  },
+  "honest-to-a-fault": {
+   "meaning": "Fazlasıyla dürüst",
+   "summary": "Yalan söyleme zarların bir kademe zorlaşır; başarsan bile Sebahat (Kolay) atarsın, başarısızlıkta yüzün seni ele verir."
+  },
+  "illiterate": {
+   "meaning": "Okuma yazma bilmeyen",
+   "summary": "Yazılı belge, harita notu ve şifreli metinleri okuyamazsın; rün yeteneklerinde eşiğin bir kademe yükselir."
+  },
+  "indebted": {
+   "meaning": "Borçlu",
+   "summary": "Oyuna Lumre olmadan başlarsın ve peşinde GM'in hikâye kancası olan bir alacaklı vardır."
+  },
+  "monolingual": {
+   "meaning": "Tek dilli",
+   "summary": "Oyuna yalnızca tek dil bilerek başlarsın."
+  },
+  "recovered": {
+   "meaning": "İyileşmiş",
+   "summary": "Düşotu, alkol ya da tütün kullanırsan Sebahat (Orta) atarsın; başarısızlıkta eski bağımlılığının perki geri gelir."
+  },
+  "rival": {
+   "meaning": "Rakip",
+   "summary": "Aynı ödülün peşinde, vazgeçmeyen bir rakibin var; o sahnedeyken Sebahat zarlarına -1 alırsın."
+  },
+  "secret": {
+   "meaning": "Sır",
+   "summary": "GM ile belirlediğin büyük bir sırrın var; açığa çıkarsa ilgili faksiyona karşı Wanted etkisini alırsın."
+  },
+  "shortsighted": {
+   "meaning": "Miyop",
+   "summary": "Uzak mesafedeki Görü zarlarına ve menzilli saldırılara -2 alırsın."
+  },
+  "superstitious": {
+   "meaning": "Batıl inançlı",
+   "summary": "Kötü bir işaret görünce Sebahat (Kolay) atarsın; başarısızlıkta o sahne boyunca tüm zarlara -1 alırsın."
+  },
+  "weak-stomach": {
+   "meaning": "Zayıf mide",
+   "summary": "Miden kolay bozulur: bozuk yiyecek, kirli su ve zehir yutma zarlarına -3 alırsın."
+  },
+  "blood-feud": {
+   "meaning": "Kan davası",
+   "summary": "Bir aileyle kan davan var: onların topraklarında güvende değilsin, mensupları seni görünce saldırır ya da adam çağırır."
+  },
+  "bloodshy": {
+   "meaning": "Kandan çekinen",
+   "summary": "Ağır yara görünce Sebahat (Kolay) atarsın, başarısızlıkta sonraki aksiyonuna -2; ilk yardım ve şifa zarlarına -2."
+  },
+  "branded": {
+   "meaning": "Damgalı",
+   "summary": "Köle damgan görülünce soylu ve askerlere Cazibe eşiğin yükselir; hizmetkâr, kürekçi ve kölelere ise Cazibe'yi Kolay atarsın."
+  },
+  "claustrophobic": {
+   "meaning": "Kapalı alan korkusu olan",
+   "summary": "Zindan, tünel, mahzen ve gemi ambarı gibi dar mekânlarda tüm zarlara -1 alırsın."
+  },
+  "cursed-heirloom": {
+   "meaning": "Lanetli yadigâr",
+   "summary": "Kurtulamadığın bir eşya taşırsın: +1 Yozlaşma ile başlarsın, eşya yoz zarlarına +1 verir ama GM lanetini gizlice işletir."
+  },
+  "devout": {
+   "meaning": "Dindar",
+   "summary": "Yoz zarlara -3 alır, her yoz yetenekte ek +1 Yozlaşma alırsın; uzun dinlenmede dua edemezsen ertesi gün Sebahat'e -2."
+  },
+  "dream-haunted": {
+   "meaning": "Rüyalara musallat olunmuş",
+   "summary": "Uzun dinlenmeden sonra Sebahat (Orta) atarsın; başarısızlıkta bir sonraki uzun dinlenmeye kadar tüm zarlara -1."
+  },
+  "exiled": {
+   "meaning": "Sürgün",
+   "summary": "Sürgün edildiğin hanenin topraklarında yakalanma riski taşırsın; o hanenin soylularına Cazibe eşiğin bir kademe yükselir."
+  },
+  "haughty": {
+   "meaning": "Kibirli",
+   "summary": "Aşağı gördüğün kişilere Cazibe eşiğin yükselir; hatanı kabul etmek ya da özür dilemek için Sebahat (Orta) atarsın."
+  },
+  "loud": {
+   "meaning": "Gürültücü",
+   "summary": "Hareket ederken atılan Giz zarlarına -3 alırsın."
+  },
+  "night-blind": {
+   "meaning": "Gece körü",
+   "summary": "Loş ışıkta ve karanlıkta Görü zarlarına -3 alırsın."
+  },
+  "oaf": {
+   "meaning": "Sakar",
+   "summary": "Kaçınç zarında 1 ya da 2 gelirse Nat1 sayılır; ince el işi gerektiren Marifet zarların bir kademe zorlaşır."
+  },
+  "oathbound": {
+   "meaning": "Yemine bağlı",
+   "summary": "Teslim olmuş ya da silahsız birine zarar veremezsin; verirsen +2 Yozlaşma alırsın."
+  },
+  "occultphobia": {
+   "meaning": "Okült korkusu",
+   "summary": "Ritüel, diriltilmiş ölü ya da yoz büyü görünce Sebahat (Orta) atarsın; başarısızlıkta 1 tur Sinme durumuna girersin."
+  },
+  "one-eyed": {
+   "meaning": "Tek gözlü",
+   "summary": "Görü zarlarına -1, menzilli saldırılara -2 alırsın; kör tarafından gelen saldırıları fark etmek zorlaşır."
+  },
+  "rune-blind": {
+   "meaning": "Rün körü",
+   "summary": "Rune Script, Ward Rune ve Runa Magna'yı alamazsın; rünlü tuzakları fark edemezsin, koruma rünleri sende tutmaz."
+  },
+  "thermo-sensitive": {
+   "meaning": "Isıya duyarlı",
+   "summary": "Kuzeyin soğuğunda ve çölün sıcağında tüm fiziksel zarlara -2 alırsın."
+  },
+  "wanted": {
+   "meaning": "Aranan",
+   "summary": "GM'in seçtiği bir hane ya da kurumun topraklarında tanınma riski taşırsın; mensuplarına karşı Cazibe zarlarına -2."
+  },
+  "delicate": {
+   "meaning": "Narin",
+   "summary": "Yaraların uzun dinlenmede kendiliğinden iyileşmez, yalnızca şifa ve iksirle düşer; sana yapılan şifa zarları zorlaşır."
+  },
+  "dreamweed-addict": {
+   "meaning": "Düşotu bağımlısı",
+   "summary": "Bir gün Düşotu kullanmazsan Sebahat (Zor) atarsın; düzenli kullandıkça Sebahat statın Yozlaşma/3 kadar artar."
+  },
+  "introvert": {
+   "meaning": "İçe dönük",
+   "summary": "Tanımadığın insanlarla iletişim kurmakta zorlanırsın: -2 Cazibe."
+  },
+  "volatile-mana": {
+   "meaning": "Oynak mana",
+   "summary": "Büyü zarlarında 1 ya da 2 Nat1 sayılır; güçlü duygu anlarında manan patlayıp yakındaki herkese Çizik verebilir."
+  },
+  "war-shaken": {
+   "meaning": "Savaş sarsıntılı",
+   "summary": "Patlama, barut sesi ya da büyük alev büyüsünde Sebahat (Orta) atarsın; başarısızlıkta 1 tur Sinme durumuna girersin."
+  },
+  "faint-hearted": {
+   "meaning": "Yüreksiz",
+   "summary": "Ruhun kırılgandır: Yozlaşma artışına karşı atılan tüm zarlara -2 alırsın."
+  },
+  "maimed": {
+   "meaning": "Sakat",
+   "summary": "Bir ya da iki uzvun beden tablosunda Kopuk başlar; tek uzuv 5, iki uzuv 9 perk puanı kazandırır."
+  },
+  "mana-deaf": {
+   "meaning": "Manaya sağır",
+   "summary": "Efsun statın 3'ü geçemez ve müttefik büyüleri sende zor tutunur; ama Decayed Mana bölgelerinde Yozlaşma zarlarına +2."
+  },
+  "frail": {
+   "meaning": "Cılız",
+   "summary": "Fiziksel aksiyonlarda Yalman zarlarına -2 alırsın; ağır silah ve ağır zırh kullanamazsın."
+  },
+  "vow-of-mercy": {
+   "meaning": "Merhamet yemini",
+   "summary": "Kan dökmemeye yemin ettin: birine zarar verdiğinde +1, öldürdüğünde +3 Yozlaşma alırsın."
+  },
+  "dream-touched": {
+   "meaning": "Rüyaya dokunulmuş",
+   "summary": "-2 Cazibe, -2 Giz ve +1 Yozlaşma ile başlarsın; olmayan şeyler görürsün ve GM sahneleri sana farklı anlatabilir."
+  }
+ },
+ "stats": {
+  "yalman": {
+   "meaning": "Kılıcın keskin yüzü",
+   "summary": "Kaba kuvvet. Ağır silahlarla ve boğuşmada yakın dövüş zarı. Brute, Berserker ve Will of God dallarının sembol stat'ı."
+  },
+  "kacinc": {
+   "meaning": "Kaçınma, sakınma",
+   "summary": "Çeviklik. Hafif silah ve kılıç oyunlarıyla saldırı, kaçınma ve savuşturma zarları. Swordsman, Duelist ve Stormer dallarının sembol stat'ı."
+  },
+  "goru": {
+   "meaning": "Görme, görüş",
+   "summary": "Göz ve nişan. Menzilli saldırılar ve bir şeyi fark etme zarları. Ranger dalının sembol stat'ı."
+  },
+  "giz": {
+   "meaning": "Sır, gizlilik",
+   "summary": "Gizlenme, sessiz hareket ve pusu. Lurcher ve Shade dallarının sembol stat'ı."
+  },
+  "marifet": {
+   "meaning": "Hüner, ustalık",
+   "summary": "El becerisi: kilitler, tuzaklar, düzenekler, silah ve zırh tamiri. Artisan dalının sembol stat'ı."
+  },
+  "hikmet": {
+   "meaning": "Bilgelik",
+   "summary": "Bilgi ve akıl: teori, taktik, rün ve mana bilgisi. Runecaster, Shackled ve Slayer dallarının sembol stat'ı."
+  },
+  "efsun": {
+   "meaning": "Büyü",
+   "summary": "İç manayı ölçer; büyü zarlarının çoğu d20 + Efsun ile atılır. Wizard, Arcanist, Unleashed ve Catastrophe dallarının sembol stat'ı."
+  },
+  "sebahat": {
+   "summary": "Zihinsel direnç ve inanç: korku, Sinme ve zihin kontrolüne karşı atılan zarlar, Yozlaşma zarları. Prayer, Archpriest, Shinigami ve Divine dallarının sembol stat'ı."
+  },
+  "hakimiyet": {
+   "meaning": "Egemenlik, hükmetme",
+   "summary": "Zihinsel baskı: sindirme, emir verme ve sorgu. Men of Will ve Occultist dallarının sembol stat'ı."
+  },
+  "cazibe": {
+   "meaning": "Çekicilik",
+   "summary": "İkna, etkileme ve sosyal ilişkiler. Preacher dalının sembol stat'ı."
+  }
+ },
+ "terms": {
+  "yozlasma": {
+   "meaning": "Decay",
+   "summary": "Büyünün parçaladığı mananın ruhta açtığı boşluk (0–15). Her halkada Teslim ya da Direniş çatalı açılır; 15'te karakterin sonu gelir.",
+   "match": [
+    "Yozlaşma",
+    "Decay"
+   ]
+  },
+  "sinme": {
+   "meaning": "Korkudan donma",
+   "summary": "Durum geçene kadar aksiyon alamazsın; her turun başında d20 + Sebahat ≥ Orta atarak kurtulursun.",
+   "match": [
+    "Sinme"
+   ]
+  },
+  "kirik": {
+   "meaning": "Kırık uzuv",
+   "summary": "O uzvu kullanan zarlara yara cezasına ek ceza verir. Sargı düzeltmez; atel ve uzun dinlenme ya da şifa gerekir.",
+   "match": [
+    "Kırık"
+   ]
+  },
+  "esin": {
+   "meaning": "İlham puanı",
+   "summary": "GM'in iyi RP için verdiği puan. 1 Esin ile bir zarı yeniden atarsın; Death Save hakkını yenilemek için de harcanır.",
+   "match": [
+    "Esin Puanı",
+    "Esin"
+   ]
+  },
+  "nat20": {
+   "meaning": "Doğal 20",
+   "summary": "d20'de 20 gelmesi: tablo dışı, olası en iyi sonuç.",
+   "match": [
+    "Nat20",
+    "Nat 20"
+   ]
+  },
+  "nat1": {
+   "meaning": "Doğal 1",
+   "summary": "d20'de 1 gelmesi: olası en kötü sonuç. Büyü zarında mana geri teper ve +1 Yozlaşma alırsın.",
+   "match": [
+    "Nat1",
+    "Nat 1"
+   ]
+  },
+  "death-save": {
+   "meaning": "Ölüm kurtarma zarı",
+   "summary": "Ölümle karşılaşınca son çare: d6 atılır, 1-3 Death, 4-6 Save; hangisi önce 3 olursa o gerçekleşir.",
+   "match": [
+    "Death Save Throw",
+    "Death Save"
+   ]
+  },
+  "yoz-zar": {
+   "meaning": "Çürük zar",
+   "summary": "Decayed Mana, ölü ruhlar, ezoterik inançlar ve rüya güçleriyle atılan zar. Yozlaşma tablosundaki bonuslar bu zarlara uygulanır.",
+   "match": [
+    "Yoz zar",
+    "yoz zar"
+   ]
+  },
+  "buyu-zari": {
+   "meaning": "Mana zarı",
+   "summary": "Mana ile yapılan her aksiyon zarı, çoğunlukla d20 + Efsun. Nat1 gelirse +1 Yozlaşma.",
+   "match": [
+    "Büyü zarı",
+    "büyü zarı"
+   ]
+  },
+  "decayed-mana": {
+   "meaning": "Bozunmuş mana",
+   "summary": "Yerinden edilmiş ya da parçalanmış mana. Kullanılamaz; temas ettiği ruhun manasını emer ve Yozlaşma'nın kaynağıdır.",
+   "match": [
+    "Decayed Mana"
+   ]
+  },
+  "blu-mana": {
+   "meaning": "Depolanmış mana",
+   "summary": "Dış manayı saklayan madenlere akıtılan iç manayla oluşan kristal. Kırılınca büyüye güç verir ya da Yozlaşma'yı arındırabilir.",
+   "match": [
+    "Blu Mana"
+   ]
+  },
+  "ic-mana": {
+   "meaning": "Internal Mana",
+   "summary": "Ruhu olan her canlının ürettiği mana: çok hızlı üretilir, çok kısa yaşar, kolay yönlendirilir. Büyünün tetiğidir; Efsun bunu ölçer.",
+   "match": [
+    "İç Mana",
+    "İç mana",
+    "iç mana"
+   ]
+  },
+  "dis-mana": {
+   "meaning": "External Mana",
+   "summary": "Taş, metal, toprak gibi cansız nesnelerin manası: yavaş üretilir, uzun yaşar, zor yönlendirilir. Büyük büyülerin yakıtıdır.",
+   "match": [
+    "Dış Mana",
+    "Dış mana",
+    "dış mana"
+   ]
+  },
+  "primordial-mana": {
+   "meaning": "İlk mana",
+   "summary": "Kaynağı bilinmeyen, tanrılara ait olduğuna inanılan mana. Divine dalının aradığı şey.",
+   "match": [
+    "Primordial Mana"
+   ]
+  },
+  "dinamizm": {
+   "meaning": "Mananın akış hızı",
+   "summary": "İç mananın ruhtan ne hızla aktığı: Normal, Yüksek (patlayıcı, kontrolü zor) ya da Düşük (sakin, verimli).",
+   "match": [
+    "Dinamizm",
+    "dinamizm"
+   ]
+  },
+  "lumre": {
+   "meaning": "Para birimi",
+   "summary": "Oyunun parası; ticarette, rüşvette ve kumarda kullanılır.",
+   "match": [
+    "Lumre"
+   ]
+  },
+  "dusotu": {
+   "meaning": "Somnaria",
+   "summary": "Mor yapraklı sakinleştirici bitki. Korkuyu ve Sinme'yi dindirir ama ardından Yozlaşma zarı atarsın.",
+   "match": [
+    "Düşotu",
+    "Somnaria"
+   ]
+  },
+  "akis": {
+   "meaning": "Flow",
+   "summary": "Shinigami'nin her çatışmada dolan havuzu (Efsun + Sebahat/2, en az 2). Erwachen ve Apotheosis açık kaldıkça harcanır.",
+   "match": [
+    "Akış"
+   ]
+  },
+  "sembol-stat": {
+   "meaning": "Dalın ana stat'ı",
+   "summary": "Her dalın bağlı olduğu stat. Yetenek gereksinimleri onun üzerinden kurulur ve o katmanda her seviyede +1 alır.",
+   "match": [
+    "sembol stat",
+    "Sembol stat",
+    "Sembol Stat",
+    "SEMBOL STAT"
+   ]
+  },
+  "kayip-an": {
+   "meaning": "Lost moment",
+   "summary": "Yozlaşma 8: her çatışmanın başında d20 atarsın; sonuç Yozlaşma'dan düşükse ilk turunu GM oynar.",
+   "match": [
+    "Kayıp An"
+   ]
+  },
+  "uber": {
+   "meaning": "Üstün",
+   "summary": "En yüksek eşik (22). Normalde imkânsız sayılan işler için.",
+   "match": [
+    "Uber"
+   ]
+  }
+ }
+}

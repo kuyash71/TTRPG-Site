@@ -21,7 +21,19 @@ const app = next({ dev, hostname, port, httpServer: server });
 const handle = app.getRequestHandler();
 await app.prepare();
 
+// umbracaelis.com/umbracaelis/... (Umbra Caelis kuralları) uygulamanın içinde /schwarzesonne/umbracaelis/... olarak çizilir.
+const UC_PATH = /^\/umbracaelis(?:[/?#]|$)/;
+
 server.on("request", (req, res) => {
+  if (req.url && UC_PATH.test(req.url)) {
+    // Bölümün kökü kural kitabına açılır.
+    if (/^\/umbracaelis\/?(?:[?#]|$)/.test(req.url)) {
+      res.writeHead(308, { Location: "/umbracaelis/kurallar", "Cache-Control": "no-store" });
+      res.end();
+      return;
+    }
+    req.url = "/schwarzesonne" + req.url;
+  }
   handle(req, res).catch((e) => {
     console.error("[http]", e);
     res.statusCode = 500;
