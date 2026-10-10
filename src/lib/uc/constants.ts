@@ -24,14 +24,4 @@ export function ucStatFromLabel(s: string): UcStatKey | null {
   return BY_LABEL.get(s.trim().toLocaleLowerCase("tr-TR")) ?? null;
 }
 
-/** Referans eşik tablosu (Core). */
-export const UC_THRESHOLDS = [
-  { label: "Çok Kolay", value: 7 },
-  { label: "Kolay", value: 9 },
-  { label: "Orta", value: 13 },
-  { label: "Zor", value: 15 },
-  { label: "Çok Zor", value: 19 },
-  { label: "Uber", value: 22 },
-] as const;
-
 export const UC_TIER_OPEN: Record<1 | 2 | 3, number> = { 1: 0, 2: 5, 3: 10 };

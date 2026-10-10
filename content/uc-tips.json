@@ -226,17 +226,17 @@
   "jinzen": {
    "meaning": "Kılıç meditasyonu (Japonca)",
    "say": "cin-zen",
-   "summary": "Uzun dinlenmede iç dünyana inip ruh-kılıçla konuşur, Rezonans kazanır ve adını öğrenirsin. Üst seviyede zor anlarda Kılıcın Sesi gelir; Öğüt ya da Güç seçersin."
+   "summary": "Uzun dinlenmede iç dünyana inip ruh-kılıçla konuşur ve Rezonans kazanırsın; ilk başarıda kılıç adını söyler ve Erwachen açılır. Üst seviyede zor anlarda Kılıcın Sesi gelir."
   },
   "erwachen": {
    "meaning": "Uyanış (Almanca)",
    "say": "er-vah-ın",
-   "summary": "Kılıcın adını bildiğinde salınım sözünü söyleyip onu uyandırır, GM ile tasarladığın bütçedeki etkiyi kazanırsın. Açık olduğu her tur 1 Akış harcar."
+   "summary": "Kılıcın adını öğrendiğin an Seviye 1 puansız açılır: salınım sözüyle kılıcı uyandırır, GM ile tasarladığın bütçedeki etkiyi kazanırsın. Açık olduğu her tur 1 Akış harcar."
   },
   "maiestas": {
    "meaning": "Heybet (Latince)",
    "say": "ma-yes-tas",
-   "summary": "Erwachen ya da Apotheosis açıkken Sebahat'i seninkinden düşük düşmanlar sana karşı zarlarında ceza alır. Üst seviyede çok düşük olanlar sana saldırmak için zar atmak zorundadır."
+   "summary": "Erwachen ya da Apotheosis açıkken Sebahat'i seninkinden düşük düşmanların sana karşı zarlarına −1/−2 ceza. Üst seviyede çok düşük olanlar sana saldırmak için zar atmak zorundadır."
   },
   "shunpo": {
    "meaning": "Anlık adım (Japonca)",
@@ -246,7 +246,7 @@
   "apotheosis": {
    "meaning": "İlahlaşma (Yunanca)",
    "say": "a-po-te-o-sis",
-   "summary": "Ruh-kılıcın nihai formunu açarsın: Erwachen etkileri ikiye katlanır ve nihai etki açılır, her tur 2 Akış harcar. Seans başına 1 kez, +2 Yozlaşma; zarları yoz zardır."
+   "summary": "Ruh-kılıcın nihai formunu açarsın: Erwachen etkileri ikiye katlanır, nihai etki açılır, her tur 2 Akış harcar. Açılışta +1, her 3 turda +1 daha Yozlaşma; 2 Rezonans bir artışı siler."
   },
   "low-profile": {
    "meaning": "Göze batmamak",
@@ -1046,7 +1046,7 @@
  "terms": {
   "yozlasma": {
    "meaning": "Decay",
-   "summary": "Büyünün parçaladığı mananın ruhta açtığı boşluk (0–15). Her halkada Teslim ya da Direniş çatalı açılır; 15'te karakterin sonu gelir.",
+   "summary": "Büyünün parçaladığı mananın ruhta açtığı boşluk (0–15). Her halkada Teslim ya da Direniş çatalı açılır; Teslim o halkayı taban yapar. Seansta en fazla 2 azalır.",
    "match": [
     "Yozlaşma",
     "Decay"
@@ -1068,7 +1068,7 @@
   },
   "esin": {
    "meaning": "İlham puanı",
-   "summary": "GM'in iyi RP için verdiği puan. 1 Esin ile bir zarı yeniden atarsın; Death Save hakkını yenilemek için de harcanır.",
+   "summary": "GM'in iyi RP ve yetenek kullanmadan yaratıcı çözümler için verdiği puan. 1 Esin ile bir zarı yeniden atarsın; Death Save hakkını yenilemek için de harcanır.",
    "match": [
     "Esin Puanı",
     "Esin"
@@ -1100,7 +1100,7 @@
   },
   "yoz-zar": {
    "meaning": "Çürük zar",
-   "summary": "Decayed Mana, ölü ruhlar, ezoterik inançlar ve rüya güçleriyle atılan zar. Yozlaşma tablosundaki bonuslar bu zarlara uygulanır.",
+   "summary": "Decayed Mana, ölü ruhlar, ezoterik inançlar ve rüya güçleriyle atılan zar. Yozlaşma tablosundan en fazla +3 bonus alır.",
    "match": [
     "Yoz zar",
     "yoz zar"
@@ -1195,16 +1195,51 @@
   },
   "kayip-an": {
    "meaning": "Lost moment",
-   "summary": "Yozlaşma 8: her çatışmanın başında d20 atarsın; sonuç Yozlaşma'dan düşükse ilk turunu GM oynar.",
+   "summary": "Yozlaşma 8: her çatışmanın başında d20 atarsın; sonuç Yozlaşma − 5 ya da daha düşükse ilk turunu GM oynar.",
    "match": [
     "Kayıp An"
    ]
   },
   "uber": {
    "meaning": "Üstün",
-   "summary": "En yüksek eşik (22). Normalde imkânsız sayılan işler için.",
+   "summary": "GM'in koyabileceği en yüksek zorluk tarifi; normalde imkânsız sayılan işler için.",
    "match": [
     "Uber"
+   ]
+  },
+  "kademe": {
+   "meaning": "Eşik basamağı",
+   "summary": "Eşik kaydırması: eşik 3 düşer (kolaylaşır) ya da 3 artar (zorlaşır). Yaraların \"1 kademe ilerlemesi\" bundan ayrıdır.",
+   "match": [
+    "eşik bir kademe",
+    "eşiği bir kademe",
+    "eşikler bir kademe",
+    "bir kademe kolaylaşır",
+    "bir kademe zorlaşır"
+   ]
+  },
+  "bonus-tavani": {
+   "meaning": "Bonus sınırı",
+   "summary": "Bir zara stat dışından gelen bonusların toplamı en fazla +5; eşik düşüren her kademe +3 sayılır. Cezaların sınırı yoktur.",
+   "match": [
+    "Bonus tavanı",
+    "bonus tavanı",
+    "bonus tavanına"
+   ]
+  },
+  "dogaclama": {
+   "meaning": "Yeteneği yeni bir biçimde kullanmak",
+   "summary": "Bir yeteneği kâğıtta yazmayan bir şekilde kullanırsın: eşik bir kademe yükselir, başarıda GM etkiyi duruma uyarlar. Kullanım sınırı ve Esin bedeli yok.",
+   "match": [
+    "Doğaçlama",
+    "doğaçlama"
+   ]
+  },
+  "halka-tabani": {
+   "meaning": "Yozlaşma tabanı",
+   "summary": "Teslim seçilen her çatal o halkanın ilk seviyesini taban yapar (1, 4, 7, 10); Yozlaşma bunun altına inemez. Direniş taban bırakmaz.",
+   "match": [
+    "Halka tabanı"
    ]
   }
  }
