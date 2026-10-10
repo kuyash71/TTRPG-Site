@@ -123,28 +123,28 @@
   },
   "juggernaut": {
    "meaning": "Durdurulamaz dev güç",
-   "summary": "Geri adım atmadan ilerledikçe İvme biriktirir, harcayıp saldırına +2 alırsın. Geri adım atar ya da bir tur saldırmazsan tüm İvme sıfırlanır."
+   "summary": "İlerledikçe, devirdikçe ve geri adım atmadan karşıladıkça İvme biriktirirsin; her harcanan İvme bir saldırı zarına +2 verir. Geri adım atarsan ya da bir tur saldırmazsan sıfırlanır."
   },
   "bonebreaker": {
    "meaning": "Kemik kıran",
-   "summary": "İsabetten sonra Yalman zarıyla (Orta, zırhlıda Zor) hedefin uzvunu Kırık yaparsın; o uzvu kullanan zarlar ceza alır. Kırık sargıyla geçmez."
+   "summary": "İsabetten sonra bir Yalman zarıyla hedefin kemiğini kırarsın; zırhlı hedefte eşik bir kademe yükselir. Kırık uzuv cezalar verir ve üst seviyede silah düşürür, sersemletir."
   },
   "thick-skin": {
    "meaning": "Kalın deri",
-   "summary": "Çizik cezalarını yok sayar, Hafif Yaralı cezasını azaltırsın. Üst seviyede çatışma başına 1 kez Yalman (Zor) zarıyla bir yara ilerlemesini engellersin."
+   "summary": "Hafif yaraların cezalarını yok sayar ya da azaltırsın; S3'te çatışmada bir kez bir yara ilerlemesini zarla engellersin."
   },
   "mons-ferreus": {
    "meaning": "Demir Dağ (Latince)",
    "say": "mons fer-re-us",
-   "summary": "Çatışma başına 1 kez, iki elli ağır silahla zarsız isabet eden ve seçtiğin uzvu 2 kademe yaralayan bir darbe indirirsin; kalkan ve hafif zırh korumaz. Sonraki tur aksiyon alamazsın."
+   "summary": "Çatışmada bir kez ağır silahla eşiği bir kademe düşük bir darbe indirirsin; isabette seçtiğin uzvun yarası ilerler ve uzuv Kırık olur, Nat20'de yara 2 kademe ilerler."
   },
   "stance-of-the-empire": {
    "meaning": "İmparatorluk duruşu",
-   "summary": "Çatışma başında Saldırı ya da Savunma Duruşu seçersin: biri saldırıya bonus verirken diğerine -1 ceza getirir. Üst seviyede her tur başında bedavaya duruş değiştirirsin."
+   "summary": "Çatışma başında saldırı ya da savunma duruşu seçip bir tarafa bonus, diğerine ceza alırsın; S3'te her tur duruş değiştirirsin."
   },
   "parry": {
    "meaning": "Savuşturma",
-   "summary": "Sana gelen yakın dövüş saldırısını Kaçınç zarıyla savuşturur, saldırganın zarına eşit ya da üstündeysen yara almazsın. Seviyeye göre çatışma başına 1-3 kez."
+   "summary": "Gelen yakın dövüş saldırısını d20 + Kaçınç ile savuşturursun (eşiği GM saldırganın ustalığına göre koyar); başarıda yara almazsın. Çatışma başına 1 kez."
   },
   "riposte": {
    "meaning": "Karşı hamle",
@@ -157,11 +157,11 @@
   "filo-de-honor": {
    "meaning": "Onurun Kılıcı (İspanyolca)",
    "say": "fi-lo de o-nor",
-   "summary": "Tanıklar önünde resmi düello çağrısı yaparsın: kabul ederse ona karşı +3, o sana -2 alır; reddederse onun ve adamlarının Sebahat ve Hakimiyet zarları -2 olur. Kaçar ya da hile yaparsan seans boyunca kullanamazsın."
+   "summary": "Tanıklar önünde resmi düello çağrısı yaparsın; kabul edilirse düelloda zarlarına +3, reddedilirse rakip adamlarının gözünde küçülür. Master Duelist ile bonusa ayrıca +1."
   },
   "mana-edge": {
    "meaning": "Mana ağzı (silahın keskin ağzı)",
-   "summary": "Büyü zarıyla (Kolay) silahına iç mana akıtırsın; birkaç tur saldırılarına bonus alır, hafif zırhı yok sayarsın. En üst seviyede çatışma boyunca sürer."
+   "summary": "Silahına mana akıtıp birkaç tur ya da tüm çatışma boyunca saldırılarına bonus alır, hafif zırhı etkisiz kılarsın."
   },
   "ember-brand": {
    "meaning": "Kor damgası",
@@ -170,16 +170,16 @@
   "glockenschlag": {
    "meaning": "Çan vuruşu (Almanca)",
    "say": "glokın-şlag",
-   "summary": "Bir tur savunmasız kalıp çevredeki dış manayı toplar, sonraki tur bir şok dalgasıyla yakındakileri savurur, düşürür ve yaralarsın; müttefikler de etkilenir. Büyü zarı başarısızsa gövden yaralanır."
+   "summary": "Bir tur mana toplar, sonra çevrendekileri savuran bir şok dalgasıyla boşaltırsın; S2'de alan büyür ve kurtulmak zorlaşır, S3'te anında ya da koni olarak atarsın."
   },
   "mana-ward": {
    "meaning": "Mana kalkanı",
-   "summary": "Sana gelen bir saldırıya karşı büyü zarı atarsın; saldırı zarına eşit ya da üstündeyse yara daha az ilerler. Çatışma başına 2 kez; üst seviyede büyüleri de saptırırsın."
+   "summary": "Gelen saldırıya mana kalkanı açarsın: büyü zarı GM'in saldırının gücüne göre koyduğu eşiği geçerse yara 1 kademe az ilerler. Çatışma başına 2 kez."
   },
   "ignis-savarum": {
    "meaning": "Savarum'un Ateşi (Latince)",
    "say": "ig-nis sa-va-rum",
-   "summary": "Büyü zarıyla (Zor) kılıcının çevresinde alev girdabı yaratır, kaçamayan yakın düşmanları 2 kademe yaralayıp yakarsın. Çatışma başına 1 kez, her kullanımda +1 Yozlaşma."
+   "summary": "Çatışmada bir kez kılıcının etrafında 10 metrelik bir alev girdabı yaratırsın; kaçamayan düşmanlar 2 kademe yara ve yanık alır, kaçanlar bile 1 kademe yaralanır."
   },
   "red-mist": {
    "meaning": "Kızıl sis (gözü dönmek)",
@@ -187,15 +187,15 @@
   },
   "pain-is-fuel": {
    "meaning": "Acı yakıttır",
-   "summary": "Hafif Yaralı ya da daha kötü durumdaki her uzvun için saldırı zarlarına +1 alırsın; üst sınır seviyeyle artar. Ne kadar yaralıysan o kadar sert vurursun."
+   "summary": "Yaralı her uzvun saldırı zarlarına +1 verir; S3'te en fazla +4 olur ve Kullanılamaz uzuvlar +2 sayılır."
   },
   "blood-price": {
    "meaning": "Kan bedeli",
-   "summary": "Saldırı zarından önce kendi uzvuna 1 kademe yara verip +3 (üst seviyede 2 kademeyle +6) alırsın. Her kullanımda Sebahat (Kolay) atarsın; başarısızlıkta +1 Yozlaşma."
+   "summary": "Saldırı zarından önce kendine 1 kademe yara verip o zara +3 alırsın; S2'de 2 kademe yarayla +6. Her kullanımda Sebahat zarı, başarısızlıkta +1 Yozlaşma."
   },
   "howl": {
    "meaning": "Uluma",
-   "summary": "Savaş çığlığı atarsın; duyan düşmanlar Sebahat (Orta) zarında başarısız olursa 1 tur Sinme durumuna girer. Üst seviyede eşik Zor olur ve müttefiklerin sonraki zarına +1 alır."
+   "summary": "Çatışmada iki kez savaş çığlığıyla düşmanları 1 tur Sindirirsin; kurtulan hedef o çatışmada bu çığlığa bağışık olur."
   },
   "ira-aeterna": {
    "meaning": "Sonsuz Öfke (Latince)",
@@ -204,19 +204,19 @@
   },
   "master-duelist": {
    "meaning": "Usta düellocu",
-   "summary": "Yalnızca sen ve tek bir düşman birbirinize saldırırken çatışma zarlarına bonus alırsın (+2'den +5'e kadar)."
+   "summary": "Bire bir çatışmada çatışma zarlarına +2, S2'de +3, S3'te +5 alırsın. Filo de Honor düellosunda bonusa ayrıca +1."
   },
   "prince-of-death": {
    "meaning": "Ölüm prensi",
-   "summary": "Çatışmada öldürdüğün hedefler sana o çatışma boyunca kaçınma ve savuşturma bonusu verir. Her yeni bonus için gereken öldürme sayısı ikiye katlanır."
+   "summary": "Çatışmada öldürdüğün hedefler sana çatışma sonuna kadar kaçınma ve savuşturma bonusu verir: 1 öldürmede +1, 2'de +2, 4'te +3."
   },
   "charisma-of-steel": {
    "meaning": "Çeliğin karizması",
-   "summary": "Bire bir düşman yendikçe Nam kazanır, harcayıp Cazibe veya Hakimiyet zarını zarsız Orta başarı sayarsın. Üst seviyede kılıcını çekerek ya da kınına sokarak düşmanları teslim olmaya zorlarsın."
+   "summary": "Bire bir zaferlerinden Nam kazanırsın; Nam harcayıp sosyal zarlarda eşiği düşürür, düşmanları kaçırır ya da seansta bir kez tüm çatışmayı şartlarınla bitirirsin."
   },
   "read-the-blade": {
    "meaning": "Kılıcı okumak",
-   "summary": "Bir tur rakibini izleyip Görü (Orta) atarsın; başarıda sonraki saldırısından otomatik kaçınır ya da bedava karşı saldırı yaparsın. Çatışma başına 1 kez (üst seviyede 2)."
+   "summary": "Bir tur rakibini izleyip (Görü ≥ Orta) bir sonraki saldırısını önceden bilirsin; ona karşı kaçınma eşiği bir kademe düşer ya da tur harcamadan karşı saldırı yaparsın."
   },
   "una-vida": {
    "meaning": "Tek Hayat (İspanyolca)",
@@ -241,33 +241,33 @@
   "shunpo": {
    "meaning": "Anlık adım (Japonca)",
    "say": "şun-po",
-   "summary": "Tur harcamadan yaklaşık 10 metrelik, gözle izlenemeyen bir adım atarsın; çatışma başına 2 kez. Üst seviyede salınım açıkken Akış harcayarak sınırsız kullanırsın."
+   "summary": "Tur harcamadan 10 metrelik anlık adım atarsın; S2'de salınım açıkken Akış harcayarak çatışma başına 4 kez kullanır, arkaya geçince pusu saldırısı yaparsın."
   },
   "apotheosis": {
    "meaning": "İlahlaşma (Yunanca)",
    "say": "a-po-te-o-sis",
-   "summary": "Ruh-kılıcın nihai formunu açarsın: Erwachen etkileri ikiye katlanır, nihai etki açılır, her tur 2 Akış harcar. Açılışta +1, her 3 turda +1 daha Yozlaşma; 2 Rezonans bir artışı siler."
+   "summary": "Ruh-kılıcının nihai formunu açarsın: Erwachen'in tüm etkileri ikiye katlanır ve nihai etki açılır. Her tur 2 Akış harcar, seans başına 1 kez."
   },
   "low-profile": {
    "meaning": "Göze batmamak",
-   "summary": "Hareket hâlindeyken attığın Giz zarlarına seviyeye göre bonus alırsın. Üst seviyede kalabalıkta gözden kaybolmak Kolay eşikte olur."
+   "summary": "Hareket halindeyken Giz zarlarına +1, S2'de +2, S3'te +3 alırsın; S3'te kalabalıkta gözden kaybolma eşiği bir kademe düşer."
   },
   "patient-predator": {
    "meaning": "Sabırlı yırtıcı",
-   "summary": "Pusuya yatıp kımıldamadan beklediğin her tur, pusudan ilk saldırına +1 biriktirirsin (seviyeye göre üst sınır artar)."
+   "summary": "Pusuda kıpırdamadan beklediğin her tur ilk saldırına +1 biriktirir (S3'te en fazla +4); S3'te başarısız Giz zarı yerini açığa çıkarmaz, yalnızca konum değiştirirsin."
   },
   "silent-takedown": {
    "meaning": "Sessiz etkisiz bırakma",
-   "summary": "Seni fark etmemiş bir hedefi arkadan yakalayıp d20 + Giz ile ses çıkarmadan bayıltırsın; üst seviyede öldürmeyi de seçebilirsin."
+   "summary": "Fark edilmeden yakaladığın hedefi sessizce bayıltırsın; zırhlı ya da tetikteki hedefler zordur. S2'de çatışma başına 1 kez öldürmeyi seçebilirsin."
   },
   "stalker-s-eye": {
    "meaning": "Takipçinin gözü",
-   "summary": "Bir hedefi zihninde işaretlersin; onu izlerken Giz ve Görü zarlarına +2 alırsın, onun seni fark etmesi zorlaşır."
+   "summary": "İşaretlediğin hedefi izlerken Giz ve Görü zarlarına +2 alırsın. S2'de işaret seans boyunca sürer ve arkanda iz bırakmazsın."
   },
   "muerte-callada": {
    "meaning": "Sessiz ölüm (İspanyolca)",
    "say": "muerte kayada",
-   "summary": "Seni fark etmemiş hedefe pusudan ilk saldırın zarsız isabet eder, yara 2 kademe ilerler ve hedef susar. Çatışma başına 1 kez; sonraki tur Giz atamazsın."
+   "summary": "Seni fark etmemiş hedefe pusudan vurduğunda eşik iki kademe düşer ve isabette yara 2 kademe ilerler; hedef o tur ses çıkaramaz. Çatışma başına 1 kez."
   },
   "steady-draw": {
    "meaning": "Sakin gerdiriş",
@@ -275,15 +275,15 @@
   },
   "tracker": {
    "meaning": "İz sürücü",
-   "summary": "d20 + Görü ile bir izi okursun; eşik ne kadar yüksekse yönü, sayıyı, yükü, zamanı ve kim olduklarını öğrenirsin."
+   "summary": "İzleri okuyup yön, sayı ve kimlik öğrenirsin. Bestiary ile yaratık izinde türünü de ayrıca zar atmadan öğrenirsin."
   },
   "pinning-shot": {
    "meaning": "Sabitleyen atış",
-   "summary": "Hedefin bacağına nişan alırsın (d20 + Görü ≥ Orta); başarıda hedef 1 tur hareket edemez ve uzvu 1 kademe yaralanır."
+   "summary": "Hedefin bacağını vurup onu yerine çivilersin. S2'de 2 tur sürer ama hedef her tur Yalman ile kurtulabilir; aynı hedef çatışmada bir kez sabitlenir."
   },
   "child-of-the-wild": {
    "meaning": "Vahşi doğanın çocuğu",
-   "summary": "Doğada yiyecek, su ve barınak bulmak Kolay olur, vahşi hayvanlar saldırmadan önce bir tur bekler. Üst seviyede bir hayvan yoldaşın olur."
+   "summary": "Doğada yiyecek, su ve barınak bulmak kolaylaşır, vahşi hayvanlar duraksar. S2'de bir hayvan yoldaş edinirsin."
   },
   "argentum-imber": {
    "meaning": "Gümüş yağmur (Latince)",
@@ -292,11 +292,11 @@
   },
   "trapwright": {
    "meaning": "Tuzak ustası",
-   "summary": "1 tur harcayıp d20 + Marifet ile tuzak kurarsın; basan hedefin uzvu yaralanır ve 1 tur hareket edemez. Fark etmek için Görü ≥ Zor gerekir."
+   "summary": "Hedefleri yaralayıp yerinde tutan tuzaklar kurarsın; çatışma dışında kurmak kolaylaşır. S3'te iki tuzak ve tur harcamadan kurulum."
   },
   "brewmaster": {
    "meaning": "İksir ustası",
-   "summary": "Uzun dinlenmede malzeme harcayıp Merhem, Uyanış, Zehir gibi iksirler hazırlarsın; seviye arttıkça iksir sayısı ve tarifler (Düşotu vb.) artar."
+   "summary": "Uzun dinlenmede şifa, uyanış ve zehir iksirleri hazırlarsın; üst seviyede Düşotu ve zor karışımlar açılır."
   },
   "fletcher-s-secret": {
    "meaning": "Okçu ustasının sırrı",
@@ -304,70 +304,70 @@
   },
   "powder-pot": {
    "meaning": "Barut çömleği",
-   "summary": "Barut çömleği fırlatır ya da kapıya koyarsın; yakındakiler Kaçınç atar, başarısızlar düşer ve yaralanır. Barut güvenilmez: 1-3 gelirse söner ya da elinde patlar."
+   "summary": "Barut çömleğiyle kapıları parçalar, yakındakileri yere serer ve yaralarsın; barut güvenilmezdir."
   },
   "meisterwerk": {
    "meaning": "Başyapıt, usta eseri (Almanca)",
    "say": "mayster-verk",
-   "summary": "Bir seanslık çalışma ve değerli malzemeyle başyapıt üretirsin: ilgili zarlara +2 ve GM ile seçilen bir özellik. Aynı anda yalnızca 1 tane olabilir."
+   "summary": "Bir seanslık çalışmayla bir başyapıt üretirsin: kullananın ilgili zarlarına +2 ve GM ile seçilen bir özellik. Blu Mana işlemeli başyapıt silahla Silvered Steel bonusuna +1."
   },
   "second-face": {
    "meaning": "İkinci yüz",
-   "summary": "Kılık değiştirip Giz zarıyla insanları kandırırsın; tanıyanlar için eşik yükselir. Üst seviyede ses taklidi ve belirli bir kişiyi taklit açılır."
+   "summary": "Kılık değiştirip başka biri olursun; S3'te belirli bir kişiyi taklit edersin. Büründüğün kimlik Nachtgericht için erişim sayılır."
   },
   "poisoner": {
    "meaning": "Zehirci",
-   "summary": "Silaha ya da yiyecek/içeceğe zehir katarsın; hedefin uzvu birkaç tur boyunca tur sonunda yaralanır. Hedef her tur Yalman ≥ Zor ile durdurabilir."
+   "summary": "Silaha ya da kadehe zehir katarsın; hedef birkaç tur yara alır. Sofraya erişimin varsa zehri fark ettirmeden katmak kolaylaşır."
   },
   "shadowstep": {
    "meaning": "Gölge adımı",
-   "summary": "Karanlık bir alana girince d20 + Giz ≥ Orta ile izini kaybettirirsin; gölgeye geçtikten sonraki ilk saldırın pusu sayılır."
+   "summary": "Karanlıkta Giz ≥ Orta ile izini kaybettirirsin; çatışmada gölgeye geçince d20 + Giz (GM'in hedefin dikkatine göre koyduğu eşik) başarılıysa sonraki ilk saldırın pusu sayılır."
   },
   "whisper-network": {
    "meaning": "Fısıltı ağı",
-   "summary": "Girdiğin şehirde bir sahne harcayıp d20 + Giz ile söylentilere ulaşır, işe yarar bilgi alırsın. Üst seviyede hane sırları ve söylenti yayma açılır."
+   "summary": "Şehirde söylentilere ulaşıp bilgi toplar ya da yayarsın. S2'de hane sırlarını ve bir kişinin günlük düzenini öğrenirsin."
   },
   "nachtgericht": {
    "meaning": "Gece mahkemesi (Almanca)",
    "say": "naht-ge-riht",
-   "summary": "Uyuyan ya da yalnız bir hedefe GM onayıyla zarsız suikast yaparsın (önemli NPC'de Çok Zor) ve iz bırakmazsın. Seans başına 1 kez."
+   "summary": "Kimliğinle ya da erişiminle yaklaştığın uyuyan veya yalnız bir hedefe d20 + Giz ile suikast yaparsın; önemsizlerde eşik iki kademe düşer, önemli NPC'lerde Çok Zor. Seans başına 1 kez, iz bırakmazsın."
   },
   "bestiary": {
    "meaning": "Canavar kitabı, bestiyer",
-   "summary": "Bir yaratığı bir tur gözlemleyip d20 + Hikmet atarsın; türünü, zayıf noktasını (o uzva saldırıya bonus) ya da özel yeteneğini öğrenirsin."
+   "summary": "Bir yaratığı gözlemleyip Hikmet zarıyla türünü, zayıf noktasını ve zaafını öğrenirsin; zayıf noktaya saldırılara +2/+3, S3'te +4 ve müttefiklerin de yararlanır."
   },
   "silvered-steel": {
    "meaning": "Gümüşlenmiş çelik",
-   "summary": "Silahını Blu Mana yağıyla kaplarsın; Decayed Mana varlıklarına, ruhlara ve diriltilmiş ölülere normal isabet eder ve bonus alırsın."
+   "summary": "Blu Mana yağıyla kaplı silahların doğaüstü varlıklara isabet eder ve +1/+2/+3 verir; Meisterwerk başyapıtıyla bonusa +1."
   },
   "grim-tonics": {
    "meaning": "Karanlık tonikler",
-   "summary": "Avcı iksiri içip birkaç tur Yalman zarlarına +2 ve Sinme bağışıklığı alırsın. Etki bitince Sebahat (Kolay) atarsın; başarısızlıkta +1 Yozlaşma."
+   "summary": "Uzun dinlenmede 2 doz avcı iksiri hazırlarsın; içince Yalman'a +2 ve Sinme bağışıklığı alırsın. Etki bitince Sebahat zarı atarsın, başarısızlıkta +1 Yozlaşma."
   },
   "mind-fortress": {
    "meaning": "Zihin kalesi",
-   "summary": "Dehşet anları ve Yozlaşma artışlarında zarlarına bonus alır, Sinme'ye Kolay eşikte direnirsin. Üst seviyede çatışma başına 1 Yozlaşma artışını engellersin."
+   "summary": "Dehşet ve Yozlaşma zarlarına +2/+3 alırsın, Sinme'den daha kolay kurtulursun. S3'te çatışma başına bir Yozlaşma artışını engellersin."
   },
   "ultima-venatio": {
    "meaning": "Son av (Latince)",
    "say": "ultima venatsiyo",
-   "summary": "Seans başına 1 kez bir hedefi Son Av ilan edersin: sahne boyunca ona karşı +4 ve daha ağır yaralar. Kaçarsa ya da ölürsen +2 Yozlaşma."
+   "summary": "Seans başına 1 kez bir hedefi Son Av ilan edersin: sahne sonuna kadar ona karşı tüm zarlarına +4 ve verdiğin yaralar 1 kademe fazla ilerler; öldürürsen Yozlaşman 1 azalır."
   },
   "breach": {
    "meaning": "Gedik açmak, içeri dalmak",
-   "summary": "Kapı, pencere ya da gedikten tur harcamadan dalar, ilk saldırına +2 alırsın. Üst seviyede müttefiklerine bonus verir, içeridekileri Sinme'ye sokabilirsin."
+   "summary": "Kapıdan, gedikten, barikattan ya da dar geçitten ilk dalan sen olursan giriş tur harcamaz ve ilk saldırına +2; üst seviyede müttefiklere bonus ve Sinme."
   },
   "escalade": {
    "meaning": "Sur tırmanışı",
-   "summary": "Duvar ve sur tırmanma zarların kolaylaşır, tırmanırken Giz'e +2 alırsın. Üst seviyede yüksekten hedefin üstüne atlayıp yere düşürürsün."
+   "summary": "Duvar, sur, çatı, kayalık ve ağaç tırmanışı kolaylaşır; yüksekten hedefin üstüne atlayıp onu devirirsin. S3'te halatın müttefikleri de taşır."
   },
   "fire-and-move": {
    "meaning": "Ateş et ve ilerle",
-   "summary": "Hareket ettiğin turlarda saldırılarına ceza uygulanmaz; üst seviyede bonus alır, aynı turda hareket edip saldırıp siper alabilirsin."
+   "summary": "Hareket ettiğin turlarda saldırı cezası almaz, +1 (S2'de +2) alırsın. S3'te aynı turda hareket edip saldırır ve siper alırsın."
   },
   "behind-the-lines": {
    "meaning": "Hattın gerisinde",
-   "summary": "Düşman kontrolündeki bölgelerde Giz ve Kaçınç zarlarına +2 alırsın. Üst seviyede çatışmadan kaçmak Kolay olur ve bir müttefiği de çıkarırsın."
+   "summary": "Düşman bölgesinde Giz ve Kaçınç zarlarına +2. S2'de kaçış yolu bilir, bir müttefikle birlikte kolayca sıyrılır ve iz bırakmadan hızlı ilerlersin."
   },
   "sturmflut": {
    "meaning": "Fırtına dalgası (Almanca)",
@@ -376,7 +376,7 @@
   },
   "close-the-wounds": {
    "meaning": "Yaraları kapat",
-   "summary": "Bir uzva dokunup dua edersin (d20 + Sebahat ≥ Orta); başarıda yara 1 kademe düşer. Çatışma başına 2 kez. Üst seviyede Kullanılamaz uzuvlara da işler, Kopuk'a işlemez."
+   "summary": "Bir uzva dokunarak dua edersin (Sebahat ≥ Orta) ve yarayı 1 kademe düşürürsün; S2'de Zor eşiği de geçersen 2 kademe düşer."
   },
   "blessing": {
    "meaning": "Kutsama",
@@ -384,49 +384,49 @@
   },
   "sanctuary": {
    "meaning": "Sığınak",
-   "summary": "Bir odayı ya da küçük alanı kutsarsın: sahne boyunca yoz zarlar zorlaşır, Decayed Mana varlıkları ve ruhlar girmek için Sebahat zarı atar. Seviye 2'de müttefikler Sinme'ye girmez."
+   "summary": "Bir alanı kutsarsın: yoz zarlar zorlaşır, yoz varlıklar zorla girer; S2'de içerideki müttefikler hiç Sinme'ye girmez."
   },
   "vigil": {
    "meaning": "Nöbet (gece boyu dua)",
-   "summary": "Pasif: uzun dinlenmede bir müttefik için dua edersin; Sebahat zarı başarılıysa Yozlaşması 1 azalır. Seans başına 1 kez; üst seviyede eşik düşer ve iki kişi için dua edebilirsin."
+   "summary": "Uzun dinlenmede dua ederek bir müttefikin Yozlaşmasını 1 azaltırsın; S2'de eşik bir kademe düşer, S3'te iki kişiye dua edersin."
   },
   "ultimo-aliento": {
    "meaning": "Son nefes (İspanyolca)",
    "say": "ultimo alyento",
-   "summary": "Bir müttefike 1 tur Son Nefes verirsin: o tur ölürse ve 2 tur içinde katilini öldürürse kritik yaralı olarak dirilir. Seans başına 1 kez; Death Save değildir."
+   "summary": "Bir müttefike 2 tur Son Nefes verirsin; bu sürede ölür ve 3 tur içinde takımdan biri katilini öldürürse kritik yaralı dirilir."
   },
   "sermon": {
    "meaning": "Vaaz",
-   "summary": "Kalabalığa vaaz verirsin (d20 + Cazibe): Kolay dikkat çeker, Orta basit bir eyleme ikna eder, Zor kalabalığı yanına çeker. Üst seviyede kalabalığı bir düşmana karşı döndürürsün."
+   "summary": "Bir kalabalığa d20 + Cazibe ile vaaz verirsin: Kolay dikkatlerini çeker, Orta basit bir eyleme ikna eder, Zor onları coşturup yanında harekete geçirir."
   },
   "fiery-words": {
    "meaning": "Ateşli sözler",
-   "summary": "Takımını coşturursun: seni duyan tüm müttefiklerin bir sonraki zarına +1 (seviyeyle +3'e çıkar). Çatışma başına 1 kez, seviye 3'te 2 kez."
+   "summary": "Takımını coşturursun: seni duyan müttefiklerin bir sonraki zarına +1, S2'de +2, S3'te +3 ve çatışma başına 2 kez."
   },
   "confession": {
    "meaning": "İtiraf",
-   "summary": "Biriyle yalnız konuşup Cazibe ile onun Sebahat'ine karşı zar atarsın; başarıda sana bir sırrını itiraf eder. Seviye 2'de bir sahne boyunca sana yalan söyleyemez."
+   "summary": "Biriyle yalnız konuşup d20 + Cazibe ≥ Orta ile ona bir sırrını itiraf ettirirsin; güçlü iradeli hedefte eşik bir kademe yükselir."
   },
   "shepherd-s-voice": {
    "meaning": "Çobanın sesi",
-   "summary": "Pasif: sesini duyan müttefikler Sinme zarlarına +2 alır. Seviye 2'de Sinme'deki bir müttefiği tur harcamadan d20 + Cazibe ≥ Kolay ile kendine getirirsin."
+   "summary": "Sinme'ye düşen müttefiklerini kurtarırsın: kurtulma zarlarına +2, S2'de tur harcamadan anında kendilerine getirirsin."
   },
   "vox-dei": {
    "meaning": "Tanrının sesi (Latince)",
    "say": "voks de-i",
-   "summary": "Seni duyan herkes (düşmanlar dahil) Zor Sebahat zarı atar; başarısız olanlar 1 tur tek kelimelik emrine uyar (Dur, Düş, Kaç...). Seans başına 1 kez; ezoterik inançta +1 Yozlaşma."
+   "summary": "Seni duyan düşmanlar Sebahat zarında başarısız olursa 1 tur boyunca tek kelimelik emrine uyar. Seans başına 1 kez."
   },
   "flock": {
    "meaning": "Sürü",
-   "summary": "Pasif: sana bağlı müritler (NPC) olur; seni korur, mesaj taşır, yanında savaşırlar. 1 müritle başlar, 3'e çıkar. Ölen müridin yerine yenisini bulmak bir seans sürer."
+   "summary": "Seni koruyan, iş gören ve yanında savaşan 1-3 mürit edinirsin; Hollow Devotees ile kuklaya dönüşebilirler."
   },
   "iron-conviction": {
    "meaning": "Demir inanç",
-   "summary": "Bir müttefike d20 + Hakimiyet ≥ Kolay ile sahne boyu Sebahat zarlarına +2 verirsin. Üst seviyelerde bonus artar; korkuya, sonra zihin kontrolüne bağışık olur."
+   "summary": "Bir müttefikin iradesini çeliğe çevirirsin: sahne boyunca Sebahat zarlarına +2/+3, S3'te +4 ve zihin kontrolüne bağışıklık."
   },
   "commandment": {
    "meaning": "Emir",
-   "summary": "Takımına tek bir emir verirsin (Saldır, Savun, Çekil, Tut); o tur emre uyan müttefikler ilgili zarlara +2 alır. Seviye 2'de tur harcamaz."
+   "summary": "Takımına tek emir verirsin; uyanların ilgili zarına +2. Çatışma başına 3 kez, S2'de bunlardan biri tur harcamaz."
   },
   "rally": {
    "meaning": "Toparlanma",
@@ -451,54 +451,54 @@
   },
   "smite": {
    "meaning": "Kutsal darbe",
-   "summary": "Kutsal bir darbe indirirsin: isabette yara 1 kademe fazla, Decayed Mana varlıklarında 2 kademe fazla ilerler. Seviye 2'de hedef Sebahat zarını geçemezse 1 tur Sinme'ye girer."
+   "summary": "Kutsal darbenle yarayı 1 kademe fazla ilerletirsin (yoz varlıklarda 2); çatışma başına 2 kez, S2'de 3 kez ve hedefi Sindirebilirsin."
   },
   "manus-dei": {
    "meaning": "Tanrının eli (Latince)",
    "say": "manus de-i",
-   "summary": "Bir sonraki saldırın zarsız isabet eder ve seçtiğin uzuvda yara 2 kademe ilerler. Seans başına 1 kez; ardından 1 tur aksiyon alamazsın."
+   "summary": "Bir saldırını tanrının eline çevirirsin: eşik bir kademe düşer, isabette uzuv 2 kademe ilerler. Iskalarsan hakkın gitmez."
   },
   "miracle-of-mending": {
    "meaning": "Onarım mucizesi",
-   "summary": "Toplu dua (d20 + Sebahat ≥ Orta): görüş alanındaki tüm müttefiklerin bir uzvundaki yara 1 kademe düşer. Çatışma başına 1 kez; seviye 3'te seansta 1 kez Kopuk uzvu bağlarsın."
+   "summary": "Toplu duayla (Sebahat ≥ Orta) görüş alanındaki tüm müttefiklerin bir uzvundaki yarayı 1 kademe düşürürsün; S2'de Zor eşiği de geçersen 2 kademe."
   },
   "excommunicate": {
    "meaning": "Aforoz et",
-   "summary": "Bir hedefi aforoz edersin (Sebahat'e karşı Sebahat); başarıda sahne boyunca büyü ve yoz zarlarına -2 (seviyeyle -4). Seviye 3'te müttefikleri de ondan şüphe eder."
+   "summary": "Bir hedefi aforoz edersin (d20 + Sebahat ≥ Orta, güçlü iradelide bir kademe zor); sahne boyunca büyü ve yoz zarlarına -2/-3/-4 alır."
   },
   "purge": {
    "meaning": "Arındırma",
-   "summary": "Bir müttefikin Yozlaşmasını Zor Sebahat zarıyla 2 azaltırsın; yarısı sana geçer. Seans başına 1 kez. Seviye 2'de sana geçmez ve son çatal kararını silebilirsin."
+   "summary": "Bir müttefikin Yozlaşmasını 1 azaltırsın (S2'de 2, 1'i sana geçer). Teslim halkalarının bıraktığı tabanın altına indiremezsin."
   },
   "consecrated-ground": {
    "meaning": "Kutsanmış toprak",
-   "summary": "1 tur harcayıp ~20 metrelik alanı kutsarsın: sahne boyunca yoz zarlar Uber eşikte atılır, Decayed Mana temizlenir. Seviye 2'de müttefiklerin Yozlaşma artışı yarıya iner."
+   "summary": "20 metrelik alanı kutsarsın: oradaki yoz zarların eşiği iki kademe yükselir; S2'de müttefiklerin 2+ Yozlaşma artışları 1 azalır."
   },
   "resurrectio": {
    "meaning": "Diriliş (Latince)",
    "say": "rezurrekti-o",
-   "summary": "Son 1 saatte ölmüş birini Zor Sebahat zarıyla diriltirsin; kritik yaralı döner, +2 Yozlaşma alır ve Death Save hakkını kaybeder. Sana +2 Yozlaşma; her seferinde eşik yükselir."
+   "summary": "Son bir saatte ölmüş birini diriltirsin. Her kullanım sonraki eşiği bir kademe yükseltir; bu artış her seans başında bir kademe iner."
   },
   "strings": {
    "meaning": "İpler",
-   "summary": "Birinin zihnine ip bağlarsın (Hakimiyet'e karşı Sebahat); başarıda 1 tur basit emirlerine uyar (seviyeyle 3 tura çıkar). Yoz zardır; her kullanımda +1 Yozlaşma."
+   "summary": "Bir kişinin zihnine d20 + Hakimiyet ≥ Orta ile ip bağlarsın; 1 tur basit emirlerine uyar. Güçlü iradeli hedefte eşik bir kademe yükselir."
   },
   "dream-communion": {
    "meaning": "Rüya birliği",
-   "summary": "Yakındaki uyuyan birinin rüyasına girip bilgi alır ya da kâbus gösterirsin. Yoz zardır, her kullanımda +1 Yozlaşma. Seviye 2'de tanıdığın biri için uzaklık sınırı yoktur."
+   "summary": "Uyuyan birinin rüyasına d20 + Hakimiyet ≥ Orta ile girer, bilgi alır ya da kâbus gösterirsin; güçlü iradeli hedefte eşik bir kademe yükselir."
   },
   "hollow-devotees": {
    "meaning": "Boş müritler",
-   "summary": "Pasif: müritlerin korkmayan, Sinme'ye girmeyen, acı duymayan, konuşamayan kuklalara dönüşür. 1 kuklayla başlar, 3'e çıkar; kukla kazanmak RP sahnesi ve canlı insan ister."
+   "summary": "Müritlerin korkusuz, acısız kuklalara dönüşür (stat en fazla 5). Her dönüşüm sana +1 Yozlaşma getirir."
   },
   "thousand-faces": {
    "meaning": "Bin yüz",
-   "summary": "Pasif: Yozlaşman düşmanlara korku olarak yansır; Sebahat zarlarına Yozlaşma/3 ceza alırlar. Seviye 2'de ceza Yozlaşma/2 olur ve seni teşhis edemezler."
+   "summary": "Çürümen düşmanlara korku olarak yansır: Sebahat zarlarına Yozlaşma/3, S2'de Yozlaşma/2 kadar ceza; S2'de seni teşhis edemezler."
   },
   "marionetista": {
    "meaning": "Kuklacı (İspanyolca)",
    "say": "maryonetista",
-   "summary": "En fazla 3 hedefe ip bağlarsın (her biri Zor Hakimiyet zarı); başaranlar sahne sonuna kadar senin için savaşır. Seans başına 1 kez, +3 Yozlaşma; yoz zardır."
+   "summary": "En fazla 3 hedefe d20 + Hakimiyet ≥ Zor ile ip bağlarsın; başarılılar sahne boyunca senin için savaşır, her tur sonunda kurtulma zarı atarlar."
   },
   "rune-script": {
    "meaning": "Rün yazısı",
@@ -514,20 +514,20 @@
   },
   "crystal-binding": {
    "meaning": "Kristal bağlama",
-   "summary": "Uzun dinlenmede bir Blu Mana kristaline mana doldurursun; kırdığında sonraki büyü ya da rün zarına +3 alırsın. Kristal bulmak RP gerektirir."
+   "summary": "Uzun dinlenmede bir Blu Mana kristali doldurursun; kırınca bir sonraki büyü ya da rün zarına +3. S2'de iki kristal ya da tek kristalle +5."
   },
   "runa-magna": {
    "meaning": "Büyük rün (Latince)",
    "say": "runa magna",
-   "summary": "1 tur harcayıp zemine dev bir rün çizersin (Hikmet, Zor): ~10 m alanda müttefikler 2 tur yara almaz ya da düşmanlar alandan çıkamaz. Seans başına 1 kez, +1 Yozlaşma."
+   "summary": "Büyük bir rün çizip alanı ya 1 tur koruma altına alır (yaralar 1 kademe az ilerler) ya da düşmanları 2 tur alana bağlarsın."
   },
   "mana-bolt": {
    "meaning": "Mana oku",
-   "summary": "Saf iç manadan bir ok fırlatırsın: büyü zarın hedefin d20 + Kaçınç zarını geçerse uzvundaki yara 1 kademe ilerler. Üst seviyede iki hedefe atabilirsin."
+   "summary": "Saf iç manadan bir ok fırlatırsın: büyü zarı GM'in hedefin çevikliğine göre koyduğu eşiği (genellikle Orta) geçerse yara 1 kademe ilerler; S3'te Zor eşiği geçen isabette 2 kademe."
   },
   "kinesis": {
    "meaning": "Hareket (kelime Yunanca kökenli)",
-   "summary": "Görüş alanındaki nesneleri manayla hareket ettirirsin. Seviye arttıkça insanları itip devirir, sonunda kapı, kaya kaldırır ve hedefi havaya kaldırıp düşürürsün."
+   "summary": "Nesneleri zihninle hareket ettirirsin; S2'de bir insanı itip devirirsin (hedef Yalman Orta ile direnir), S3'te kaldırıp düşürürsün."
   },
   "elemental-weave": {
    "meaning": "Element örgüsü",
@@ -535,24 +535,24 @@
   },
   "mana-shroud": {
    "meaning": "Mana örtüsü",
-   "summary": "Tepki: sana gelen bir büyüye karşı büyü zarı atarsın; saldırganın zarını geçersen büyü etkisiz kalır. Çatışma başına 2 kez; üst seviyede büyüyü geri yansıtırsın."
+   "summary": "Sana yönelen büyüye karşı kendini örtersin: büyü zarı GM'in büyünün gücüne göre koyduğu eşiği geçerse büyü sana işlemez. Çatışma başına 2 kez."
   },
   "arcanum-maius": {
    "meaning": "Büyük sır (Latince)",
    "say": "arkanum ma-yus",
-   "summary": "Sonraki büyünün yara, alan, süre ya da bonusunu ikiye katlarsın. Çatışma başına 1 kez; o büyünün zarı bir kademe zorlaşır, başarısızlıkta +1 Yozlaşma."
+   "summary": "İç mananı kıvılcım gibi kullanıp bir sonraki büyünün yara kademesini, alanını, süresini ya da bonusunu ikiye katlarsın. Çatışma başına 1 kez."
   },
   "steady-flow": {
    "meaning": "Düzenli akış",
-   "summary": "Pasif olarak büyü zarındaki Nat1'in bedelini azaltırsın: önce Sebahat zarıyla Yozlaşmadan kaçarsın, sonra hiç almazsın, en sonunda Nat1 sıradan bir başarısızlık olur."
+   "summary": "Nat1 geri tepmesi kolaylaşır; S2'de seans başına 2 Nat1'in geri tepmesini tamamen yok sayarsın, S3'te Nat1 felaket sayılmaz."
   },
   "binding-chains": {
    "meaning": "Bağlayan zincirler",
-   "summary": "Hedefi mana zincirleriyle bağlarsın: büyü zarın hedefin Kaçınç zarını geçerse hareket edip saldıramaz (Yalman Zor ile kurtulur). Süre seviyeyle uzar, sonunda büyüyü de keser."
+   "summary": "Hedefi mana zincirleriyle bağlarsın (büyü zarı, eşik genellikle Orta); hareket edemez ve saldıramaz, her tur sonunda Yalman ile kurtulmaya çalışır."
   },
   "counterweave": {
    "meaning": "Karşı örgü",
-   "summary": "Tepki: yapılmakta olan bir büyüyü çözersin; d20 + Hikmet büyücünün zarını geçerse büyü gerçekleşmez. Çatışma başına 1 kez, üst seviyede 2 kez ve büyücüye +1 Yozlaşma."
+   "summary": "Başkasının yapmakta olduğu büyüyü d20 + Hikmet ile kaynağında çözersin (eşiği GM büyünün gücüne göre koyar). Çatışma başına 1 kez, S2'de 2."
   },
   "soothing-mana": {
    "meaning": "Yatıştırıcı mana",
@@ -561,19 +561,19 @@
   "pax-manae": {
    "meaning": "Mananın barışı (Latince)",
    "say": "paks ma-ne",
-   "summary": "~15 m alanda 2 tur boyunca kimse (sen dahil) büyü yapamaz ve süren büyüler biter; sen Hikmet ve Sebahat zarlarına +3 alırsın. Seans başına 1 kez."
+   "summary": "Hikmet ≥ Zor ile 15 metrede manayı 2 tur durdurursun; alandaki büyücüler her tur Zor eşikte kurtulma zarı atar, sen Hikmet ve Sebahat zarlarına +3 alırsın."
   },
   "overcharge": {
    "meaning": "Aşırı yükleme",
-   "summary": "Büyü zarından önce +2 eklemeye karar verirsin (seviyeyle +4'e kadar). Zarda 1-3 gelirse mana geri teper: +1 Yozlaşma ve büyü kolunda 1 kademe yara."
+   "summary": "Büyü zarına önceden +2/+3, S3'te +4 eklersin; zarda 1-3 gelirse Nat1 sayılır ve mana geri teper."
   },
   "mana-burst": {
    "meaning": "Mana patlaması",
-   "summary": "Manayı bedeninden patlatırsın: yakınındaki herkes, müttefikler dahil, Kaçınç (Orta) atar; başarısızlar yere düşer ve 1 kademe yaralanır. Üst seviyede müttefikleri dışarıda tutarsın."
+   "summary": "Manayı bedeninden patlatırsın (büyü zarı Orta); yakındakiler Kaçınç ≥ Orta atar, başarısızlar düşer ve yaralanır. S2'de müttefikleri dışlamak eşiği bir kademe yükseltir."
   },
   "chain-reaction": {
    "meaning": "Zincirleme tepkime",
-   "summary": "Büyüde Nat20 attığında ya da büyüyle düşman öldürdüğünde, tur harcamadan bir Mana Bolt ya da aynı büyüyü tekrar yaparsın (-2). Tur başına 1 kez."
+   "summary": "Nat20 ya da büyüyle öldürmede tur harcamadan bir büyü daha yaparsın (-2); S2'de Zor eşiği geçen her büyüde de tetiklenir."
   },
   "volatile-regeneration": {
    "meaning": "Değişken (oynak) yenilenme",
@@ -582,36 +582,36 @@
   "entfesselt": {
    "meaning": "Zincirlerinden kurtulmuş (Almanca)",
    "say": "ent-fes-selt",
-   "summary": "3 tur boyunca büyü zarlarına +5 alırsın, tek hedefli büyülerin ikinci bir hedefe de değer; her tur Sebahat atmazsan +1 Yozlaşma. Seans başına 1 kez; sonra 1 tur aksiyon alamazsın."
+   "summary": "3 tur boyunca büyü zarlarına +5 alırsın ve tek hedefli büyülerini ikinci bir hedefe de yöneltebilirsin (-2). Her tur Sebahat ≥ Orta, başarısızlıkta +1 Yozlaşma."
   },
   "rot-touch": {
    "meaning": "Çürük dokunuş",
-   "summary": "Decayed Mana ile bir hedefe dokunursun (yoz zar, Kaçınç'a karşı). Hedef sahne boyunca büyü zarlarına -2 alır ve uzvu 1 kademe yaralanır. Her kullanım +1 Yozlaşma."
+   "summary": "Decayed mana ile bir hedefe dokunursun (yoz zar, eşik genellikle Orta); büyü zarlarına -2 alır ve uzvu 1 kademe yaralanır."
   },
   "blight-field": {
    "meaning": "Çürüme alanı",
-   "summary": "~10 m alanı Decayed Mana ile kirletirsin (yoz zar, Orta); sahne boyunca orada büyü yapan zarında 1-3 gelirse +1 Yozlaşma alır. Üst seviyede alan her tur yaralar. Her kullanım +1 Yozlaşma."
+   "summary": "En fazla 3 tur süren bir Decayed Mana alanı açarsın; alandakiler her tur Yalman ile direnmezse yaralanır. Çatışma başına 1 kez."
   },
   "mana-leech": {
    "meaning": "Mana sülüğü",
-   "summary": "Pasif olarak Decayed Mana seni emmez, sen ondan beslenirsin: bu bölgelerde büyü ve yoz zarlarına +2 alırsın. Üst seviyede orada hiç Yozlaşma almazsın."
+   "summary": "Decayed Mana bölgelerinde güçlenirsin; S2'de bölgenin kendisinden gelen Yozlaşmayı almazsın ama yetenek bedelleri işler."
   },
   "unmaking": {
    "meaning": "Yok etme, çözme",
-   "summary": "Bir nesnenin manasını dağıtıp onu parçalarsın; eşik nesneye göre değişir (silah Orta, kapı Zor, duvar Çok Zor). Üst seviyede büyüleri, rünleri ve kutsanmış alanları da çözersin."
+   "summary": "Bir nesnenin manasını dağıtıp onu parçalarsın; S2'de büyü etkilerini, rünleri ve kutsanmış alanları da çözersin (eşiği GM yapanın gücüne göre koyar)."
   },
   "caida-carmesi": {
    "meaning": "Kızıl düşüş (İspanyolca)",
    "say": "ka-i-da karmesi",
-   "summary": "Kızıl Kıyamet'in bir yankısını indirirsin (yoz zar, Zor): ~30 m alanda herkes, müttefikler dahil, ağır yara alabilir ve alan bir gün Decayed Mana bölgesi olur. Seans başına 1 kez, +3 Yozlaşma."
+   "summary": "Kızıl Kıyamet'in yankısını indirirsin (yoz zar Zor); 30 metredeki herkes Kaçınç ≥ Çok Zor atar, başarısızların iki uzvu 2 kademe yaralanır. +2 Yozlaşma."
   },
   "echo-of-the-first": {
    "meaning": "İlk olanın yankısı",
-   "summary": "Pasif olarak sana gelen her Yozlaşma artışından önce Sebahat zarı atarsın; başarıda artış olmaz. Çatışma başına 1 kez; seviyeyle eşik kolaylaşır."
+   "summary": "Gelen Yozlaşmaya Sebahat ile direnirsin; ileri seviyelerde eşik düşer, kullanım artar ve müttefiklerini de korursun."
   },
   "halo": {
    "meaning": "Hale, ışık halkası",
-   "summary": "Sahne boyunca bedeninden ışık yayarsın: karanlık dağılır, yanılsama ve kılık değiştirme çalışmaz, Decayed Mana varlıkları sana saldırırken ceza alır. Yozlaşman 5+ ise kullanamazsın."
+   "summary": "Işık yayarak yanılsamaları bozar, Decayed varlıklara ceza verirsin; S2'de müttefikleri de korur, S3'te herkese +2 verir."
   },
   "word-of-making": {
    "meaning": "Yaratış sözü",
@@ -619,12 +619,12 @@
   },
   "heavenly-sight": {
    "meaning": "Göksel görüş",
-   "summary": "Göğe bakıp bir soru sorarsın, GM evet ya da hayır der. Seans başına 1 kez. Yozlaşman 5+ ise cevabı God of Dreams verir ve doğru olup olmadığını bilemezsin."
+   "summary": "Göğe evet/hayır sorusu sorarsın; S2'de seans başına 2 kez sorar ve gelecekten kısa görüntüler görürsün."
   },
   "mana-primordialis": {
    "meaning": "İlk mana, ilkel mana (Latince)",
    "say": "mana primordiyalis",
-   "summary": "Tanrıların manasıyla bir gerçeği yeniden yazarsın: bir ölümü geri almak, bir laneti silmek gibi. Kampanya başına 1 kez; bir uzvun kalıcı olarak ışığa ya da taşa döner. Yozlaşma 4+ iken olmaz."
+   "summary": "Bir gerçeği yeniden yazarsın: ölümü geri almak, büyüyü silmek, yaraları yok saymak ya da (Sebahat ≥ Zor ile) bir düşmanın tüm uzuvlarını 2 kademe ilerletmek."
   }
  },
  "perks": {
@@ -1220,7 +1220,7 @@
   },
   "bonus-tavani": {
    "meaning": "Bonus sınırı",
-   "summary": "Bir zara stat dışından gelen bonusların toplamı en fazla +5; eşik düşüren her kademe +3 sayılır. Cezaların sınırı yoktur.",
+   "summary": "Stat dışı bonuslardan zara eklenebilecek en fazla miktar: Sv 0'da +4, her yeni katmanda +1 (Sv 5'te +5, Sv 10'da +6, Sv 15'te +7). Taşan bonusu GM anlatıma çevirir.",
    "match": [
     "Bonus tavanı",
     "bonus tavanı",
@@ -1240,6 +1240,14 @@
    "summary": "Teslim seçilen her çatal o halkanın ilk seviyesini taban yapar (1, 4, 7, 10); Yozlaşma bunun altına inemez. Direniş taban bırakmaz.",
    "match": [
     "Halka tabanı"
+   ]
+  },
+  "tasan-bonus": {
+   "meaning": "Tavanı aşan bonus",
+   "summary": "Bonus tavanını aşan bonuslar kaybolmaz; GM bunları hareketin cezasını kaldırmak, işi daha hızlı ya da temiz bitirmek gibi zar dışı sonuçlara çevirir.",
+   "match": [
+    "Taşan bonus",
+    "taşan bonus"
    ]
   }
  }
