@@ -26,8 +26,10 @@ import {
 } from "@/lib/shz/constants";
 import type { RulesData } from "@/lib/shz/content";
 import { amputationPlan, buildCreation, effectiveStats, learnState, type Stats } from "@/lib/shz/rules";
+import { LanguagePicker } from "@/components/character/languages";
+import { SHZ_LANGUAGES, languageProblems, languageSlots } from "@/lib/languages";
 
-const STEP_LABELS = { kimlik: "Kimlik", ekspertiz: "Ekspertiz", perkler: "Perkler", augment: "Augment", statlar: "Statlar", yetenek: "İlk yetenek", ozet: "Özet" } as const;
+const STEP_LABELS = { kimlik: "Kimlik", ekspertiz: "Ekspertiz", perkler: "Perkler", diller: "Diller", augment: "Augment", statlar: "Statlar", yetenek: "İlk yetenek", ozet: "Özet" } as const;
 type StepKey = keyof typeof STEP_LABELS;
 const KV = KRIEGSVERSEHRT.perk;
 
@@ -52,6 +54,7 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
   const [perks, setPerks] = useState<string[]>([]);
   const [points, setPoints] = useState<Partial<Stats>>({});
   const [first, setFirst] = useState<string | null>(null);
+  const [langs, setLangs] = useState<string[]>([]);
   const [perkFilter, setPerkFilter] = useState("");
   const [perkTab, setPerkTab] = useState<"positive" | "negative" | "selected">("positive");
 
@@ -73,15 +76,18 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
   const ampPlan = amputationPlan(amp);
   const ampOk = !perks.includes(KV) || ampPlan.problems.length === 0;
   const augProblem = result.problems.find((p) => /augment/i.test(p));
-  const STEPS: StepKey[] = ["kimlik", "ekspertiz", "perkler", ...(needsAug ? (["augment"] as const) : []), "statlar", "yetenek", "ozet"];
+  const langSlots = languageSlots("SHZ", perks);
+  const langProblems = languageProblems("SHZ", perks, langs);
+  const STEPS: StepKey[] = ["kimlik", "ekspertiz", "perkler", "diller", ...(needsAug ? (["augment"] as const) : []), "statlar", "yetenek", "ozet"];
   const okMap: Record<StepKey, boolean> = {
     kimlik: idOk,
     ekspertiz: !!T,
     perkler: budget.problems.length === 0 && ampOk,
+    diller: langProblems.length === 0,
     augment: !!aug && !augProblem,
     statlar: used === totalPoints && (!T || (points[T.stat] ?? 0) <= treeCap),
     yetenek: true,
-    ozet: result.ok && idOk,
+    ozet: result.ok && idOk && langProblems.length === 0,
   };
   const stepOk = STEPS.map((k) => okMap[k]);
   const step = Math.max(0, STEPS.indexOf(cur));
@@ -89,7 +95,10 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
 
   // Perk ya da ağaç değişince stat dağılımı geçersiz kalabilir: sıfırla.
   const togglePerk = (k: string) => {
-    setPerks((p) => (p.includes(k) ? p.filter((x) => x !== k) : [...p, k]));
+    const next = perks.includes(k) ? perks.filter((x) => x !== k) : [...perks, k];
+    setPerks(next);
+    // Monolingual / Trilingual dil sayısını değiştirir: fazla seçimi kırp.
+    setLangs((l) => l.slice(0, languageSlots("SHZ", next)));
     if (k === KV) setAmp([]);
     setPoints({});
     setFirst(null);
@@ -361,6 +370,8 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
           </div>
         )}
 
+        {cur === "diller" && <LanguagePicker list={SHZ_LANGUAGES} slots={langSlots} value={langs} onChange={setLangs} />}
+
         {cur === "augment" && T && needsAug && (
           <div className="space-y-4">
             <Card className="flex flex-col gap-5 p-5 sm:flex-row">
@@ -547,6 +558,10 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
               {perks.includes(KV) && ampPlan.parts.length > 0 && <p className="mt-1 text-sm text-danger">Kopuk: {ampPlan.parts.map(bodyPartLabel).join(", ")}</p>}
             </div>
             <div>
+              <p className="kicker mb-1">Diller</p>
+              <p className="text-sm">{langs.length ? langs.map((l, i) => (i === 0 ? `${l} (ana dil)` : l)).join(", ") : "Seçilmedi"}</p>
+            </div>
+            <div>
               <p className="kicker mb-1">İlk yetenek</p>
               <p className="text-sm">{first ? data.abilities[first].name : "Seçilmedi (1 yetenek puanı saklanacak)"}</p>
             </div>
@@ -560,11 +575,11 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
             <Button
               variant="primary"
               size="lg"
-              disabled={!result.ok || !idOk || busy}
+              disabled={!result.ok || !idOk || langProblems.length > 0 || busy}
               onClick={async () => {
                 const r = await run(() =>
                   api<{ id: string }>("/api/characters", {
-                    body: { campaignId, ...id, creation: { tree, points, perks, startAugment: aug, firstAbility: first, amputation: perks.includes(KV) ? amp : null } },
+                    body: { campaignId, ...id, languages: langs, creation: { tree, points, perks, startAugment: aug, firstAbility: first, amputation: perks.includes(KV) ? amp : null } },
                   }),
                 );
                 if (r) router.push(`/karakter/${r.id}`);

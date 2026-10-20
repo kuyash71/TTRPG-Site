@@ -7,7 +7,8 @@ import { characterLogs, users } from "@/db/schema";
 import { Portrait } from "@/components/portrait";
 import { Badge, Card, PageHeader, StatusBadge } from "@/components/ui";
 import { characterAccess, ownerCharacter } from "@/lib/access";
-import { pageUser } from "@/lib/auth/session";
+import { absoluteRedirect, pageUser } from "@/lib/auth/session";
+import { characterHref } from "@/lib/links";
 import { getTree, rulesData } from "@/lib/shz/content";
 import { Sheet } from "./sheet";
 
@@ -18,7 +19,8 @@ export default async function CharacterPage({ params }: { params: Promise<{ id: 
   const user = await pageUser();
   const a = await characterAccess(id, user).catch(() => null);
   if (!a) notFound();
-  const owner = await db.query.users.findFirst({ where: eq(users.id, a.character.userId), columns: { displayName: true } });
+  if (a.campaign.system === "UC") await absoluteRedirect(characterHref("UC", id));
+  const owner = a.character.userId ? await db.query.users.findFirst({ where: eq(users.id, a.character.userId), columns: { displayName: true } }) : null;
 
   if (!a.isGM && !a.isOwner) {
     const c = a.character;
@@ -28,7 +30,8 @@ export default async function CharacterPage({ params }: { params: Promise<{ id: 
           <Portrait id={c.id} version={c.portraitVersion} name={c.name} className="h-[150px] w-[120px]" />
         </div>
         <PageHeader kicker={a.campaign.name} title={c.name} actions={<StatusBadge status={c.status} />}>
-          {owner?.displayName} · Seviye {c.level} · {c.nationality} · {c.alignment}
+          {owner?.displayName ?? "Sahipsiz"} · Seviye {c.level} · {c.nationality} · {c.alignment}
+          {c.languages.length > 0 && ` · ${c.languages.join(", ")}`}
         </PageHeader>
         <Card className="space-y-3 p-6">
           <div className="flex flex-wrap gap-2">
@@ -61,7 +64,7 @@ export default async function CharacterPage({ params }: { params: Promise<{ id: 
     <Sheet
       character={JSON.parse(JSON.stringify(character))}
       campaign={{ id: a.campaign.id, name: a.campaign.name, deathSaveEnabled: a.campaign.deathSaveEnabled, levelCap: a.campaign.levelCap, startPerkPoints: a.campaign.startPerkPoints }}
-      ownerName={owner?.displayName ?? ""}
+      ownerName={owner?.displayName ?? "Sahipsiz"}
       isGM={a.isGM}
       isOwner={a.isOwner}
       data={rulesData()}

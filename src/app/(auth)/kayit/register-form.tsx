@@ -19,11 +19,14 @@ export function RegisterForm({ code }: { code: string }) {
         setBusy(true);
         setError(null);
         try {
-          await api("/api/auth/register", {
+          const r = await api<{ system?: "SHZ" | "UC" }>("/api/auth/register", {
             body: { code: f.get("code"), username: f.get("username"), displayName: f.get("displayName"), password: f.get("password") },
           });
-          router.replace("/panel");
-          router.refresh();
+          if (r.system === "UC") window.location.assign("/umbracaelis/panel");
+          else {
+            router.replace("/panel");
+            router.refresh();
+          }
         } catch (err) {
           setError((err as Error).message);
           setBusy(false);

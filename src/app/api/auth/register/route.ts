@@ -1,7 +1,7 @@
 import { and, eq, gt, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db";
-import { campaignMembers, invites, users } from "@/db/schema";
+import { campaignMembers, campaigns, invites, users } from "@/db/schema";
 import { ApiError, bad, conflict, route } from "@/lib/api";
 import { sha256 } from "@/lib/auth/core";
 import { hashPassword, passwordProblem } from "@/lib/auth/password";
@@ -55,6 +55,8 @@ export const POST = route(
       return u.id;
     });
     await startSession(userId);
-    return { ok: true };
+    // Davet bir Umbra Caelis kampanyasına bağlıysa oyuncu o sistemin paneline gider.
+    const camp = invite.campaignId ? await db.query.campaigns.findFirst({ where: eq(campaigns.id, invite.campaignId), columns: { system: true } }) : null;
+    return { ok: true, system: camp?.system ?? "SHZ" };
   },
 );

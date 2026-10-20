@@ -2,7 +2,7 @@ import "server-only";
 import { and, eq } from "drizzle-orm";
 import { db } from "../db";
 import { campaignMembers, campaigns, characterLogs, characters, type Campaign, type Character } from "../db/schema";
-import { forbidden, notFound } from "./api";
+import { bad, forbidden, notFound } from "./api";
 import type { SessionUser } from "./auth/session";
 
 export async function campaignAccess(campaignId: string, user: SessionUser) {
@@ -70,8 +70,14 @@ export function publicCharacter(c: Character) {
     age: c.age,
     appearance: c.appearance,
     trees: c.trees,
+    languages: c.languages,
     portraitVersion: c.portraitVersion,
   };
+}
+
+/** Sisteme özgü uçların yanlış sistemdeki kampanyada çağrılmasını engeller. */
+export function requireSystem(campaign: Pick<Campaign, "system">, system: Campaign["system"]) {
+  if (campaign.system !== system) throw bad(system === "UC" ? "Bu işlem yalnızca Umbra Caelis karakterleri için." : "Bu işlem yalnızca Schwarzesonne karakterleri için.");
 }
 
 /** Sahibine gösterilen alanlar (GM notları hariç). */

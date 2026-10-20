@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useGo } from "@/components/app-link";
 import { CopyButton, Modal, useAction } from "@/components/interactive";
 import { Button, Card, Empty, Field, cx } from "@/components/ui";
 import { api } from "@/lib/client";
@@ -277,8 +278,23 @@ export function LevelUpPanel({ campaignId, characters, levelCap }: { campaignId:
  * Odayı kapat: kampanyayı tüm verisiyle kalıcı olarak siler.
  * Odada oyuncu ya da izleyici kaldığı sürece düğme kapalıdır (sunucu da aynı kuralı uygular).
  */
-export function CloseRoom({ campaignId, name, players, spectators, characters }: { campaignId: string; name: string; players: number; spectators: number; characters: number }) {
+export function CloseRoom({
+  campaignId,
+  name,
+  players,
+  spectators,
+  characters,
+  afterHref = "/panel",
+}: {
+  campaignId: string;
+  name: string;
+  players: number;
+  spectators: number;
+  characters: number;
+  afterHref?: string;
+}) {
   const router = useRouter();
+  const go = useGo();
   const { busy, run } = useAction();
   const [open, setOpen] = useState(false);
   const [confirm, setConfirm] = useState("");
@@ -333,8 +349,7 @@ export function CloseRoom({ campaignId, name, players, spectators, characters }:
                 } catch {
                   /* yok say */
                 }
-                router.replace("/panel");
-                router.refresh();
+                go(afterHref, { replace: true });
               }}
             >
               Kalıcı olarak kapat
@@ -343,5 +358,64 @@ export function CloseRoom({ campaignId, name, players, spectators, characters }:
         </div>
       </Modal>
     </Card>
+  );
+}
+
+/** GM: karakteri bir oyuncuya / GM'e devret ya da sahipsiz bırak. */
+export function TransferOwner({
+  characterId,
+  characterName,
+  ownerId,
+  options,
+}: {
+  characterId: string;
+  characterName: string;
+  ownerId: string | null;
+  options: { id: string; name: string }[];
+}) {
+  const router = useRouter();
+  const { busy, run } = useAction();
+  const [open, setOpen] = useState(false);
+  const [to, setTo] = useState<string>(ownerId ?? "");
+  return (
+    <>
+      <button type="button" className="text-xs text-muted hover:text-ink" onClick={() => (setTo(ownerId ?? ""), setOpen(true))} data-testid="transfer-owner">
+        Sahibini değiştir
+      </button>
+      <Modal open={open} onClose={() => setOpen(false)} title="Karakteri devret">
+        <div className="space-y-4">
+          <p className="text-sm text-muted">
+            <strong className="text-ink">{characterName}</strong> başka bir oyuncuya ya da sana devredilebilir veya sahipsiz bırakılabilir. Sahipsiz karakter partide kalır; zarlarını GM
+            atar. Oyuncular kampanya başına tek aktif karaktere sahip olabilir.
+          </p>
+          <Field label="Yeni sahibi">
+            <select className="input" value={to} onChange={(e) => setTo(e.target.value)}>
+              <option value="">Sahipsiz</option>
+              {options.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <div className="flex justify-end gap-2">
+            <Button onClick={() => setOpen(false)}>Vazgeç</Button>
+            <Button
+              variant="primary"
+              disabled={busy || to === (ownerId ?? "")}
+              onClick={async () => {
+                const ok = await run(() => api(`/api/characters/${characterId}/owner`, { method: "PATCH", body: { userId: to || null } }), to ? "Karakter devredildi." : "Karakter sahipsiz bırakıldı.");
+                if (ok !== undefined) {
+                  setOpen(false);
+                  router.refresh();
+                }
+              }}
+            >
+              Kaydet
+            </Button>
+          </div>
+        </div>
+      </Modal>
+    </>
   );
 }

@@ -13,6 +13,11 @@ Yayın adresi: **https://umbracaelis.com/schwarzesonne** (ana sayfa `umbracaelis
 - **GM araçları:** Onay kuyruğu, toplu seviye atlatma (ağaç stat'ı + aksiyon stat'ı + MVP), karakter üzerinde tam düzenleme (her değişiklik kayda geçer), davet ve kullanıcı yönetimi.
 - **Kurallar:** `/schwarzesonne/kurallar`. Temel kurallar, perkler, 7 ağaç, augmentler ve kampanyalar, arama ile birlikte.
 - **Umbra Caelis kuralları:** `umbracaelis.com/umbracaelis/kurallar`. Aynı uygulamanın içinde, altın + lavanta temayla: temel kurallar, 4 ana sınıf, 24 dal, 120 yetenek, perkler (kategori süzgeciyle), sözlük ve arama. Hesap gerektirmez.
+- **Umbra Caelis oyun masası:** `umbracaelis.com/umbracaelis/panel`. Schwarzesonne ile aynı hesap (oturum çerezi `/` yolunda, `shz_sid`); üst çubuktan iki sistem arasında geçilir. Kendi kampanyaları, karakter sihirbazı (kozmetik → ana sınıf → K1 dal + başlangıç bonusu → perkler → diller → 2 + 2 stat → ilk yetenek), karakter kağıdı (katman kilidi, Sv 3 kilidi, Zirve puanı, bonus tavanı, Yozlaşma 0–15 ve Teslim/Direniş çatalları, Esin, beden), seviye atlatma (aksiyon + sembol + MVP) ve oyun odası (bonus tavanı, büyü/yoz zarı, Düşotu, mana geri tepmesi, Blu Mana arınması).
+- **Fiziksel atılmış zar:** Kampanya ayarı. Açıkken oyuncular dijital zar atamaz; GM atan karakteri, zar türünü (normal, Pervitin / Yozlaşma, Death Save), stat'ı, eşiği, uzvu ve gelen sayıyı girer; sistem sonucu hesaplar.
+- **Şifremi unuttum:** Oyuncu kullanıcı adıyla istek bırakır; kampanyalarının GM'leri ve site yöneticisi bildirim alır. Onaylayan tek kullanımlık kod (24 saat) üretir; oyuncu kodla girince yeni şifre belirlemek zorundadır.
+- **Karakter devretme:** GM karakteri başka bir oyuncuya ya da kendine devreder veya sahipsiz bırakır.
+- **Diller:** SHZ için günümüzün en çok konuşulan 50 dili, UC için yer tutucu (`src/lib/languages.ts`). Oluşturmada 2 dil (Monolingual 1, Trilingual / Polyglot 3); GM karakter kağıdından ekleyip değiştirir.
 
 ## Gameset aktarıcı (Obsidian → site)
 

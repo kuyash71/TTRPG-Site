@@ -274,3 +274,14 @@ body:has(.uc-theme) {
 .prose-shz .thr b {
   @apply font-mono font-semibold text-accent;
 }
+
+/* Sisteme göre amblem: Umbra Caelis bölümünde hilal, Schwarzesonne'de güneş. */
+.uc-show {
+  display: none;
+}
+.uc-theme .uc-show {
+  display: block;
+}
+.uc-theme .uc-hide {
+  display: none;
+}

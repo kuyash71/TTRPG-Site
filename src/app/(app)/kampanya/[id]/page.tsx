@@ -8,10 +8,11 @@ import { campaignMembers, characters, users } from "@/db/schema";
 import { CampaignForm } from "@/components/campaign/campaign-form";
 import { Badge, Card, Empty, LinkButton, PageHeader, SectionTitle, StatusBadge } from "@/components/ui";
 import { campaignAccess } from "@/lib/access";
-import { pageUser } from "@/lib/auth/session";
+import { absoluteRedirect, pageUser } from "@/lib/auth/session";
+import { campaignHref } from "@/lib/links";
 import { resolveContentLinks } from "@/lib/base";
 import { content, getTree } from "@/lib/shz/content";
-import { ApprovalActions, CloseRoom, JoinCodeBox, LevelUpPanel, MemberRoleToggle, RemoveMember } from "./gm-tools";
+import { ApprovalActions, CloseRoom, JoinCodeBox, LevelUpPanel, MemberRoleToggle, RemoveMember, TransferOwner } from "./gm-tools";
 
 export const metadata: Metadata = { title: "Kampanya" };
 
@@ -21,12 +22,13 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
   const access = await campaignAccess(id, user).catch(() => null);
   if (!access) notFound();
   const { campaign: c, isGM, isSpectator } = access;
+  if (c.system === "UC") await absoluteRedirect(campaignHref("UC", c.id));
   const info = c.contentKey ? content().campaigns.find((x) => x.key === c.contentKey) : undefined;
 
   const chars = await db
-    .select({ ch: characters, owner: users.displayName })
+    .select({ ch: characters, ownerName: users.displayName })
     .from(characters)
-    .innerJoin(users, eq(users.id, characters.userId))
+    .leftJoin(users, eq(users.id, characters.userId))
     .where(eq(characters.campaignId, c.id))
     .orderBy(asc(characters.createdAt));
   const members = await db
@@ -37,6 +39,7 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
     .orderBy(asc(campaignMembers.joinedAt));
   const gm = await db.query.users.findFirst({ where: eq(users.id, c.gmId), columns: { displayName: true } });
 
+  const ownerOf = (x: { ownerName: string | null }) => x.ownerName ?? "Sahipsiz";
   const visible = chars.filter(({ ch }) => isGM || ch.userId === user.id || ch.status === "ACTIVE" || ch.status === "DEAD");
   const pending = chars.filter(({ ch }) => ch.status === "PENDING");
   const mine = chars.filter(({ ch }) => ch.userId === user.id && (ch.status === "ACTIVE" || ch.status === "PENDING"));
@@ -70,6 +73,7 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
       >
         <span className="text-sm">
           GM: {gm?.displayName} · Başlangıç perk puanı +{c.startPerkPoints} · Seviye sınırı {c.levelCap} · Death Save {c.deathSaveEnabled ? "açık" : "kapalı"}
+          {c.physicalDice && " · Fiziksel zar"}
         </span>
       </PageHeader>
 
@@ -86,14 +90,14 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
             <section>
               <SectionTitle>Onay bekleyen karakterler</SectionTitle>
               <div className="space-y-3">
-                {pending.map(({ ch, owner }) => (
+                {pending.map(({ ch, ownerName }) => (
                   <Card key={ch.id} className="flex flex-wrap items-center justify-between gap-4 border-warn/40 p-4">
                     <div>
                       <Link href={`/karakter/${ch.id}`} className="font-serif text-lg text-ink hover:text-accent">
                         {ch.name}
                       </Link>
                       <p className="text-sm text-muted">
-                        {owner} · {ch.trees.map((t) => getTree(t)?.name).join(", ")} · {ch.nationality}
+                        {ownerName ?? "Sahipsiz"} · {ch.trees.map((t) => getTree(t)?.name).join(", ")} · {ch.nationality}
                       </p>
                     </div>
                     <ApprovalActions characterId={ch.id} />
@@ -109,18 +113,34 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
               <Empty title="Henüz karakter yok">Oyuncular katıldıktan sonra karakterlerini oluşturup onaya gönderir.</Empty>
             ) : (
               <div className="grid gap-3 sm:grid-cols-2">
-                {visible.map(({ ch, owner }) => (
-                  <Link key={ch.id} href={`/karakter/${ch.id}`} className="card flex items-center gap-4 p-4 transition hover:border-accent/40">
-                    <Portrait id={ch.id} version={ch.portraitVersion} name={ch.name} className="h-14 w-11" />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate font-serif text-base text-ink">{ch.name}</p>
-                      <p className="truncate text-xs text-muted">
-                        Sv {ch.level} · {owner} · {ch.trees.map((t) => getTree(t)?.name ?? t).join(" / ")}
-                      </p>
+                {visible.map((row) => {
+                  const { ch } = row;
+                  return (
+                    <div key={ch.id} className="card flex items-center gap-4 p-4 transition hover:border-accent/40">
+                      <Link href={`/karakter/${ch.id}`} className="shrink-0">
+                        <Portrait id={ch.id} version={ch.portraitVersion} name={ch.name} className="h-14 w-11" />
+                      </Link>
+                      <div className="min-w-0 flex-1">
+                        <Link href={`/karakter/${ch.id}`} className="block truncate font-serif text-base text-ink hover:text-accent">
+                          {ch.name}
+                        </Link>
+                        <p className="truncate text-xs text-muted">
+                          Sv {ch.level} · <span className={row.ownerName ? undefined : "text-warn"}>{ownerOf(row)}</span> · {ch.trees.map((t) => getTree(t)?.name ?? t).join(" / ")}
+                        </p>
+                        {ch.languages.length > 0 && <p className="truncate text-[11px] text-muted" >Diller: {ch.languages.join(", ")}</p>}
+                        {isGM && (
+                          <TransferOwner
+                            characterId={ch.id}
+                            characterName={ch.name}
+                            ownerId={ch.userId}
+                            options={[{ id: c.gmId, name: `${gm?.displayName ?? "GM"} (GM)` }, ...members.filter((m) => m.role === "PLAYER").map((m) => ({ id: m.id, name: m.displayName }))]}
+                          />
+                        )}
+                      </div>
+                      <StatusBadge status={ch.status} />
                     </div>
-                    <StatusBadge status={ch.status} />
-                  </Link>
-                ))}
+                  );
+                })}
               </div>
             )}
           </section>
@@ -130,13 +150,13 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
               <SectionTitle>Seviye atlat</SectionTitle>
               <LevelUpPanel
                 campaignId={c.id}
-                characters={active.map(({ ch, owner }) => ({
-                  id: ch.id,
-                  name: ch.name,
-                  owner,
-                  level: ch.level,
-                  treeStat: getTree(ch.trees[0] ?? "")?.stat ?? null,
-                  stats: ch.stats,
+                characters={active.map((row) => ({
+                  id: row.ch.id,
+                  name: row.ch.name,
+                  owner: ownerOf(row),
+                  level: row.ch.level,
+                  treeStat: getTree(row.ch.trees[0] ?? "")?.stat ?? null,
+                  stats: row.ch.stats,
                 }))}
                 levelCap={c.levelCap}
               />
@@ -157,6 +177,7 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
                     startPerkPoints: c.startPerkPoints,
                     levelCap: c.levelCap,
                     deathSaveEnabled: c.deathSaveEnabled,
+                    physicalDice: c.physicalDice,
                     status: c.status,
                   }}
                 />

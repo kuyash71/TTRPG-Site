@@ -1,10 +1,8 @@
 import Link from "next/link";
 import { SunLogo } from "@/components/logo";
-import { redirect } from "next/navigation";
-import { currentUser } from "@/lib/auth/session";
 
+/** Giriş, kayıt ve şifre ekranlarının ortak çerçevesi. Oturum yönlendirmeleri her sayfanın kendisindedir. */
 export default async function AuthLayout({ children }: { children: React.ReactNode }) {
-  if (await currentUser()) redirect("/panel");
   return (
     <div className="relative grid min-h-dvh place-items-center overflow-hidden px-4 py-12">
       <div

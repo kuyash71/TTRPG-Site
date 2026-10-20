@@ -1,11 +1,16 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-const SESSION_COOKIE = "shz_session";
-const PUBLIC = [/^\/giris(\/|$)/, /^\/kayit(\/|$)/, /^\/kurallar(\/|$)/, /^\/umbracaelis(\/|$)/, /^\/yardim(\/|$)/, /^\/icon/, /^\/api\//, /^\/emblems\//, /^\/favicon/];
+const SESSION_COOKIE = "shz_sid";
+const LEGACY_COOKIE = "shz_session";
+const SESSION_TTL_S = 60 * 60 * 24 * 14;
+const PUBLIC = [/^\/giris(\/|$)/, /^\/sifremi-unuttum(\/|$)/, /^\/kayit(\/|$)/, /^\/kurallar(\/|$)/, /^\/umbracaelis(\/|$)/, /^\/yardim(\/|$)/, /^\/icon/, /^\/api\//, /^\/emblems\//, /^\/favicon/];
 
 export function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname; // basePath hariç
-  const hasSession = !!req.cookies.get(SESSION_COOKIE)?.value;
+  // Eski çerez (yalnızca /schwarzesonne yolunda geçerli) yeni ortak çereze taşınır: SHZ ve UC aynı oturumu kullanır.
+  const legacy = req.cookies.get(LEGACY_COOKIE)?.value;
+  const migrate = !req.cookies.get(SESSION_COOKIE)?.value && !!legacy && /^[A-Za-z0-9_-]{20,100}$/.test(legacy);
+  const hasSession = !!req.cookies.get(SESSION_COOKIE)?.value || migrate;
 
   // Kaba erişim kontrolü (asıl doğrulama sunucu tarafında yapılır).
   if (!PUBLIC.some((r) => r.test(path)) && !hasSession) {
@@ -41,8 +46,14 @@ export function middleware(req: NextRequest) {
   const requestHeaders = new Headers(req.headers);
   requestHeaders.set("x-nonce", nonce);
   requestHeaders.set("Content-Security-Policy", csp);
+  if (migrate) requestHeaders.set("cookie", `${req.headers.get("cookie") ?? ""}; ${SESSION_COOKIE}=${legacy}`);
   const res = NextResponse.next({ request: { headers: requestHeaders } });
   res.headers.set("Content-Security-Policy", csp);
+  if (migrate) {
+    const secure = dev ? "" : "; Secure";
+    res.headers.append("Set-Cookie", `${SESSION_COOKIE}=${legacy}; Path=/; Max-Age=${SESSION_TTL_S}; HttpOnly; SameSite=Lax${secure}`);
+    res.headers.append("Set-Cookie", `${LEGACY_COOKIE}=; Path=${req.nextUrl.basePath || "/schwarzesonne"}; Max-Age=0; HttpOnly; SameSite=Lax${secure}`);
+  }
   return res;
 }
 

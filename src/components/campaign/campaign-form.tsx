@@ -1,5 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { useGo } from "@/components/app-link";
+import { campaignHref, type Sys } from "@/lib/links";
 import { SunLogo } from "@/components/logo";
 import { useState } from "react";
 import { useAction } from "@/components/interactive";
@@ -14,14 +16,16 @@ export interface CampaignValues {
   startPerkPoints: number;
   levelCap: number;
   deathSaveEnabled: boolean;
+  physicalDice: boolean;
   status?: "ACTIVE" | "PAUSED" | "ARCHIVED";
 }
 
-export function CampaignForm({ id, initial, presets }: { id?: string; initial?: CampaignValues; presets: CampaignInfo[] }) {
+export function CampaignForm({ id, initial, presets, system = "SHZ" }: { id?: string; initial?: CampaignValues; presets: CampaignInfo[]; system?: Sys }) {
   const router = useRouter();
+  const go = useGo();
   const { busy, run } = useAction();
   const [v, setV] = useState<CampaignValues>(
-    initial ?? { name: "", contentKey: null, description: "", startPerkPoints: 2, levelCap: 10, deathSaveEnabled: true },
+    initial ?? { name: "", contentKey: null, description: "", startPerkPoints: 2, levelCap: system === "UC" ? 15 : 10, deathSaveEnabled: true, physicalDice: false },
   );
   const set = <K extends keyof CampaignValues>(k: K, val: CampaignValues[K]) => setV((x) => ({ ...x, [k]: val }));
 
@@ -34,11 +38,12 @@ export function CampaignForm({ id, initial, presets }: { id?: string; initial?: 
           await run(() => api(`/api/campaigns/${id}`, { method: "PATCH", body: v }), "Kampanya kaydedildi.");
           router.refresh();
         } else {
-          const r = await run(() => api<{ id: string }>("/api/campaigns", { body: v }));
-          if (r) router.push(`/kampanya/${r.id}`);
+          const r = await run(() => api<{ id: string }>("/api/campaigns", { body: { ...v, system } }));
+          if (r) go(campaignHref(system, r.id));
         }
       }}
     >
+      {presets.length > 0 && (
       <div>
         <span className="label">Hikâye</span>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
@@ -72,6 +77,7 @@ export function CampaignForm({ id, initial, presets }: { id?: string; initial?: 
         </div>
         <p className="mt-1.5 text-xs text-muted">İsteğe bağlı. Kendi hikâyeni anlatıyorsan boş bırak.</p>
       </div>
+      )}
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Kampanya adı">
           <input value={v.name} onChange={(e) => set("name", e.target.value)} required minLength={2} maxLength={80} className="input" />
@@ -93,7 +99,7 @@ export function CampaignForm({ id, initial, presets }: { id?: string; initial?: 
         <Field label="Başlangıç perk puanı" hint="Önerilen +0 veya +2">
           <input type="number" min={0} max={10} value={v.startPerkPoints} onChange={(e) => set("startPerkPoints", Number(e.target.value))} className="input" />
         </Field>
-        <Field label="Seviye sınırı" hint="10 (uzun kampanyalarda 15'e kadar)">
+        <Field label="Seviye sınırı" hint={system === "UC" ? "En fazla 15 (Zirve)" : "10 (uzun kampanyalarda 15'e kadar)"}>
           <input type="number" min={1} max={15} value={v.levelCap} onChange={(e) => set("levelCap", Number(e.target.value))} className="input" />
         </Field>
         <label className="flex items-center gap-3 rounded-lg border border-line bg-surface2/40 px-3 py-2.5 sm:mt-5 sm:self-start">
@@ -101,6 +107,16 @@ export function CampaignForm({ id, initial, presets }: { id?: string; initial?: 
           <span className="text-sm">Death Save açık</span>
         </label>
       </div>
+      <label className="flex items-start gap-3 rounded-lg border border-line bg-surface2/40 px-3 py-3">
+        <input type="checkbox" checked={v.physicalDice} onChange={(e) => set("physicalDice", e.target.checked)} className="mt-0.5 h-4 w-4 accent-[rgb(186,168,240)]" data-testid="physical-dice" />
+        <span className="text-sm">
+          <span className="font-medium text-ink">Fiziksel atılmış zar</span>
+          <span className="block text-xs text-muted">
+            Masada gerçek zarla oynanan oyunlar için. Açıkken oyuncular odada dijital zar atamaz; GM eşiği, stat&apos;ı, uzvu ya da {system === "UC" ? "Yozlaşma" : "Corruption"} / Death
+            Save durumunu seçip atılan zarı ve atan oyuncuyu girer, sistem başarıyı hesaplar.
+          </span>
+        </span>
+      </label>
       <Button type="submit" variant="primary" disabled={busy}>
         {id ? "Kaydet" : "Kampanyayı oluştur"}
       </Button>

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { characters } from "@/db/schema";
 import { bad, conflict, forbidden, route } from "@/lib/api";
-import { addLog, characterAccess } from "@/lib/access";
+import { addLog, characterAccess, requireSystem } from "@/lib/access";
 import { characterChanged } from "@/lib/realtime-bus";
 import { getPerk, rulesData } from "@/lib/shz/content";
 import { kriegsversehrtLimbs, perkBudget } from "@/lib/shz/rules";
@@ -15,6 +15,7 @@ import { kriegsversehrtLimbs, perkBudget } from "@/lib/shz/rules";
  */
 export const POST = route({ body: z.object({ perks: z.array(z.string().max(80)).max(40) }), limit: 20 }, async ({ params, body, user }) => {
   const a = await characterAccess(params.id, user);
+    requireSystem(a.campaign, "SHZ");
   const c = a.character;
   if (!a.isGM && !(a.isOwner && c.status === "ACTIVE" && c.perkEditAllowed)) throw forbidden("Perk düzenlemek için GM izni gerekli.");
   const next = [...new Set(body.perks)];

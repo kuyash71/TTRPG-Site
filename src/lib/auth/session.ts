@@ -2,7 +2,6 @@ import "server-only";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
-import { BASE_PATH } from "../base";
 import { isProd } from "../env";
 import { SESSION_COOKIE, createSession, destroySessionByToken, userFromToken, type SessionUser } from "./core";
 
@@ -15,9 +14,11 @@ export const currentUser = cache(async () => {
 });
 
 /** Sayfalar için: giriş yoksa giriş sayfasına yönlendirir. */
-export async function pageUser() {
+export async function pageUser(opts?: { next?: string }) {
   const u = await currentUser();
-  if (!u) redirect("/giris");
+  if (!u) redirect(opts?.next ? `/giris?sonra=${encodeURIComponent(opts.next)}` : "/giris");
+  // Sıfırlama koduyla girenler önce yeni şifre belirler.
+  if (u.mustChangePassword) redirect("/sifre-yenile");
   return u;
 }
 export async function pageGM() {
@@ -36,6 +37,17 @@ export function clientIp(h: Headers): string {
   return (h.get("x-real-ip") || "").trim().slice(0, 64) || "yerel";
 }
 
+/**
+ * Tam adrese yönlendirme. /umbracaelis gibi uygulama alt yolunun (basePath) dışındaki adresler için:
+ * redirect() göreli yola /schwarzesonne ekler.
+ */
+export async function absoluteRedirect(path: string): Promise<never> {
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost";
+  const proto = h.get("x-forwarded-proto") ?? (isProd ? "https" : "http");
+  redirect(`${proto}://${host}${path}`);
+}
+
 export async function startSession(userId: string) {
   const { token, expiresAt } = await createSession(userId, await clientMeta());
   const jar = await cookies();
@@ -43,7 +55,7 @@ export async function startSession(userId: string) {
     httpOnly: true,
     secure: isProd,
     sameSite: "lax",
-    path: BASE_PATH,
+    path: "/",
     expires: expiresAt,
     priority: "high",
   });
@@ -53,5 +65,5 @@ export async function endSession() {
   const jar = await cookies();
   const t = jar.get(SESSION_COOKIE)?.value;
   if (t) await destroySessionByToken(t);
-  jar.set(SESSION_COOKIE, "", { httpOnly: true, secure: isProd, sameSite: "lax", path: BASE_PATH, maxAge: 0 });
+  jar.set(SESSION_COOKIE, "", { httpOnly: true, secure: isProd, sameSite: "lax", path: "/", maxAge: 0 });
 }

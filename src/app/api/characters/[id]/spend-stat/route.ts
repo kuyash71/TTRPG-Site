@@ -3,12 +3,13 @@ import { z } from "zod";
 import { db } from "@/db";
 import { characters } from "@/db/schema";
 import { bad, conflict, route } from "@/lib/api";
-import { addLog, characterEditor } from "@/lib/access";
+import { addLog, characterEditor, requireSystem } from "@/lib/access";
 import { characterChanged } from "@/lib/realtime-bus";
 import { STAT_KEYS, STAT_LABELS, STAT_MAX } from "@/lib/shz/constants";
 
 export const POST = route({ body: z.object({ stat: z.enum(STAT_KEYS) }), limit: 30 }, async ({ params, body, user }) => {
   const { character: c, campaign } = await characterEditor(params.id, user);
+  requireSystem(campaign, "SHZ");
   if (c.freeStatPoints < 1) throw bad("Serbest stat puanın yok.");
   if (c.stats[body.stat] >= STAT_MAX) throw bad(`${STAT_LABELS[body.stat]} zaten ${STAT_MAX}.`);
   const upd = await db

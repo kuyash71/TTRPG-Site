@@ -3,7 +3,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { characters, type Character } from "@/db/schema";
 import { bad, forbidden, route } from "@/lib/api";
-import { addLog, characterAccess } from "@/lib/access";
+import { addLog, characterAccess, requireSystem } from "@/lib/access";
 import { characterChanged, notifyCampaign } from "@/lib/realtime-bus";
 import { messages } from "@/db/schema";
 import { CORRUPTION_MAX, LEVEL_CAP_MAX, MAX_TREES, STAT_KEYS, STAT_LABELS, STAT_MAX } from "@/lib/shz/constants";
@@ -36,6 +36,7 @@ export const PATCH = route(
   },
   async ({ params, body, user }) => {
     const a = await characterAccess(params.id, user);
+    requireSystem(a.campaign, "SHZ");
     if (!a.isGM) throw forbidden();
     const c = a.character;
     const set: Partial<Character> = {};

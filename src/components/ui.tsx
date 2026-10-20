@@ -50,6 +50,13 @@ export function LinkButton({
   className?: string;
   children: ReactNode;
 }) {
+  // /umbracaelis adresleri uygulama alt yolunun dışındadır: düz bağlantı.
+  if (href.startsWith("/umbracaelis"))
+    return (
+      <a href={href} className={btnClass(variant, size, className)}>
+        {children}
+      </a>
+    );
   return (
     <Link href={href} className={btnClass(variant, size, className)}>
       {children}

@@ -5,6 +5,7 @@ import { portraitUrl } from "@/lib/base";
 import { api } from "@/lib/client";
 import { useToast } from "./interactive";
 import { SunLogo } from "./logo";
+import { MoonLogo } from "./uc/logo";
 import { cx } from "./ui";
 
 export function Portrait({ id, version, name, className }: { id: string; version: number | null | undefined; name: string; className?: string }) {
@@ -16,7 +17,9 @@ export function Portrait({ id, version, name, className }: { id: string; version
         <img src={url} alt={`${name} portresi`} className="h-full w-full object-cover" loading="lazy" />
       ) : (
         <div className="grid h-full w-full place-items-center text-accent/50">
-          <SunLogo className="h-1/2 w-1/2" />
+          {/* Umbra Caelis sayfalarında (.uc-theme) hilal, diğerlerinde güneş amblemi */}
+          <SunLogo className="uc-hide h-1/2 w-1/2" />
+          <MoonLogo className="uc-show h-1/2 w-1/2" />
         </div>
       )}
     </div>

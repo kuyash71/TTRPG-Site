@@ -21,7 +21,18 @@ export function LogoutButton({ className }: { className?: string }) {
   );
 }
 
-export function MobileMenu({ links, loggedIn, name }: { links: { href: string; label: string }[]; loggedIn: boolean; name: string | null }) {
+export function MobileMenu({
+  links,
+  extra = [],
+  loggedIn,
+  name,
+}: {
+  links: { href: string; label: string }[];
+  /** Uygulama alt yolunun dışındaki bağlantılar (düz <a>). */
+  extra?: { href: string; label: string }[];
+  loggedIn: boolean;
+  name: string | null;
+}) {
   const [open, setOpen] = useState(false);
   const path = usePathname();
   useEffect(() => setOpen(false), [path]);
@@ -37,6 +48,11 @@ export function MobileMenu({ links, loggedIn, name }: { links: { href: string; l
             <Link key={l.href} href={l.href} className="block rounded-md px-3 py-2.5 text-ink hover:bg-surface2">
               {l.label}
             </Link>
+          ))}
+          {extra.map((l) => (
+            <a key={l.href} href={l.href} className="block rounded-md px-3 py-2.5 text-ink hover:bg-surface2">
+              {l.label}
+            </a>
           ))}
           {loggedIn && <LogoutButton className="block w-full rounded-md px-3 py-2.5 text-left text-ink hover:bg-surface2" />}
         </div>

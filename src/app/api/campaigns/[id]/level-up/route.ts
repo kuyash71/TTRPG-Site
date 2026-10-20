@@ -3,7 +3,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { characterLogs, characters, messages } from "@/db/schema";
 import { bad, route, zId } from "@/lib/api";
-import { requireCampaignGM } from "@/lib/access";
+import { requireCampaignGM, requireSystem } from "@/lib/access";
 import { notifyCampaign } from "@/lib/realtime-bus";
 import { STAT_KEYS, STAT_LABELS, STAT_MAX } from "@/lib/shz/constants";
 import { getTree } from "@/lib/shz/content";
@@ -25,6 +25,7 @@ export const POST = route(
   },
   async ({ params, body, user }) => {
     const camp = await requireCampaignGM(params.id, user);
+    requireSystem(camp, "SHZ");
     const ids = body.entries.map((e) => e.characterId);
     if (new Set(ids).size !== ids.length) throw bad("Aynı karakter iki kez seçilmiş.");
     if (body.mvp && !ids.includes(body.mvp.characterId)) throw bad("MVP, seviye atlayanlardan biri olmalı.");

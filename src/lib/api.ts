@@ -39,7 +39,7 @@ type Ctx<B, A extends Auth> = {
  *  - hata mesajlarının sızmasını önleyen tek tip hata cevabı
  */
 export function route<S extends z.ZodType = z.ZodType<undefined>, A extends Auth = "user">(
-  opts: { auth?: A; body?: S; limit?: number; maxBody?: number },
+  opts: { auth?: A; body?: S; limit?: number; maxBody?: number; allowMustChange?: boolean },
   handler: (ctx: Ctx<z.infer<S>, A>) => Promise<unknown>,
 ) {
   return async (req: NextRequest, segment: { params: Promise<Params> }) => {
@@ -54,6 +54,7 @@ export function route<S extends z.ZodType = z.ZodType<undefined>, A extends Auth
       const auth = (opts.auth ?? "user") as Auth;
       const user = await currentUser();
       if (auth !== "none" && !user) throw new ApiError(401, "Giriş yapman gerekiyor.");
+      if (auth !== "none" && user?.mustChangePassword && !opts.allowMustChange) throw forbidden("Önce yeni şifreni belirlemelisin.");
       if (auth === "gm" && user?.role !== "GM") throw forbidden();
       if (auth === "admin" && !user?.isAdmin) throw forbidden("Bu işlem yalnızca site yöneticisine açık.");
       const limitKey = `${user?.id ?? ip}:${mutating ? "w" : "r"}`;

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { characters } from "@/db/schema";
 import { bad, forbidden, route } from "@/lib/api";
-import { addLog, characterAccess } from "@/lib/access";
+import { addLog, characterAccess, requireSystem } from "@/lib/access";
 import { characterChanged } from "@/lib/realtime-bus";
 import { BANDAGES, BANDAGE_KEYS, BODY_PART_KEYS, WOUNDS, WOUND_KEYS, bodyPartLabel } from "@/lib/shz/constants";
 import { getAugment } from "@/lib/shz/content";
@@ -23,6 +23,7 @@ export const PATCH = route(
   },
   async ({ params, body, user }) => {
     const a = await characterAccess(params.id, user);
+    requireSystem(a.campaign, "SHZ");
     if (!a.isGM) throw forbidden();
     const c = a.character;
     const all = normalizeBody(c.body);

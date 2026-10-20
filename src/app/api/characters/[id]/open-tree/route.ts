@@ -3,13 +3,14 @@ import { z } from "zod";
 import { db } from "@/db";
 import { characters } from "@/db/schema";
 import { bad, conflict, route } from "@/lib/api";
-import { addLog, characterEditor } from "@/lib/access";
+import { addLog, characterEditor, requireSystem } from "@/lib/access";
 import { characterChanged } from "@/lib/realtime-bus";
 import { getTree, rulesData } from "@/lib/shz/content";
 import { canOpenTree } from "@/lib/shz/rules";
 
 export const POST = route({ body: z.object({ tree: z.string().max(60) }), limit: 10 }, async ({ params, body, user }) => {
   const { character: c, campaign } = await characterEditor(params.id, user);
+  requireSystem(campaign, "SHZ");
   const problems = canOpenTree(c, body.tree, rulesData());
   if (problems.length) throw bad(problems.join(" · "));
   const upd = await db

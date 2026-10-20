@@ -312,6 +312,27 @@ export default async function HelpPage() {
                 düzenleyebilir&quot; kutusu tek seferlik perk düzenleme izni verir. Ölü karakteri parti kartından ya da karakter kağıdından diriltebilirsin.
               </li>
               <li>
+                <strong>Fiziksel atılmış zar:</strong> Kampanya ayarlarındaki &quot;Fiziksel atılmış zar&quot; kutusu masada gerçek zarla oynanan oyunlar içindir. Açıkken oyuncular odada
+                dijital zar atamaz. Sen zar panelinde atan karakteri, zar türünü (normal zar, Pervitin / Yozlaşma, Death Save), stat&apos;ı, eşiği, uzvu ve düzenleyiciyi seçip masada gelen
+                sayıyı girersin; sistem başarıyı, Corruption / Yozlaşma ve Death Save etkisini hesaplar.
+              </li>
+              <li>
+                <strong>Şifre sıfırlama:</strong> Oyuncu giriş ekranındaki &quot;Şifremi unuttum&quot; ile istek bırakınca panelinde ve üst çubukta bildirim görürsün. &quot;Onayla, kod
+                üret&quot; tek kullanımlık bir kod verir (24 saat geçerli); kodu oyuncuya ilet. Oyuncu kodla girince yeni şifresini belirlemek zorunda kalır.
+              </li>
+              <li>
+                <strong>Karakter devretme:</strong> Kampanya sayfasındaki parti kartında &quot;Sahibini değiştir&quot; ile karakteri başka bir oyuncuya ya da kendine devredebilir veya
+                sahipsiz bırakabilirsin. Sahipsiz karakterin zarlarını GM atar.
+              </li>
+              <li>
+                <strong>Diller:</strong> Oyuncular karakter oluştururken dillerini listeden seçer (2 dil; Monolingual 1, Trilingual 3). Karakter kağıdındaki Diller kartından dil ekleyip
+                değiştirebilirsin; listede olmayan bir dili de elle yazabilirsin.
+              </li>
+              <li>
+                <strong>Umbra Caelis:</strong> Aynı hesapla umbracaelis.com/umbracaelis/panel adresinden Umbra Caelis kampanyaları açılır. Üst çubuktaki düğmeyle iki sistem arasında
+                geçebilirsin.
+              </li>
+              <li>
                 <strong>Kurallar:</strong> Obsidian&apos;daki kuralları güncelledikten sonra <code className="rounded bg-surface2 px-1">npm run sync</code> çalıştırıp push etmen yeterli.
               </li>
             </ul>
@@ -320,7 +341,7 @@ export default async function HelpPage() {
           <Section id="sss" title="Sık sorulanlar">
             <dl className="space-y-4">
               {[
-                ["Şifremi unuttum.", "GM'ine haber ver; site yöneticisi hesabını sıfırlayabilir."],
+                ["Şifremi unuttum.", "Giriş ekranında 'Şifremi unuttum'a bas ve kullanıcı adını yaz. GM'in onaylayınca sana tek kullanımlık bir kod verir; girişte 'Sıfırlama kodum var'ı seçip kodla gir ve yeni şifreni belirle."],
                 ["Karakterim reddedildi, ne yapmalıyım?", "Karakter sayfasındaki GM notunu oku ve kampanya sayfasından yeni bir karakter oluştur."],
                 ["Bir yeteneği yanlışlıkla aldım.", "GM'ine söyle; GM düzenle ekranından geri alıp puanını iade edebilir."],
                 ["Karakterimi silmek istiyorum.", "Karakter kağıdında 'Karakteri sil' düğmesine bas ve onay için karakterin adını yaz. Silme geri alınamaz."],

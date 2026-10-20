@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/ui";
 import { campaignAccess } from "@/lib/access";
-import { pageUser } from "@/lib/auth/session";
+import { absoluteRedirect, pageUser } from "@/lib/auth/session";
+import { createCharHref } from "@/lib/links";
 import { rulesData } from "@/lib/shz/content";
 import { Wizard } from "./wizard";
 
@@ -13,6 +14,7 @@ export default async function CreateCharacter({ params }: { params: Promise<{ id
   const user = await pageUser();
   const access = await campaignAccess(id, user).catch(() => null);
   if (!access) notFound();
+  if (access.campaign.system === "UC") await absoluteRedirect(createCharHref("UC", id));
   if (access.isSpectator)
     return (
       <div>

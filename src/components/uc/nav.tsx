@@ -6,6 +6,7 @@ const LINKS = [
   { href: "/umbracaelis/kurallar/siniflar", label: "Sınıflar" },
   { href: "/umbracaelis/kurallar/perkler", label: "Perkler" },
   { href: "/umbracaelis/kurallar/sozluk", label: "Sözlük" },
+  { href: "/umbracaelis/panel", label: "Oyun masası" },
 ];
 
 /** Umbra Caelis üst çubuğu. Bu bölümde hesap yoktur; bağlantılar düz <a> (adres /umbracaelis altında kalır). */

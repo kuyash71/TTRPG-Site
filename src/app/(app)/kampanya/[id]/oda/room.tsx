@@ -1,8 +1,7 @@
 "use client";
-import { CheckSquare, Dices, Eye, HeartPulse, MessageCircleOff, Skull, Square, Trash2, UserPlus, UserRound, UserX } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { CheckSquare, Dices, Eye, HandMetal, HeartPulse, MessageCircleOff, MoonStar, Skull, Square, Trash2, UserPlus, UserRound, UserX } from "lucide-react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { AppLink, useGo } from "@/components/app-link";
 import { io, type Socket } from "socket.io-client";
 import { BodyDiagram } from "@/components/body-diagram";
 import { CorruptionEffects } from "@/components/corruption";
@@ -17,9 +16,36 @@ import { api } from "@/lib/client";
 import { BODY_PARTS, CORRUPTION_EFFECTS, STAT_KEYS, STAT_LABELS, THRESHOLDS, type BodyPartKey, type StatKey } from "@/lib/shz/constants";
 import type { RulesData } from "@/lib/shz/content";
 import { checkModifiers, effectiveStats, installedAugments, normalizeBody, outcomeLabel, woundPenalty } from "@/lib/shz/rules";
+import { campaignHref, characterHref, createCharHref, panelHref, type Sys } from "@/lib/links";
+import { UC_STAT_KEYS, UC_STAT_LABELS, type UcStatKey } from "@/lib/uc/constants";
+import { UC_DECAY_EFFECTS, UC_DECAY_MAX, UC_DECAY_MODES, ucBonusCap, ucCheckParts, ucNormalizeStats, type UcDecayMode, type UcRules } from "@/lib/uc/rules";
+
+/** Odanın oyun sistemi ve masa ayarları (Schwarzesonne / Umbra Caelis, fiziksel zar). */
+interface RoomSys {
+  system: Sys;
+  uc: UcRules | null;
+  physical: boolean;
+  deathSaveEnabled: boolean;
+}
+const SysCtx = createContext<RoomSys>({ system: "SHZ", uc: null, physical: false, deathSaveEnabled: true });
+const useSys = () => useContext(SysCtx);
+const pointName = (sys: Sys) => (sys === "UC" ? "Esin" : "Inspiration");
+const decayName = (sys: Sys) => (sys === "UC" ? "Yozlaşma" : "Corruption");
+const statKeysOf = (sys: Sys): readonly string[] => (sys === "UC" ? UC_STAT_KEYS : STAT_KEYS);
+function statLabelOf(sys: Sys, k: string | null) {
+  if (!k) return "";
+  return sys === "UC" ? (UC_STAT_LABELS[k as UcStatKey] ?? k) : (STAT_LABELS[k as StatKey] ?? k);
+}
+/** Umbra Caelis karakterinin zar önizlemesi (sunucu aynı fonksiyonla hesaplar). */
+function ucPreview(c: FullChar, p: { stat: string; part: string; modifier: number; magic: boolean; decay: boolean }) {
+  return ucCheckParts(
+    { stats: ucNormalizeStats(c.stats as unknown as Record<string, number>), body: c.body, level: c.level, corruption: c.corruption, inspiration: c.inspiration, uc: c.uc ?? {} },
+    { stat: (p.stat || null) as UcStatKey | null, part: (p.part || null) as BodyPartKey | null, modifier: p.modifier, magic: p.magic, decay: p.decay },
+  );
+}
 
 type FullChar = Omit<Character, "createdAt" | "updatedAt">;
-type PublicChar = Pick<FullChar, "id" | "userId" | "name" | "status" | "level" | "nationality" | "alignment" | "age" | "appearance" | "trees" | "portraitVersion">;
+type PublicChar = Pick<FullChar, "id" | "userId" | "name" | "status" | "level" | "nationality" | "alignment" | "age" | "appearance" | "trees" | "languages" | "portraitVersion">;
 type Entry = { view: "gm" | "owner"; character: FullChar } | { view: "public"; character: PublicChar };
 
 interface Msg {
@@ -51,15 +77,18 @@ interface RollV {
 }
 interface RollReq {
   id: string;
-  kind: "check" | "death" | "pervitin";
-  characters: { id: string; name: string; userId: string }[];
-  stat: StatKey | null;
+  kind: "check" | "death" | "pervitin" | "decay";
+  characters: { id: string; name: string; userId: string | null }[];
+  stat: string | null;
   threshold: string | null;
   thresholdValue: number | null;
   thresholdLabel: string | null;
   modifier: number;
   label: string;
   blackMagic: boolean;
+  magic?: boolean;
+  decay?: boolean;
+  decayMode?: UcDecayMode | null;
   hidden: boolean;
   playerPart: boolean;
 }
@@ -77,9 +106,10 @@ export function Room({
   members,
   initialChars,
   data,
+  ucData = null,
   needsCharacter,
 }: {
-  campaign: { id: string; name: string; deathSaveEnabled: boolean };
+  campaign: { id: string; name: string; deathSaveEnabled: boolean; physicalDice: boolean; system: Sys };
   me: { id: string; displayName: string };
   isGM: boolean;
   isSpectator: boolean;
@@ -87,9 +117,16 @@ export function Room({
   members: Member[];
   initialChars: Entry[];
   data: RulesData;
+  /** Umbra Caelis odası için sade kural verisi. */
+  ucData?: UcRules | null;
   needsCharacter: boolean;
 }) {
-  const router = useRouter();
+  const go = useGo();
+  const [settings, setSettings] = useState({ physicalDice: campaign.physicalDice, deathSaveEnabled: campaign.deathSaveEnabled });
+  const sys: RoomSys = useMemo(
+    () => ({ system: campaign.system, uc: ucData, physical: settings.physicalDice, deathSaveEnabled: settings.deathSaveEnabled }),
+    [campaign.system, ucData, settings],
+  );
   const [memberList, setMemberList] = useState<Member[]>(members);
   const myMute = memberList.find((m) => m.id === me.id) ?? { chatMuted: false, rollMuted: false, role: isSpectator ? "SPECTATOR" : "PLAYER" };
   // İzleyici: sahneye yazamaz, zar atamaz, karakter oluşturamaz (rol değişikliği anında yansır).
@@ -118,11 +155,11 @@ export function Room({
   // Başka sayfalara geçince "Oyun odasına dön" düğmesi için hatırla.
   useEffect(() => {
     try {
-      sessionStorage.setItem("shz:lastRoom", JSON.stringify({ id: campaign.id, name: campaign.name }));
+      sessionStorage.setItem("shz:lastRoom", JSON.stringify({ id: campaign.id, name: campaign.name, system: campaign.system }));
     } catch {
       /* depolama kapalı */
     }
-  }, [campaign.id, campaign.name]);
+  }, [campaign.id, campaign.name, campaign.system]);
   const sock = useRef<Socket | null>(null);
   const [connected, setConnected] = useState(false);
   const [chars, setChars] = useState<Entry[]>(initialChars);
@@ -246,8 +283,7 @@ export function Room({
       } catch {
         /* yok say */
       }
-      router.replace("/panel");
-      router.refresh();
+      go(panelHref(campaign.system), { replace: true });
     });
     s.on("campaign:closed", (p: { campaignId: string; campaignName: string }) => {
       if (p.campaignId !== campaign.id) return;
@@ -257,9 +293,15 @@ export function Room({
       } catch {
         /* yok say */
       }
-      router.replace("/panel");
-      router.refresh();
+      go(panelHref(campaign.system), { replace: true });
     });
+    s.on("campaign:settings", (p: { physicalDice: boolean; deathSaveEnabled: boolean }) => {
+      setSettings((x) => {
+        if (x.physicalDice !== p.physicalDice) toast(p.physicalDice ? "GM fiziksel zar modunu açtı: zarlar masada atılır, sonucu GM girer." : "Fiziksel zar modu kapandı: dijital zar açık.", "ok");
+        return { physicalDice: p.physicalDice, deathSaveEnabled: p.deathSaveEnabled };
+      });
+    });
+    s.on("reset:request", (p: { name: string }) => toast(`${p.name} şifre sıfırlama istedi. Panelden onaylayabilirsin.`, "ok"));
     s.on("character:deleted", ({ characterId }: { characterId: string }) => {
       setChars((list) => list.filter((e) => e.character.id !== characterId));
       setViewing((v) => (v === characterId ? null : v));
@@ -274,7 +316,7 @@ export function Room({
     return () => {
       s.disconnect();
     };
-  }, [campaign.id, refreshChar, toast, join, me.id, pushPopup, router]);
+  }, [campaign.id, campaign.system, refreshChar, toast, join, me.id, pushPopup, go]);
 
   const feed = useMemo<FeedItem[]>(
     () => [...msgs.map((m) => ({ t: "m" as const, at: m.createdAt, m })), ...rolls.map((r) => ({ t: "r" as const, at: r.createdAt, r }))].sort((a, b) => a.at.localeCompare(b.at)),
@@ -300,7 +342,7 @@ export function Room({
       isGM={isGM}
       data={data}
       emit={emit}
-      deathSaveEnabled={campaign.deathSaveEnabled}
+      deathSaveEnabled={settings.deathSaveEnabled}
       campaignId={campaign.id}
       rollMuted={!isGM && myMute.rollMuted}
       requests={requests}
@@ -327,15 +369,21 @@ export function Room({
   );
 
   return (
+    <SysCtx.Provider value={sys}>
     <div className="-mx-4 -my-8 sm:-mx-6 sm:-my-10">
       <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-2.5 sm:px-6 sm:py-3">
         <div className="min-w-0">
           <p className="kicker">Oyun odası</p>
-          <Link href={`/kampanya/${campaign.id}`} className="block truncate font-serif text-base text-ink hover:text-accent sm:text-lg">
+          <AppLink href={campaignHref(campaign.system, campaign.id)} className="block truncate font-serif text-base text-ink hover:text-accent sm:text-lg">
             {campaign.name}
-          </Link>
+          </AppLink>
         </div>
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          {settings.physicalDice && (
+            <span className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-accent/40 px-3 text-xs text-accent" title="Zarlar masada atılır; sonucu GM girer" data-testid="physical-badge">
+              <HandMetal className="h-4 w-4" /> <span className="hidden sm:inline">Fiziksel zar</span>
+            </span>
+          )}
           {spectator && (
             <span className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-line px-3 text-sm text-muted" title="İzleyici: sahneye yazamaz, zar atamazsın">
               <Eye className="h-4 w-4" /> İzleyici
@@ -344,19 +392,19 @@ export function Room({
           {!isGM &&
             !spectator &&
             (ownChar ? (
-              <Link
-                href={`/karakter/${ownChar.character.id}`}
+              <AppLink
+                href={characterHref(campaign.system, ownChar.character.id)}
                 className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-accent/50 px-3 text-sm text-accent hover:bg-accent/10"
                 title={ownChar.character.name}
               >
                 <UserRound className="h-4 w-4" />
                 <span>Karakterim</span>
-              </Link>
+              </AppLink>
             ) : (
-              <Link href={`/kampanya/${campaign.id}/karakter-olustur`} className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-accent px-3 text-sm font-semibold text-onAccent hover:bg-accent/90">
+              <AppLink href={createCharHref(campaign.system, campaign.id)} className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-accent px-3 text-sm font-semibold text-onAccent hover:bg-accent/90">
                 <UserPlus className="h-4 w-4" />
                 <span>Karakter Oluştur</span>
-              </Link>
+              </AppLink>
             ))}
           <span className={cx("flex items-center gap-1.5 text-xs", connected ? "text-ok" : "text-danger")} title={connected ? "Canlı bağlantı" : "Bağlanıyor"}>
             <span className={cx("h-2 w-2 rounded-full", connected ? "animate-pulse bg-ok" : "bg-danger")} />
@@ -395,13 +443,14 @@ export function Room({
           </div>
           <div className="flex flex-wrap justify-end gap-2">
             <Button onClick={closeAsk}>Şimdilik izle</Button>
-            <Link href={`/kampanya/${campaign.id}/karakter-olustur`} onClick={closeAsk} className="inline-flex h-10 items-center rounded-lg bg-accent px-4 text-sm font-semibold text-onAccent hover:bg-accent/90">
+            <AppLink href={createCharHref(campaign.system, campaign.id)} onClick={closeAsk} className="inline-flex h-10 items-center rounded-lg bg-accent px-4 text-sm font-semibold text-onAccent hover:bg-accent/90">
               Karakter oluştur
-            </Link>
+            </AppLink>
           </div>
         </div>
       </Modal>
     </div>
+    </SysCtx.Provider>
   );
 }
 
@@ -477,7 +526,11 @@ function Party({
   onMuted: (m: Member) => void;
 }) {
   const toast = useToast();
+  const { system, uc, deathSaveEnabled } = useSys();
   const [kick, setKick] = useState<Member | null>(null);
+  const gmPath = (id: string) => (system === "UC" ? `/api/uc/characters/${id}/gm` : `/api/characters/${id}/gm`);
+  const decayMax = system === "UC" ? UC_DECAY_MAX : 13;
+  const decayHint = (v: number) => (system === "UC" ? UC_DECAY_EFFECTS[v] : CORRUPTION_EFFECTS[v]);
   const setMute = async (u: Member, body: { chatMuted?: boolean; rollMuted?: boolean }) => {
     try {
       const r = await api<{ chatMuted: boolean; rollMuted: boolean; role: Member["role"] }>(`/api/campaigns/${campaign.id}/members/${u.id}`, { method: "PATCH", body });
@@ -488,7 +541,7 @@ function Party({
   };
   const quick = async (id: string, body: Record<string, unknown>, ok?: string) => {
     try {
-      await api(`/api/characters/${id}/gm`, { method: "PATCH", body });
+      await api(gmPath(id), { method: "PATCH", body });
       if (ok) toast(ok, "ok");
     } catch (e) {
       toast((e as Error).message, "error");
@@ -500,7 +553,7 @@ function Party({
       {chars.length === 0 && <p className="text-sm text-muted">Aktif karakter yok.</p>}
       {chars.map((e) => {
         const c = e.character;
-        const on = online.includes(c.userId);
+        const on = !!c.userId && online.includes(c.userId);
         const full = e.view !== "public" ? (e.character as FullChar) : null;
         const body = full ? normalizeBody(full.body) : null;
         const hurt = body ? BODY_PARTS.filter((p) => body[p.key].wound !== "saglam") : [];
@@ -517,8 +570,10 @@ function Party({
                   {c.name}
                 </button>
                 <p className="text-[11px] text-muted">
-                  Sv {c.level} · {members.find((m) => m.id === c.userId)?.displayName ?? (c.userId === gm.id ? gm.displayName : "")}
+                  Sv {c.level} · {c.userId ? (members.find((m) => m.id === c.userId)?.displayName ?? (c.userId === gm.id ? gm.displayName : "")) : <span className="text-warn">sahipsiz</span>}
+                  {system === "UC" && uc && c.trees.length > 0 && ` · ${c.trees.map((t) => uc.dals[t]?.name ?? t).join(" / ")}`}
                 </p>
+                {c.languages?.length > 0 && <p className="truncate text-[10px] text-muted" title="Diller">{c.languages.join(" · ")}</p>}
               </div>
               <span title={on ? "Çevrimiçi" : "Çevrimdışı"} className={cx("mt-1.5 h-2 w-2 shrink-0 rounded-full", on ? "bg-ok" : "bg-line")} />
             </div>
@@ -536,24 +591,24 @@ function Party({
             {full && !dead && (
               <div className="mt-2 space-y-1.5 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-muted" title={CORRUPTION_EFFECTS[full.corruption]}>
-                    Corruption
+                  <span className="text-muted" title={decayHint(full.corruption)}>
+                    {decayName(system)}
                   </span>
                   <span className="flex items-center gap-1.5">
                     {isGM && <MiniBtn onClick={() => quick(c.id, { corruption: Math.max(0, full.corruption - 1) })}>−</MiniBtn>}
                     <span className={cx("w-8 text-center font-mono", full.corruption >= 7 ? "text-danger" : full.corruption >= 4 ? "text-warn" : full.corruption === 0 && "text-ok")}>{full.corruption}</span>
-                    {isGM && <MiniBtn onClick={() => quick(c.id, { corruption: Math.min(13, full.corruption + 1) })}>+</MiniBtn>}
+                    {isGM && <MiniBtn onClick={() => quick(c.id, { corruption: Math.min(decayMax, full.corruption + 1) })}>+</MiniBtn>}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-muted">Inspiration</span>
+                  <span className="text-muted">{pointName(system)}</span>
                   <span className="flex items-center gap-1.5">
                     {isGM && <MiniBtn onClick={() => quick(c.id, { inspiration: full.inspiration - 1 })}>−</MiniBtn>}
                     <span className={cx("w-8 text-center font-mono", full.inspiration < 0 && "text-danger")}>{full.inspiration}</span>
                     {isGM && <MiniBtn onClick={() => quick(c.id, { inspiration: full.inspiration + 1 })}>+</MiniBtn>}
                   </span>
                 </div>
-                {campaign.deathSaveEnabled && full.deathSave && (
+                {deathSaveEnabled && full.deathSave && (
                   <div className="flex items-center justify-between">
                     <span className="text-muted">Death Save</span>
                     <DeathPips ds={full.deathSave} />
@@ -729,6 +784,8 @@ function Feed({
   rollKey: number;
 }) {
   const toast = useToast();
+  const { system, physical } = useSys();
+  const pn = pointName(system);
   const end = useRef<HTMLDivElement>(null);
   const box = useRef<HTMLDivElement>(null);
   const [text, setText] = useState("");
@@ -925,7 +982,9 @@ function Feed({
               r={it.r}
               canDelete={isGM}
               onDelete={() => removeRoll(it.r.id)}
-              canReroll={!it.r.rerolled && !!it.r.characterId && it.r.kind !== "death" && it.r.kind !== "pervitin" && (isGM || (charOf(it.r.characterId)?.inspiration ?? 0) > 0)}
+              canReroll={
+                !physical && !it.r.rerolled && !!it.r.characterId && !["death", "pervitin", "decay"].includes(it.r.kind) && (isGM || (charOf(it.r.characterId)?.inspiration ?? 0) > 0)
+              }
               onReroll={() => setConfirmReroll(it.r)}
             />
           );
@@ -1027,16 +1086,16 @@ function Feed({
           </Button>
         </div>
       </form>
-      <Modal open={!!confirmReroll} onClose={() => setConfirmReroll(null)} title="Inspiration harcansın mı?">
+      <Modal open={!!confirmReroll} onClose={() => setConfirmReroll(null)} title={`${pn} harcansın mı?`}>
         {confirmReroll && (
           <div className="space-y-4">
             <p className="text-sm text-ink/90">
-              Bu zarı <strong>1 Inspiration</strong> harcayarak yeniden atacaksın. Yeni sonuç geçerli olur, eskisi iptal edilir.
+              Bu zarı <strong>1 {pn}</strong> harcayarak yeniden atacaksın. Yeni sonuç geçerli olur, eskisi iptal edilir.
             </p>
             <RollCard r={confirmReroll} canReroll={false} onReroll={() => {}} />
             {!isGM && charOf(confirmReroll.characterId) && (
               <p className="text-xs text-muted">
-                Kalan Inspiration: <span className="font-mono text-ink">{charOf(confirmReroll.characterId)!.inspiration}</span> → <span className="font-mono text-ink">{charOf(confirmReroll.characterId)!.inspiration - 1}</span>
+                Kalan {pn}: <span className="font-mono text-ink">{charOf(confirmReroll.characterId)!.inspiration}</span> → <span className="font-mono text-ink">{charOf(confirmReroll.characterId)!.inspiration - 1}</span>
               </p>
             )}
             <div className="flex justify-end gap-2">
@@ -1124,18 +1183,22 @@ function ClearModal({ open, onClose, emit, campaignId, tab, peer, peerName }: { 
   );
 }
 
-function reqSummary(q: RollReq) {
+function reqSummary(q: RollReq, system: Sys) {
   const bits: string[] = [];
-  if (q.kind === "check") bits.push(q.stat ? STAT_LABELS[q.stat] : "Statsız");
+  if (q.kind === "check") bits.push(q.stat ? statLabelOf(system, q.stat) : "Statsız");
+  if (q.kind === "decay" && q.decayMode) bits.push(UC_DECAY_MODES[q.decayMode].label);
   if (q.thresholdLabel) bits.push(q.thresholdLabel + (q.thresholdValue == null && q.threshold ? ` (${THRESHOLDS.find((t) => t.key === q.threshold)?.value})` : ""));
   if (q.modifier) bits.push(`durum ${q.modifier > 0 ? "+" : ""}${q.modifier}`);
   if (q.blackMagic) bits.push("kara büyü");
+  if (q.magic) bits.push("büyü zarı");
+  if (q.decay) bits.push("yoz zar");
   if (q.hidden) bits.push("sonuç gizli");
   return bits.join(" · ");
 }
 
 function RequestBar({ requests, isGM, myChars, emit, campaignId, rollMuted }: { requests: RollReq[]; isGM: boolean; myChars: FullChar[]; emit: Emit; campaignId: string; rollMuted: boolean }) {
   const toast = useToast();
+  const { system } = useSys();
   const [parts, setParts] = useState<Record<string, BodyPartKey | "">>({});
   const [busy, setBusy] = useState(false);
   const answer = async (q: RollReq, characterId: string) => {
@@ -1145,7 +1208,9 @@ function RequestBar({ requests, isGM, myChars, emit, campaignId, rollMuted }: { 
         ? await emit("death", { campaignId, characterId, requestId: q.id })
         : q.kind === "pervitin"
           ? await emit("pervitin", { campaignId, characterId, requestId: q.id })
-          : await emit("roll", {
+          : q.kind === "decay"
+            ? await emit("decay", { campaignId, characterId, mode: q.decayMode ?? "dusotu", requestId: q.id })
+            : await emit("roll", {
               campaignId,
               characterId,
               stat: q.stat,
@@ -1153,6 +1218,8 @@ function RequestBar({ requests, isGM, myChars, emit, campaignId, rollMuted }: { 
               part: q.playerPart ? parts[q.id] || null : null,
               modifier: 0,
               blackMagic: q.blackMagic,
+              magic: !!q.magic,
+              decay: !!q.decay,
               label: q.label,
               hidden: false,
               requestId: q.id,
@@ -1169,9 +1236,9 @@ function RequestBar({ requests, isGM, myChars, emit, campaignId, rollMuted }: { 
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div className="min-w-0">
                 <p>
-                  <strong className={q.kind === "death" ? "text-danger" : "text-accent"}>{q.kind === "death" ? "☠ Death Save" : q.kind === "pervitin" ? "Pervitin zarı" : "GM zar istiyor"}:</strong> {q.label}
+                  <strong className={q.kind === "death" ? "text-danger" : "text-accent"}>{q.kind === "death" ? "☠ Death Save" : q.kind === "pervitin" ? "Pervitin zarı" : q.kind === "decay" ? "Yozlaşma zarı" : "GM zar istiyor"}:</strong> {q.label}
                 </p>
-                <p className="text-xs text-muted">{reqSummary(q)}</p>
+                <p className="text-xs text-muted">{reqSummary(q, system)}</p>
                 {isGM && <p className="mt-0.5 text-xs text-muted">Bekleniyor: {q.characters.map((c) => c.name).join(", ")}</p>}
               </div>
               {isGM && (
@@ -1290,6 +1357,7 @@ const OUTCOME_TONE: Record<string, string> = {
 
 function RollCard({ r, canReroll, onReroll, canDelete, onDelete }: { r: RollV; canReroll: boolean; onReroll: () => void; canDelete?: boolean; onDelete?: () => void }) {
   const d = r.detail;
+  const { system } = useSys();
   if (r.kind === "death") return <DeathCard r={r} canDelete={canDelete} onDelete={onDelete} />;
   return (
     <div className={cx("group rounded-xl border bg-surface px-3 py-3 sm:px-4", r.rerolled ? "border-line opacity-50" : "border-line", r.hidden && "border-dashed")}>
@@ -1300,6 +1368,9 @@ function RollCard({ r, canReroll, onReroll, canDelete, onDelete }: { r: RollV; c
             {r.hidden && " · gizli"}
             {r.rerolled && " · yeniden atıldı"}
             {d.requested && " · GM isteği"}
+            {d.physical && " · fiziksel zar (GM girdi)"}
+            {r.kind === "buyu" && " · büyü zarı"}
+            {r.kind === "yoz" && " · yoz zar"}
             {canDelete && onDelete && <DeleteBtn onDelete={onDelete} title="Zarı sil" />}
           </p>
           <p className="font-medium text-ink">{r.label}</p>
@@ -1321,10 +1392,11 @@ function RollCard({ r, canReroll, onReroll, canDelete, onDelete }: { r: RollV; c
           </span>
         )}
       </div>
-      {d.note && r.kind !== "check" && r.kind !== "kara-buyu" && <p className="mt-1.5 text-xs text-ink/80">{d.note}</p>}
+      {d.note && (r.kind === "pervitin" || r.kind === "decay") && <p className="mt-1.5 text-xs text-ink/80">{d.note}</p>}
+      {d.extra && <p className="mt-1.5 rounded-md bg-lav/10 px-2 py-1 text-xs text-ink/85">{d.extra}</p>}
       {canReroll && (
         <button type="button" onClick={onReroll} className="mt-2 text-xs text-accent hover:underline">
-          Inspiration harca, yeniden at
+          {pointName(system)} harca, yeniden at
         </button>
       )}
     </div>
@@ -1347,6 +1419,7 @@ function DeathCard({ r, canDelete, onDelete }: { r: RollV; canDelete?: boolean; 
         <div className="min-w-0">
           <p className="text-[11px] text-muted">
             {r.characterName ?? r.userName} · {time(r.createdAt)} · Death Save
+            {d.physical && " · fiziksel zar"}
             {canDelete && onDelete && <DeleteBtn onDelete={onDelete} title="Zarı sil" />}
           </p>
           <p className={cx("font-serif text-lg", dead ? "text-danger" : "text-ok")}>
@@ -1381,6 +1454,37 @@ function DeathCard({ r, canDelete, onDelete }: { r: RollV; canDelete?: boolean; 
 
 // ------------------------------------------------------------------ zar paneli
 function ThresholdPicker({ value, manual, onChange, allowManual }: { value: string | null; manual: number | null; onChange: (key: string | null, manual: number | null) => void; allowManual: boolean }) {
+  const { system } = useSys();
+  // Umbra Caelis: sabit eşik tablosu yok; eşiği GM sayı olarak koyar (oyuncuya söylemek zorunda değil).
+  if (system === "UC")
+    return (
+      <div>
+        <span className="label">Eşik</span>
+        {allowManual ? (
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={() => onChange(null, null)} className={cx("rounded-md border px-3 py-1.5 text-xs", manual === null ? "border-accent bg-accent/15" : "border-line text-muted")}>
+              Yok
+            </button>
+            <label className={cx("flex flex-1 items-center gap-2 rounded-md border px-2 text-xs", manual !== null ? "border-accent bg-accent/15" : "border-line text-muted")}>
+              <span>Sayı</span>
+              <input
+                type="number"
+                min={1}
+                max={60}
+                inputMode="numeric"
+                value={manual ?? ""}
+                placeholder="GM belirler"
+                data-testid="uc-threshold"
+                onChange={(e) => onChange(null, e.target.value === "" ? null : Math.max(1, Math.min(60, Number(e.target.value))))}
+                className="h-8 w-full min-w-0 bg-transparent text-center font-mono text-ink outline-none"
+              />
+            </label>
+          </div>
+        ) : (
+          <p className="rounded-md border border-line bg-surface2/50 px-3 py-1.5 text-xs text-muted">Eşiği GM belirler; sonucu GM değerlendirir.</p>
+        )}
+      </div>
+    );
   return (
     <div>
       <span className="label">Eşik</span>
@@ -1418,7 +1522,8 @@ function ThresholdPicker({ value, manual, onChange, allowManual }: { value: stri
   );
 }
 
-function StatPicker({ value, onChange }: { value: StatKey | ""; onChange: (k: StatKey | "") => void }) {
+function StatPicker({ value, onChange }: { value: string; onChange: (k: string) => void }) {
+  const { system } = useSys();
   return (
     <div>
       <span className="label">Stat</span>
@@ -1426,14 +1531,14 @@ function StatPicker({ value, onChange }: { value: StatKey | ""; onChange: (k: St
         <button type="button" onClick={() => onChange("")} className={cx("rounded-md border px-1 py-1.5 text-xs", value === "" ? "border-accent bg-accent/15 text-ink" : "border-line text-muted hover:text-ink")}>
           Statsız
         </button>
-        {STAT_KEYS.map((k) => (
+        {statKeysOf(system).map((k) => (
           <button
             key={k}
             type="button"
             onClick={() => onChange(value === k ? "" : k)}
             className={cx("rounded-md border px-1 py-1.5 text-xs", value === k ? "border-accent bg-accent/15 text-ink" : "border-line text-muted hover:text-ink")}
           >
-            {STAT_LABELS[k]}
+            {statLabelOf(system, k)}
           </button>
         ))}
       </div>
@@ -1456,6 +1561,44 @@ function ModifierPicker({ value, onChange, label = "Durum düzenleyici" }: { val
         )}
       </span>
     </div>
+  );
+}
+
+function Check({ checked, onChange, children }: { checked: boolean; onChange: (v: boolean) => void; children: React.ReactNode }) {
+  return (
+    <label className="flex items-center gap-2 text-sm">
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="h-4 w-4 accent-[rgb(186,168,240)]" />
+      {children}
+    </label>
+  );
+}
+
+/** Fiziksel zar: masada gelen değer (GM girer). */
+function DieInput({ sides, value, onChange }: { sides: 6 | 20; value: number | null; onChange: (n: number | null) => void }) {
+  return (
+    <label className="block">
+      <span className="label">Masada gelen zar (d{sides})</span>
+      <div className="flex items-center gap-2">
+        <input
+          type="number"
+          min={1}
+          max={sides}
+          inputMode="numeric"
+          className="input w-24 text-center font-mono text-lg"
+          value={value ?? ""}
+          placeholder="—"
+          data-testid="physical-die"
+          onChange={(e) => onChange(e.target.value === "" ? null : Math.max(1, Math.min(sides, Math.round(Number(e.target.value)))))}
+        />
+        <div className="flex flex-wrap gap-1">
+          {(sides === 6 ? [1, 2, 3, 4, 5, 6] : [1, 20]).map((n) => (
+            <button key={n} type="button" onClick={() => onChange(n)} className={cx("h-8 min-w-8 rounded border px-1.5 font-mono text-xs", value === n ? "border-accent bg-accent/15 text-ink" : "border-line text-muted hover:text-ink")}>
+              {n}
+            </button>
+          ))}
+        </div>
+      </div>
+    </label>
   );
 }
 
@@ -1483,27 +1626,42 @@ function DicePanel({
   spectator: boolean;
 }) {
   const toast = useToast();
+  const { system, physical } = useSys();
+  const uc = system === "UC";
   const choices = isGM ? allChars : myChars;
   const [charId, setCharId] = useState<string>(choices[0]?.id ?? "");
-  const [stat, setStat] = useState<StatKey | "">("korp");
-  const [threshold, setThreshold] = useState<string | null>("orta");
+  const [stat, setStat] = useState<string>(uc ? "yalman" : "korp");
+  const [threshold, setThreshold] = useState<string | null>(uc ? null : "orta");
   const [manual, setManual] = useState<number | null>(null);
   const [part, setPart] = useState<BodyPartKey | "">("");
   const [mod, setMod] = useState(0);
   const [bm, setBm] = useState(false);
+  const [magic, setMagic] = useState(false);
+  const [yoz, setYoz] = useState(false);
   const [label, setLabel] = useState("");
   const [hidden, setHidden] = useState(false);
   const [busy, setBusy] = useState(false);
   const [reqOpen, setReqOpen] = useState(false);
+  // Fiziksel zar (yalnızca GM): zar türü ve masada gelen değer
+  const [pkind, setPkind] = useState<"check" | "corr" | "death">("check");
+  const [die, setDie] = useState<number | null>(null);
+  const [dmode, setDmode] = useState<UcDecayMode>("dusotu");
 
   useEffect(() => {
     if (isGM && charId === "") return; // GM bilerek karaktersiz d20 seçti
     if (!choices.some((c) => c.id === charId)) setCharId(choices[0]?.id ?? "");
   }, [choices, charId, isGM]);
   const ch = choices.find((c) => c.id === charId) ?? null;
-  const parts = ch ? checkModifiers(ch, { stat: stat || null, part: part || null, modifier: mod, blackMagic: bm }, data) : mod ? [{ label: "Düzenleyici", value: mod }] : [];
+  const ucr = ch && uc ? ucPreview(ch, { stat, part, modifier: mod, magic, decay: yoz }) : null;
+  const parts = ch
+    ? uc
+      ? ucr!.parts
+      : checkModifiers(ch, { stat: (stat || null) as StatKey | null, part: part || null, modifier: mod, blackMagic: bm }, data)
+    : mod
+      ? [{ label: "Düzenleyici", value: mod }]
+      : [];
   const sum = parts.reduce((a, b) => a + b.value, 0);
-  const thValue = manual ?? THRESHOLDS.find((t) => t.key === threshold)?.value ?? null;
+  const thValue = manual ?? (uc ? null : (THRESHOLDS.find((t) => t.key === threshold)?.value ?? null));
 
   const doEmit = async (ev: string, payload: unknown) => {
     setBusy(true);
@@ -1512,10 +1670,207 @@ function DicePanel({
     if (!r.ok) toast(r.error, "error");
     return r.ok;
   };
+  const checkPayload = (extra: Record<string, unknown> = {}) => ({
+    campaignId,
+    characterId: ch?.id ?? null,
+    stat: ch ? stat || null : null,
+    threshold: uc || manual !== null ? null : threshold,
+    thresholdValue: isGM ? manual : null,
+    part: ch ? part || null : null,
+    modifier: mod,
+    blackMagic: !uc && !!ch && bm,
+    magic: uc && !!ch && magic,
+    decay: uc && !!ch && yoz,
+    label,
+    hidden: isGM && hidden,
+    ...extra,
+  });
 
+  const charSelect = (allowNone: boolean) => (
+    <label className="block">
+      <span className="label">{physical ? "Zarı atan" : "Karakter"}</span>
+      <select className="input" value={charId} onChange={(e) => setCharId(e.target.value)} data-testid="dice-char">
+        {allowNone && <option value="">GM (karaktersiz d20)</option>}
+        {choices.map((c) => (
+          <option key={c.id} value={c.id}>
+            {c.name}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+  const flags = ch && (
+    <>
+      {uc ? (
+        <>
+          <Check checked={magic} onChange={setMagic}>
+            Büyü zarı <span className="text-xs text-muted">(Nat1 → mana geri tepmesi)</span>
+          </Check>
+          <Check checked={yoz} onChange={setYoz}>
+            Yoz zar <span className="text-xs text-muted">(Yozlaşma bonusu, tavana sayılır)</span>
+          </Check>
+        </>
+      ) : (
+        <Check checked={bm} onChange={setBm}>
+          Kara büyü zarı (Corruption etkileri)
+        </Check>
+      )}
+    </>
+  );
+  const partSelect = ch && (
+    <label className="block">
+      <span className="label">Kullanılan uzuv (yara cezası)</span>
+      <select className="input" value={part} onChange={(e) => setPart(e.target.value as BodyPartKey | "")}>
+        <option value="">Yok</option>
+        {BODY_PARTS.map((p) => {
+          const pen = woundPenalty(normalizeBody(ch.body)[p.key]);
+          return (
+            <option key={p.key} value={p.key}>
+              {p.label}
+              {pen ? ` (−${pen})` : ""}
+            </option>
+          );
+        })}
+      </select>
+    </label>
+  );
+  const preview = (first: string) => (
+    <div className="rounded-lg border border-line bg-surface2/50 px-3 py-2 text-xs">
+      <span className="text-muted">{first} </span>
+      {parts.map((p, i) => (
+        <span key={i} className={cx(p.value < 0 ? "text-danger" : "text-ink/80")}>
+          {" "}
+          {p.value >= 0 ? "+" : "−"} {Math.abs(p.value)} <span className="text-muted">{p.label}</span>
+        </span>
+      ))}
+      <span className="ml-1 font-mono text-ink"> = {first} {sum >= 0 ? "+" : "−"} {Math.abs(sum)}</span>
+      {thValue != null && <span className="ml-1 text-muted">≥ {thValue}</span>}
+      {ucr && (
+        <span className="mt-1 block text-[11px] text-muted">
+          Bonus tavanı +{ucr.cap}
+          {ucr.overflow > 0 && <span className="text-lav"> · taşan +{ucr.overflow} anlatıma döner</span>}
+        </span>
+      )}
+    </div>
+  );
+
+  // ---------------- fiziksel zar modu
+  if (physical && !isGM)
+    return (
+      <div className="space-y-4 p-4">
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-muted">Zar · fiziksel masa</p>
+        <div className="rounded-lg border border-accent/40 bg-accent/10 px-3 py-3 text-sm" data-testid="physical-player-note">
+          <p className="flex items-center gap-2 font-medium text-ink">
+            <HandMetal className="h-4 w-4 text-accent" /> Zarlar masada atılıyor
+          </p>
+          <p className="mt-1 text-ink/85">Zarını gerçek zarla at ve sonucu GM&apos;e söyle. GM sonucu sisteme girer; başarı ve karakterine etkisi Akış&apos;ta görünür.</p>
+        </div>
+      </div>
+    );
+  if (physical && isGM) {
+    const sides = pkind === "death" ? 6 : 20;
+    const needTh = pkind === "corr";
+    const canSend = die != null && !busy && (pkind === "check" || !!ch) && (!needTh || thValue != null) && (pkind !== "death" || (deathSaveEnabled && !!ch?.deathSave.available));
+    return (
+      <div className="space-y-4 p-4" data-testid="physical-gm">
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-muted">Fiziksel zar · sonucu gir</p>
+        <p className="text-xs text-muted">Oyuncu zarı masada attı: atan karakteri, zar türünü ve gelen sayıyı seç. Sistem başarıyı ve {decayName(system)} / Death Save etkisini hesaplar.</p>
+        <div role="tablist" className="grid grid-cols-3 gap-1 rounded-lg border border-line bg-surface p-1">
+          {(
+            [
+              ["check", "Normal zar"],
+              ["corr", uc ? "Yozlaşma" : "Pervitin"],
+              ["death", "Death Save"],
+            ] as const
+          ).map(([k, l]) => (
+            <button
+              key={k}
+              type="button"
+              role="tab"
+              aria-selected={pkind === k}
+              disabled={k === "death" && !deathSaveEnabled}
+              onClick={() => {
+                setPkind(k);
+                setDie(null);
+              }}
+              className={cx("rounded-md px-2 py-1.5 text-xs transition disabled:opacity-40", pkind === k ? (k === "death" ? "bg-danger/20 text-ink" : "bg-accent/20 text-ink") : "text-muted hover:text-ink")}
+            >
+              {l}
+            </button>
+          ))}
+        </div>
+        {charSelect(pkind === "check")}
+        {pkind === "check" && (
+          <>
+            {ch && <StatPicker value={stat} onChange={setStat} />}
+            <ThresholdPicker value={threshold} manual={manual} allowManual onChange={(k, m) => (setThreshold(k), setManual(m))} />
+            {partSelect}
+            <ModifierPicker value={mod} onChange={setMod} label={uc ? "Bonus / ceza" : "Durum düzenleyici"} />
+            {flags}
+            <Check checked={hidden} onChange={setHidden}>
+              Gizli (yalnızca GM görür)
+            </Check>
+            <input className="input" placeholder="Açıklama (ör. Kapıyı kır)" maxLength={80} value={label} onChange={(e) => setLabel(e.target.value)} />
+            {preview(die != null ? String(die) : "d20")}
+          </>
+        )}
+        {pkind === "corr" && (
+          <>
+            {uc && (
+              <label className="block">
+                <span className="label">Yozlaşma zarı</span>
+                <select className="input" value={dmode} onChange={(e) => setDmode(e.target.value as UcDecayMode)}>
+                  {(Object.keys(UC_DECAY_MODES) as UcDecayMode[]).map((k) => (
+                    <option key={k} value={k}>
+                      {UC_DECAY_MODES[k].label}
+                    </option>
+                  ))}
+                </select>
+                <span className="mt-1 block text-[11px] text-muted">{UC_DECAY_MODES[dmode].hint}</span>
+              </label>
+            )}
+            {!uc && <p className="text-[11px] text-muted">d20 + Sanita − Corruption/3 + durum ≥ eşik; başarısızlıkta +1 Corruption.</p>}
+            <ThresholdPicker value={threshold} manual={manual} allowManual onChange={(k, m) => (setThreshold(k), setManual(m))} />
+            <ModifierPicker value={mod} onChange={setMod} label="GM düzenleyici (±)" />
+          </>
+        )}
+        {pkind === "death" && (
+          <p className="rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-xs">
+            d6: 1–3 ölüm, 4–6 kurtuluş. {ch && !ch.deathSave.available && <strong className="text-danger">{ch.name} için Death Save hakkı yok.</strong>}
+          </p>
+        )}
+        <DieInput sides={sides} value={die} onChange={setDie} />
+        <Button
+          variant="primary"
+          size="lg"
+          className="w-full"
+          disabled={!canSend}
+          data-testid="physical-submit"
+          onClick={async () => {
+            const ok =
+              pkind === "death"
+                ? await doEmit("death", { campaignId, characterId: ch!.id, physical: die })
+                : pkind === "corr"
+                  ? uc
+                    ? await doEmit("decay", { campaignId, characterId: ch!.id, mode: dmode, thresholdValue: thValue, modifier: mod, physical: die })
+                    : await doEmit("pervitin", { campaignId, characterId: ch!.id, threshold: manual === null ? threshold : null, thresholdValue: manual, modifier: mod, physical: die })
+                  : await doEmit("roll", checkPayload({ physical: die }));
+            if (ok) {
+              setDie(null);
+              setLabel("");
+            }
+          }}
+        >
+          <HandMetal className="h-5 w-5" /> Sonucu gir
+        </Button>
+      </div>
+    );
+  }
+
+  // ---------------- dijital zar
   return (
     <div className="space-y-4 p-4">
-      <p className="text-[11px] font-semibold uppercase tracking-widest text-muted">Zar · d20 + stat ≥ eşik</p>
+      <p className="text-[11px] font-semibold uppercase tracking-widest text-muted">Zar · d20 + stat{uc ? " + bonus" : ""} ≥ eşik</p>
       {rollMuted && <p className="rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">GM seni zar atmada susturdu.</p>}
       {!isGM && requests.some((q) => q.characters.some((c) => myChars.some((m) => m.id === c.id))) && (
         <p className="rounded-md border border-accent/40 bg-accent/10 px-3 py-2 text-xs text-ink">GM senden zar istiyor. Akış sekmesinin altındaki isteği yanıtla.</p>
@@ -1528,17 +1883,7 @@ function DicePanel({
       {choices.length === 0 && !isGM && !spectator && <p className="text-sm text-muted">Zar atmak için onaylanmış bir karakterin olmalı.</p>}
       {(choices.length > 0 || isGM) && (
         <>
-          <label className="block">
-            <span className="label">Karakter</span>
-            <select className="input" value={charId} onChange={(e) => setCharId(e.target.value)}>
-              {isGM && <option value="">GM (karaktersiz d20)</option>}
-              {choices.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </label>
+          {charSelect(isGM)}
           {ch && <StatPicker value={stat} onChange={setStat} />}
           <ThresholdPicker
             value={threshold}
@@ -1549,90 +1894,58 @@ function DicePanel({
               setManual(m);
             }}
           />
-          {ch && (
-            <label className="block">
-              <span className="label">Kullanılan uzuv (yara cezası)</span>
-              <select className="input" value={part} onChange={(e) => setPart(e.target.value as BodyPartKey | "")}>
-                <option value="">Yok</option>
-                {BODY_PARTS.map((p) => {
-                  const pen = woundPenalty(normalizeBody(ch.body)[p.key]);
-                  return (
-                    <option key={p.key} value={p.key}>
-                      {p.label}
-                      {pen ? ` (−${pen})` : ""}
-                    </option>
-                  );
-                })}
-              </select>
-            </label>
-          )}
-          <ModifierPicker value={mod} onChange={setMod} />
-          {ch && (
-            <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" checked={bm} onChange={(e) => setBm(e.target.checked)} className="h-4 w-4 accent-[rgb(186,168,240)]" />
-              Kara büyü zarı (Corruption etkileri)
-            </label>
-          )}
+          {partSelect}
+          <ModifierPicker value={mod} onChange={setMod} label={uc ? "Bonus / ceza" : "Durum düzenleyici"} />
+          {flags}
           {isGM && (
-            <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" checked={hidden} onChange={(e) => setHidden(e.target.checked)} className="h-4 w-4 accent-[rgb(186,168,240)]" />
+            <Check checked={hidden} onChange={setHidden}>
               Gizli at (yalnızca GM görür)
-            </label>
+            </Check>
           )}
           <input className="input" placeholder="Açıklama (ör. Kapıyı kır)" maxLength={80} value={label} onChange={(e) => setLabel(e.target.value)} />
-          <div className="rounded-lg border border-line bg-surface2/50 px-3 py-2 text-xs">
-            <span className="text-muted">d20 </span>
-            {parts.map((p, i) => (
-              <span key={i} className={cx(p.value < 0 ? "text-danger" : "text-ink/80")}>
-                {" "}
-                {p.value >= 0 ? "+" : "−"} {Math.abs(p.value)} <span className="text-muted">{p.label}</span>
-              </span>
-            ))}
-            <span className="ml-1 font-mono text-ink"> = d20 {sum >= 0 ? "+" : "−"} {Math.abs(sum)}</span>
-            {thValue != null && <span className="ml-1 text-muted">≥ {thValue}</span>}
-          </div>
+          {preview("d20")}
           <div className="sticky bottom-0 -mx-4 bg-bg/95 px-4 py-2 backdrop-blur lg:static lg:mx-0 lg:bg-transparent lg:p-0">
-          <Button
-            variant="primary"
-            size="lg"
-            className="w-full"
-            disabled={busy || rollMuted || (!ch && !isGM)}
-            onClick={() =>
-              doEmit("roll", {
-                campaignId,
-                characterId: ch?.id ?? null,
-                stat: ch ? stat || null : null,
-                threshold: manual === null ? threshold : null,
-                thresholdValue: isGM ? manual : null,
-                part: ch ? part || null : null,
-                modifier: mod,
-                blackMagic: !!ch && bm,
-                label,
-                hidden: isGM && hidden,
-              }).then((ok) => ok && setLabel(""))
-            }
-          >
-            <Dices className="h-5 w-5" /> Zar at
-          </Button>
+            <Button variant="primary" size="lg" className="w-full" disabled={busy || rollMuted || (!ch && !isGM)} onClick={() => doEmit("roll", checkPayload()).then((ok) => ok && setLabel(""))}>
+              <Dices className="h-5 w-5" /> Zar at
+            </Button>
           </div>
           {isGM && ch && (
             <div className="grid grid-cols-2 gap-2">
               <Button disabled={busy || !deathSaveEnabled || !ch.deathSave.available} onClick={() => doEmit("death", { campaignId, characterId: ch.id })} title={!deathSaveEnabled ? "Kampanyada kapalı" : "GM doğrudan atar"}>
                 <Skull className="h-4 w-4" /> Death Save
               </Button>
-              <Button
-                disabled={busy || thValue == null}
-                onClick={() => doEmit("pervitin", { campaignId, characterId: ch.id, threshold: manual === null ? threshold : null, thresholdValue: manual, modifier: mod })}
-                title="d20 + Sanita − Corruption/3 + durum ≥ eşik"
-              >
-                Pervitin
-              </Button>
+              {uc ? (
+                <Button
+                  disabled={busy || thValue == null}
+                  onClick={() => doEmit("decay", { campaignId, characterId: ch.id, mode: dmode, thresholdValue: thValue, modifier: mod })}
+                  title={thValue == null ? "Önce eşik gir" : UC_DECAY_MODES[dmode].hint}
+                >
+                  <MoonStar className="h-4 w-4" /> {UC_DECAY_MODES[dmode].label}
+                </Button>
+              ) : (
+                <Button
+                  disabled={busy || thValue == null}
+                  onClick={() => doEmit("pervitin", { campaignId, characterId: ch.id, threshold: manual === null ? threshold : null, thresholdValue: manual, modifier: mod })}
+                  title="d20 + Sanita − Corruption/3 + durum ≥ eşik"
+                >
+                  Pervitin
+                </Button>
+              )}
+              {uc && (
+                <select className="input col-span-2 h-9 py-1 text-xs" value={dmode} onChange={(e) => setDmode(e.target.value as UcDecayMode)} aria-label="Yozlaşma zarı türü">
+                  {(Object.keys(UC_DECAY_MODES) as UcDecayMode[]).map((k) => (
+                    <option key={k} value={k}>
+                      Yozlaşma zarı: {UC_DECAY_MODES[k].label}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
           )}
-          {!isGM && <p className="text-[11px] text-muted">Death Save ve Pervitin zarlarını GM ister; istek gelince Akış&apos;ın altında belirir.</p>}
+          {!isGM && <p className="text-[11px] text-muted">Death Save ve {uc ? "Yozlaşma" : "Pervitin"} zarlarını GM ister; istek gelince Akış&apos;ın altında belirir.</p>}
         </>
       )}
-      {isGM && (
+      {isGM && !physical && (
         <div className="border-t border-line pt-4">
           <Button variant="outline" className="w-full" disabled={!allChars.length} onClick={() => setReqOpen(true)}>
             Oyunculardan zar iste
@@ -1646,19 +1959,25 @@ function DicePanel({
 
 function RequestModal({ open, onClose, chars, emit, campaignId, deathSaveEnabled }: { open: boolean; onClose: () => void; chars: FullChar[]; emit: Emit; campaignId: string; deathSaveEnabled: boolean }) {
   const toast = useToast();
+  const { system } = useSys();
+  const uc = system === "UC";
   const [kind, setKind] = useState<RollReq["kind"]>("check");
   const [ids, setIds] = useState<string[]>([]);
-  const [stat, setStat] = useState<StatKey | "">("sanita");
-  const [threshold, setThreshold] = useState<string | null>("orta");
+  const [stat, setStat] = useState<string>(uc ? "sebahat" : "sanita");
+  const [threshold, setThreshold] = useState<string | null>(uc ? null : "orta");
   const [manual, setManual] = useState<number | null>(null);
   const [mod, setMod] = useState(0);
   const [label, setLabel] = useState("");
   const [bm, setBm] = useState(false);
+  const [magic, setMagic] = useState(false);
+  const [yoz, setYoz] = useState(false);
+  const [dmode, setDmode] = useState<UcDecayMode>("dusotu");
   const [hidden, setHidden] = useState(false);
   const [playerPart, setPlayerPart] = useState(false);
   const [busy, setBusy] = useState(false);
   const eligible = kind === "death" ? chars.filter((c) => c.deathSave.available) : chars;
-  const needTh = kind === "pervitin";
+  const needTh = kind === "pervitin" || kind === "decay";
+  const hasTh = uc ? manual !== null : threshold !== null || manual !== null;
   return (
     <Modal open={open} onClose={onClose} title="Oyunculardan zar iste" wide>
       <div className="space-y-4">
@@ -1667,7 +1986,7 @@ function RequestModal({ open, onClose, chars, emit, campaignId, deathSaveEnabled
             [
               ["check", "Normal zar"],
               ["death", "Death Save"],
-              ["pervitin", "Pervitin"],
+              uc ? ["decay", "Yozlaşma zarı"] : ["pervitin", "Pervitin"],
             ] as const
           ).map(([k, l]) => (
             <button
@@ -1676,7 +1995,7 @@ function RequestModal({ open, onClose, chars, emit, campaignId, deathSaveEnabled
               role="tab"
               aria-selected={kind === k}
               disabled={k === "death" && !deathSaveEnabled}
-              onClick={() => setKind(k)}
+              onClick={() => setKind(k as RollReq["kind"])}
               className={cx("rounded-md px-3 py-1.5 text-sm transition disabled:opacity-40", kind === k ? (k === "death" ? "bg-danger/20 text-ink" : "bg-accent/20 text-ink") : "text-muted hover:text-ink")}
             >
               {l}
@@ -1701,6 +2020,19 @@ function RequestModal({ open, onClose, chars, emit, campaignId, deathSaveEnabled
           </div>
         </div>
         {kind === "check" && <StatPicker value={stat} onChange={setStat} />}
+        {kind === "decay" && (
+          <label className="block">
+            <span className="label">Yozlaşma zarı</span>
+            <select className="input" value={dmode} onChange={(e) => setDmode(e.target.value as UcDecayMode)}>
+              {(Object.keys(UC_DECAY_MODES) as UcDecayMode[]).map((k) => (
+                <option key={k} value={k}>
+                  {UC_DECAY_MODES[k].label}
+                </option>
+              ))}
+            </select>
+            <span className="mt-1 block text-[11px] text-muted">{UC_DECAY_MODES[dmode].hint}</span>
+          </label>
+        )}
         {kind !== "death" && (
           <ThresholdPicker
             value={threshold}
@@ -1713,31 +2045,39 @@ function RequestModal({ open, onClose, chars, emit, campaignId, deathSaveEnabled
           />
         )}
         {kind === "death" && <p className="rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-sm">d6 atılır: 1–3 ölüm, 4–6 kurtuluş. Üç ölümde karakter ölür, üç kurtuluşta kritik yaralı hayatta kalır.</p>}
-        {kind !== "death" && <ModifierPicker value={mod} onChange={setMod} label={kind === "pervitin" ? "GM düzenleyici (±)" : "Durum düzenleyici"} />}
+        {kind !== "death" && <ModifierPicker value={mod} onChange={setMod} label={kind === "check" ? (uc ? "Bonus / ceza" : "Durum düzenleyici") : "GM düzenleyici (±)"} />}
         <input className="input" placeholder="Açıklama (ör. Ritüeli gördünüz)" maxLength={80} value={label} onChange={(e) => setLabel(e.target.value)} />
         <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
           {kind === "check" && (
             <>
-              <label className="flex items-center gap-2">
-                <input type="checkbox" checked={bm} onChange={(e) => setBm(e.target.checked)} className="h-4 w-4 accent-[rgb(186,168,240)]" />
-                Kara büyü zarı
-              </label>
-              <label className="flex items-center gap-2">
-                <input type="checkbox" checked={playerPart} onChange={(e) => setPlayerPart(e.target.checked)} className="h-4 w-4 accent-[rgb(186,168,240)]" />
+              {uc ? (
+                <>
+                  <Check checked={magic} onChange={setMagic}>
+                    Büyü zarı
+                  </Check>
+                  <Check checked={yoz} onChange={setYoz}>
+                    Yoz zar
+                  </Check>
+                </>
+              ) : (
+                <Check checked={bm} onChange={setBm}>
+                  Kara büyü zarı
+                </Check>
+              )}
+              <Check checked={playerPart} onChange={setPlayerPart}>
                 Oyuncu kullandığı uzvu seçsin
-              </label>
+              </Check>
             </>
           )}
-          <label className="flex items-center gap-2">
-            <input type="checkbox" checked={hidden} onChange={(e) => setHidden(e.target.checked)} className="h-4 w-4 accent-[rgb(186,168,240)]" />
+          <Check checked={hidden} onChange={setHidden}>
             Sonucu yalnızca ben ve atan görsün
-          </label>
+          </Check>
         </div>
         <div className="flex justify-end gap-2">
           <Button onClick={onClose}>Vazgeç</Button>
           <Button
             variant="primary"
-            disabled={!ids.length || busy || (needTh && threshold === null && manual === null)}
+            disabled={!ids.length || busy || (needTh && !hasTh)}
             onClick={async () => {
               setBusy(true);
               const r = await emit("request", {
@@ -1745,11 +2085,14 @@ function RequestModal({ open, onClose, chars, emit, campaignId, deathSaveEnabled
                 characterIds: ids.filter((id) => eligible.some((c) => c.id === id)),
                 kind,
                 stat: kind === "check" ? stat || null : null,
-                threshold: manual === null ? threshold : null,
+                threshold: uc || manual !== null ? null : threshold,
                 thresholdValue: manual,
                 modifier: kind === "death" ? 0 : mod,
                 label,
-                blackMagic: kind === "check" && bm,
+                blackMagic: !uc && kind === "check" && bm,
+                magic: uc && kind === "check" && magic,
+                decay: uc && kind === "check" && yoz,
+                ...(kind === "decay" ? { decayMode: dmode } : {}),
                 hidden,
                 playerPart: kind === "check" && playerPart,
               });
@@ -1771,6 +2114,7 @@ function RequestModal({ open, onClose, chars, emit, campaignId, deathSaveEnabled
 
 // ------------------------------------------------------------------ karakter görünümü (oda içinde)
 function CharacterQuick({ entry, data, onClose }: { entry: Entry | null; data: RulesData; onClose: () => void }) {
+  const { system, uc } = useSys();
   const c = entry?.character;
   const full = entry && entry.view !== "public" ? (entry.character as FullChar) : null;
   return (
@@ -1785,23 +2129,91 @@ function CharacterQuick({ entry, data, onClose }: { entry: Entry | null; data: R
               </p>
               {c.status === "DEAD" && <Badge tone="danger">Öldü</Badge>}
               <div className="flex flex-wrap gap-2">
-                {c.trees.map((t) => (
-                  <span key={t} className="flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 py-0.5 pl-0.5 pr-2.5 text-xs text-accent">
-                    <TreeIcon treeKey={t} className="h-6 w-6 rounded-full" />
-                    {data.trees.find((x) => x.key === t)?.name}
-                  </span>
-                ))}
+                {c.trees.map((t) =>
+                  system === "UC" ? (
+                    <span key={t} className="rounded-full border border-accent/40 bg-accent/10 px-2.5 py-0.5 text-xs text-accent">
+                      K{uc?.dals[t]?.tier} · {uc?.dals[t]?.name ?? t}
+                    </span>
+                  ) : (
+                    <span key={t} className="flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 py-0.5 pl-0.5 pr-2.5 text-xs text-accent">
+                      <TreeIcon treeKey={t} className="h-6 w-6 rounded-full" />
+                      {data.trees.find((x) => x.key === t)?.name}
+                    </span>
+                  ),
+                )}
               </div>
+              {c.languages?.length > 0 && <p className="text-xs text-muted">Diller: {c.languages.join(", ")}</p>}
               {c.appearance && <p className="text-ink/80">{c.appearance}</p>}
-              <Link href={`/karakter/${c.id}`} target="_blank" className="inline-block text-xs text-accent hover:underline">
+              <AppLink href={characterHref(system, c.id)} target="_blank" className="inline-block text-xs text-accent hover:underline">
                 Tam karakter kağıdını yeni sekmede aç ↗
-              </Link>
+              </AppLink>
             </div>
           </div>
-          {full ? <QuickFull c={full} data={data} /> : <p className="text-sm text-muted">Diğer oyuncuların karakter kağıtlarının yalnızca bu kısmı görünür.</p>}
+          {full ? (
+            system === "UC" ? (
+              <QuickFullUc c={full} />
+            ) : (
+              <QuickFull c={full} data={data} />
+            )
+          ) : (
+            <p className="text-sm text-muted">Diğer oyuncuların karakter kağıtlarının yalnızca bu kısmı görünür.</p>
+          )}
         </div>
       )}
     </Modal>
+  );
+}
+
+function QuickFullUc({ c }: { c: FullChar }) {
+  const { uc } = useSys();
+  const stats = ucNormalizeStats(c.stats as unknown as Record<string, number>);
+  const body = normalizeBody(c.body);
+  const owned = Object.entries(c.abilities).filter(([, v]) => v > 0);
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-5 gap-2">
+        {UC_STAT_KEYS.map((k) => (
+          <div key={k} className="rounded-lg border border-line bg-surface2/50 px-2 py-1.5 text-center">
+            <p className="text-[10px] uppercase tracking-wider text-muted">{UC_STAT_LABELS[k]}</p>
+            <p className="font-mono text-lg">{stats[k]}</p>
+          </div>
+        ))}
+      </div>
+      <div className="grid gap-5 sm:grid-cols-[180px_1fr]">
+        <BodyDiagram body={body} className="mx-auto max-w-[160px]" />
+        <div className="space-y-2 text-sm">
+          <p>
+            <span className="text-muted">Yozlaşma:</span> <span className="font-mono">{c.corruption}</span> · <span className="text-muted">Esin:</span> <span className="font-mono">{c.inspiration}</span> ·{" "}
+            <span className="text-muted">Bonus tavanı:</span> <span className="font-mono">+{ucBonusCap(c.level)}</span> · <span className="text-muted">Death Save:</span>{" "}
+            {c.deathSave.available ? "Var" : "Yok"}
+          </p>
+          {c.corruption > 0 && <p className="text-xs text-lav">{UC_DECAY_EFFECTS[c.corruption]}</p>}
+          {BODY_PARTS.filter((p) => body[p.key].wound !== "saglam").map((p) => (
+            <p key={p.key} className="text-danger/90">
+              {p.label}: −{woundPenalty(body[p.key])}
+            </p>
+          ))}
+        </div>
+      </div>
+      {owned.length > 0 && (
+        <div>
+          <p className="kicker mb-2">Yetenekler</p>
+          <ul className="grid gap-1.5 text-sm sm:grid-cols-2">
+            {owned.map(([k, lv]) => (
+              <li key={k} className="rounded-md border border-line px-3 py-1.5">
+                {uc?.abilities[k]?.name ?? k} <span className="font-mono text-xs text-accent">Sv {lv}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {c.perks.length > 0 && (
+        <div>
+          <p className="kicker mb-2">Perkler</p>
+          <p className="text-sm">{c.perks.map((k) => uc?.perks.find((p) => p.key === k)?.name ?? k).join(", ")}</p>
+        </div>
+      )}
+    </div>
   );
 }
 

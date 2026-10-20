@@ -1,3 +1,4 @@
+import { UcTopNav } from "@/components/uc/nav";
 import { UcRulesNav, type UcNavGroup } from "@/components/uc/nav-client";
 import { UC_BASE } from "@/lib/uc/constants";
 import { ucContent } from "@/lib/uc/content";
@@ -28,9 +29,12 @@ export default function UcRulesLayout({ children }: { children: React.ReactNode 
     },
   ];
   return (
+    <>
+    <UcTopNav />
     <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[230px_1fr] lg:py-10">
       <UcRulesNav groups={groups} />
       <main className="min-w-0">{children}</main>
     </div>
+    </>
   );
 }

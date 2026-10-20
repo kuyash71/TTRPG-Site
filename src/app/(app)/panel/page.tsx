@@ -13,6 +13,8 @@ import { CORRUPTION_MAX } from "@/lib/shz/constants";
 import { content, getTree } from "@/lib/shz/content";
 import { outcomeLabel } from "@/lib/shz/rules";
 import { JoinCampaign } from "./join-campaign";
+import { ResetRequests } from "@/components/reset-requests";
+import { visibleResets } from "@/lib/password-resets";
 
 export const metadata: Metadata = { title: "Panel" };
 
@@ -34,15 +36,16 @@ export default async function Panel() {
   const camps = await db
     .select()
     .from(campaigns)
-    .where(or(eq(campaigns.gmId, user.id), inArray(campaigns.id, memberOf)))
+    .where(and(eq(campaigns.system, "SHZ"), or(eq(campaigns.gmId, user.id), inArray(campaigns.id, memberOf))))
     .orderBy(desc(campaigns.createdAt));
   const ids = camps.map((c) => c.id).concat(["-"]);
   const chars = await db
     .select({ c: characters, campaignName: campaigns.name })
     .from(characters)
     .innerJoin(campaigns, eq(campaigns.id, characters.campaignId))
-    .where(eq(characters.userId, user.id))
+    .where(and(eq(characters.userId, user.id), eq(campaigns.system, "SHZ")))
     .orderBy(desc(characters.updatedAt));
+  const resets = user.role === "GM" || user.isAdmin ? await visibleResets(user) : [];
   const [memberCounts, charCounts, lastMsg, lastRoll, pending, recent, gms] = await Promise.all([
     db.select({ id: campaignMembers.campaignId, n: count() }).from(campaignMembers).where(inArray(campaignMembers.campaignId, ids)).groupBy(campaignMembers.campaignId),
     db
@@ -104,6 +107,8 @@ export default async function Panel() {
           <Stat icon={<Skull className="h-4 w-4" />} label={user.role === "GM" ? "Onay bekleyen" : "Ölü karakter"} value={user.role === "GM" ? pending.length : chars.filter(({ c }) => c.status === "DEAD").length} tone={user.role === "GM" && pending.length ? "warn" : undefined} />
         </div>
       </section>
+
+      <ResetRequests items={resets} />
 
       {unspent.length > 0 && (
         <div className="flex flex-wrap items-center gap-3 rounded-xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm">

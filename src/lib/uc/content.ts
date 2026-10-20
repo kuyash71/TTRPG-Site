@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { UcAbility, UcClass, UcContent, UcDal } from "./content-types";
+import type { UcRules } from "./rules";
 
 // content/uc.json dosyasını okur ve önbelleğe alır (dosya değişirse yeniden okunur).
 let cache: { mtime: number; data: UcContent; cls: Map<string, UcClass> } | null = null;
@@ -29,4 +30,22 @@ export function ucAbility(key: string): UcAbility | undefined {
 /** Bir yeteneğin sayfadaki adresi. */
 export function ucAbilityHref(a: Pick<UcAbility, "classKey" | "dalKey" | "key">) {
   return `/umbracaelis/kurallar/siniflar/${a.classKey}/${a.dalKey}#${a.key}`;
+}
+
+/** Kural motoru ve istemci bileşenleri için sade veri (HTML metinleri olmadan). */
+export function ucRulesData(): UcRules {
+  const c = load().data;
+  return {
+    classes: c.classes.map((x) => ({ key: x.key, name: x.name, dals: x.dals })),
+    dals: Object.fromEntries(
+      Object.values(c.dals).map((d) => [d.key, { key: d.key, name: d.name, classKey: d.classKey, tier: d.tier, stat: d.stat, identity: d.identity, startBonusText: d.startBonusText, abilities: d.abilities }]),
+    ),
+    abilities: Object.fromEntries(
+      Object.values(c.abilities).map((a) => [
+        a.key,
+        { key: a.key, name: a.name, classKey: a.classKey, dalKey: a.dalKey, tier: a.tier, type: a.type, maxLevel: a.maxLevel, signature: a.signature, requirements: a.requirements, requirementText: a.requirementText },
+      ]),
+    ),
+    perks: c.perks.map((p) => ({ key: p.key, name: p.name, kind: p.kind, points: p.points, category: p.category, exclusive: p.exclusive })),
+  };
 }

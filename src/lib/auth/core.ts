@@ -4,7 +4,12 @@ import { and, eq, gt } from "drizzle-orm";
 import { db } from "../../db";
 import { sessions, users, type User } from "../../db/schema";
 
-export const SESSION_COOKIE = "shz_session";
+/**
+ * Oturum çerezi. Yol "/" olduğu için hem /schwarzesonne hem /umbracaelis altında geçerlidir (tek hesap, iki sistem).
+ * Eski sürümün çerezi ("shz_session", yalnızca /schwarzesonne yolu) ara katmanda bu ada taşınır.
+ */
+export const SESSION_COOKIE = "shz_sid";
+export const LEGACY_SESSION_COOKIE = "shz_session";
 export const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 14; // 14 gün
 const TOUCH_INTERVAL_MS = 1000 * 60 * 30;
 
@@ -16,7 +21,7 @@ export function newToken() {
   return randomBytes(32).toString("base64url");
 }
 
-export type SessionUser = Pick<User, "id" | "username" | "displayName" | "role" | "isAdmin">;
+export type SessionUser = Pick<User, "id" | "username" | "displayName" | "role" | "isAdmin" | "mustChangePassword">;
 
 export async function createSession(userId: string, meta: { ip?: string | null; userAgent?: string | null }) {
   const token = newToken();
@@ -43,6 +48,7 @@ export async function userFromToken(token: string | undefined | null): Promise<(
       displayName: users.displayName,
       role: users.role,
       isAdmin: users.isAdmin,
+      mustChangePassword: users.mustChangePassword,
       disabled: users.disabled,
     })
     .from(sessions)
@@ -58,7 +64,7 @@ export async function userFromToken(token: string | undefined | null): Promise<(
       .set({ lastSeenAt: new Date(), expiresAt: new Date(Date.now() + SESSION_TTL_MS) })
       .where(eq(sessions.id, r.sessionId));
   }
-  return { sessionId: r.sessionId, id: r.id, username: r.username, displayName: r.displayName, role: r.role, isAdmin: r.isAdmin };
+  return { sessionId: r.sessionId, id: r.id, username: r.username, displayName: r.displayName, role: r.role, isAdmin: r.isAdmin, mustChangePassword: r.mustChangePassword };
 }
 
 export async function destroySessionByToken(token: string) {

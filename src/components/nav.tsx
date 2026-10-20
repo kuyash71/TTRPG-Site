@@ -1,3 +1,4 @@
+import { KeyRound, MoonStar } from "lucide-react";
 import Link from "next/link";
 import { SunLogo } from "./logo";
 import type { SessionUser } from "@/lib/auth/session";
@@ -15,7 +16,7 @@ export function Brand() {
   );
 }
 
-export function TopNav({ user }: { user: SessionUser | null }) {
+export function TopNav({ user, resets = 0 }: { user: SessionUser | null; resets?: number }) {
   const links = user
     ? [
         { href: "/panel", label: "Panel" },
@@ -41,6 +42,23 @@ export function TopNav({ user }: { user: SessionUser | null }) {
           ))}
           {user && (
             <>
+              {/* Sistem geçişi: aynı hesapla Umbra Caelis paneline (düz bağlantı: /umbracaelis uygulama alt yolunun dışında). */}
+              <a
+                href="/umbracaelis/panel"
+                className="ml-1 inline-flex items-center gap-1.5 rounded-md border border-line px-2.5 py-1.5 text-xs text-muted transition hover:border-accent/50 hover:text-ink"
+                title="Umbra Caelis paneline geç"
+              >
+                <MoonStar className="h-3.5 w-3.5" /> Umbra Caelis
+              </a>
+              {resets > 0 && (
+                <Link
+                  href="/panel#sifre-istekleri"
+                  className="ml-1 inline-flex items-center gap-1 rounded-md border border-warn/50 bg-warn/10 px-2 py-1.5 text-xs text-warn"
+                  title="Şifre sıfırlama istekleri"
+                >
+                  <KeyRound className="h-3.5 w-3.5" /> {resets}
+                </Link>
+              )}
               <span className="mx-2 h-5 w-px bg-line" />
               <span className="mr-1 text-sm text-ink/80">
                 {user.displayName}
@@ -50,7 +68,12 @@ export function TopNav({ user }: { user: SessionUser | null }) {
             </>
           )}
         </nav>
-        <MobileMenu links={links} loggedIn={!!user} name={user?.displayName ?? null} />
+        <MobileMenu
+          links={user ? [...links, ...(resets > 0 ? [{ href: "/panel#sifre-istekleri", label: `Şifre istekleri (${resets})` }] : [])] : links}
+          extra={user ? [{ href: "/umbracaelis/panel", label: "Umbra Caelis'e geç" }] : []}
+          loggedIn={!!user}
+          name={user?.displayName ?? null}
+        />
       </div>
     </header>
   );

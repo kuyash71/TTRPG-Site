@@ -13,10 +13,12 @@ const campaignFields = z.object({
   startPerkPoints: z.number().int().min(0).max(10),
   levelCap: z.number().int().min(1).max(LEVEL_CAP_MAX),
   deathSaveEnabled: z.boolean(),
+  physicalDice: z.boolean().default(false),
+  system: z.enum(["SHZ", "UC"]).default("SHZ"),
 });
 
 export const POST = route({ auth: "gm", body: campaignFields, limit: 20 }, async ({ body, user }) => {
-  if (body.contentKey && !content().campaigns.some((c) => c.key === body.contentKey)) throw bad("Bilinmeyen kampanya.");
+  if (body.contentKey && (body.system === "UC" || !content().campaigns.some((c) => c.key === body.contentKey))) throw bad("Bilinmeyen kampanya.");
   const [c] = await db
     .insert(campaigns)
     .values({
@@ -26,6 +28,8 @@ export const POST = route({ auth: "gm", body: campaignFields, limit: 20 }, async
       startPerkPoints: body.startPerkPoints,
       levelCap: body.levelCap,
       deathSaveEnabled: body.deathSaveEnabled,
+      physicalDice: body.physicalDice,
+      system: body.system,
       gmId: user.id,
       joinCode: joinCode(),
     })

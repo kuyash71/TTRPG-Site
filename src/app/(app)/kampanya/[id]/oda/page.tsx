@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import { db } from "@/db";
 import { campaignMembers, characters, users } from "@/db/schema";
 import { campaignAccess, ownerCharacter, publicCharacter } from "@/lib/access";
-import { pageUser } from "@/lib/auth/session";
+import { absoluteRedirect, pageUser } from "@/lib/auth/session";
+import { roomHref } from "@/lib/links";
 import { rulesData } from "@/lib/shz/content";
 import { Room } from "./room";
 
@@ -15,6 +16,7 @@ export default async function RoomPage({ params }: { params: Promise<{ id: strin
   const user = await pageUser();
   const access = await campaignAccess(id, user).catch(() => null);
   if (!access) notFound();
+  if (access.campaign.system === "UC") await absoluteRedirect(roomHref("UC", id));
   const { campaign, isGM, isSpectator } = access;
   const rows = await db.select().from(characters).where(eq(characters.campaignId, id)).orderBy(asc(characters.createdAt));
   const chars = rows
@@ -29,7 +31,7 @@ export default async function RoomPage({ params }: { params: Promise<{ id: strin
   const data = rulesData();
   return (
     <Room
-      campaign={{ id: campaign.id, name: campaign.name, deathSaveEnabled: campaign.deathSaveEnabled }}
+      campaign={{ id: campaign.id, name: campaign.name, deathSaveEnabled: campaign.deathSaveEnabled, physicalDice: campaign.physicalDice, system: campaign.system }}
       me={{ id: user.id, displayName: user.displayName }}
       isGM={isGM}
       isSpectator={isSpectator}

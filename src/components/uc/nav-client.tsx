@@ -2,9 +2,10 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { cx } from "@/components/ui";
+import { LogoutButton } from "@/components/nav-client";
 import { UcPageGlyph } from "./icons";
 
-export function UcMobileMenu({ links }: { links: { href: string; label: string }[] }) {
+export function UcMobileMenu({ links, name, logout }: { links: { href: string; label: string }[]; name?: string | null; logout?: boolean }) {
   const [open, setOpen] = useState(false);
   const path = usePathname();
   useEffect(() => setOpen(false), [path]);
@@ -15,11 +16,13 @@ export function UcMobileMenu({ links }: { links: { href: string; label: string }
       </button>
       {open && (
         <div className="absolute inset-x-0 top-16 border-b border-line bg-bg px-4 pb-4 pt-2 shadow-card">
+          {name && <p className="px-3 py-2 text-sm text-muted">{name}</p>}
           {links.map((l) => (
             <a key={l.href} href={l.href} className="block rounded-md px-3 py-2.5 text-ink hover:bg-surface2">
               {l.label}
             </a>
           ))}
+          {logout && <LogoutButton className="block w-full rounded-md px-3 py-2.5 text-left text-ink hover:bg-surface2" />}
         </div>
       )}
     </div>

@@ -8,6 +8,7 @@ import { notifyCampaign } from "@/lib/realtime-bus";
 import { AGE_MAX, AGE_MIN, BODY_PART_KEYS, STAT_KEYS, bodyPartLabel } from "@/lib/shz/constants";
 import { getPerk, getTree, rulesData } from "@/lib/shz/content";
 import { buildCreation } from "@/lib/shz/rules";
+import { languageProblems } from "@/lib/languages";
 
 const statMap = z.partialRecord(z.enum(STAT_KEYS), z.number().int().min(0).max(10));
 
@@ -23,6 +24,7 @@ export const POST = route(
       background: z.string().trim().max(4000).default(""),
       appearance: z.string().trim().max(1000).default(""),
       secretNotes: z.string().trim().max(6000).default(""),
+      languages: z.array(z.string().max(60)).max(5).default([]),
       creation: z.object({
         tree: z.string().max(60),
         points: statMap,
@@ -37,6 +39,9 @@ export const POST = route(
     const { campaign, isGM, isSpectator } = await campaignAccess(body.campaignId, user);
     if (campaign.status === "ARCHIVED") throw bad("Bu kampanya arşivlenmiş.");
     if (isSpectator) throw bad("İzleyiciler karakter oluşturamaz.");
+    if (campaign.system !== "SHZ") throw bad("Bu kampanya Umbra Caelis kampanyası; karakteri Umbra Caelis bölümünden oluştur.");
+    const lp = languageProblems("SHZ", body.creation.perks, body.languages);
+    if (lp.length) throw bad(lp[0]);
     const r = buildCreation(body.creation, campaign.startPerkPoints, rulesData());
     if (!r.ok) throw bad(r.problems[0]);
 
@@ -70,6 +75,7 @@ export const POST = route(
           trees: [body.creation.tree],
           abilities: r.abilities,
           perks: [...new Set(body.creation.perks)],
+          languages: body.languages,
           body: r.body,
           corruption: r.corruption,
         })

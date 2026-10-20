@@ -43,6 +43,8 @@ export const users = pgTable("users", {
   /** Site yöneticisi: kullanıcıları yönetir, GM daveti üretebilir. */
   isAdmin: boolean("is_admin").notNull().default(false),
   disabled: boolean("disabled").notNull().default(false),
+  /** Şifre sıfırlama koduyla girildi: bir sonraki sayfada yeni şifre belirlemek zorunda. */
+  mustChangePassword: boolean("must_change_password").notNull().default(false),
   lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
   createdAt: created(),
 });
@@ -76,8 +78,13 @@ export const loginAttempts = pgTable(
   (t) => [index("login_attempts_key_idx").on(t.key, t.createdAt)],
 );
 
+/** Kampanyanın oyun sistemi: Schwarzesonne ya da Umbra Caelis. Aynı hesap ikisinde de oynar. */
+export const gameSystemEnum = pgEnum("game_system", ["SHZ", "UC"]);
+export type GameSystem = (typeof gameSystemEnum.enumValues)[number];
+
 export const campaigns = pgTable("campaigns", {
   id: id(),
+  system: gameSystemEnum("system").notNull().default("SHZ"),
   name: text("name").notNull(),
   contentKey: text("content_key"),
   description: text("description").notNull().default(""),
@@ -91,6 +98,8 @@ export const campaigns = pgTable("campaigns", {
   startPerkPoints: integer("start_perk_points").notNull().default(0),
   levelCap: integer("level_cap").notNull().default(10),
   deathSaveEnabled: boolean("death_save_enabled").notNull().default(true),
+  /** Fiziksel masa: zarları oyuncular gerçek zarla atar, sonucu GM sisteme girer (dijital zar kapalı). */
+  physicalDice: boolean("physical_dice").notNull().default(false),
   createdAt: created(),
 });
 
@@ -156,6 +165,17 @@ export interface InventoryItem {
   note: string;
 }
 
+/** Yozlaşma çatalları (3, 6, 9, 12): Teslim ya da Direniş. */
+export type UcForkChoice = "teslim" | "direnis";
+export interface UcCharData {
+  classKey?: string;
+  faith?: string;
+  food?: string;
+  forks?: Partial<Record<"3" | "6" | "9" | "12", UcForkChoice>>;
+  /** Dalı henüz seçilmemiş katmanda kazanılan sembol stat puanları (dal seçilince eklenir). */
+  pendingSymbol?: number;
+}
+
 export const characters = pgTable(
   "characters",
   {
@@ -163,9 +183,8 @@ export const characters = pgTable(
     campaignId: text("campaign_id")
       .notNull()
       .references(() => campaigns.id, { onDelete: "cascade" }),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+    /** Karakterin sahibi; null ise sahipsizdir (GM devredebilir). */
+    userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
     status: characterStatusEnum("status").notNull().default("PENDING"),
     reviewNote: text("review_note"),
 
@@ -183,6 +202,8 @@ export const characters = pgTable(
     trees: text("trees").array().notNull().default([]),
     abilities: jsonb("abilities").$type<Record<string, number>>().notNull().default({}),
     perks: text("perks").array().notNull().default([]),
+    /** Bildiği diller (ilki ana dil). */
+    languages: text("languages").array().notNull().default([]),
     body: jsonb("body").$type<Body>().notNull().default({}),
     corruption: integer("corruption").notNull().default(0),
     corruptionLocked: boolean("corruption_locked").notNull().default(false),
@@ -198,6 +219,8 @@ export const characters = pgTable(
     /** GM izni: oyuncu perklerini bir kez yeniden düzenleyebilir. */
     perkEditAllowed: boolean("perk_edit_allowed").notNull().default(false),
     gmNotes: text("gm_notes").notNull().default(""),
+    /** Umbra Caelis'e özgü alanlar (SHZ karakterlerinde boş). */
+    uc: jsonb("uc").$type<UcCharData>().notNull().default({}),
     createdAt: created(),
     // milisaniye hassasiyeti: koşullu güncellemelerde (yarış koruması) JS Date ile birebir eşleşir
     updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 })
@@ -257,6 +280,10 @@ export interface RollDetail {
   deathTrack?: { deaths: number; saves: number; final: "death" | "save" | null };
   /** Zarı kimin istediği / hangi isteğe yanıt olduğu. */
   requested?: boolean;
+  /** Fiziksel zar: değeri masada atıldı, GM girdi. */
+  physical?: boolean;
+  /** Zar kartında gösterilen ek açıklama (taşan bonus, Nat1 geri tepme…). */
+  extra?: string;
 }
 
 export const rolls = pgTable(
@@ -278,6 +305,28 @@ export const rolls = pgTable(
   },
   (t) => [index("rolls_campaign_idx").on(t.campaignId, t.createdAt)],
 );
+
+/** Şifremi unuttum istekleri: kampanyanın GM'i ya da site yöneticisi onaylar, tek kullanımlık kod üretilir. */
+export const resetStatusEnum = pgEnum("reset_status", ["PENDING", "APPROVED", "USED", "DENIED"]);
+export const passwordResets = pgTable(
+  "password_resets",
+  {
+    id: id(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    status: resetStatusEnum("status").notNull().default("PENDING"),
+    ip: text("ip"),
+    decidedById: text("decided_by_id").references(() => users.id, { onDelete: "set null" }),
+    decidedAt: timestamp("decided_at", { withTimezone: true }),
+    codeHash: text("code_hash"),
+    codeExpiresAt: timestamp("code_expires_at", { withTimezone: true }),
+    usedAt: timestamp("used_at", { withTimezone: true }),
+    createdAt: created(),
+  },
+  (t) => [index("password_resets_user_idx").on(t.userId, t.status)],
+);
+export type PasswordReset = typeof passwordResets.$inferSelect;
 
 export type User = typeof users.$inferSelect;
 export type Campaign = typeof campaigns.$inferSelect;

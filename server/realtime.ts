@@ -10,9 +10,11 @@ import { z } from "zod";
 import { db } from "../src/db";
 import { campaignMembers, campaigns, characterLogs, characters, messages, rolls, users, type Character, type RollDetail } from "../src/db/schema";
 import { SESSION_COOKIE, readCookie, userFromToken, type SessionUser } from "../src/lib/auth/core";
-import { BODY_PART_KEYS, CORRUPTION_PERVITIN_IMMUNE, STAT_KEYS, STAT_LABELS, thresholdByKey } from "../src/lib/shz/constants";
+import { BODY_PART_KEYS, CORRUPTION_PERVITIN_IMMUNE, STAT_KEYS, STAT_LABELS, thresholdByKey, type StatKey } from "../src/lib/shz/constants";
 import { rulesData } from "../src/lib/shz/content";
 import { checkModifiers, clampCorruption, effectiveStats, outcomeFor, outcomeLabel, type CharLike } from "../src/lib/shz/rules";
+import { UC_STAT_KEYS, UC_STAT_LABELS, type UcStatKey } from "../src/lib/uc/constants";
+import { UC_DECAY_MODES, ucCheckParts, ucDecayOutcome, ucDecayParts, ucNormalizeStats, type UcCharLike, type UcDecayMode } from "../src/lib/uc/rules";
 
 type Ack = (r: { ok: true; data?: unknown } | { ok: false; error: string }) => void;
 interface Data {
@@ -41,6 +43,12 @@ const zThKey = z.enum(["cok-kolay", "kolay", "orta", "zor", "cok-zor", "uber"]);
 const zThreshold = zThKey.nullable();
 /** GM'in elle girdiği eşik (hazır kademelerin yerine geçer). */
 const zManual = z.number().int().min(1).max(60).nullable().optional();
+/** Fiziksel zar modunda GM'in girdiği zar değeri. */
+const zD20 = z.number().int().min(1).max(20).nullable().optional();
+const zD6 = z.number().int().min(1).max(6).nullable().optional();
+/** Stat anahtarı (sisteme göre işleyicide doğrulanır). */
+const zStat = z.string().max(20).nullable();
+const zDecayMode = z.enum(["dusotu", "geri-tepme", "arinma"]);
 const schemas = {
   join: z.object({ campaignId: zId }),
   chat: z.object({
@@ -53,15 +61,19 @@ const schemas = {
   roll: z.object({
     campaignId: zId,
     characterId: zId.nullable(),
-    stat: z.enum(STAT_KEYS).nullable(),
+    stat: zStat,
     threshold: zThreshold,
     thresholdValue: zManual,
     part: z.enum(BODY_PART_KEYS as [string, ...string[]]).nullable(),
     modifier: z.number().int().min(-20).max(20),
-    blackMagic: z.boolean(),
+    blackMagic: z.boolean().default(false),
+    /** Umbra Caelis: büyü zarı / yoz zar. */
+    magic: z.boolean().default(false),
+    decay: z.boolean().default(false),
     label: z.string().trim().max(80),
     hidden: z.boolean(),
     requestId: z.string().max(64).optional(),
+    physical: zD20,
   }),
   reroll: z.object({ campaignId: zId, rollId: zId }),
   deleteMessage: z.object({ campaignId: zId, messageId: zId }),
@@ -72,13 +84,16 @@ const schemas = {
   request: z.object({
     campaignId: zId,
     characterIds: z.array(zId).min(1).max(20),
-    kind: z.enum(["check", "death", "pervitin"]).default("check"),
-    stat: z.enum(STAT_KEYS).nullable(),
+    kind: z.enum(["check", "death", "pervitin", "decay"]).default("check"),
+    stat: zStat,
     threshold: zThreshold,
     thresholdValue: zManual,
     modifier: z.number().int().min(-20).max(20).default(0),
     label: z.string().trim().max(80),
-    blackMagic: z.boolean(),
+    blackMagic: z.boolean().default(false),
+    magic: z.boolean().default(false),
+    decay: z.boolean().default(false),
+    decayMode: zDecayMode.optional(),
     hidden: z.boolean().default(false),
     playerPart: z.boolean().default(false),
   }),
@@ -87,6 +102,7 @@ const schemas = {
     campaignId: zId,
     characterId: zId,
     requestId: z.string().max(64).optional(),
+    physical: zD6,
   }),
   pervitin: z.object({
     campaignId: zId,
@@ -95,22 +111,36 @@ const schemas = {
     thresholdValue: zManual,
     modifier: z.number().int().min(-20).max(20).optional(),
     requestId: z.string().max(64).optional(),
+    physical: zD20,
+  }),
+  /** Umbra Caelis Yozlaşma zarları: Düşotu, mana geri tepmesi, Blu Mana arınması. */
+  decay: z.object({
+    campaignId: zId,
+    characterId: zId,
+    mode: zDecayMode,
+    thresholdValue: zManual,
+    modifier: z.number().int().min(-20).max(20).optional(),
+    requestId: z.string().max(64).optional(),
+    physical: zD20,
   }),
 };
 
 interface PendingRequest {
   id: string;
   campaignId: string;
-  kind: "check" | "death" | "pervitin";
-  characters: { id: string; name: string; userId: string }[];
+  kind: "check" | "death" | "pervitin" | "decay";
+  characters: { id: string; name: string; userId: string | null }[];
   remaining: string[];
-  stat: (typeof STAT_KEYS)[number] | null;
+  stat: string | null;
   threshold: string | null;
   thresholdValue: number | null;
   thresholdLabel: string | null;
   modifier: number;
   label: string;
   blackMagic: boolean;
+  magic: boolean;
+  decay: boolean;
+  decayMode: UcDecayMode | null;
   hidden: boolean;
   playerPart: boolean;
   createdAt: string;
@@ -173,6 +203,46 @@ function asCharLike(c: Character): CharLike {
   };
 }
 
+function asUcChar(c: Character): UcCharLike {
+  return {
+    level: c.level,
+    stats: ucNormalizeStats(c.stats as unknown as Record<string, number>),
+    trees: c.trees,
+    abilities: c.abilities,
+    perks: c.perks,
+    body: c.body,
+    corruption: c.corruption,
+    inspiration: c.inspiration,
+    uc: c.uc ?? {},
+  };
+}
+
+const isShzStat = (k: string | null): k is StatKey => !!k && (STAT_KEYS as readonly string[]).includes(k);
+const isUcStat = (k: string | null): k is UcStatKey => !!k && (UC_STAT_KEYS as readonly string[]).includes(k);
+function statLabel(system: "SHZ" | "UC", k: string | null) {
+  if (!k) return null;
+  return system === "UC" ? (isUcStat(k) ? UC_STAT_LABELS[k] : null) : isShzStat(k) ? STAT_LABELS[k] : null;
+}
+
+async function loadCamp(cid: string) {
+  const c = await db.query.campaigns.findFirst({ where: eq(campaigns.id, cid) });
+  if (!c) fail("Kampanya bulunamadı.");
+  return c!;
+}
+
+/**
+ * Fiziksel zar modu: oyuncular dijital zar atamaz; GM, masada atılan zarın değerini girer.
+ * Dönüş: kullanılacak zar değeri (fiziksel ya da sunucunun attığı).
+ */
+function diceValue(camp: { physicalDice: boolean }, isGM: boolean, physical: number | null | undefined, sides: 6 | 20) {
+  if (camp.physicalDice && !isGM) fail("Bu masada zarlar fiziksel atılıyor: zarını masada at, sonucu GM girer.");
+  if (physical != null) {
+    if (!camp.physicalDice || !isGM) fail("Zar değerini yalnızca fiziksel zar modunda GM girebilir.");
+    return { value: physical, physical: true };
+  }
+  return { value: randomInt(1, sides + 1), physical: false };
+}
+
 class UserError extends Error {}
 const fail = (m: string) => {
   throw new UserError(m);
@@ -205,7 +275,7 @@ async function revalidate(s: S): Promise<boolean> {
   if (Date.now() - s.data.checkedAt < 60_000) return true;
   s.data.checkedAt = Date.now();
   const u = await userFromToken(s.data.token);
-  if (!u) {
+  if (!u || u.mustChangePassword) {
     s.disconnect(true);
     return false;
   }
@@ -285,7 +355,7 @@ async function systemMessage(io: Server, cid: string, user: SessionUser, content
 function takeRequest(cid: string, requestId: string | undefined, kind: PendingRequest["kind"], characterId: string, isGM: boolean) {
   const req = requestId ? (campaignRequests(cid).get(requestId) ?? null) : null;
   if (requestId && (!req || req.kind !== kind || !req.remaining.includes(characterId))) fail("Bu zar isteği artık geçerli değil.");
-  if (!req && !isGM) fail(kind === "death" ? "Death Save zarını yalnızca GM isteyebilir." : "Pervitin zarını yalnızca GM isteyebilir.");
+  if (!req && !isGM) fail(kind === "death" ? "Death Save zarını yalnızca GM isteyebilir." : kind === "decay" ? "Yozlaşma zarını yalnızca GM isteyebilir." : "Pervitin zarını yalnızca GM isteyebilir.");
   return { req, release: req ? claim(req, characterId) : () => {} };
 }
 
@@ -329,7 +399,8 @@ export function attachRealtime(io: Server) {
       if (process.env.NODE_ENV === "production" && (!origin || origin !== allowed)) return next(new Error("origin"));
       const token = readCookie(socket.handshake.headers.cookie, SESSION_COOKIE);
       const user = await userFromToken(token);
-      if (!user) return next(new Error("auth"));
+      // Sıfırlama koduyla girip henüz yeni şifre belirlemeyenler odaya bağlanamaz.
+      if (!user || user.mustChangePassword) return next(new Error("auth"));
       (socket as S).data = {
         user,
         token: token!,
@@ -522,7 +593,8 @@ export function attachRealtime(io: Server) {
       roll: guard(schemas.roll, async function roll(s, p) {
         const isGM = joined(s, p.campaignId);
         await assertNotMuted(s, p.campaignId, isGM, "roll");
-        const data = rulesData();
+        const camp = await loadCamp(p.campaignId);
+        const uc = camp.system === "UC";
         // GM isteğine yanıt: parametreleri istemciden değil istekten al.
         let req: PendingRequest | null = null;
         if (p.requestId) {
@@ -530,35 +602,53 @@ export function attachRealtime(io: Server) {
           if (!req || req.kind !== "check") fail("Bu zar isteği artık geçerli değil.");
           if (!p.characterId || !req!.remaining.includes(p.characterId)) fail("Bu istek bu karakter için değil.");
         }
+        const die = diceValue(camp, isGM, p.physical, 20);
         const release = req ? claim(req, p.characterId!) : () => {};
         try {
           const stat = req ? req.stat : p.stat;
+          if (stat && !statLabel(camp.system, stat)) fail("Geçersiz stat.");
+          // Umbra Caelis'te sabit eşik tablosu yoktur: eşiği yalnızca GM sayı olarak koyar.
           const th = req
             ? req.thresholdValue != null
               ? {
                   value: req.thresholdValue,
                   label: req.thresholdLabel ?? `Eşik ${req.thresholdValue}`,
                 }
-              : resolveThreshold(req.threshold, null, false)
-            : resolveThreshold(p.threshold, p.thresholdValue, isGM);
+              : uc
+                ? null
+                : resolveThreshold(req.threshold, null, false)
+            : uc
+              ? isGM && p.thresholdValue != null
+                ? { value: p.thresholdValue, label: `Eşik ${p.thresholdValue}` }
+                : null
+              : resolveThreshold(p.threshold, p.thresholdValue, isGM);
           const modifier = req ? req.modifier : p.modifier;
-          const blackMagic = req ? req.blackMagic : p.blackMagic;
+          const blackMagic = !uc && (req ? req.blackMagic : p.blackMagic);
+          const magic = uc && (req ? req.magic : p.magic);
+          const decay = uc && (req ? req.decay : p.decay);
           const part = req && !req.playerPart ? null : p.part;
-          const d20 = randomInt(1, 21);
+          const d20 = die.value;
           let parts: { label: string; value: number }[] = [];
           let charName: string | null = null;
+          const extra: string[] = [];
           if (p.characterId) {
             const c = await loadChar(p.campaignId, p.characterId);
             if (!isGM && (c.userId !== s.data.user.id || c.status !== "ACTIVE")) fail("Bu karakter için zar atamazsın.");
-            parts = checkModifiers(asCharLike(c), { stat, part: part as never, modifier, blackMagic }, data);
+            if (uc) {
+              const r = ucCheckParts(asUcChar(c), { stat: isUcStat(stat) ? stat : null, part: part as never, modifier, magic, decay });
+              parts = r.parts;
+              if (r.overflow) extra.push(`Taşan bonus +${r.overflow}: anlatıma dahil (GM karar verir).`);
+            } else parts = checkModifiers(asCharLike(c), { stat: isShzStat(stat) ? stat : null, part: part as never, modifier, blackMagic }, rulesData());
             charName = c.name;
           } else {
             if (!isGM) fail("Bir karakter seçmelisin.");
             if (modifier) parts.push({ label: "Düzenleyici", value: modifier });
           }
+          if (magic && d20 === 1) extra.push("Büyü zarında Nat1: mana geri tepti. GM, Sebahat ile mana geri tepmesi zarı ister; başarısızlıkta +1 Yozlaşma.");
           const total = d20 + parts.reduce((a, b) => a + b.value, 0);
           const outcome = outcomeFor(d20, total, th?.value ?? null);
-          const label = (req ? req.label : p.label) || (stat ? `${STAT_LABELS[stat]} zarı` : "d20");
+          const sl = statLabel(camp.system, stat);
+          const label = (req ? req.label : p.label) || (sl ? `${sl} zarı` : "d20");
           const detail: RollDetail = {
             parts: [{ label: "d20", value: d20 }, ...parts],
             total,
@@ -566,11 +656,15 @@ export function attachRealtime(io: Server) {
             thresholdLabel: th?.label ?? null,
             outcome,
             ...(req ? { requestId: req.id, requested: true } : {}),
+            ...(die.physical ? { physical: true } : {}),
+            ...(extra.length ? { extra: extra.join(" ") } : {}),
             note: JSON.stringify({
               stat,
               part,
               modifier,
               blackMagic,
+              magic,
+              decay,
               threshold: th?.value ?? null,
               thresholdLabel: th?.label ?? null,
             }),
@@ -581,7 +675,7 @@ export function attachRealtime(io: Server) {
               campaignId: p.campaignId,
               userId: s.data.user.id,
               characterId: p.characterId,
-              kind: blackMagic ? "kara-buyu" : "check",
+              kind: blackMagic ? "kara-buyu" : magic ? "buyu" : decay ? "yoz" : "check",
               label,
               dice: [d20],
               detail,
@@ -603,11 +697,15 @@ export function attachRealtime(io: Server) {
         const orig = await db.query.rolls.findFirst({
           where: and(eq(rolls.id, p.rollId), eq(rolls.campaignId, p.campaignId)),
         });
-        if (!orig || !orig.characterId || orig.kind === "death" || orig.kind === "pervitin") fail("Bu zar yeniden atılamaz.");
+        if (!orig || !orig.characterId || ["death", "pervitin", "decay"].includes(orig.kind)) fail("Bu zar yeniden atılamaz.");
         if (orig!.rerolled) fail("Bu zar zaten yeniden atıldı.");
+        const camp = await loadCamp(p.campaignId);
+        if (camp.physicalDice) fail("Fiziksel zar modunda yeniden atış masada yapılır; GM yeni sonucu girer.");
+        const uc = camp.system === "UC";
+        const pointName = uc ? "Esin" : "Inspiration";
         const c = await loadChar(p.campaignId, orig!.characterId!);
         if (!isGM && (c.userId !== s.data.user.id || c.status !== "ACTIVE")) fail("Bu zar senin değil.");
-        if (c.inspiration < 1) fail("Inspiration puanın yok.");
+        if (c.inspiration < 1) fail(`${pointName} puanın yok.`);
         const prm = JSON.parse(orig!.detail.note ?? "{}");
         const upd = await db
           .update(characters)
@@ -622,17 +720,18 @@ export function attachRealtime(io: Server) {
           .returning({ id: rolls.id });
         if (!marked.length) fail("Bu zar zaten yeniden atıldı.");
         const fresh = { ...c, inspiration: c.inspiration - 1 };
-        const data = rulesData();
-        const parts = checkModifiers(
-          asCharLike(fresh),
-          {
-            stat: prm.stat ?? null,
-            part: prm.part ?? null,
-            modifier: prm.modifier ?? 0,
-            blackMagic: !!prm.blackMagic,
-          },
-          data,
-        );
+        const parts = uc
+          ? ucCheckParts(asUcChar(fresh), { stat: isUcStat(prm.stat ?? null) ? prm.stat : null, part: prm.part ?? null, modifier: prm.modifier ?? 0, magic: !!prm.magic, decay: !!prm.decay }).parts
+          : checkModifiers(
+              asCharLike(fresh),
+              {
+                stat: isShzStat(prm.stat ?? null) ? prm.stat : null,
+                part: prm.part ?? null,
+                modifier: prm.modifier ?? 0,
+                blackMagic: !!prm.blackMagic,
+              },
+              rulesData(),
+            );
         const d20 = randomInt(1, 21);
         const total = d20 + parts.reduce((a, b) => a + b.value, 0);
         const detail: RollDetail = {
@@ -651,7 +750,7 @@ export function attachRealtime(io: Server) {
             userId: s.data.user.id,
             characterId: c.id,
             kind: orig!.kind,
-            label: `${orig!.label} (Inspiration)`,
+            label: `${orig!.label} (${pointName})`,
             dice: [d20],
             detail,
             hidden: orig!.hidden,
@@ -661,7 +760,7 @@ export function attachRealtime(io: Server) {
           characterId: c.id,
           actorId: s.data.user.id,
           kind: "inspiration",
-          text: `Inspiration harcandı: "${orig!.label}" yeniden atıldı.`,
+          text: `${pointName} harcandı: "${orig!.label}" yeniden atıldı.`,
         });
         io.to(room(p.campaignId)).emit("roll:rerolled", { id: orig!.id });
         await emitRoll(io, p.campaignId, r, s.data.user, c.name);
@@ -698,15 +797,22 @@ export function attachRealtime(io: Server) {
 
       request: guard(schemas.request, async function request(s, p) {
         if (!joined(s, p.campaignId)) fail("Zar isteğini yalnızca GM gönderebilir.");
-        const th = p.kind === "death" ? null : resolveThreshold(p.threshold, p.thresholdValue, true);
-        if (p.kind === "pervitin" && !th) fail("Pervitin zarı için bir eşik seç.");
-        if (p.kind === "death") {
-          const camp = await db.query.campaigns.findFirst({
-            where: eq(campaigns.id, p.campaignId),
-            columns: { deathSaveEnabled: true },
-          });
-          if (!camp?.deathSaveEnabled) fail("Bu kampanyada Death Save kapalı.");
-        }
+        const camp = await loadCamp(p.campaignId);
+        const uc = camp.system === "UC";
+        if (camp.physicalDice) fail("Fiziksel zar modunda oyunculardan dijital zar istenmez: zarı masada iste, sonucu sen gir.");
+        if (uc ? p.kind === "pervitin" : p.kind === "decay") fail("Bu zar türü bu sistemde yok.");
+        if (p.stat && !statLabel(camp.system, p.stat)) fail("Geçersiz stat.");
+        if (p.kind === "decay" && !p.decayMode) fail("Yozlaşma zarının türünü seç.");
+        const th =
+          p.kind === "death"
+            ? null
+            : uc
+              ? p.thresholdValue != null
+                ? { value: p.thresholdValue, label: `Eşik ${p.thresholdValue}` }
+                : null
+              : resolveThreshold(p.threshold, p.thresholdValue, true);
+        if ((p.kind === "pervitin" || p.kind === "decay") && !th) fail("Bu zar için bir eşik gir.");
+        if (p.kind === "death" && !camp.deathSaveEnabled) fail("Bu kampanyada Death Save kapalı.");
         const rows = await db
           .select({
             id: characters.id,
@@ -725,10 +831,13 @@ export function attachRealtime(io: Server) {
           ).map((x) => x.u),
         );
         const chars = rows
-          .filter((c) => (p.kind !== "death" || c.deathSave.available) && !spect.has(c.userId))
+          .filter((c) => (p.kind !== "death" || c.deathSave.available) && !(c.userId && spect.has(c.userId)))
           .map(({ id, name, userId }) => ({ id, name, userId }));
         if (!chars.length) fail(p.kind === "death" ? "Seçilen karakterlerin Death Save hakkı yok." : "Seçilen karakterler aktif değil.");
-        const label = p.label || (p.kind === "death" ? "Death Save" : p.kind === "pervitin" ? "Pervitin zarı" : p.stat ? `${STAT_LABELS[p.stat]} zarı` : "Zar");
+        const sl = statLabel(camp.system, p.stat);
+        const label =
+          p.label ||
+          (p.kind === "death" ? "Death Save" : p.kind === "pervitin" ? "Pervitin zarı" : p.kind === "decay" ? UC_DECAY_MODES[p.decayMode!].label : sl ? `${sl} zarı` : "Zar");
         const req: PendingRequest = {
           id: randomUUID(),
           campaignId: p.campaignId,
@@ -736,12 +845,15 @@ export function attachRealtime(io: Server) {
           characters: chars,
           remaining: chars.map((c) => c.id),
           stat: p.kind === "check" ? p.stat : null,
-          threshold: p.thresholdValue != null ? null : p.threshold,
+          threshold: p.thresholdValue != null || uc ? null : p.threshold,
           thresholdValue: p.thresholdValue ?? null,
           thresholdLabel: th?.label ?? null,
           modifier: p.modifier,
           label,
-          blackMagic: p.kind === "check" && p.blackMagic,
+          blackMagic: !uc && p.kind === "check" && p.blackMagic,
+          magic: uc && p.kind === "check" && p.magic,
+          decay: uc && p.kind === "check" && p.decay,
+          decayMode: p.kind === "decay" ? p.decayMode! : null,
           hidden: p.hidden,
           playerPart: p.kind === "check" && p.playerPart,
           createdAt: new Date().toISOString(),
@@ -768,18 +880,17 @@ export function attachRealtime(io: Server) {
       death: guard(schemas.death, async function death(s, p) {
         const isGM = joined(s, p.campaignId);
         await assertNotMuted(s, p.campaignId, isGM, "roll");
-        const camp = await db.query.campaigns.findFirst({
-          where: eq(campaigns.id, p.campaignId),
-        });
-        if (!camp!.deathSaveEnabled) fail("Bu kampanyada Death Save kapalı.");
+        const camp = await loadCamp(p.campaignId);
+        if (!camp.deathSaveEnabled) fail("Bu kampanyada Death Save kapalı.");
+        const die = diceValue(camp, isGM, p.physical, 6);
         const { req, release } = takeRequest(p.campaignId, p.requestId, "death", p.characterId, isGM);
         try {
           const c = await loadChar(p.campaignId, p.characterId);
           if (!isGM && (c.userId !== s.data.user.id || c.status !== "ACTIVE")) fail("Bu karakter senin değil.");
           if (c.status === "DEAD") fail("Karakter zaten ölü.");
           const ds = { ...c.deathSave };
-          if (!ds.available) fail("Death Save hakkı yok. Inspiration ile yenilenmeli.");
-          const d6 = randomInt(1, 7);
+          if (!ds.available) fail(`Death Save hakkı yok. ${camp.system === "UC" ? "Esin" : "Inspiration"} ile yenilenmeli.`);
+          const d6 = die.value;
           const isDeath = d6 <= 3;
           if (isDeath) ds.deaths++;
           else ds.saves++;
@@ -814,6 +925,7 @@ export function attachRealtime(io: Server) {
             note,
             deathTrack: track,
             ...(req ? { requestId: req.id, requested: true } : {}),
+            ...(die.physical ? { physical: true } : {}),
           };
           const [r] = await db
             .insert(rolls)
@@ -850,6 +962,9 @@ export function attachRealtime(io: Server) {
       pervitin: guard(schemas.pervitin, async function pervitin(s, p) {
         const isGM = joined(s, p.campaignId);
         await assertNotMuted(s, p.campaignId, isGM, "roll");
+        const camp = await loadCamp(p.campaignId);
+        if (camp.system !== "SHZ") fail("Pervitin yalnızca Schwarzesonne'de var.");
+        const die = diceValue(camp, isGM, p.physical, 20);
         const { req, release } = takeRequest(p.campaignId, p.requestId, "pervitin", p.characterId, isGM);
         try {
           const c = await loadChar(p.campaignId, p.characterId);
@@ -866,7 +981,7 @@ export function attachRealtime(io: Server) {
           const modifier = req ? req.modifier : isGM ? (p.modifier ?? 0) : 0;
           const data = rulesData();
           const eff = effectiveStats(asCharLike(c), data);
-          const d20 = randomInt(1, 21);
+          const d20 = die.value;
           const parts = [
             { label: "d20", value: d20 },
             { label: "Sanita", value: eff.sanita.value },
@@ -907,6 +1022,7 @@ export function attachRealtime(io: Server) {
             outcome,
             note,
             ...(req ? { requestId: req.id, requested: true } : {}),
+            ...(die.physical ? { physical: true } : {}),
           };
           const [r] = await db
             .insert(rolls)
@@ -926,6 +1042,73 @@ export function attachRealtime(io: Server) {
           io.to(room(p.campaignId)).emit("character:changed", {
             characterId: c.id,
           });
+        } catch (e) {
+          release();
+          throw e;
+        }
+      }),
+
+      decay: guard(schemas.decay, async function decay(s, p) {
+        const isGM = joined(s, p.campaignId);
+        await assertNotMuted(s, p.campaignId, isGM, "roll");
+        const camp = await loadCamp(p.campaignId);
+        if (camp.system !== "UC") fail("Yozlaşma zarları yalnızca Umbra Caelis'te var.");
+        const die = diceValue(camp, isGM, p.physical, 20);
+        const { req, release } = takeRequest(p.campaignId, p.requestId, "decay", p.characterId, isGM);
+        try {
+          const c = await loadChar(p.campaignId, p.characterId);
+          if (!isGM && (c.userId !== s.data.user.id || c.status !== "ACTIVE")) fail("Bu karakter senin değil.");
+          const mode: UcDecayMode = req ? req.decayMode! : p.mode;
+          const thValue = req ? req.thresholdValue : isGM ? (p.thresholdValue ?? null) : null;
+          if (thValue == null) fail("Bu zar için eşik gerekli.");
+          const modifier = req ? req.modifier : isGM ? (p.modifier ?? 0) : 0;
+          const ch = asUcChar(c);
+          const d20 = die.value;
+          const parts = [{ label: "d20", value: d20 }, ...ucDecayParts(ch, mode, modifier)];
+          const total = parts.reduce((a, b) => a + b.value, 0);
+          const success = d20 === 20 || (d20 !== 1 && total >= thValue!);
+          const res = ucDecayOutcome(ch, mode, success);
+          if (res.next !== c.corruption) {
+            const upd = await db
+              .update(characters)
+              .set({ corruption: res.next })
+              .where(and(eq(characters.id, c.id), eq(characters.updatedAt, c.updatedAt)))
+              .returning({ id: characters.id });
+            if (!upd.length) fail("Karakter bu sırada değişti, tekrar dene.");
+            await db.insert(characterLogs).values({
+              characterId: c.id,
+              actorId: s.data.user.id,
+              kind: "corruption",
+              text: `${UC_DECAY_MODES[mode].label}: ${res.note}`,
+            });
+          }
+          const outcome: RollDetail["outcome"] = res.effect === "none" && (mode === "dusotu" && (c.corruption >= 10 || c.uc?.forks?.["6"] === "direnis")) ? "info" : success ? "success" : "fail";
+          const detail: RollDetail = {
+            parts,
+            total,
+            threshold: thValue!,
+            thresholdLabel: req?.thresholdLabel ?? `Eşik ${thValue}`,
+            outcome,
+            note: res.note,
+            ...(req ? { requestId: req.id, requested: true } : {}),
+            ...(die.physical ? { physical: true } : {}),
+          };
+          const [r] = await db
+            .insert(rolls)
+            .values({
+              campaignId: p.campaignId,
+              userId: s.data.user.id,
+              characterId: c.id,
+              kind: "decay",
+              label: req?.label ?? UC_DECAY_MODES[mode].label,
+              dice: [d20],
+              detail,
+              hidden: req?.hidden ?? false,
+            })
+            .returning();
+          await emitRoll(io, p.campaignId, r, s.data.user, c.name);
+          if (req) settleRequest(p.campaignId, req);
+          io.to(room(p.campaignId)).emit("character:changed", { characterId: c.id });
         } catch (e) {
           release();
           throw e;

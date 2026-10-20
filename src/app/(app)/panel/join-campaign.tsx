@@ -1,12 +1,13 @@
 "use client";
-import { useRouter } from "next/navigation";
+import { useGo } from "@/components/app-link";
 import { useState } from "react";
 import { useAction, useToast } from "@/components/interactive";
 import { Button, Card } from "@/components/ui";
 import { api } from "@/lib/client";
+import { campaignHref, type Sys } from "@/lib/links";
 
 export function JoinCampaign() {
-  const router = useRouter();
+  const go = useGo();
   const { busy, run } = useAction();
   const toast = useToast();
   const [code, setCode] = useState("");
@@ -17,10 +18,10 @@ export function JoinCampaign() {
         className="flex gap-2"
         onSubmit={async (e) => {
           e.preventDefault();
-          const r = await run(() => api<{ id: string; role: "PLAYER" | "SPECTATOR" }>("/api/campaigns/join", { body: { code } }));
+          const r = await run(() => api<{ id: string; role: "PLAYER" | "SPECTATOR"; system: Sys }>("/api/campaigns/join", { body: { code } }));
           if (r) {
             toast(r.role === "SPECTATOR" ? "Kampanyaya izleyici olarak katıldın." : "Kampanyaya katıldın.", "ok");
-            router.push(`/kampanya/${r.id}`);
+            go(campaignHref(r.system, r.id));
           }
         }}
       >

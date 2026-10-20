@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { campaignMembers, campaigns, invites } from "@/db/schema";
 import { bad, conflict, notFound, route } from "@/lib/api";
 import { requireCampaignGM } from "@/lib/access";
-import { closeCampaignRoom } from "@/lib/realtime-bus";
+import { closeCampaignRoom, notifyCampaign } from "@/lib/realtime-bus";
 import { LEVEL_CAP_MAX } from "@/lib/shz/constants";
 import { content } from "@/lib/shz/content";
 
@@ -17,13 +17,17 @@ export const PATCH = route(
       startPerkPoints: z.number().int().min(0).max(10).optional(),
       levelCap: z.number().int().min(1).max(LEVEL_CAP_MAX).optional(),
       deathSaveEnabled: z.boolean().optional(),
+      physicalDice: z.boolean().optional(),
       status: z.enum(["ACTIVE", "PAUSED", "ARCHIVED"]).optional(),
     }),
   },
   async ({ params, body, user }) => {
-    await requireCampaignGM(params.id, user);
+    const camp = await requireCampaignGM(params.id, user);
+    if (body.contentKey && camp.system === "UC") throw bad("Umbra Caelis kampanyalarında hazır hikâye yok.");
     if (body.contentKey && !content().campaigns.some((c) => c.key === body.contentKey)) throw bad("Bilinmeyen kampanya.");
-    await db.update(campaigns).set(body).where(eq(campaigns.id, params.id));
+    const [c] = await db.update(campaigns).set(body).where(eq(campaigns.id, params.id)).returning();
+    // Açık odalar fiziksel zar / Death Save ayarını anında görür.
+    notifyCampaign(params.id, "campaign:settings", { physicalDice: c.physicalDice, deathSaveEnabled: c.deathSaveEnabled });
     return { ok: true };
   },
 );

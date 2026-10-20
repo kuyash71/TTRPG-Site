@@ -26,5 +26,5 @@ export const POST = route({ body: z.object({ code: z.string().trim().min(4).max(
     }
     notifyCampaign(c.id, "members:changed", {});
   }
-  return { id: c.id, role };
+  return { id: c.id, role, system: c.system };
 });
