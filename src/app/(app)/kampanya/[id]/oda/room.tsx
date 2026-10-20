@@ -1,5 +1,5 @@
 "use client";
-import { CheckSquare, Dices, Eye, HandMetal, HeartPulse, MessageCircleOff, MoonStar, Skull, Square, Trash2, UserPlus, UserRound, UserX } from "lucide-react";
+import { CheckSquare, Dices, Eye, HeartPulse, MessageCircleOff, MoonStar, Skull, Square, Trash2, UserPlus, UserRound, UserX } from "lucide-react";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { AppLink, useGo } from "@/components/app-link";
 import { io, type Socket } from "socket.io-client";
@@ -381,7 +381,7 @@ export function Room({
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           {settings.physicalDice && (
             <span className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-accent/40 px-3 text-xs text-accent" title="Zarlar masada atılır; sonucu GM girer" data-testid="physical-badge">
-              <HandMetal className="h-4 w-4" /> <span className="hidden sm:inline">Fiziksel zar</span>
+              <Dices className="h-4 w-4" /> <span className="hidden sm:inline">Fiziksel zar</span>
             </span>
           )}
           {spectator && (
@@ -747,9 +747,16 @@ function MiniBtn({ onClick, children }: { onClick: () => void; children: React.R
 // ------------------------------------------------------------------ akış
 type ChatTab = "ic" | "ooc" | "fisilti";
 
-/** Fısıltının karşı tarafı (GM açısından oyuncu, oyuncu açısından GM). */
+/** GM'in gördüğü oyuncular arası fısıltıların ortak konusu. */
+const PLAYERS_THREAD = "__oyuncular";
+/**
+ * Fısıltının hangi konuşmaya ait olduğu: tarafı olduğum mesajda karşı taraf;
+ * GM'in yalnızca izlediği oyuncular arası mesajlar tek bir "Oyuncular arası" konusunda toplanır.
+ */
 function whisperPeer(m: Msg, me: string) {
-  return m.userId === me ? m.recipientId : m.userId;
+  if (m.userId === me) return m.recipientId;
+  if (m.recipientId === me) return m.userId;
+  return PLAYERS_THREAD;
 }
 
 function Feed({
@@ -772,7 +779,7 @@ function Feed({
   me: string;
   isGM: boolean;
   myChars: FullChar[];
-  members: { id: string; displayName: string }[];
+  members: { id: string; displayName: string; role?: "PLAYER" | "SPECTATOR" }[];
   gm: { id: string; displayName: string };
   emit: Emit;
   campaignId: string;
@@ -813,10 +820,18 @@ function Feed({
   };
   // Sahnede oyuncu ilk aktif karakteriyle konuşur; GM anlatıcıdır.
   const speaker = isGM ? null : (myChars[0] ?? null);
+  // Fısıltı konuşmaları: GM için her üye + oyuncular arası; oyuncu için GM + diğer oyuncular (izleyiciler yalnızca GM'e yazar).
+  const peers: { id: string; name: string }[] = isGM
+    ? [...members.map((m) => ({ id: m.id, name: m.displayName })), { id: PLAYERS_THREAD, name: "Oyuncular arası" }]
+    : [
+        { id: gm.id, name: `${gm.displayName} (GM)` },
+        ...(spectator ? [] : members.filter((m) => m.id !== me && (m.role ?? "PLAYER") === "PLAYER").map((m) => ({ id: m.id, name: m.displayName }))),
+      ];
+  const readOnlyThread = peer === PLAYERS_THREAD;
 
   useEffect(() => {
-    if (isGM && !members.some((m) => m.id === peer)) setPeer(members[0]?.id ?? "");
-  }, [isGM, members, peer]);
+    if (!peers.some((x) => x.id === peer)) setPeer(peers[0]?.id ?? "");
+  }, [peers, peer]);
 
   const inTab = useCallback(
     (it: FeedItem, t: ChatTab, p?: string) => {
@@ -832,7 +847,7 @@ function Feed({
   const countOf = (t: ChatTab, p?: string) => items.filter((it) => inTab(it, t, p) && !(it.t === "m" && it.m.userId === me)).length;
   const keyOf = (t: ChatTab, p?: string) => (t === "fisilti" ? `f:${p}` : t);
   const unread = (t: ChatTab, p?: string) => Math.max(0, countOf(t, p) - (seen[keyOf(t, p)] ?? 0));
-  const whisperUnread = isGM ? members.reduce((a, m) => a + unread("fisilti", m.id), 0) : unread("fisilti", gm.id);
+  const whisperUnread = peers.reduce((a, x) => a + unread("fisilti", x.id), 0);
 
   const openKey = keyOf(tab, tab === "fisilti" ? peer : undefined);
   const openCount = countOf(tab, tab === "fisilti" ? peer : undefined);
@@ -869,14 +884,14 @@ function Feed({
   const send = async () => {
     const t = text.trim();
     if (!t) return;
-    if (channel === "WHISPER" && isGM && !peer) return toast("Fısıldayacağın oyuncuyu seç.", "error");
+    if (channel === "WHISPER" && (!peer || readOnlyThread)) return toast("Fısıldayacağın kişiyi seç.", "error");
     setSending(true);
     const r = await emit("chat", {
       campaignId,
       channel,
       text: t,
       characterId: channel === "IC" && speaker ? speaker.id : null,
-      recipientId: channel === "WHISPER" && isGM ? peer : null,
+      recipientId: channel === "WHISPER" ? peer : null,
     });
     setSending(false);
     if (!r.ok) return toast(r.error, "error");
@@ -900,7 +915,7 @@ function Feed({
     if (!r.ok) toast(r.error, "error");
   };
 
-  const nameOf = (id: string | null) => (id === gm.id ? gm.displayName : (members.find((m) => m.id === id)?.displayName ?? "?"));
+  const nameOf = (id: string | null) => (id === gm.id ? gm.displayName : id === PLAYERS_THREAD ? "Oyuncular arası" : (members.find((m) => m.id === id)?.displayName ?? "?"));
   const tabBtn = (t: ChatTab, label: string, n: number) => (
     <button
       key={t}
@@ -938,19 +953,26 @@ function Feed({
           )}
         </span>
       </div>
-      {tab === "fisilti" && isGM && (
-        <div className="flex shrink-0 gap-1.5 overflow-x-auto border-b border-line px-3 py-2 sm:px-5">
-          {members.length === 0 && <span className="text-xs text-muted">Kampanyada oyuncu yok.</span>}
-          {members.map((m) => {
+      {tab === "fisilti" && (
+        <div className="flex shrink-0 gap-1.5 overflow-x-auto border-b border-line px-3 py-2 sm:px-5" data-testid="whisper-peers">
+          {isGM && members.length === 0 && <span className="text-xs text-muted">Kampanyada oyuncu yok.</span>}
+          {peers.map((m) => {
             const n = unread("fisilti", m.id);
+            const pp = m.id === PLAYERS_THREAD;
             return (
               <button
                 key={m.id}
                 type="button"
                 onClick={() => setPeer(m.id)}
-                className={cx("flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1 text-xs", peer === m.id ? "border-accent bg-accent/15 text-ink" : "border-line text-muted hover:text-ink")}
+                title={pp ? "Oyuncuların birbirine fısıldadıkları (salt okunur)" : undefined}
+                className={cx(
+                  "flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1 text-xs",
+                  pp && "border-dashed",
+                  peer === m.id ? "border-accent bg-accent/15 text-ink" : "border-line text-muted hover:text-ink",
+                )}
               >
-                {m.displayName}
+                {pp && <Eye className="h-3 w-3" />}
+                {m.name}
                 {n > 0 && peer !== m.id && <span className="rounded-full bg-accent px-1.5 text-[10px] font-semibold leading-4 text-onAccent">{n}</span>}
               </button>
             );
@@ -964,11 +986,15 @@ function Feed({
               ? "Sahne boş. Karakterinle konuş ya da zar at."
               : tab === "ooc"
                 ? "Oyun dışı sohbet burada. Herkes görür."
-                : isGM
-                  ? peer
-                    ? `${nameOf(peer)} ile özel konuşma. Bunu yalnızca ikiniz görürsünüz.`
-                    : "Fısıldamak için bir oyuncu seç."
-                  : "GM ile özel konuşma. Bunu yalnızca sen ve GM görürsünüz."}
+                : readOnlyThread
+                  ? "Oyuncuların birbirine fısıldadıkları burada görünür. Bu konuşmalara yazamazsın."
+                  : !peer
+                    ? "Fısıldamak için birini seç."
+                    : peer === gm.id
+                      ? "GM ile özel konuşma. Bunu yalnızca sen ve GM görürsünüz."
+                      : isGM
+                        ? `${nameOf(peer)} ile özel konuşma. Bunu yalnızca ikiniz görürsünüz.`
+                        : `${nameOf(peer)} ile özel konuşma. Diğer oyuncular göremez; GM masadaki tüm fısıltıları görür.`}
           </p>
         )}
         {view.map((it) => {
@@ -1049,7 +1075,7 @@ function Feed({
             {spectator ? "İzleyicisin: sahneye yazamazsın. Masa sohbetine ya da GM'e fısıltıyla yazabilirsin." : "Sahnede konuşmak için onaylanmış bir karakterin olmalı. Masa ve Fısıltılar herkese açık."}
           </p>
         )}
-        {chatMuted && tab !== "fisilti" && (
+        {chatMuted && (tab !== "fisilti" || peer !== gm.id) && (
           <p className="mb-2 rounded-md border border-danger/40 bg-danger/10 px-3 py-1.5 text-xs text-danger">GM seni sohbette susturdu. Yine de GM&apos;e fısıldayabilirsin.</p>
         )}
         <div className="flex gap-2">
@@ -1075,13 +1101,15 @@ function Feed({
                       : "Karakterin yok"
                 : tab === "ooc"
                   ? "Masaya bir not… (herkes görür)"
-                  : isGM
-                    ? `${nameOf(peer)} için gizli mesaj…`
-                    : "GM'e gizli mesaj…"
+                  : readOnlyThread
+                    ? "Oyuncular arası konuşmalar salt okunur"
+                    : peer === gm.id
+                      ? "GM'e gizli mesaj…"
+                      : `${nameOf(peer)} için gizli mesaj…`
             }
             className="input min-h-[44px] resize-none"
           />
-          <Button type="submit" variant="primary" className="h-11" disabled={sending || !text.trim() || (chatMuted && tab !== "fisilti") || (tab === "ic" && !isGM && !speaker)}>
+          <Button type="submit" variant="primary" className="h-11" disabled={sending || !text.trim() || (chatMuted && (tab !== "fisilti" || peer !== gm.id)) || (tab === "ic" && !isGM && !speaker) || (tab === "fisilti" && readOnlyThread)}>
             Gönder
           </Button>
         </div>
@@ -1115,7 +1143,7 @@ function Feed({
           </div>
         )}
       </Modal>
-      <ClearModal open={clearOpen} onClose={() => setClearOpen(false)} emit={emit} campaignId={campaignId} tab={tab} peer={peer} peerName={nameOf(peer)} />
+      <ClearModal open={clearOpen} onClose={() => setClearOpen(false)} emit={emit} campaignId={campaignId} tab={tab} peer={readOnlyThread ? "" : peer} peerName={nameOf(peer)} />
     </div>
   );
 }
@@ -1316,7 +1344,7 @@ function MessageRow({ m, me, nameOf, canDelete, onDelete }: { m: Msg; me: string
       <div className={cx("group flex", mine ? "justify-end" : "justify-start")}>
         <div className={cx("max-w-[85%] rounded-2xl px-3.5 py-2 text-sm", mine ? "rounded-br-sm bg-accent/20" : "rounded-bl-sm border border-line bg-surface2")}>
           <p className="mb-0.5 text-[11px] text-muted">
-            {mine ? "Sen" : nameOf(m.userId)} · {time(m.createdAt)}
+            {mine ? "Sen" : m.recipientId === me ? nameOf(m.userId) : `${nameOf(m.userId)} → ${nameOf(m.recipientId)}`} · {time(m.createdAt)}
             {del}
           </p>
           <p className="whitespace-pre-wrap break-words">{m.content}</p>
@@ -1761,7 +1789,7 @@ function DicePanel({
         <p className="text-[11px] font-semibold uppercase tracking-widest text-muted">Zar · fiziksel masa</p>
         <div className="rounded-lg border border-accent/40 bg-accent/10 px-3 py-3 text-sm" data-testid="physical-player-note">
           <p className="flex items-center gap-2 font-medium text-ink">
-            <HandMetal className="h-4 w-4 text-accent" /> Zarlar masada atılıyor
+            <Dices className="h-4 w-4 text-accent" /> Zarlar masada atılıyor
           </p>
           <p className="mt-1 text-ink/85">Zarını gerçek zarla at ve sonucu GM&apos;e söyle. GM sonucu sisteme girer; başarı ve karakterine etkisi Akış&apos;ta görünür.</p>
         </div>
@@ -1861,7 +1889,7 @@ function DicePanel({
             }
           }}
         >
-          <HandMetal className="h-5 w-5" /> Sonucu gir
+          <Dices className="h-5 w-5" /> Sonucu gir
         </Button>
       </div>
     );

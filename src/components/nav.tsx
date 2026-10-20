@@ -30,6 +30,8 @@ export function TopNav({ user, resets = 0 }: { user: SessionUser | null; resets?
         { href: "/yardim", label: "Yardım" },
         { href: "/giris", label: "Giriş" },
       ];
+  // Hesapsız ziyaretçi için Umbra Caelis kuralları (uygulama alt yolunun dışında: düz bağlantı).
+  const outside = user ? [{ href: "/umbracaelis/panel", label: "Umbra Caelis'e geç" }] : [{ href: "/umbracaelis/kurallar", label: "Umbra Caelis kuralları" }];
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-bg/85 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
@@ -40,6 +42,11 @@ export function TopNav({ user, resets = 0 }: { user: SessionUser | null; resets?
               {l.label}
             </Link>
           ))}
+          {!user && (
+            <a href="/umbracaelis/kurallar" className="ml-1 inline-flex items-center gap-1.5 rounded-md border border-line px-2.5 py-1.5 text-xs text-muted transition hover:border-accent/50 hover:text-ink">
+              <MoonStar className="h-3.5 w-3.5" /> Umbra Caelis kuralları
+            </a>
+          )}
           {user && (
             <>
               {/* Sistem geçişi: aynı hesapla Umbra Caelis paneline (düz bağlantı: /umbracaelis uygulama alt yolunun dışında). */}
@@ -70,7 +77,7 @@ export function TopNav({ user, resets = 0 }: { user: SessionUser | null; resets?
         </nav>
         <MobileMenu
           links={user ? [...links, ...(resets > 0 ? [{ href: "/panel#sifre-istekleri", label: `Şifre istekleri (${resets})` }] : [])] : links}
-          extra={user ? [{ href: "/umbracaelis/panel", label: "Umbra Caelis'e geç" }] : []}
+          extra={outside}
           loggedIn={!!user}
           name={user?.displayName ?? null}
         />

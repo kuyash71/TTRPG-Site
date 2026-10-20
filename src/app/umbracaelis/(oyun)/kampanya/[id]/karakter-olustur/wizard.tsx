@@ -320,9 +320,12 @@ export function UcWizard({
                 const on = perks.includes(p.key);
                 const blockedBy = p.exclusive.find((x) => perks.includes(x));
                 return (
-                  <div key={p.key} className={cx("flex flex-col gap-2", on && "rounded-xl ring-2 ring-accent/60")}>
-                    <UcPerkCard perk={p} exclusiveNames={p.exclusive.map((x) => perkName.get(x) ?? x)} />
-                    <div className="flex justify-end px-1 pb-1">
+                  <UcPerkCard
+                    key={p.key}
+                    perk={p}
+                    selected={on}
+                    exclusiveNames={p.exclusive.map((x) => perkName.get(x) ?? x)}
+                    action={
                       <Button
                         size="sm"
                         variant={on ? "primary" : "secondary"}
@@ -333,8 +336,8 @@ export function UcWizard({
                       >
                         {on ? "Seçildi" : blockedBy ? <Lock className="h-3.5 w-3.5" /> : "Seç"}
                       </Button>
-                    </div>
-                  </div>
+                    }
+                  />
                 );
               })}
               {!visiblePerks.length && <p className="text-sm text-muted">Gösterilecek perk yok.</p>}
@@ -429,18 +432,20 @@ export function UcWizard({
                   const st = ucLearnState(charLike, a.key, data);
                   const ok = st.state === "available";
                   return (
-                    <div key={a.key} className={cx("space-y-2", first === a.key && "rounded-xl ring-2 ring-accent/60", !ok && "opacity-70")}>
-                      <UcAbilityCard ability={a} />
-                      <div className="flex items-center justify-between gap-2 px-1">
-                        {ok ? (
+                    <UcAbilityCard
+                      key={a.key}
+                      ability={a}
+                      highlight={first === a.key ? "owned" : ok ? "available" : "locked"}
+                      footer={
+                        ok ? (
                           <Button size="sm" variant={first === a.key ? "primary" : "outline"} onClick={() => setFirst(a.key)}>
                             {first === a.key ? "Seçildi" : "Bunu al"}
                           </Button>
                         ) : (
                           <p className="text-xs text-muted">Kilitli: {st.problems.join(" · ")}</p>
-                        )}
-                      </div>
-                    </div>
+                        )
+                      }
+                    />
                   );
                 })}
             </div>

@@ -1,4 +1,5 @@
 import { Lightbulb } from "lucide-react";
+import type { ReactNode } from "react";
 import { Badge, cx } from "@/components/ui";
 import { UC_STAT_LABELS } from "@/lib/uc/constants";
 import type { UcAbility, UcDal, UcPerk } from "@/lib/uc/content-types";
@@ -57,10 +58,28 @@ export function StatBadge({ stat }: { stat: keyof typeof UC_STAT_LABELS }) {
   );
 }
 
-export function UcAbilityCard({ ability: a }: { ability: UcAbility }) {
+export function UcAbilityCard({
+  ability: a,
+  footer,
+  highlight,
+}: {
+  ability: UcAbility;
+  /** Kartın içinde, en altta gösterilen eylem satırı (seç / aç düğmesi). */
+  footer?: ReactNode;
+  highlight?: "owned" | "available" | "locked";
+}) {
   const req = !a.requirementText || /^yok$/i.test(a.requirementText) ? null : a.requirementText;
   return (
-    <article id={a.key} className={cx("card flex scroll-mt-24 flex-col p-4", a.signature && "border-accent/45 bg-gradient-to-b from-accent/[0.06] to-transparent")}>
+    <article
+      id={a.key}
+      className={cx(
+        "card flex scroll-mt-24 flex-col p-4",
+        a.signature && "border-accent/45 bg-gradient-to-b from-accent/[0.06] to-transparent",
+        highlight === "owned" && "border-accent ring-1 ring-accent/60",
+        highlight === "available" && "border-ok/60",
+        highlight === "locked" && "opacity-75",
+      )}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
           <UcAbilityIcon type={a.type} signature={a.signature} />
@@ -121,14 +140,36 @@ export function UcAbilityCard({ ability: a }: { ability: UcAbility }) {
         ))}
         {a.flavorHtml && <UcHtml html={a.flavorHtml} className="border-t border-line pt-3 font-serif text-[13px] italic text-muted" />}
       </div>
+      {footer && (
+        <div className="mt-auto pt-3">
+          <div className="border-t border-line pt-3">{footer}</div>
+        </div>
+      )}
     </article>
   );
 }
 
-export function UcPerkCard({ perk: p, exclusiveNames }: { perk: UcPerk; exclusiveNames?: string[] }) {
+export function UcPerkCard({
+  perk: p,
+  exclusiveNames,
+  action,
+  selected,
+}: {
+  perk: UcPerk;
+  exclusiveNames?: string[];
+  /** Kartın sağ altındaki eylem (seç düğmesi). */
+  action?: ReactNode;
+  selected?: boolean;
+}) {
   const pos = p.kind === "positive";
+  // Kurallar sayfasındaki süzgeç `hidden` özniteliğini kullanır: flex yalnızca eylemli kartta.
   return (
-    <article id={p.key} data-perk-cat={p.category} data-perk-kind={p.kind} className="card scroll-mt-24 p-4">
+    <article
+      id={p.key}
+      data-perk-cat={p.category}
+      data-perk-kind={p.kind}
+      className={cx("card scroll-mt-24 p-4", !!action && "flex flex-col", selected && "border-accent bg-accent/[0.06] ring-1 ring-accent/60")}
+    >
       <div className="flex items-start gap-3">
         <UcPerkIcon category={p.category} kind={p.kind} />
         <div className="min-w-0 flex-1">
@@ -163,6 +204,7 @@ export function UcPerkCard({ perk: p, exclusiveNames }: { perk: UcPerk; exclusiv
           )}
         </div>
       </div>
+      {action && <div className="mt-auto flex justify-end pt-3">{action}</div>}
     </article>
   );
 }

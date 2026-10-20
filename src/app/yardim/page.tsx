@@ -227,7 +227,8 @@ export default async function HelpPage() {
             <ul className="list-disc space-y-1.5 pl-5">
               <li>
                 <strong>Sahne (IC):</strong> karakterinin söyledikleri ve yaptıkları, zarlar ve sistem mesajları. <strong>Masa (OOC):</strong> oyun dışı sohbet.{" "}
-                <strong>Fısıltılar:</strong> GM ile özel konuşma; GM her oyuncuyla ayrı bir konuşma görür.
+                <strong>Fısıltılar:</strong> GM&apos;le ya da başka bir oyuncuyla özel konuşma; üstteki listeden kime yazacağını seçersin. Diğer oyuncular göremez, ama GM masadaki tüm
+                fısıltıları (oyuncular arası olanlar dahil, salt okunur) görür. Sohbette susturulan oyuncu yalnızca GM&apos;e fısıldayabilir.
               </li>
               <li>
                 Kendi mesajını silebilirsin (mesajın üstüne gelince çıkan çöp kutusu). Birden çok mesajı silmek için sekme çubuğundaki <strong>Seç</strong> düğmesine bas, mesajları işaretle

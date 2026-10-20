@@ -613,10 +613,8 @@ function AbilitiesTab({ c, u, data, abilities, canAct, busy, act }: { c: Ch; u: 
                 const full = abilities.find((x) => x.key === k);
                 const lv = c.abilities[k] ?? 0;
                 const st = ucLearnState(u, k, data);
-                return (
-                  <div key={k} className={cx("flex flex-col gap-2 rounded-xl", lv > 0 && "ring-2 ring-accent/50", st.state === "available" && canAct && !lv && "ring-1 ring-ok/50")} data-testid={`ability-${k}`}>
-                    {full ? <UcAbilityCard ability={full} /> : <Card className="p-4">{data.abilities[k]?.name}</Card>}
-                    <div className="flex flex-wrap items-center justify-between gap-2 px-2 pb-2">
+                const footer = (
+                    <div className="flex flex-wrap items-center justify-between gap-2">
                       <span className="text-xs">
                         {lv > 0 ? (
                           <Badge tone="accent">
@@ -632,9 +630,20 @@ function AbilitiesTab({ c, u, data, abilities, canAct, busy, act }: { c: Ch; u: 
                           {st.usesZirve && " · Zirve"}
                         </Button>
                       )}
-                      {canAct && st.state === "locked" && <span className="text-[11px] text-muted">{st.problems.join(" · ")}</span>}
+                      {canAct && st.state === "locked" && <span className="w-full text-[11px] text-muted">{st.problems.join(" · ")}</span>}
                     </div>
-                  </div>
+                  );
+                  return (
+                    <div key={k} className="grid" data-testid={`ability-${k}`}>
+                      {full ? (
+                        <UcAbilityCard ability={full} footer={footer} highlight={lv > 0 ? "owned" : st.state === "available" && canAct ? "available" : undefined} />
+                      ) : (
+                        <Card className="w-full p-4">
+                          {data.abilities[k]?.name}
+                          <div className="mt-3">{footer}</div>
+                        </Card>
+                      )}
+                    </div>
                 );
               })}
             </div>
@@ -959,9 +968,16 @@ function PerkEditor({ open, onClose, c, perks: perkList, data, start, isGM, act 
           {shown.map((p) => {
             const on = perks.includes(p.key);
             return (
-              <button key={p.key} type="button" onClick={() => setPerks(on ? perks.filter((x) => x !== p.key) : [...perks, p.key])} className={cx("text-left", on && "rounded-xl ring-2 ring-accent/60")}>
-                <UcPerkCard perk={p} />
-              </button>
+              <UcPerkCard
+                key={p.key}
+                perk={p}
+                selected={on}
+                action={
+                  <Button size="sm" variant={on ? "primary" : "secondary"} onClick={() => setPerks(on ? perks.filter((x) => x !== p.key) : [...perks, p.key])}>
+                    {on ? "Seçildi" : "Seç"}
+                  </Button>
+                }
+              />
             );
           })}
         </div>

@@ -504,7 +504,21 @@ export function attachRealtime(io: Server) {
               });
               if (!m) fail("Alıcı bu kampanyada değil.");
               recipientId = p.recipientId!;
-            } else recipientId = camp!.gmId; // oyuncular yalnızca GM'e fısıldar
+            } else if (!p.recipientId || p.recipientId === camp!.gmId) recipientId = camp!.gmId;
+            else {
+              // Oyuncular arası fısıltı: yalnızca oyuncular arasında (izleyiciler yalnızca GM'e yazar).
+              // GM bu konuşmaları da görür (masada gizli bir şey kalmaz).
+              if (p.recipientId === uid) fail("Kendine fısıldayamazsın.");
+              const [me, to] = await Promise.all([
+                db.query.campaignMembers.findFirst({ where: and(eq(campaignMembers.campaignId, p.campaignId), eq(campaignMembers.userId, uid)) }),
+                db.query.campaignMembers.findFirst({ where: and(eq(campaignMembers.campaignId, p.campaignId), eq(campaignMembers.userId, p.recipientId)) }),
+              ]);
+              if (me?.role !== "PLAYER") fail("İzleyiciler yalnızca GM'e fısıldayabilir.");
+              if (!to || to.role !== "PLAYER") fail("Alıcı bu kampanyada oyuncu değil.");
+              // Susturulan oyuncu yalnızca GM'e fısıldayabilir.
+              await assertNotMuted(s, p.campaignId, false, "chat");
+              recipientId = p.recipientId;
+            }
           }
           const [m] = await db
             .insert(messages)

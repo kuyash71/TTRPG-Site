@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AuthBrand } from "@/components/auth-brand";
 import { redirect } from "next/navigation";
 import { absoluteRedirect, currentUser } from "@/lib/auth/session";
 import { LoginForm } from "./login-form";
@@ -19,5 +20,10 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     if (next.startsWith("/umbracaelis")) await absoluteRedirect(next);
     redirect(next);
   }
-  return <LoginForm next={next} />;
+  return (
+    <>
+      <AuthBrand system={next.startsWith("/umbracaelis") ? "UC" : "SHZ"} />
+      <LoginForm next={next} />
+    </>
+  );
 }
