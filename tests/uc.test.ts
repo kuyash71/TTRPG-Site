@@ -26,10 +26,13 @@ function char(over: Partial<UcCharLike> = {}): UcCharLike {
   return { level: 0, stats: { ...ucEmptyStats(), yalman: 2, sebahat: 1 }, trees: ["brute"], abilities: {}, perks: [], body: {}, corruption: 0, inspiration: 0, uc: { classKey: "close-quarter" }, ...over };
 }
 
-test("UC veri: 4 sınıf, 24 dal, dal başına 5 yetenek, K1 başlangıç bonusları çözülür", () => {
+test("UC veri: 4 sınıf, 24 dal, dal başına 6 yetenek (2 Vertex), K1 başlangıç bonusları çözülür", () => {
   assert.equal(data.classes.length, 4);
   assert.equal(Object.keys(data.dals).length, 24);
-  for (const d of Object.values(data.dals)) assert.equal(d.abilities.length, 5, d.name);
+  for (const d of Object.values(data.dals)) {
+    assert.equal(d.abilities.length, 6, d.name);
+    assert.equal(d.abilities.filter((k) => data.abilities[k].signature).length, 2, `${d.name}: Vertex sayısı`);
+  }
   for (const d of Object.values(data.dals).filter((x) => x.tier === 1)) assert.ok(ucDalStartBonus(d), d.name);
 });
 
