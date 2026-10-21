@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { Portrait } from "@/components/portrait";
 import { Badge, Card, PageHeader, StatusBadge } from "@/components/ui";
 import { db } from "@/db";
+import { getLocale, getT } from "@/i18n/server";
 import { characterLogs, users } from "@/db/schema";
 import { characterAccess, ownerCharacter } from "@/lib/access";
 import { pageUser } from "@/lib/auth/session";
@@ -11,15 +12,20 @@ import { characterHref } from "@/lib/links";
 import { ucContent, ucRulesData } from "@/lib/uc/content";
 import { UcSheet } from "./sheet";
 
-export const metadata: Metadata = { title: "Karakter" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t("Karakter") };
+}
 
 export default async function UcCharacterPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const t = await getT();
+  const loc = await getLocale();
   const user = await pageUser({ next: `/umbracaelis/karakter/${id}` });
   const a = await characterAccess(id, user).catch(() => null);
   if (!a) notFound();
   if (a.campaign.system !== "UC") redirect(characterHref("SHZ", id));
-  const data = ucRulesData();
+  const data = ucRulesData(loc);
   const owner = a.character.userId ? await db.query.users.findFirst({ where: eq(users.id, a.character.userId), columns: { displayName: true } }) : null;
 
   if (!a.isGM && !a.isOwner) {
@@ -30,22 +36,22 @@ export default async function UcCharacterPage({ params }: { params: Promise<{ id
           <Portrait id={c.id} version={c.portraitVersion} name={c.name} className="h-[150px] w-[120px]" />
         </div>
         <PageHeader kicker={a.campaign.name} title={c.name} actions={<StatusBadge status={c.status} />}>
-          {owner?.displayName ?? "Sahipsiz"} · Seviye {c.level} · {c.nationality} · {c.alignment}
+          {owner?.displayName ?? t("Sahipsiz")} · {t("Seviye {n}", { n: c.level })} · {c.nationality} · {c.alignment}
           {c.languages.length > 0 && ` · ${c.languages.join(", ")}`}
         </PageHeader>
         <Card className="space-y-3 p-6">
           <div className="flex flex-wrap gap-2">
-            {c.trees.map((t) => (
-              <Badge key={t} tone="accent">
-                K{data.dals[t]?.tier} · {data.dals[t]?.name ?? t}
+            {c.trees.map((k) => (
+              <Badge key={k} tone="accent">
+                {t("K{tier}", { tier: data.dals[k]?.tier })} · {data.dals[k]?.name ?? k}
               </Badge>
             ))}
           </div>
           {c.appearance && <p className="text-ink/90">{c.appearance}</p>}
-          <p className="text-sm text-muted">Diğer oyuncuların karakter kağıtlarının yalnızca bu kısmı görünür.</p>
+          <p className="text-sm text-muted">{t("Diğer oyuncuların karakter kağıtlarının yalnızca bu kısmı görünür.")}</p>
         </Card>
         <a href={`/umbracaelis/kampanya/${a.campaign.id}`} className="mt-6 inline-block text-sm text-muted hover:text-ink">
-          ← Kampanyaya dön
+          {t("← Kampanyaya dön")}
         </a>
       </div>
     );
@@ -58,7 +64,7 @@ export default async function UcCharacterPage({ params }: { params: Promise<{ id
     .where(eq(characterLogs.characterId, id))
     .orderBy(desc(characterLogs.createdAt))
     .limit(200);
-  const content = ucContent();
+  const content = ucContent(loc);
   // Yalnızca karakterin sınıfının yetenek metinleri (sayfa boyutu için).
   const classKey = a.character.uc?.classKey;
   const abilities = Object.values(content.abilities).filter((x) => x.classKey === classKey);
@@ -67,12 +73,14 @@ export default async function UcCharacterPage({ params }: { params: Promise<{ id
     <UcSheet
       character={JSON.parse(JSON.stringify(character))}
       campaign={{ id: a.campaign.id, name: a.campaign.name, deathSaveEnabled: a.campaign.deathSaveEnabled, levelCap: a.campaign.levelCap, startPerkPoints: a.campaign.startPerkPoints }}
-      ownerName={owner?.displayName ?? "Sahipsiz"}
+      ownerName={owner?.displayName ?? t("Sahipsiz")}
       isGM={a.isGM}
       isOwner={a.isOwner}
       data={data}
       abilities={abilities}
       perks={content.perks}
+      mechanics={Object.fromEntries(Object.values(content.dals).filter((d) => d.mechanic && d.classKey === classKey).map((d) => [d.key, d.mechanic!]))}
+      faiths={content.classes.find((x) => x.key === classKey)?.faiths}
       logs={logs.map((l) => ({ ...l, createdAt: l.createdAt.toISOString() }))}
     />
   );

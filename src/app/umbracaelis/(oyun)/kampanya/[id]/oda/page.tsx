@@ -3,13 +3,17 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { Room } from "@/app/(app)/kampanya/[id]/oda/room";
 import { db } from "@/db";
+import { getLocale, getT } from "@/i18n/server";
 import { campaignMembers, characters, users } from "@/db/schema";
 import { campaignAccess, ownerCharacter, publicCharacter } from "@/lib/access";
 import { pageUser } from "@/lib/auth/session";
 import { roomHref } from "@/lib/links";
 import { ucRulesData } from "@/lib/uc/content";
 
-export const metadata: Metadata = { title: "Oyun odası" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t("Oyun odası") };
+}
 
 const EMPTY_SHZ = { trees: [], abilities: {}, perks: [], augments: [] };
 
@@ -40,7 +44,7 @@ export default async function UcRoomPage({ params }: { params: Promise<{ id: str
       members={members}
       initialChars={JSON.parse(JSON.stringify(chars))}
       data={EMPTY_SHZ}
-      ucData={ucRulesData()}
+      ucData={ucRulesData(await getLocale())}
       needsCharacter={!isGM && !isSpectator && !rows.some((c) => c.userId === user.id && (c.status === "ACTIVE" || c.status === "PENDING"))}
     />
   );

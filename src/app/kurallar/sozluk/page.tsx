@@ -1,16 +1,21 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { branchLabel } from "@/components/content/cards";
 import { AbilityIcon, AugmentIcon, PageIcon, StatIcon, TermIcon, TreeIcon } from "@/components/content/icons";
 import { PageHeader } from "@/components/ui";
 import { STAT_KEYS, STAT_LABELS } from "@/lib/shz/constants";
 import { content } from "@/lib/shz/content";
+import { branchLabel } from "@/lib/shz/labels";
+import type { Locale } from "@/i18n/core";
+import { getLocale, getT } from "@/i18n/server";
 import { TERM_TIPS, branchMeaning, tipFor } from "@/lib/shz/tips";
 
-export const metadata: Metadata = { title: "Sözlük" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t("Sözlük") };
+}
 
-function Row({ icon, name, href, kind, id, extra }: { icon: React.ReactNode; name: string; href?: string; kind: Parameters<typeof tipFor>[0]; id: string; extra?: string }) {
-  const t = tipFor(kind, id);
+function Row({ icon, name, href, kind, id, extra, loc }: { icon: React.ReactNode; name: string; href?: string; kind: Parameters<typeof tipFor>[0]; id: string; extra?: string; loc: Locale }) {
+  const t = tipFor(kind, id, loc);
   const title = href ? (
     <Link href={href} className="hover:underline">
       {name}
@@ -34,56 +39,67 @@ function Row({ icon, name, href, kind, id, extra }: { icon: React.ReactNode; nam
   );
 }
 
-export default function GlossaryPage() {
-  const c = content();
+export default async function GlossaryPage() {
+  const tt = await getT();
+  const loc = await getLocale();
+  const c = content(loc);
   const abilities = Object.values(c.abilities).sort((a, b) => a.name.localeCompare(b.name, "de"));
   return (
     <div className="max-w-4xl">
       <PageHeader
-        kicker="Yeni oyuncular için"
+        kicker={tt("Yeni oyuncular için")}
         title={
           <span className="flex items-center gap-3">
             <PageIcon page="sozluk" />
-            Sözlük
+            {tt("Sözlük")}
           </span>
         }
       >
-        Oyundaki Almanca adların Türkçe anlamları, yaklaşık okunuşları ve ne işe yaradıkları. Kural metinlerinde altı noktalı terimlere ve stat adlarına, kartlarda da{" "}
-        <span className="text-warn">ampul</span> simgesine tıklayarak aynı açıklamayı görebilirsin.
+        {loc === "en" ? (
+          <>
+            The meanings of the game&apos;s German names, their approximate pronunciation and what they do. You can see the same explanation by clicking dotted-underlined terms and stat
+            names in the rules text, or the <span className="text-warn">light bulb</span> icon on cards.
+          </>
+        ) : (
+          <>
+            Oyundaki Almanca adların Türkçe anlamları, yaklaşık okunuşları ve ne işe yaradıkları. Kural metinlerinde altı noktalı terimlere ve stat adlarına, kartlarda da{" "}
+            <span className="text-warn">ampul</span> simgesine tıklayarak aynı açıklamayı görebilirsin.
+          </>
+        )}
       </PageHeader>
 
       <section className="mb-10">
-        <h2 className="mb-2 text-xl">Statlar</h2>
+        <h2 className="mb-2 text-xl">{tt("Statlar")}</h2>
         <ul className="card px-4">
           {STAT_KEYS.map((k) => (
-            <Row key={k} icon={<StatIcon stat={k} />} name={STAT_LABELS[k]} kind="stats" id={k} />
+            <Row key={k} icon={<StatIcon stat={k} />} name={STAT_LABELS[k]} kind="stats" id={k} loc={loc} />
           ))}
         </ul>
       </section>
 
       <section className="mb-10">
-        <h2 className="mb-2 text-xl">Oyun terimleri</h2>
+        <h2 className="mb-2 text-xl">{tt("Oyun terimleri")}</h2>
         <ul className="card px-4">
-          {Object.entries(TERM_TIPS).map(([k, t]) => (
-            <Row key={k} icon={<TermIcon term={k} />} name={t.match[0]} kind="terms" id={k} />
+          {Object.entries(TERM_TIPS[loc]).map(([k, t]) => (
+            <Row key={k} icon={<TermIcon term={k} />} name={t.match[0]} kind="terms" id={k} loc={loc} />
           ))}
         </ul>
       </section>
 
       <section className="mb-10">
-        <h2 className="mb-2 text-xl">Ekspertiz ağaçları ve kolları</h2>
+        <h2 className="mb-2 text-xl">{tt("Ekspertiz ağaçları ve kolları")}</h2>
         <ul className="card px-4">
           {c.trees.map((t) => {
             const branches = [...new Map(t.abilities.map((k) => c.abilities[k]).filter((a) => a.branch !== "Kök").map((a) => [a.branchName, a])).values()];
             return (
               <li key={t.key} className="border-b border-line/60 py-3 last:border-0">
                 <ul>
-                  <Row icon={<TreeIcon treeKey={t.key} className="h-9 w-9" />} name={t.name} href={`/kurallar/yetenekler/${t.key}`} kind="trees" id={t.key} extra={STAT_LABELS[t.stat]} />
+                  <Row icon={<TreeIcon treeKey={t.key} className="h-9 w-9" />} name={t.name} href={`/kurallar/yetenekler/${t.key}`} kind="trees" id={t.key} extra={STAT_LABELS[t.stat]} loc={loc} />
                 </ul>
                 <p className="ml-12 mt-1 flex flex-wrap gap-1.5">
                   {branches.map((a) => (
                     <span key={a.branchName} className="chip">
-                      {branchLabel(a)} {branchMeaning(a.branchName) && <span className="text-muted">· {branchMeaning(a.branchName)}</span>}
+                      {branchLabel(a, tt)} {branchMeaning(a.branchName, loc) && <span className="text-muted">· {branchMeaning(a.branchName, loc)}</span>}
                     </span>
                   ))}
                 </p>
@@ -94,7 +110,7 @@ export default function GlossaryPage() {
       </section>
 
       <section className="mb-10">
-        <h2 className="mb-2 text-xl">Yetenekler (A–Z)</h2>
+        <h2 className="mb-2 text-xl">{tt("Yetenekler (A–Z)")}</h2>
         <ul className="card px-4">
           {abilities.map((a) => (
             <Row
@@ -105,16 +121,17 @@ export default function GlossaryPage() {
               kind="abilities"
               id={a.key}
               extra={c.trees.find((t) => t.key === a.tree)?.name}
+              loc={loc}
             />
           ))}
         </ul>
       </section>
 
       <section className="mb-10">
-        <h2 className="mb-2 text-xl">Augmentler</h2>
+        <h2 className="mb-2 text-xl">{tt("Augmentler")}</h2>
         <ul className="card px-4">
           {c.augments.map((a) => (
-            <Row key={a.key} icon={<AugmentIcon augmentKey={a.key} tier={a.tier ?? "T1"} className="h-9 w-9" />} name={a.name} href={`/kurallar/augmentler#${a.key}`} kind="augments" id={a.key} extra={a.tier ?? undefined} />
+            <Row key={a.key} icon={<AugmentIcon augmentKey={a.key} tier={a.tier ?? "T1"} className="h-9 w-9" />} name={a.name} href={`/kurallar/augmentler#${a.key}`} kind="augments" id={a.key} extra={a.tier ?? undefined} loc={loc} />
           ))}
         </ul>
       </section>

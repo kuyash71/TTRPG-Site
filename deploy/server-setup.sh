@@ -352,10 +352,12 @@ server {
     # Giriş sayfası (statik)
     location = / {
         add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
-        add_header Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" always;
+        add_header Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" always;
         add_header X-Content-Type-Options nosniff always;
         add_header X-Frame-Options DENY always;
         add_header Referrer-Policy same-origin always;
+        # Tarayıcı eski seçim ekranını saklamasın: her açılışta sunucuya sorsun.
+        add_header Cache-Control "no-cache" always;
         try_files /index.html =404;
     }
 

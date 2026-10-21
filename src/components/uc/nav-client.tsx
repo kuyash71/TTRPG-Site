@@ -3,16 +3,18 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { cx } from "@/components/ui";
 import { LogoutButton } from "@/components/nav-client";
+import { useT } from "@/i18n/client";
 import { UcPageGlyph } from "./icons";
 
 export function UcMobileMenu({ links, name, logout }: { links: { href: string; label: string }[]; name?: string | null; logout?: boolean }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const path = usePathname();
   useEffect(() => setOpen(false), [path]);
   return (
     <div className="md:hidden">
-      <button type="button" aria-label="Menü" aria-expanded={open} onClick={() => setOpen(!open)} className="rounded-md border border-line px-3 py-1.5 text-sm text-ink">
-        {open ? "Kapat" : "Menü"}
+      <button type="button" aria-label={t("Menü")} aria-expanded={open} onClick={() => setOpen(!open)} className="rounded-md border border-line px-3 py-1.5 text-sm text-ink">
+        {open ? t("Kapat") : t("Menü")}
       </button>
       {open && (
         <div className="absolute inset-x-0 top-16 border-b border-line bg-bg px-4 pb-4 pt-2 shadow-card">
@@ -36,16 +38,17 @@ export interface UcNavGroup {
 
 /** Kural kitabının sol menüsü (SHZ kurallarıyla aynı düzen). */
 export function UcRulesNav({ groups }: { groups: UcNavGroup[] }) {
+  const t = useT();
   const path = usePathname();
   const [open, setOpen] = useState(false);
   const here = path.replace(/^\/schwarzesonne/, "").replace(/\/+$/, "");
   return (
     <aside className="lg:sticky lg:top-24 lg:max-h-[calc(100dvh-7rem)] lg:self-start lg:overflow-y-auto">
       <form action="/umbracaelis/kurallar/ara" method="get" role="search">
-        <input name="q" placeholder="Kurallarda ara…" className="input" maxLength={60} aria-label="Kurallarda ara" />
+        <input name="q" placeholder={t("Kurallarda ara…")} className="input" maxLength={60} aria-label={t("Kurallarda ara")} />
       </form>
       <button type="button" className="mt-3 w-full rounded-md border border-line px-3 py-2 text-left text-sm text-muted lg:hidden" onClick={() => setOpen(!open)}>
-        {open ? "İçindekileri gizle" : "İçindekiler"}
+        {open ? t("İçindekileri gizle") : t("İçindekiler")}
       </button>
       <nav className={cx("mt-4 space-y-5 lg:block", open ? "block" : "hidden")}>
         {groups.map((g) => (

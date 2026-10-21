@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { campaignMembers, messages, users } from "@/db/schema";
 import { notFound, route } from "@/lib/api";
+import { fmt } from "@/i18n/core";
 import { requireCampaignGM } from "@/lib/access";
 import { disconnectUserSockets } from "@/lib/auth/core";
 import { notifyCampaign, notifyUser } from "@/lib/realtime-bus";
@@ -20,7 +21,7 @@ export const DELETE = route({}, async ({ params, user }) => {
   setTimeout(() => disconnectUserSockets(params.userId), 300);
   const [msg] = await db
     .insert(messages)
-    .values({ campaignId: params.id, userId: user.id, channel: "SYSTEM", content: `${u?.displayName ?? "Oyuncu"} kampanyadan çıkarıldı.` })
+    .values({ campaignId: params.id, userId: user.id, channel: "SYSTEM", content: fmt("{name} kampanyadan çıkarıldı.", { name: u?.displayName ?? "Oyuncu" }) })
     .returning();
   notifyCampaign(params.id, "message", { ...msg, userName: user.displayName, characterName: null });
   // Bu oyuncunun karakterlerini bekleyen zar isteklerinden düş.
@@ -42,6 +43,15 @@ export const DELETE = route({}, async ({ params, user }) => {
   return { ok: true };
 });
 
+const MEMBER_CHANGE = {
+  "sohbette susturuldu": (name: string) => fmt("{name} sohbette susturuldu.", { name }),
+  "sohbet susturması kaldırıldı": (name: string) => fmt("{name} sohbet susturması kaldırıldı.", { name }),
+  "zar atmada susturuldu": (name: string) => fmt("{name} zar atmada susturuldu.", { name }),
+  "zar susturması kaldırıldı": (name: string) => fmt("{name} zar susturması kaldırıldı.", { name }),
+  "izleyici yapıldı": (name: string) => fmt("{name} izleyici yapıldı.", { name }),
+  "oyuncu yapıldı": (name: string) => fmt("{name} oyuncu yapıldı.", { name }),
+};
+
 /** GM: oyuncuyu sohbette ve/veya zar atmada susturur ya da susturmayı kaldırır. */
 export const PATCH = route(
   { body: z.object({ chatMuted: z.boolean().optional(), rollMuted: z.boolean().optional(), role: z.enum(["PLAYER", "SPECTATOR"]).optional() }), limit: 60 },
@@ -54,14 +64,17 @@ export const PATCH = route(
       .returning();
     if (!m) throw notFound("Oyuncu bu kampanyada değil.");
     const u = await db.query.users.findFirst({ where: eq(users.id, params.userId), columns: { displayName: true } });
-    const parts: string[] = [];
+    const parts: (keyof typeof MEMBER_CHANGE)[] = [];
     if (body.chatMuted !== undefined) parts.push(body.chatMuted ? "sohbette susturuldu" : "sohbet susturması kaldırıldı");
     if (body.rollMuted !== undefined) parts.push(body.rollMuted ? "zar atmada susturuldu" : "zar susturması kaldırıldı");
     if (body.role) parts.push(body.role === "SPECTATOR" ? "izleyici yapıldı" : "oyuncu yapıldı");
     if (parts.length) {
+      const name = u?.displayName ?? "Oyuncu";
+      // Tek değişiklik (olağan durum) tam cümle şablonuyla yazılır; böylece gösterilirken çevrilebilir.
+      const content = parts.length === 1 ? MEMBER_CHANGE[parts[0]](name) : `${name} ${parts.join(", ")}.`;
       const [msg] = await db
         .insert(messages)
-        .values({ campaignId: params.id, userId: user.id, channel: "SYSTEM", content: `${u?.displayName ?? "Oyuncu"} ${parts.join(", ")}.` })
+        .values({ campaignId: params.id, userId: user.id, channel: "SYSTEM", content })
         .returning();
       notifyCampaign(params.id, "message", { ...msg, userName: user.displayName, characterName: null });
     }

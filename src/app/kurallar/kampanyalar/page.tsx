@@ -3,17 +3,23 @@ import { SunLogo } from "@/components/logo";
 import { Html } from "@/components/content/cards";
 import { Badge, PageHeader } from "@/components/ui";
 import { content } from "@/lib/shz/content";
+import { getLocale, getT } from "@/i18n/server";
 
-export const metadata: Metadata = { title: "Kampanyalar" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t("Kampanyalar") };
+}
 
-export default function CampaignsPage() {
+export default async function CampaignsPage() {
+  const t = await getT();
+  const loc = await getLocale();
   return (
     <div>
-      <PageHeader kicker="1955" title="Kampanyalar">
-        Alman iç savaşının farklı cephelerinden sekiz hikâye.
+      <PageHeader kicker="1955" title={t("Kampanyalar")}>
+        {t("Alman iç savaşının farklı cephelerinden sekiz hikâye.")}
       </PageHeader>
       <div className="grid gap-4 md:grid-cols-2">
-        {content().campaigns.map((c) => (
+        {content(loc).campaigns.map((c) => (
           <article key={c.key} className="card flex gap-4 p-5">
             {c.emblem ? (
               // eslint-disable-next-line @next/next/no-img-element

@@ -43,6 +43,13 @@
       "when": 1792452187839,
       "tag": "0005_uc_lobby",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792542077883,
+      "tag": "0006_custom_abilities",
+      "breakpoints": true
     }
   ]
 }

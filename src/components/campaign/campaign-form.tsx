@@ -8,6 +8,7 @@ import { useAction } from "@/components/interactive";
 import { Button, Field, cx } from "@/components/ui";
 import { api } from "@/lib/client";
 import type { CampaignInfo } from "@/lib/shz/content-types";
+import { useT } from "@/i18n/client";
 
 export interface CampaignValues {
   name: string;
@@ -21,6 +22,7 @@ export interface CampaignValues {
 }
 
 export function CampaignForm({ id, initial, presets, system = "SHZ" }: { id?: string; initial?: CampaignValues; presets: CampaignInfo[]; system?: Sys }) {
+  const t = useT();
   const router = useRouter();
   const go = useGo();
   const { busy, run } = useAction();
@@ -35,7 +37,7 @@ export function CampaignForm({ id, initial, presets, system = "SHZ" }: { id?: st
       onSubmit={async (e) => {
         e.preventDefault();
         if (id) {
-          await run(() => api(`/api/campaigns/${id}`, { method: "PATCH", body: v }), "Kampanya kaydedildi.");
+          await run(() => api(`/api/campaigns/${id}`, { method: "PATCH", body: v }), t("Kampanya kaydedildi."));
           router.refresh();
         } else {
           const r = await run(() => api<{ id: string }>("/api/campaigns", { body: { ...v, system } }));
@@ -45,7 +47,7 @@ export function CampaignForm({ id, initial, presets, system = "SHZ" }: { id?: st
     >
       {presets.length > 0 && (
       <div>
-        <span className="label">Hikâye</span>
+        <span className="label">{t("Hikâye")}</span>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           {presets.map((p) => (
             <button
@@ -75,50 +77,52 @@ export function CampaignForm({ id, initial, presets, system = "SHZ" }: { id?: st
             </button>
           ))}
         </div>
-        <p className="mt-1.5 text-xs text-muted">İsteğe bağlı. Kendi hikâyeni anlatıyorsan boş bırak.</p>
+        <p className="mt-1.5 text-xs text-muted">{t("İsteğe bağlı. Kendi hikâyeni anlatıyorsan boş bırak.")}</p>
       </div>
       )}
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Kampanya adı">
+        <Field label={t("Kampanya adı")}>
           <input value={v.name} onChange={(e) => set("name", e.target.value)} required minLength={2} maxLength={80} className="input" />
         </Field>
         {id && (
-          <Field label="Durum">
+          <Field label={t("Durum")}>
             <select value={v.status} onChange={(e) => set("status", e.target.value as CampaignValues["status"])} className="input">
-              <option value="ACTIVE">Aktif</option>
-              <option value="PAUSED">Duraklatıldı</option>
-              <option value="ARCHIVED">Arşiv</option>
+              <option value="ACTIVE">{t("Aktif")}</option>
+              <option value="PAUSED">{t("Duraklatıldı")}</option>
+              <option value="ARCHIVED">{t("Arşiv")}</option>
             </select>
           </Field>
         )}
       </div>
-      <Field label="Açıklama" hint="Oyunculara görünen kısa tanıtım">
+      <Field label={t("Açıklama")} hint={t("Oyunculara görünen kısa tanıtım")}>
         <textarea value={v.description} onChange={(e) => set("description", e.target.value)} maxLength={2000} rows={3} className="input" />
       </Field>
       <div className="grid gap-4 sm:grid-cols-3">
-        <Field label="Başlangıç perk puanı" hint="Önerilen +0 veya +2">
+        <Field label={t("Başlangıç perk puanı")} hint={t("Önerilen +0 veya +2")}>
           <input type="number" min={0} max={10} value={v.startPerkPoints} onChange={(e) => set("startPerkPoints", Number(e.target.value))} className="input" />
         </Field>
-        <Field label="Seviye sınırı" hint={system === "UC" ? "En fazla 15 (Zirve)" : "10 (uzun kampanyalarda 15'e kadar)"}>
+        <Field label={t("Seviye sınırı")} hint={system === "UC" ? t("En fazla 15 (Zirve)") : t("10 (uzun kampanyalarda 15'e kadar)")}>
           <input type="number" min={1} max={15} value={v.levelCap} onChange={(e) => set("levelCap", Number(e.target.value))} className="input" />
         </Field>
         <label className="flex items-center gap-3 rounded-lg border border-line bg-surface2/40 px-3 py-2.5 sm:mt-5 sm:self-start">
           <input type="checkbox" checked={v.deathSaveEnabled} onChange={(e) => set("deathSaveEnabled", e.target.checked)} className="h-4 w-4 accent-[rgb(186,168,240)]" />
-          <span className="text-sm">Death Save açık</span>
+          <span className="text-sm">{t("Death Save açık")}</span>
         </label>
       </div>
       <label className="flex items-start gap-3 rounded-lg border border-line bg-surface2/40 px-3 py-3">
         <input type="checkbox" checked={v.physicalDice} onChange={(e) => set("physicalDice", e.target.checked)} className="mt-0.5 h-4 w-4 accent-[rgb(186,168,240)]" data-testid="physical-dice" />
         <span className="text-sm">
-          <span className="font-medium text-ink">Fiziksel atılmış zar</span>
+          <span className="font-medium text-ink">{t("Fiziksel atılmış zar")}</span>
           <span className="block text-xs text-muted">
-            Masada gerçek zarla oynanan oyunlar için. Açıkken oyuncular odada dijital zar atamaz; GM eşiği, stat&apos;ı, uzvu ya da {system === "UC" ? "Yozlaşma" : "Corruption"} / Death
-            Save durumunu seçip atılan zarı ve atan oyuncuyu girer, sistem başarıyı hesaplar.
+            {t(
+              "Masada gerçek zarla oynanan oyunlar için. Açıkken oyuncular odada dijital zar atamaz; GM eşiği, stat'ı, uzvu ya da {corruption} / Death Save durumunu seçip atılan zarı ve atan oyuncuyu girer, sistem başarıyı hesaplar.",
+              { corruption: system === "UC" ? t("Yozlaşma") : "Corruption" },
+            )}
           </span>
         </span>
       </label>
       <Button type="submit" variant="primary" disabled={busy}>
-        {id ? "Kaydet" : "Kampanyayı oluştur"}
+        {id ? t("Kaydet") : t("Kampanyayı oluştur")}
       </Button>
     </form>
   );

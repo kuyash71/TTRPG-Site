@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { campaignMembers, characters, users } from "@/db/schema";
 import { bad, conflict, forbidden, route, zId } from "@/lib/api";
+import { fmt } from "@/i18n/core";
 import { addLog, characterAccess } from "@/lib/access";
 import { characterChanged, notifyCampaign } from "@/lib/realtime-bus";
 
@@ -44,12 +45,12 @@ export const PATCH = route({ body: z.object({ userId: zId.nullable() }), limit: 
             ),
           )
           .limit(1);
-        if (other.length) throw conflict(`${targetName} bu kampanyada zaten aktif bir karaktere sahip (${other[0].name}). Önce onu devret ya da emekliye ayır.`);
+        if (other.length) throw conflict("{target} bu kampanyada zaten aktif bir karaktere sahip ({name}). Önce onu devret ya da emekliye ayır.", { target: targetName, name: other[0].name });
       }
     }
     await tx.update(characters).set({ userId: body.userId }).where(eq(characters.id, c.id));
   });
-  await addLog(c.id, user.id, "gm", `GM: karakter ${body.userId ? `${targetName} oyuncusuna devredildi` : "sahipsiz bırakıldı"}`);
+  await addLog(c.id, user.id, "gm", body.userId ? fmt("GM: karakter {name} oyuncusuna devredildi", { name: targetName }) : fmt("GM: karakter sahipsiz bırakıldı"));
   characterChanged(a.campaign.id, c.id);
   notifyCampaign(a.campaign.id, "approvals:changed", {});
   return { ok: true };

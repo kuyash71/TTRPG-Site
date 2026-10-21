@@ -1,3 +1,5 @@
+"use client";
+import { useT } from "@/i18n/client";
 import { BODY_PARTS, WOUNDS, type BodyPartKey } from "@/lib/shz/constants";
 import type { PartState } from "@/lib/shz/rules";
 import { cx } from "./ui";
@@ -37,8 +39,9 @@ export function BodyDiagram({
   onSelect?: (k: BodyPartKey) => void;
   className?: string;
 }) {
+  const t = useT();
   return (
-    <svg viewBox="0 0 200 368" className={cx("h-auto w-full max-w-[240px]", className)} role="img" aria-label="Beden tablosu">
+    <svg viewBox="0 0 200 368" className={cx("h-auto w-full max-w-[240px]", className)} role="img" aria-label={t("Beden tablosu")}>
       {BODY_PARTS.map((p) => {
         const s = SHAPES[p.key];
         const st = body[p.key];
@@ -49,9 +52,9 @@ export function BodyDiagram({
             onClick={onSelect ? () => onSelect(p.key) : undefined}
             className={onSelect ? "cursor-pointer" : undefined}
             role={onSelect ? "button" : undefined}
-            aria-label={`${p.label}: ${WOUNDS.find((w) => w.key === st.wound)?.label}`}
+            aria-label={`${t(p.label)}: ${t(WOUNDS.find((w) => w.key === st.wound)?.label ?? "")}`}
           >
-            <title>{p.label}</title>
+            <title>{t(p.label)}</title>
             <path
               d={s.d}
               fill={FILL[st.wound]}
@@ -72,19 +75,20 @@ export function BodyDiagram({
 }
 
 export function WoundLegend() {
+  const t = useT();
   return (
     <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted">
       {WOUNDS.map((w) => (
         <span key={w.key} className="flex items-center gap-1.5">
           <span className="inline-block h-2.5 w-2.5 rounded-sm border border-line" style={{ background: FILL[w.key] }} />
-          {w.label}
+          {t(w.label)}
         </span>
       ))}
       <span className="flex items-center gap-1.5">
         <span className="inline-block h-2.5 w-2.5 rounded-full bg-accent" /> Augment
       </span>
       <span className="flex items-center gap-1.5">
-        <span className="inline-block h-2.5 w-3 border border-dashed border-muted" /> Sargılı
+        <span className="inline-block h-2.5 w-3 border border-dashed border-muted" /> {t("Sargılı")}
       </span>
     </div>
   );

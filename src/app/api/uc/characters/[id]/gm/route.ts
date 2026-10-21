@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { characters, messages, type Character, type UcCharData } from "@/db/schema";
 import { bad, forbidden, route } from "@/lib/api";
+import { fmt } from "@/i18n/core";
 import { addLog, characterAccess, requireSystem } from "@/lib/access";
 import { characterChanged, notifyCampaign } from "@/lib/realtime-bus";
 import { asUcChar, ucStatsColumn, ucUnspent } from "@/lib/uc/char";
@@ -47,11 +48,11 @@ export const PATCH = route(
 
     if (body.level !== undefined && body.level !== c.level) {
       set.level = body.level;
-      log.push(`seviye ${c.level} → ${body.level}`);
+      log.push(fmt("seviye {from} → {to}", { from: c.level, to: body.level }));
     }
     if (body.freeStatPoints !== undefined && body.freeStatPoints !== c.freeStatPoints) {
       set.freeStatPoints = body.freeStatPoints;
-      log.push(`serbest stat puanı ${c.freeStatPoints} → ${body.freeStatPoints}`);
+      log.push(fmt("serbest stat puanı {from} → {to}", { from: c.freeStatPoints, to: body.freeStatPoints }));
     }
     if (body.stats) {
       const next = asUcChar(c).stats;
@@ -67,30 +68,30 @@ export const PATCH = route(
         if ((forks[l] ?? null) === v) continue;
         if (v) forks[l] = v;
         else delete forks[l];
-        log.push(`Çatal ${l}: ${v === "teslim" ? "Teslim" : v === "direnis" ? "Direniş" : "karar silindi"}`);
+        log.push(fmt(v === "teslim" ? "Çatal {level}: Teslim" : v === "direnis" ? "Çatal {level}: Direniş" : "Çatal {level}: karar silindi", { level: l }));
       }
       uc = { ...uc, forks };
     }
     if (body.corruption !== undefined || body.forks) {
       const want = body.corruption ?? c.corruption;
       const v = ucClampDecay(want, uc.forks);
-      if (body.corruption !== undefined && v !== want) log.push(`Yozlaşma çatal tabanı (${ucDecayFloor(uc.forks)}) altına inemez`);
-      if (v !== c.corruption) log.push(`Yozlaşma ${c.corruption} → ${v}`);
+      if (body.corruption !== undefined && v !== want) log.push(fmt("Yozlaşma çatal tabanı ({floor}) altına inemez", { floor: ucDecayFloor(uc.forks) }));
+      if (v !== c.corruption) log.push(fmt("Yozlaşma {from} → {to}", { from: c.corruption, to: v }));
       set.corruption = v;
     }
     if (body.inspiration !== undefined && body.inspiration !== c.inspiration) {
       set.inspiration = body.inspiration;
-      log.push(`Esin ${c.inspiration} → ${body.inspiration}`);
+      log.push(fmt("Esin {from} → {to}", { from: c.inspiration, to: body.inspiration }));
     }
     if (body.status && body.status !== c.status) {
       set.status = body.status;
-      log.push(`durum ${c.status} → ${body.status}`);
+      log.push(fmt("durum {from} → {to}", { from: c.status, to: body.status }));
     }
     if (body.gmNotes !== undefined) set.gmNotes = body.gmNotes;
     if (body.classKey !== undefined && body.classKey !== uc.classKey) {
       if (!data.classes.some((x) => x.key === body.classKey)) throw bad("Bilinmeyen sınıf.");
       uc = { ...uc, classKey: body.classKey };
-      log.push(`ana sınıf: ${data.classes.find((x) => x.key === body.classKey)!.name}`);
+      log.push(fmt("ana sınıf: {name}", { name: data.classes.find((x) => x.key === body.classKey)!.name }));
     }
     if (body.trees) {
       const trees = [...new Set(body.trees)];
@@ -98,45 +99,51 @@ export const PATCH = route(
       const tiers = trees.map((t) => data.dals[t].tier);
       if (new Set(tiers).size !== tiers.length) throw bad("Her katmanda yalnızca bir dal seçilebilir.");
       set.trees = trees.sort((x, y) => data.dals[x].tier - data.dals[y].tier);
-      log.push(`dallar: ${set.trees.map((t) => data.dals[t].name).join(", ") || "yok"}`);
+      log.push(fmt("dallar: {list}", { list: set.trees.map((t) => data.dals[t].name).join(", ") || "yok" }));
     }
     if (body.abilities) {
       const next: Record<string, number> = {};
       for (const [k, v] of Object.entries(body.abilities)) {
         const ab = data.abilities[k];
-        if (!ab) throw bad(`Bilinmeyen yetenek: ${k}`);
-        if (v > ab.maxLevel) throw bad(`${ab.name} en fazla ${ab.maxLevel}. seviye olabilir.`);
+        if (!ab) throw bad("Bilinmeyen yetenek: {key}", { key: k });
+        if (v > ab.maxLevel) throw bad("{name} en fazla {max}. seviye olabilir.", { name: ab.name, max: ab.maxLevel });
         if (v > 0) next[k] = v;
       }
       set.abilities = next;
-      log.push("yetenekler GM tarafından düzenlendi");
+      log.push(fmt("yetenekler GM tarafından düzenlendi"));
     }
     if (body.perks) {
       if (body.perks.some((p) => !data.perks.some((x) => x.key === p))) throw bad("Bilinmeyen perk.");
       set.perks = [...new Set(body.perks)];
-      log.push(`perkler: ${set.perks.map((p) => data.perks.find((x) => x.key === p)!.name).join(", ") || "yok"}`);
+      log.push(fmt("perkler: {list}", { list: set.perks.map((p) => data.perks.find((x) => x.key === p)!.name).join(", ") || "yok" }));
     }
     if (body.deathSave) {
       set.deathSave = { ...c.deathSave, ...body.deathSave };
-      log.push(`Death Save ${body.deathSave.available ? "hakkı verildi" : "hakkı kaldırıldı"}`);
+      log.push(body.deathSave.available ? fmt("Death Save hakkı verildi") : fmt("Death Save hakkı kaldırıldı"));
     }
     if (body.perkEditAllowed !== undefined && body.perkEditAllowed !== c.perkEditAllowed) {
       set.perkEditAllowed = body.perkEditAllowed;
-      log.push(body.perkEditAllowed ? "perk düzenleme izni verildi" : "perk düzenleme izni kaldırıldı");
+      log.push(body.perkEditAllowed ? fmt("perk düzenleme izni verildi") : fmt("perk düzenleme izni kaldırıldı"));
     }
     let announce: string | null = null;
     if (body.revive) {
       if (c.status !== "DEAD") throw bad("Karakter ölü değil.");
       set.status = "ACTIVE";
       set.deathSave = { ...c.deathSave, available: true, deaths: 0, saves: 0 };
-      log.push("karakter diriltildi");
-      announce = `✚ ${c.name} GM tarafından diriltildi.`;
+      log.push(fmt("karakter diriltildi"));
+      announce = fmt("✚ {name} GM tarafından diriltildi.", { name: c.name });
     }
     if (JSON.stringify(uc) !== JSON.stringify(c.uc ?? {})) set.uc = uc;
     if (set.level !== undefined || set.abilities) set.abilityPoints = ucUnspent({ level: set.level ?? c.level, abilities: set.abilities ?? c.abilities }, data);
     if (!Object.keys(set).length) return { ok: true };
     await db.update(characters).set(set).where(eq(characters.id, c.id));
-    if (log.length) await addLog(c.id, user.id, "gm", `GM: ${log.join(", ")}${body.reason ? ` (${body.reason})` : ""}`);
+    if (log.length)
+      await addLog(
+        c.id,
+        user.id,
+        "gm",
+        body.reason ? fmt("GM: {changes} ({reason})", { changes: log.join(", "), reason: body.reason }) : fmt("GM: {changes}", { changes: log.join(", ") }),
+      );
     characterChanged(a.campaign.id, c.id);
     if (announce) {
       const [m] = await db.insert(messages).values({ campaignId: a.campaign.id, userId: user.id, channel: "SYSTEM", content: announce }).returning();

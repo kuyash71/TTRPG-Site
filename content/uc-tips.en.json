@@ -1,0 +1,1403 @@
+{
+ "classes": {
+  "close-quarter": {
+   "meaning": "Close range, hand-to-hand combat",
+   "summary": "With sword, axe or fist, you close the distance between you and your enemy to an arm's length. Your attacks are rolled with Yalman (heavy weapons, grappling) or Kaçınç (light weapons, swords), depending on the weapon."
+  },
+  "hunter": {
+   "meaning": "Hunter",
+   "summary": "You fight at a place and time of your own choosing: you track, set ambushes and hunt. Your ranged attacks are rolled with Görü."
+  },
+  "priest": {
+   "meaning": "Priest",
+   "summary": "You are a bearer of faith and will: either you heal and bless with your god's power, or you rouse the team with your words and steer people's will. You choose a faith at the start."
+  },
+  "scholar": {
+   "meaning": "Scholar, learned one",
+   "summary": "You are a mage who learned mana through training: you carve runes, trigger outer mana with your inner mana, and wrestle with your soul's dynamism. If you roll a Nat1 on a spell roll, you gain +1 Corruption."
+  }
+ },
+ "dals": {
+  "brute": {
+   "meaning": "Brawny, hulking",
+   "summary": "You leave finesse behind and fight with weight, bone-breaking and willpower; symbol stat Yalman. If you choose it as your first branch, you start the game with +1 Sebahat."
+  },
+  "swordsman": {
+   "meaning": "Swordmaster",
+   "summary": "You fight with the discipline of the imperial sword school: proper stance, distance and parrying; symbol stat Kaçınç. If you choose it as your first branch, you start with +1 Görü."
+  },
+  "arcanist": {
+   "meaning": "One who knows magic, mystic",
+   "summary": "You are a battle mage who channels inner mana from your body into your weapon; your sword strikes become as devastating as spells. Symbol stat Efsun."
+  },
+  "berserker": {
+   "meaning": "Frenzied warrior",
+   "summary": "You don't try to control the mana overflowing from within; you surrender to rage. Rage becomes your weapon, pain your fuel. Symbol stat Yalman."
+  },
+  "duelist": {
+   "meaning": "Duelist",
+   "summary": "You always reduce the fight to a two-person scene, read your opponent and punish their first mistake; symbol stat Kaçınç. Branch mechanic Duel: you declare a rival, build up Opening as you foil their attacks, and spend it against them."
+  },
+  "shinigami": {
+   "meaning": "God of death (Japanese)",
+   "say": "şi-ni-ga-mi",
+   "summary": "You speak with your soul-sword (Animus), learn its name and release it as Erwachen and Apotheosis. Symbol stat Sebahat; branch mechanic Flow: you keep your release open with your Flow pool, which fills in every combat."
+  },
+  "lurcher": {
+   "meaning": "One who lies in ambush, who prowls stealthily",
+   "summary": "You are a hunter who patiently lies in ambush, learns their prey and brings it down with a single strike at the right moment. Symbol stat Giz; if chosen as your first branch, you start with +1 Kaçınç."
+  },
+  "ranger": {
+   "meaning": "Ranger, tracker",
+   "summary": "You are an archer and tracker who lives between the bow and nature; you read the wind, the trail and where the arrow will fall. Symbol stat Görü; if chosen as your first branch, you start with +1 Hikmet."
+  },
+  "artisan": {
+   "meaning": "Artisan, master",
+   "summary": "You trust your hands: you are an artisan hunter who prepares traps, potions, special arrows and powder pots. Symbol stat Marifet."
+  },
+  "shade": {
+   "meaning": "Shadow",
+   "summary": "You are a spy and assassin who wears the shadow: a false face, a poisoned cup, a whispered rumor. Symbol stat Giz."
+  },
+  "slayer": {
+   "meaning": "Slayer, monster hunter",
+   "summary": "You are a monster hunter who hunts creatures fed by Decayed Mana and supernatural horrors with knowledge; symbol stat Hikmet. Branch mechanic Hunting Ledger: you add a Page for each species you observe or kill, learning its weak spot and its weakness."
+  },
+  "stormer": {
+   "meaning": "Raider, assaulter",
+   "summary": "You are a raider who climbs walls, breaks down doors and breaches lines; you always fight on the move, symbol stat Kaçınç. Branch mechanic Momentum: you build it up as you move and attack, and spend it for attack bonuses and defense; it fades when you stand still."
+  },
+  "prayer": {
+   "meaning": "Prayer",
+   "summary": "You are a healer priest who closes wounds with prayer, blesses allies and wards areas against evil. Symbol stat Sebahat; if chosen as your first branch, you start with +1 Hikmet."
+  },
+  "preacher": {
+   "meaning": "Preacher",
+   "summary": "You are a preacher whose words are a sword: you persuade crowds, rouse the team and draw out confessions. Symbol stat Cazibe; if chosen as your first branch, you start with +1 Hakimiyet."
+  },
+  "men-of-will": {
+   "meaning": "Men of will",
+   "summary": "You are a leader priest who gives will to your people: you gather followers, give orders and cleanse the team of fear and pain. Symbol stat Hakimiyet."
+  },
+  "will-of-god": {
+   "meaning": "The will of god",
+   "summary": "You are a paladin who turns prayer into armor and faith into blows: you stand in the front line in heavy armor, judge the sinner and protect your allies. Symbol stat Yalman."
+  },
+  "archpriest": {
+   "meaning": "High priest",
+   "summary": "You are the pinnacle of holy power: mass healing, Corruption cleansing, excommunication, consecrating the ground and resurrection; symbol stat Sebahat. Branch mechanic Grace: you spend a pool, fed by Sebahat and shrinking as Corruption rises, to empower your healing and blessings."
+  },
+  "occultist": {
+   "meaning": "Occultist",
+   "summary": "You are the dark end of Men of Will: you turn your followers into puppets and enter dreams; your power rests on decayed rolls and Corruption, symbol stat Hakimiyet. Branch mechanic Strings: you tie Strings that last across sessions to the people whose minds you enter, and grow stronger against them."
+  },
+  "runecaster": {
+   "meaning": "Rune caster, rune master",
+   "summary": "You draw magic not from your own soul but from the world: you direct outer mana with runes and store power in Blu Mana crystals. A slow, patient playstyle; symbol stat Hikmet."
+  },
+  "wizard": {
+   "meaning": "Mage",
+   "summary": "You are the classic mage: you extend your inner mana like a limb and trigger outer mana. You play with mana bolts, elements and shields; symbol stat Efsun."
+  },
+  "shackled": {
+   "meaning": "Chained",
+   "summary": "Your mana is low in dynamism, calm and efficient. You chain mana, silence other people's spells and are resistant to Corruption; symbol stat Hikmet."
+  },
+  "unleashed": {
+   "meaning": "Unleashed, unbridled",
+   "summary": "Your high-dynamism mana is explosive and uncontrolled. You empower your rolls and unleash explosions, but you accept the risk of backlash and Corruption; symbol stat Efsun."
+  },
+  "catastrophe": {
+   "meaning": "Calamity, ruin",
+   "summary": "You turn Decayed Mana, said to be unusable, into a weapon; you pay the price of every power with Corruption, symbol stat Efsun. Branch mechanic Crimson Burden: you spend the Burden that builds up on successful decayed rolls; if it overflows, it explodes, and whatever goes unspent turns into Corruption."
+  },
+  "divine": {
+   "meaning": "Divine, godly",
+   "summary": "You seek Primordial Mana, held to belong to the gods; you play with light, creation and prophecy, symbol stat Sebahat. Branch mechanic Voice of the Sky: while your Corruption is low, the sky stays open and empowers you; as it rises, the sky falls silent and the dream speaks in its place."
+  }
+ },
+ "abilities": {
+  "heavy-hands": {
+   "meaning": "Heavy hands",
+   "summary": "You get a bonus on Yalman rolls for brute-force tasks such as breaking doors, lifting, pushing and grappling. At higher levels you can attempt impossible tasks at Uber difficulty with GM approval."
+  },
+  "juggernaut": {
+   "meaning": "Unstoppable giant strength",
+   "summary": "You build up Impetus as you advance, knock enemies down and meet attacks without stepping back; each Impetus spent gives +2 to an attack roll. It resets if you step back or don't attack for a turn."
+  },
+  "bonebreaker": {
+   "meaning": "Bone breaker",
+   "summary": "After a hit, you roll d20 + Yalman to break the target's bone; against an armored target the roll gets one step harder. A fractured limb takes penalties; at higher levels it makes the target drop their weapon, and a head or torso fracture stuns."
+  },
+  "thick-skin": {
+   "meaning": "Thick skin",
+   "summary": "You ignore or reduce the penalties of light wounds; at Lv 3, once per combat, you prevent a wound advance with a roll."
+  },
+  "mons-ferreus": {
+   "meaning": "Iron Mountain (Latin)",
+   "say": "mons fer-re-us",
+   "summary": "Once per combat, with a heavy weapon held in both hands, you deliver a blow whose roll is one step easier; on a hit, the wound on the limb you choose advances and the limb becomes Fractured, 2 stages on a Nat20. You cannot take an action on the next turn."
+  },
+  "stance-of-the-empire": {
+   "meaning": "Imperial stance",
+   "summary": "At the start of combat you choose an offensive or defensive stance, gaining a bonus on one side and a penalty on the other; at Lv 3 you change stance every turn."
+  },
+  "parry": {
+   "meaning": "Parry",
+   "summary": "You parry an incoming melee attack with d20 + Kaçınç (the GM sets the difficulty based on the attacker's skill); on a success, you take no wound. Once per combat, more often at higher levels."
+  },
+  "riposte": {
+   "meaning": "Counterstrike",
+   "summary": "Right after a successful parry or dodge, you make a bonus counterattack without spending a turn. At higher levels the attacker cannot dodge it."
+  },
+  "measured-step": {
+   "meaning": "Measured step",
+   "summary": "In one-on-one combat you set the distance; following a retreating target doesn't cost a turn. At higher levels you strike first against an approaching enemy (2 times per combat)."
+  },
+  "filo-de-honor": {
+   "meaning": "Sword of Honor (Spanish)",
+   "say": "fi-lo de o-nor",
+   "summary": "You issue a formal duel challenge in front of witnesses; if accepted, you get +3 on your rolls in the duel; if refused, your opponent is diminished in the eyes of their men. With Master Duelist, an additional +1 to the bonus."
+  },
+  "mana-edge": {
+   "meaning": "Mana edge (the sharp edge of a weapon)",
+   "summary": "You channel mana into your weapon and gain a bonus on your attacks for a few turns or for the whole combat, rendering light armor ineffective."
+  },
+  "ember-brand": {
+   "meaning": "Ember brand",
+   "summary": "With a spell roll (Medium) you set your weapon aflame; on your next hit, the target limb burns and its wound advances 1 more stage at the end of the turn. At higher levels the burn lasts longer and can jump to a second target."
+  },
+  "glockenschlag": {
+   "meaning": "Bell strike (German)",
+   "say": "glokın-şlag",
+   "summary": "You gather mana for a turn, then release it in a shockwave that throws back those around you; at Lv 2 the area grows and escaping gets harder, at Lv 3 you cast it instantly or as a cone."
+  },
+  "mana-ward": {
+   "meaning": "Mana shield",
+   "summary": "You raise a mana shield against an incoming attack: if your spell roll succeeds (the GM sets the difficulty based on the attack's strength), the wound advances 1 stage less. 2 times per combat."
+  },
+  "ignis-savarum": {
+   "meaning": "Savarum's Fire (Latin)",
+   "say": "ig-nis sa-va-rum",
+   "summary": "Once per combat you create a 10-meter whirlwind of flame around your sword; enemies who can't escape take 2 stages of wound and a burn, and even those who escape are wounded 1 stage."
+  },
+  "red-mist": {
+   "meaning": "Red mist (going berserk)",
+   "summary": "You enter a rage for a few turns: +2 on attacks, immunity to fear and mind control, but -2 on dodging and parrying and you cannot retreat. When the rage ends, -2 on all rolls for 1 turn."
+  },
+  "pain-is-fuel": {
+   "meaning": "Pain is fuel",
+   "summary": "Each wounded limb gives +1 to your attack rolls; at Lv 3 this goes up to +4, and Unusable limbs count as +2."
+  },
+  "blood-price": {
+   "meaning": "Blood price",
+   "summary": "Before an attack roll, you deal 1 stage of wound to yourself and take +3 on that roll; at Lv 2, +6 for 2 stages of wound. Each use requires a Sebahat roll; on a failure, +1 Corruption."
+  },
+  "howl": {
+   "meaning": "Howl",
+   "summary": "Twice per combat, you make enemies Cower for 1 turn with a war cry; a target who resists is immune to this cry for that combat."
+  },
+  "ira-aeterna": {
+   "meaning": "Endless Rage (Latin)",
+   "say": "i-ra e-ter-na",
+   "summary": "The moment you die in combat, you fight on for 2 turns ignoring wound penalties; if you kill the one who killed you, you survive critically wounded. Once per session, +2 Corruption."
+  },
+  "master-duelist": {
+   "meaning": "Master duelist",
+   "summary": "In one-on-one combat you get +2 on combat rolls, +3 at Lv 2, +5 at Lv 3. In a Filo de Honor duel, an additional +1 to the bonus."
+  },
+  "prince-of-death": {
+   "meaning": "Prince of death",
+   "summary": "Targets you kill in combat grant you a dodge and parry bonus until the end of combat: +1 for 1 kill, +2 for 2, +3 for 4."
+  },
+  "charisma-of-steel": {
+   "meaning": "Charisma of steel",
+   "summary": "You earn Renown from your one-on-one victories; by spending Renown you make your social rolls one step easier, drive enemies to flee, or once per session end an entire combat on your terms."
+  },
+  "read-the-blade": {
+   "meaning": "Reading the sword",
+   "summary": "You watch your opponent for a turn and, with d20 + Görü (Medium), foresee their next attack; your dodge roll against it gets one step easier, or you make a counterattack without spending a turn."
+  },
+  "una-vida": {
+   "meaning": "One Life (Spanish)",
+   "say": "u-na vi-da",
+   "summary": "Each of your hits leaves a Herida (gash) on the target. Once per combat, with a strike that needs no roll, you detonate them all, advancing the wound 1 stage for every 2 Herida; if the target doesn't die, the first attack against you hits without a roll."
+  },
+  "jinzen": {
+   "meaning": "Sword meditation (Japanese)",
+   "say": "cin-zen",
+   "summary": "During a long rest you descend into your inner world, speak with the soul-sword and gain Resonance; on the first success, the sword speaks its name and Erwachen opens. At higher levels, the Voice of the Sword comes to you in hard moments."
+  },
+  "erwachen": {
+   "meaning": "Awakening (German)",
+   "say": "er-vah-ın",
+   "summary": "The moment you learn the sword's name, Level 1 opens for free: with the release word you awaken the sword and gain the effect within the budget you designed with the GM. Each turn it is open costs 1 Flow."
+  },
+  "maiestas": {
+   "meaning": "Majesty (Latin)",
+   "say": "ma-yes-tas",
+   "summary": "While Erwachen or Apotheosis is open, enemies whose Sebahat is lower than yours take a −1/−2 penalty on their rolls against you. At higher levels, those far lower must roll just to attack you."
+  },
+  "shunpo": {
+   "meaning": "Instant step (Japanese)",
+   "say": "şun-po",
+   "summary": "Without spending a turn, you take a 10-meter instant step; at Lv 2, while your release is open, you can use it 4 times per combat by spending Flow, and when you get behind a target you make an ambush attack."
+  },
+  "apotheosis": {
+   "meaning": "Deification (Greek)",
+   "say": "a-po-te-o-sis",
+   "summary": "You unlock your soul-sword's ultimate form: all of Erwachen's effects are doubled and the ultimate effect opens. Costs 2 Flow per turn, once per session."
+  },
+  "low-profile": {
+   "meaning": "Staying inconspicuous",
+   "summary": "While on the move, you get +1 on Giz rolls, +2 at Lv 2, +3 at Lv 3; at Lv 3 your rolls to vanish into a crowd get one step easier."
+  },
+  "patient-predator": {
+   "meaning": "Patient predator",
+   "summary": "Each turn you wait motionless in ambush builds up +1 to your first attack (up to +4 at Lv 3); at Lv 3 a failed Giz roll doesn't reveal your position, you only change position."
+  },
+  "silent-takedown": {
+   "meaning": "Silent neutralization",
+   "summary": "You silently knock out a target you seize unnoticed; armored or alert targets are hard. At Lv 2, once per combat, you can choose to kill."
+  },
+  "stalker-s-eye": {
+   "meaning": "The tracker's eye",
+   "summary": "While following a target you've marked, you get +2 on Giz and Görü rolls. At Lv 2 the mark lasts the whole session and you leave no trail behind."
+  },
+  "muerte-callada": {
+   "meaning": "Silent death (Spanish)",
+   "say": "muerte kayada",
+   "summary": "When you strike from ambush at a target that hasn't noticed you, your attack roll gets two steps easier and on a hit the wound advances 2 stages; the target can't make a sound that turn. Once per combat."
+  },
+  "steady-draw": {
+   "meaning": "Steady draw",
+   "summary": "If you didn't move that turn, you get a level-based bonus on bow and crossbow rolls; at the highest level you also get +1 while moving."
+  },
+  "tracker": {
+   "meaning": "Tracker",
+   "summary": "You read tracks and learn direction, number and identity. With Bestiary, on a creature's trail you also learn its species without rolling."
+  },
+  "pinning-shot": {
+   "meaning": "Pinning shot",
+   "summary": "You shoot the target's leg and nail them in place. At Lv 2 it lasts 2 turns, but the target can break free with Yalman each turn; the same target can be pinned only once per combat."
+  },
+  "child-of-the-wild": {
+   "meaning": "Child of the wilds",
+   "summary": "Finding food, water and shelter in the wild gets easier, and wild animals hesitate. At Lv 2 you gain an animal companion."
+  },
+  "argentum-imber": {
+   "meaning": "Silver rain (Latin)",
+   "say": "argentum imber",
+   "summary": "You shoot 3 arrows in one turn, at different targets or limbs, each with a separate roll and a -2 penalty. Once per combat."
+  },
+  "trapwright": {
+   "meaning": "Trap master",
+   "summary": "You set traps that wound targets and hold them in place; setting them outside combat is easier. At Lv 3, two traps and setup without spending a turn."
+  },
+  "brewmaster": {
+   "meaning": "Potion master",
+   "summary": "During a long rest you prepare healing, awakening and poison potions; at higher levels Düşotu and difficult mixtures unlock."
+  },
+  "fletcher-s-secret": {
+   "meaning": "The master archer's secret",
+   "summary": "During a long rest you make special arrows (2 of each type); you know two of the Barbed, Whistling, Light and Rope types. At higher levels you know them all and add the armor-ignoring Piercing arrow."
+  },
+  "powder-pot": {
+   "meaning": "Powder pot",
+   "summary": "With a powder pot you shatter doors and knock down and wound those nearby; gunpowder is unreliable."
+  },
+  "meisterwerk": {
+   "meaning": "Masterpiece, master's work (German)",
+   "say": "mayster-verk",
+   "summary": "With a session's worth of work you produce a masterpiece: +2 to the user's relevant rolls and one property chosen with the GM. A masterpiece weapon worked with Blu Mana adds +1 to the Silvered Steel bonus."
+  },
+  "second-face": {
+   "meaning": "Second face",
+   "summary": "You disguise yourself and become someone else; at Lv 3 you impersonate a specific person. The identity you assume counts as access for Nachtgericht."
+  },
+  "poisoner": {
+   "meaning": "Poisoner",
+   "summary": "You add poison to a weapon or a cup; the target takes wounds for a few turns. If you have access to the table, slipping in the poison unnoticed gets easier."
+  },
+  "shadowstep": {
+   "meaning": "Shadow step",
+   "summary": "When you enter a dark area, you shake off pursuit with d20 + Giz (Medium); in combat, when you slip into shadow and succeed on d20 + Giz (the GM sets the difficulty based on the target's alertness), your next first attack counts as an ambush."
+  },
+  "whisper-network": {
+   "meaning": "Whisper network",
+   "summary": "In a city you tap into rumors to gather or spread information. At Lv 2 you learn house secrets and a person's daily routine."
+  },
+  "nachtgericht": {
+   "meaning": "Night court (German)",
+   "say": "naht-ge-riht",
+   "summary": "You assassinate a sleeping or lone target you approach through your identity or access with d20 + Giz; easy against minor targets, hard against important NPCs. Once per session, and you leave no trace."
+  },
+  "bestiary": {
+   "meaning": "Book of monsters, bestiary",
+   "summary": "You observe a creature and, with a Hikmet roll, learn its species, weak spot and weakness; +2/+3 on attacks against the weak spot, +4 at Lv 3, and your allies benefit too."
+  },
+  "silvered-steel": {
+   "meaning": "Silvered steel",
+   "summary": "Your weapons coated in Blu Mana oil hit supernatural beings and give +1/+2/+3; +1 to the bonus with a Meisterwerk masterpiece."
+  },
+  "grim-tonics": {
+   "meaning": "Dark tonics",
+   "summary": "During a long rest you prepare 2 doses of hunter's elixir; when you drink it, you get +2 to Yalman and immunity to Cower. When the effect ends you make a Sebahat roll; on a failure, +1 Corruption."
+  },
+  "mind-fortress": {
+   "meaning": "Fortress of the mind",
+   "summary": "You get +2/+3 on terror and Corruption rolls and recover from Cower more easily. At Lv 3, once per combat, you prevent a Corruption increase."
+  },
+  "ultima-venatio": {
+   "meaning": "Last hunt (Latin)",
+   "say": "ultima venatsiyo",
+   "summary": "Once per session you declare a target your Last Hunt: until the end of the scene, +5 on all your rolls against them and the wounds you deal advance 1 extra stage; if you kill them, your Corruption drops by 1; if they escape or you die, +2 Corruption."
+  },
+  "breach": {
+   "meaning": "Opening a breach, storming in",
+   "summary": "If you are the first to storm through a door, breach, barricade or narrow pass, entering doesn't cost a turn and you get +2 on your first attack; at higher levels, a bonus for allies and Cower."
+  },
+  "escalade": {
+   "meaning": "Wall climb",
+   "summary": "Climbing walls, ramparts, roofs, cliffs and trees gets easier; you leap from height onto a target and knock them down. At Lv 3 your rope carries your allies too."
+  },
+  "fire-and-move": {
+   "meaning": "Fire and advance",
+   "summary": "On turns you move, you take no attack penalty and get +1 (+2 at Lv 2). At Lv 3 you move, attack and take cover in the same turn."
+  },
+  "behind-the-lines": {
+   "meaning": "Behind the lines",
+   "summary": "+2 on Giz and Kaçınç rolls in enemy territory. At Lv 2 you know an escape route, slip away easily together with an ally, and move quickly without leaving a trail."
+  },
+  "sturmflut": {
+   "meaning": "Storm surge (German)",
+   "say": "ştuurm-fluut",
+   "summary": "In one turn you charge and attack 3 targets, each hit adding +1 to the next; those next to the fallen may enter Cower. Once per combat; you cannot take an action on the next turn."
+  },
+  "close-the-wounds": {
+   "meaning": "Close the wounds",
+   "summary": "You touch a limb and pray (d20 + Sebahat, Medium), reducing the wound by 1 stage (down to Badly Wounded); at Lv 2, 2 stages on a strong success; at Lv 3 it also works on Unusable limbs."
+  },
+  "blessing": {
+   "meaning": "Blessing",
+   "summary": "You give an ally a bonus in one area, based on your faith, for 1 turn (e.g. Tenebri: attack). The bonus rises from +2 to +3; at the highest level it lasts 2 turns and can be given to two allies."
+  },
+  "sanctuary": {
+   "meaning": "Sanctuary",
+   "summary": "You consecrate an area: decayed rolls get harder and corrupted beings struggle to enter; at Lv 2 allies inside never enter Cower."
+  },
+  "vigil": {
+   "meaning": "Vigil (all-night prayer)",
+   "summary": "During a long rest you pray (d20 + Sebahat, Hard) to reduce an ally's Corruption by 1; at Lv 2 the roll gets one step easier, at Lv 3 you pray for two people (yourself included)."
+  },
+  "ultimo-aliento": {
+   "meaning": "Last breath (Spanish)",
+   "say": "ultimo alyento",
+   "summary": "You grant an ally Last Breath for 2 turns; if they die during this time and someone on the team kills their killer within 3 turns, they return critically wounded."
+  },
+  "sermon": {
+   "meaning": "Sermon",
+   "summary": "You preach to a crowd with d20 + Cazibe: Easy draws their attention, Medium persuades them to a simple action, Hard rouses them to act at your side."
+  },
+  "fiery-words": {
+   "meaning": "Fiery words",
+   "summary": "You rouse your team: allies who hear you get +1 on their next roll, +2 at Lv 2, +3 at Lv 3 and 2 times per combat."
+  },
+  "confession": {
+   "meaning": "Confession",
+   "summary": "You speak with someone alone and, with d20 + Cazibe (Medium), make them confess a secret to you; against a strong-willed target the roll gets one step harder. At Lv 2 the target cannot lie to you for the rest of the scene."
+  },
+  "shepherd-s-voice": {
+   "meaning": "The shepherd's voice",
+   "summary": "You rescue allies who have fallen into Cower: +2 on their recovery rolls; at Lv 2 you bring them to their senses instantly without spending a turn."
+  },
+  "vox-dei": {
+   "meaning": "The voice of god (Latin)",
+   "say": "voks de-i",
+   "summary": "Enemies who hear you and fail a Sebahat roll obey your one-word command for 1 turn. Once per session."
+  },
+  "flock": {
+   "meaning": "Flock",
+   "summary": "You gain 1-3 followers who protect you, do work for you and fight at your side; with Hollow Devotees they can be turned into puppets."
+  },
+  "iron-conviction": {
+   "meaning": "Iron faith",
+   "summary": "You turn an ally's will to steel: +2/+3 on Sebahat rolls for the scene, +4 at Lv 3, and immunity to mind control."
+  },
+  "commandment": {
+   "meaning": "Command",
+   "summary": "You give your team a single order; those who follow it get +2 on the relevant roll. 3 times per combat; at Lv 2 one of these doesn't cost a turn."
+  },
+  "rally": {
+   "meaning": "Rally",
+   "summary": "You rally your wounded allies: for the scene, those who hear you ignore Wounded penalties. Once per combat; at level 2 the Badly Wounded penalty drops to -2."
+  },
+  "voluntas-gregis": {
+   "meaning": "The will of the flock (Latin)",
+   "say": "voluntas gregis",
+   "summary": "Reaction: triggers when an ally dies or enters Cower; all allies ignore wound penalties for 2 turns and get +2 on attacks. Once per session."
+  },
+  "divine-judgement": {
+   "meaning": "Divine judgment",
+   "summary": "Passive: +1 on attacks against targets the GM deems sinful (+3 with level). At level 3, with a Medium Sebahat roll, you can ask whether a target is sinful."
+  },
+  "holy-armor": {
+   "meaning": "Holy armor",
+   "summary": "Passive: you take no penalty on Kaçınç rolls in heavy armor. At higher levels your armor reduces an incoming wound by 1 stage (once per combat, then 2 times)."
+  },
+  "aegis-of-faith": {
+   "meaning": "Shield of faith",
+   "summary": "Reaction: you take an attack aimed at a nearby ally upon yourself. 2 times per combat. At level 2, with a Medium Yalman roll, the wound advances 1 stage less."
+  },
+  "smite": {
+   "meaning": "Holy strike",
+   "summary": "Your holy strike advances the wound 1 extra stage (2 against corrupted beings); 2 times per combat, at Lv 2 3 times, and you can make the target Cower."
+  },
+  "manus-dei": {
+   "meaning": "The hand of god (Latin)",
+   "say": "manus de-i",
+   "summary": "You turn one of your attacks into the hand of god: the roll gets one step easier, and on a hit the limb advances 2 stages (directly Unusable against a corrupted being). If you miss, you don't lose the use; after a hit, you cannot take an action on the next turn."
+  },
+  "miracle-of-mending": {
+   "meaning": "Miracle of mending",
+   "summary": "With a mass prayer (d20 + Sebahat, Medium) you reduce the wound on one limb of every ally in your line of sight by 1 stage; at Lv 2, 2 stages on a strong success; at Lv 3, once per session, you reattach a Severed limb."
+  },
+  "excommunicate": {
+   "meaning": "Excommunicate",
+   "summary": "You excommunicate a target with d20 + Sebahat (Medium) (against a strong-willed target the roll gets one step harder); for the scene they take -2/-3/-4 on spell and decayed rolls, and at Lv 3 even their allies grow suspicious of them."
+  },
+  "purge": {
+   "meaning": "Purification",
+   "summary": "You reduce an ally's Corruption by 1 (by 2 at Lv 2, with 1 passing to you). You cannot lower it below the floor left by Surrender rings."
+  },
+  "consecrated-ground": {
+   "meaning": "Consecrated ground",
+   "summary": "You spend 1 turn to consecrate a 20-meter area: for the scene, decayed rolls there get two steps harder and Decayed Mana zones are cleansed; at Lv 2, your allies' Corruption increases of 2+ are reduced by 1."
+  },
+  "resurrectio": {
+   "meaning": "Resurrection (Latin)",
+   "say": "rezurrekti-o",
+   "summary": "You raise someone who died within the last hour with d20 + Sebahat (Hard); they return critically wounded and permanently lose their Death Save. Each use brings +2 Corruption and makes the next roll one step harder (it drops back one step each session)."
+  },
+  "strings": {
+   "meaning": "Strings",
+   "summary": "You tie a String to a person's mind with d20 + Hakimiyet (Medium); for 1 turn (2 at Lv 2, 3 at Lv 3) they obey your simple commands. Against a strong-willed target the roll gets one step harder; each use, +1 Corruption."
+  },
+  "dream-communion": {
+   "meaning": "Dream communion",
+   "summary": "You enter a sleeping person's dream with d20 + Hakimiyet (Medium) to gain information or show them a nightmare; against a strong-willed target the roll gets one step harder. It is a decayed roll; each use, +1 Corruption."
+  },
+  "hollow-devotees": {
+   "meaning": "Hollow followers",
+   "summary": "Your followers turn into fearless, painless puppets (stats at most 5). Each transformation brings you +1 Corruption."
+  },
+  "thousand-faces": {
+   "meaning": "Thousand faces",
+   "summary": "Your rot reflects onto enemies as fear: a penalty to their Sebahat rolls equal to Corruption/3, Corruption/2 at Lv 2; at Lv 2 they cannot identify you."
+  },
+  "marionetista": {
+   "meaning": "Puppeteer (Spanish)",
+   "say": "maryonetista",
+   "summary": "You tie Strings to up to 3 targets with d20 + Hakimiyet (Hard); those affected fight for you for the scene and make a recovery roll at the end of each turn. Once per session, +3 Corruption."
+  },
+  "rune-script": {
+   "meaning": "Rune writing",
+   "summary": "You spend 1 turn to carve a rune on an object (Hikmet, Easy): Light, Lock, Alarm or Heat. As your level rises you know more runes, and your runes last a day."
+  },
+  "ward-rune": {
+   "meaning": "Ward rune",
+   "summary": "You draw a ward rune on yourself or an ally (Hikmet, Medium). The next wound its bearer takes advances 1 stage less; at higher levels it blocks a wound entirely."
+  },
+  "mana-sense": {
+   "meaning": "Mana sense",
+   "summary": "You passively read the outer mana around you: you notice spell traces, runes, Decayed Mana zones and crystals with Hikmet instead of Görü. Later you also see the dynamism of living beings."
+  },
+  "crystal-binding": {
+   "meaning": "Crystal binding",
+   "summary": "During a long rest you charge a Blu Mana crystal; breaking it gives +3 to your next spell or rune roll. At Lv 2, two crystals or +5 with a single crystal."
+  },
+  "runa-magna": {
+   "meaning": "Great rune (Latin)",
+   "say": "runa magna",
+   "summary": "You draw a great rune and either place an area under protection for 1 turn (wounds advance 1 stage less) or bind enemies to the area for 2 turns."
+  },
+  "mana-bolt": {
+   "meaning": "Mana bolt",
+   "summary": "You fire a bolt of pure inner mana: the GM sets the difficulty based on the target's agility and cover (usually Medium); on a hit the wound advances 1 stage, 2 stages on a strong success at Lv 3."
+  },
+  "kinesis": {
+   "meaning": "Motion (the word is of Greek origin)",
+   "summary": "You move objects with your mind; at Lv 2 you push a person and knock them down (the target resists with Yalman, Medium), at Lv 3 you lift them and drop them."
+  },
+  "elemental-weave": {
+   "meaning": "Element weave",
+   "summary": "You choose an element (fire, ice, lightning, water) and create minor effects. In combat, with a spell roll, you inflict a 1-turn burn, freeze, shock or knockdown on a target."
+  },
+  "mana-shroud": {
+   "meaning": "Mana veil",
+   "summary": "You veil yourself in mana against a spell aimed at you: the GM sets the difficulty of the spell roll based on the spell's strength; on a success, the spell doesn't affect you. 2 times per combat."
+  },
+  "arcanum-maius": {
+   "meaning": "Great secret (Latin)",
+   "say": "arkanum ma-yus",
+   "summary": "You use your inner mana like a spark to double your next spell's wound stages, area, duration or bonus. Once per combat."
+  },
+  "steady-flow": {
+   "meaning": "Steady flow",
+   "summary": "Nat1 backlash gets milder; at Lv 2 you completely ignore the backlash of 2 Nat1s per session, and at Lv 3 a Nat1 doesn't count as a catastrophe."
+  },
+  "binding-chains": {
+   "meaning": "Binding chains",
+   "summary": "You bind the target with mana chains (spell roll, the GM sets the difficulty, usually Medium); they cannot move or attack, and at the end of each turn they try to break free with d20 + Yalman (Hard)."
+  },
+  "counterweave": {
+   "meaning": "Counterweave",
+   "summary": "You unravel a spell someone else is casting at its source with d20 + Hikmet (the GM sets the difficulty based on the spell's strength). Once per combat; at Lv 2, 2 times, and the spell's caster gains +1 Corruption."
+  },
+  "soothing-mana": {
+   "meaning": "Soothing mana",
+   "summary": "You channel your calm mana into an ally to end Cower and Lost Moment effects. At higher levels it eases the penalties of high dynamism, and once per session you reduce Corruption by 1."
+  },
+  "pax-manae": {
+   "meaning": "Peace of mana (Latin)",
+   "say": "paks ma-ne",
+   "summary": "On a success, you halt mana in a 15-meter area for 2 turns: no one can cast spells, ongoing spells end, and other mages make a Hard recovery roll each turn; you get +3 on Hikmet and Sebahat rolls."
+  },
+  "overcharge": {
+   "meaning": "Overload",
+   "summary": "You add +2/+3 (+4 at Lv 3) to a spell roll in advance; if the die shows 1-3, it counts as a Nat1 and the mana backlashes."
+  },
+  "mana-burst": {
+   "meaning": "Mana burst",
+   "summary": "You burst mana out of your body (spell roll, Medium); those nearby roll d20 + Kaçınç (Medium), and those who fail fall and are wounded. At Lv 2, keeping allies out makes the roll one step harder."
+  },
+  "chain-reaction": {
+   "meaning": "Chain reaction",
+   "summary": "On a Nat20 or a spell kill, you cast a Mana Bolt or the same spell again without spending a turn (-2); at Lv 2 it also triggers on every spell that is a strong success."
+  },
+  "volatile-regeneration": {
+   "meaning": "Volatile regeneration",
+   "summary": "Passively, at the end of each combat, the wound on one of your limbs heals 1 stage. At higher levels, heavier wounds mend and Unleashed backlash wounds heal completely."
+  },
+  "entfesselt": {
+   "meaning": "Freed from its chains (German)",
+   "say": "ent-fes-selt",
+   "summary": "For 3 turns you get +5 on spell rolls and can direct your single-target spells at a second target as well (-2). Each turn, d20 + Sebahat (Medium); on a failure, +1 Corruption. At the end, you cannot take an action for 1 turn and your arms are wounded."
+  },
+  "rot-touch": {
+   "meaning": "Rotten touch",
+   "summary": "You touch a target with Decayed Mana (decayed roll, the GM sets the difficulty, usually Medium); for the scene they take -2 on spell rolls and their limb is wounded 1 stage. The first use in a combat costs +1 Corruption."
+  },
+  "blight-field": {
+   "meaning": "Field of rot",
+   "summary": "You open a Decayed Mana field lasting up to 3 turns; those inside are wounded each turn unless they resist with Yalman. Once per combat."
+  },
+  "mana-leech": {
+   "meaning": "Mana leech",
+   "summary": "You grow stronger in Decayed Mana zones; at Lv 2 you don't take the Corruption that comes from the zone itself, but ability costs still apply."
+  },
+  "unmaking": {
+   "meaning": "Annihilation, unraveling",
+   "summary": "You disperse an object's mana and shatter it; at Lv 2 you also unravel spell effects, runes and consecrated areas (the GM sets the difficulty based on the power of whoever made the effect)."
+  },
+  "caida-carmesi": {
+   "meaning": "Crimson fall (Spanish)",
+   "say": "ka-i-da karmesi",
+   "summary": "You bring down a small echo of Kızıl Kıyamet from the sky: every living being in the area that cannot resist this power (allies included) is torn apart instantly, and the area becomes a Decayed Mana zone for a day. It is a decayed roll, +2 Corruption."
+  },
+  "echo-of-the-first": {
+   "meaning": "Echo of the First",
+   "summary": "Before every incoming Corruption increase you roll d20 + Sebahat (Hard); on a success, there is no increase. At higher levels the roll gets easier, uses increase, and you protect your allies too."
+  },
+  "halo": {
+   "meaning": "Halo, ring of light",
+   "summary": "By radiating light you break illusions and penalize Decayed beings; at Lv 2 it also protects allies, at Lv 3 it gives everyone +2."
+  },
+  "word-of-making": {
+   "meaning": "Word of creation",
+   "summary": "With a single spoken word you materialize a simple object (Sebahat, Medium); it vanishes at the end of the scene. At higher levels you create large things such as weapons, armor and bridges."
+  },
+  "heavenly-sight": {
+   "meaning": "Celestial sight",
+   "summary": "You ask the sky a yes/no question; at Lv 2 you ask 2 times per session and see brief visions of the future."
+  },
+  "mana-primordialis": {
+   "meaning": "First mana, primal mana (Latin)",
+   "say": "mana primordiyalis",
+   "summary": "You touch the mana of the gods and rewrite a truth: undo a death within the last hour, erase a spell or a curse, ignore wounds, or advance all of an enemy's limbs by 2 stages. Cannot be used while Corruption is 4+."
+  },
+  "daemon": {
+   "meaning": "Demon, daimon (Greek)",
+   "summary": "Wounds affect all your rolls twice as heavily, but affect Yalman and Sebahat rolls 50% less. As a cost, wounds very heavily affect your communication and other traits; you reflect this in RP."
+  },
+  "gladius-duplex": {
+   "meaning": "Twin swords (Latin)",
+   "summary": "You can wield a sword in each hand; however, while doing so your sword rolls are affected negatively by 25% and you cannot use two-handed swords."
+  },
+  "explosio-intra": {
+   "meaning": "Explosion from within (Latin)",
+   "summary": "You gather mana in your sword and create an explosion at its tip; you can trigger the explosion even while the sword is inside the enemy. If your sword's quality is low, it may shatter."
+  },
+  "pugna-fortium": {
+   "meaning": "Battle of the mighty (Latin)",
+   "summary": "You enter an uncontrolled fight with your opponent: your attack rolls get a 50% bonus, and the enemy's attack rolls against you gain a 33% bonus. The fight lasts until one side dies."
+  },
+  "una-ictum": {
+   "meaning": "Single strike (Latin)",
+   "summary": "Your first attack roll against a target gets a 100% bonus; if the total is 20 or more it hits, and the excess turns into damage. If you kill the target, you can use it again; if you fail to kill it, you are stunned for 2 turns."
+  },
+  "espada-tomada": {
+   "meaning": "Seized sword (Spanish)",
+   "summary": "You tear apart and devour the spirit inside the soul-sword you have subjugated, gaining permanent abilities and stats determined by the GM. The cost: you lose Erwachen and Jinzen, and gain +3 Corruption."
+  },
+  "oculus-hyaenae": {
+   "meaning": "Hyena's eye (Latin)",
+   "summary": "You study a convoy or a mob and understand its organization; the GM gives you hints about the target's exploitable weaknesses. The cost: you cannot make Görü rolls directly against the target."
+  },
+  "lovi-zvijer": {
+   "meaning": "Hunt the beast (Croatian)",
+   "summary": "You use very powerful bows, giant bows and mini ballistae without penalty. Against small targets, damaging more than one limb gets easier; the larger the target, the heavier your critical hits."
+  },
+  "production-de-masse": {
+   "meaning": "Mass production (French)",
+   "summary": "After a crafting ability, you roll d20 (the GM sets the difficulty); on a success, you craft again, and the roll gets one step harder with each link in the chain. If the crafting or the roll fails, you cannot take an action for turns equal to the number you crafted + 1."
+  },
+  "manos-sucias": {
+   "meaning": "Dirty hands (Spanish)",
+   "summary": "The first time you lose your stealth, you play 3 turns in a row; only once per combat. Afterward, you cannot take an action for 2 turns."
+  },
+  "ego-sum-apex": {
+   "meaning": "The summit is mine (Latin)",
+   "summary": "You strike fear into your target with Hakimiyet; on a success, for the rest of the combat their rolls drop by d10, and yours rise by a separate d10. On a failure, the effect is reversed."
+  },
+  "umbra-mors": {
+   "meaning": "Shadow death (Latin)",
+   "summary": "You enter the walls and move through connected structures and shadows, within the shadow realm. There is no time limit, but if you stay long you blend into the shadows and gain Corruption that grows with the duration."
+  },
+  "ultimo-oportunidad": {
+   "meaning": "Last chance (Spanish)",
+   "summary": "You let a dying ally retry a lost Death Save; each use increases your Corruption (+1, +1, +2, +2, +3)."
+  },
+  "vox-populi": {
+   "meaning": "Voice of the people (Latin)",
+   "summary": "When you accuse someone in public, you roll Sebahat instead of Cazibe; depending on the RP, the accused can be forced into a duel or executed. +1 Corruption on failure."
+  },
+  "sammumaton-tuli": {
+   "meaning": "Undying fire (Finnish)",
+   "summary": "You resist psychological pressure and threats and gain +7 to Sebahat; it becomes easier to free allies affected by a target that cannot affect you. The cost is fanaticism; if you face a malevolent divine being, +5 Corruption."
+  },
+  "oculus-dei": {
+   "meaning": "Eye of God (Latin)",
+   "summary": "Through the eye of God you see a person's soul and past, or scenes from the future. You roll throughout the vision; if you fail without ending the vision yourself, +2 Corruption."
+  },
+  "iustita-dei": {
+   "meaning": "Justice of God (Latin)",
+   "summary": "You call down a holy lightning bolt that grows stronger with the amount of your target's sins; as its cost, each use advances the wound on your attacking arm and hand by 3 stages."
+  },
+  "ausbeutung": {
+   "meaning": "Exploitation (German)",
+   "summary": "You drain the souls of targets under your influence: per soul, all your wounds improve by 1 stage and you gain +5 on your next roll. Its rolls are decayed rolls; the cost is +2 Corruption."
+  },
+  "nexus-inconexus": {
+   "meaning": "Unbound bond (Latin)",
+   "summary": "You carve runes into small stones and throw them; the rune's effect takes place at the distant target (e.g. an explosion rune you throw explodes there)."
+  },
+  "finis-deorum": {
+   "meaning": "End of the gods (Latin)",
+   "summary": "You fully release the mana in one of your limbs and merge it with external mana, destroying your target with the immense energy this creates. The cost is sacrificing that limb; damage multiplies for each limb you have lost."
+  },
+  "inclusus": {
+   "meaning": "Imprisoned (Latin)",
+   "summary": "You weave a spell around the target that takes d4 + the target's difficulty to complete; if it works, the target is chained in place, cannot cast spells, and its actions are restricted. It can also be prepared in advance as a trap."
+  },
+  "todesregen": {
+   "meaning": "Rain of death (German)",
+   "summary": "You turn all the mana around you and bring down a salvo of spells on the target area; the area is torn apart as if struck by dozens of spells. Afterwards you are mana-fatigued, and your spells get harder until you rest."
+  },
+  "dolor-aeternus": {
+   "meaning": "Endless pain (Latin)",
+   "summary": "You awaken the tree that heralds death and open an area around you that expands based on your roll; everyone inside (allies included) is Corrupted, rots, and is erased from reality by nightmares. It is a decayed roll, +2 Corruption."
+  },
+  "vajrayana": {
+   "meaning": "Diamond path (Sanskrit)",
+   "summary": "If you manage to enter the Vajrayana state, you cast spells without cost; to sustain it you roll every turn and gain Corruption by turn (+0/+1/+1/+1). Cannot be used at Corruption 7+."
+  }
+ },
+ "perks": {
+  "born-in-the-saddle": {
+   "meaning": "Born in the Saddle",
+   "summary": "You grew up on horseback: your riding rolls get one step easier, and your attacks take no penalty while mounted."
+  },
+  "careful-runner": {
+   "meaning": "Careful Runner",
+   "summary": "You roll falling checks at Easy while running and on rough ground; but your fast-movement rolls in the dark get one step harder."
+  },
+  "blood-bond": {
+   "meaning": "Blood Bond",
+   "summary": "You share a blood bond with another player: +2 to your Cower rolls in the same scene, and once per session you can spend Inspiration for each other."
+  },
+  "gambler-s-hand": {
+   "meaning": "Gambler's Hand",
+   "summary": "Once per session you reroll a gambling roll; you roll Görü at Easy to spot a cheater."
+  },
+  "heirloom": {
+   "meaning": "Family Heirloom",
+   "summary": "You start with an item passed down in your family; you gain +1 on rolls that use it, but the GM decides a secret of the item that will come to light one day."
+  },
+  "herbalist": {
+   "meaning": "Herbalist",
+   "summary": "You know healing herbs, poisons and Düşotu; your rolls to find healing materials in the wild get one step easier."
+  },
+  "kench": {
+   "meaning": "Iron Stomach",
+   "summary": "Your stomach is hard to upset: +3 to rolls against spoiled food, dirty water and swallowed poison."
+  },
+  "knifeplay": {
+   "meaning": "Knife Play",
+   "summary": "Your dagger and short-blade rolls get one step easier; +2 to Giz rolls to conceal a blade."
+  },
+  "night-owl": {
+   "meaning": "Night Owl",
+   "summary": "You take no penalty the day after a sleepless night; +2 to Görü rolls on night watch."
+  },
+  "one-hander": {
+   "meaning": "One-Handed",
+   "summary": "Your rolls get easier with one-handed melee weapons and harder with two-handed weapons."
+  },
+  "outward-soul": {
+   "meaning": "Outward Soul",
+   "summary": "+2 to your abilities that draw external mana; the cost is -1 on spells that use only internal mana, and your Shinigami Flow pool is 1 lower."
+  },
+  "pilgrim": {
+   "meaning": "Pilgrim",
+   "summary": "You find shelter and food in the churches and monasteries of your faith; +2 to Cazibe rolls with priests and pilgrims."
+  },
+  "seafarer": {
+   "meaning": "Sailor",
+   "summary": "You roll balance on deck, swimming, knots and sailing at Easy; in every port you find work and a bunk to sleep in."
+  },
+  "academy-graduate": {
+   "meaning": "Academy Graduate",
+   "summary": "Your Hikmet rolls on mana theory, history and houses get one step easier; there is a teacher at the academy who remembers you."
+  },
+  "calm-mana": {
+   "meaning": "Calm Mana",
+   "summary": "Your arms take no wounds from spell backlash (Nat1, Overcharge); +2 to Düşotu Corruption rolls."
+  },
+  "dreamer-s-favor": {
+   "meaning": "Dreamer's Grace",
+   "summary": "You gain +1 Inspiration Point; in exchange you start the game with +1 Corruption, and the God of Dreams has noticed you."
+  },
+  "ear-for-lies": {
+   "meaning": "Ear for Lies",
+   "summary": "+2 to Görü or Hikmet rolls to sense a lie; on a Nat20 you also sense part of the truth behind the lie."
+  },
+  "field-surgeon": {
+   "meaning": "Field Surgeon",
+   "summary": "The clean bandages you apply are not fouled by mud and blood; you do not roll to splint a broken limb."
+  },
+  "forger": {
+   "meaning": "Forger",
+   "summary": "Your rolls to prepare forged documents get one step easier; the Görü roll of anyone inspecting your document gets one step harder."
+  },
+  "local-knowledge": {
+   "meaning": "Local Knowledge",
+   "summary": "At the start of the game you choose a region; there your rolls for navigation, shortcuts and dealing with the locals get one step easier."
+  },
+  "lucky": {
+   "meaning": "Lucky",
+   "summary": "Once per session, you can reroll a Nat1 without spending Inspiration."
+  },
+  "mana-sensitive": {
+   "meaning": "Mana-Sensitive",
+   "summary": "You sense mana even without training: you notice when a spell is cast nearby, when you are in a Decayed Mana zone, or when a Blu Mana crystal is present."
+  },
+  "old-friend": {
+   "meaning": "Old Friend",
+   "summary": "Once per session you get help from a friend you define with the GM; but one day they will ask you for help too."
+  },
+  "old-soldier": {
+   "meaning": "Old Soldier",
+   "summary": "You served in a unit: you roll Cazibe at Easy with that unit's soldiers, and gain +2 to Hikmet rolls on military matters."
+  },
+  "polyglot": {
+   "meaning": "Multilingual",
+   "summary": "You start the game knowing 3 languages."
+  },
+  "rune-literate": {
+   "meaning": "Rune-Literate",
+   "summary": "You know the language of the old runes; your rolls for rune abilities and for reading old inscriptions get one step easier."
+  },
+  "smuggler-s-friend": {
+   "meaning": "Smuggler's Friend",
+   "summary": "You have contacts on the black market: your Cazibe roll to find forbidden or scarce goods gets one step easier, and prices may drop."
+  },
+  "songkeeper": {
+   "meaning": "Song Keeper",
+   "summary": "+2 to Cazibe rolls to entertain or calm a crowd; you recall knowledge from old songs with a Hikmet roll."
+  },
+  "street-born": {
+   "meaning": "Street-Born",
+   "summary": "Your Giz and Kaçınç rolls for hiding and pickpocketing in the city get easier; once per session you get a rumor clue without rolling."
+  },
+  "sworn-sword": {
+   "meaning": "Sworn Sword",
+   "summary": "+2 to Hakimiyet rolls when speaking on behalf of your noble; you must go when they call, and if you break your oath you gain Exiled."
+  },
+  "tinkerer": {
+   "meaning": "Tinkerer",
+   "summary": "Your Marifet rolls for things like locks, traps, mechanisms and weapon and armor repair get one step easier."
+  },
+  "two-hander": {
+   "meaning": "Two-Handed",
+   "summary": "Your rolls get easier with two-handed melee weapons and harder with one-handed weapons."
+  },
+  "blu-bearer": {
+   "meaning": "Blu Bearer",
+   "summary": "You start with a trinket of Blu Mana crystal; you can break it once to purge Corruption, or to be protected from Decayed Mana for one scene."
+  },
+  "extrovert": {
+   "meaning": "Extrovert",
+   "summary": "You communicate easily with strangers: +2 Cazibe."
+  },
+  "frostblood": {
+   "meaning": "Ice-Blooded",
+   "summary": "+3 to Cower rolls, and you are unaffected by cold; you roll Corruption's Lost Moment roll twice and pick the better."
+  },
+  "hawkeye": {
+   "meaning": "Hawk Eye",
+   "summary": "Your long-range ranged attacks take no penalty; a 19 also counts as a critical success on ranged attacks."
+  },
+  "hidden-heir": {
+   "meaning": "Hidden Heir",
+   "summary": "The GM secretly decides your true lineage; once in the campaign, when your blood comes to light, a great door opens, but you also gain enemies."
+  },
+  "katze": {
+   "meaning": "Cat (German)",
+   "say": "Katse",
+   "summary": "You see well in the dark: no Görü penalty in dim light, and the penalty is halved in pitch darkness."
+  },
+  "noble-blood": {
+   "meaning": "Noble Blood",
+   "summary": "Your Cazibe and Hakimiyet rolls get one step easier with people tied to your house and on its lands; but your house's enemies are your enemies too."
+  },
+  "quick": {
+   "meaning": "Nimble",
+   "summary": "You always act first in the first turn of combat; in an ambush you get a reaction before the first attack."
+  },
+  "quiet": {
+   "meaning": "Quiet",
+   "summary": "+2 to Giz rolls made while walking and running."
+  },
+  "adaptable": {
+   "meaning": "Adaptable",
+   "summary": "Penalties from environmental effects such as cold, heat, hunger and fatigue are halved for you."
+  },
+  "ashblood": {
+   "meaning": "Ash-Blooded",
+   "summary": "On every long rest, the wound on one of your limbs drops 1 extra stage; your broken limbs heal twice as fast."
+  },
+  "cheetah": {
+   "meaning": "Cheetah",
+   "summary": "You gain +2 Kaçınç; you roll running and climbing at Easy."
+  },
+  "giant-s-back": {
+   "meaning": "Giant's Back",
+   "summary": "You take no penalty when using heavy weapons and heavy armor; your carrying limit doubles."
+  },
+  "steadfast": {
+   "meaning": "Unshakable",
+   "summary": "Your soul is sturdy: +2 to all rolls made against Corruption increases."
+  },
+  "universal": {
+   "meaning": "Universal",
+   "summary": "Your Hikmet rolls on houses, history, geography, religion and armies get one step easier; once per session you get a piece of general knowledge from the GM without rolling."
+  },
+  "titanborn": {
+   "meaning": "Titan-Born",
+   "summary": "+2 to Yalman rolls on physical actions, and you ignore Scratched penalties."
+  },
+  "hardened-by-war": {
+   "meaning": "Battle-Hardened",
+   "summary": "You never enter the Cower state in any way and are unaffected by fear effects."
+  },
+  "saddle-sore": {
+   "meaning": "Saddle Sore",
+   "summary": "You don't get along with horses: your riding rolls get one step harder."
+  },
+  "smoker": {
+   "meaning": "Smoker",
+   "summary": "If you go a day without smoking tobacco you roll Sebahat (Easy); on failure, -1 to all rolls the next day, and the penalty grows by 1 each day."
+  },
+  "bastard": {
+   "meaning": "Bastard",
+   "summary": "You are a noble's unacknowledged child: your Cazibe rolls with that house get one step harder, and nobles look down on you."
+  },
+  "dependent": {
+   "meaning": "Dependent",
+   "summary": "There is someone you are responsible for; the GM uses them as a story hook, and you cannot abandon them while they are in danger."
+  },
+  "drunkard": {
+   "meaning": "Drunkard",
+   "summary": "If you go a day without drinking you roll Sebahat (Medium), -1 to all rolls on failure; on a day you drink, Cazibe +1, Kaçınç and Görü -1."
+  },
+  "honest-to-a-fault": {
+   "meaning": "Too Honest",
+   "summary": "Your rolls to lie get one step harder; even if you succeed you roll Sebahat (Easy), and on failure your face gives you away."
+  },
+  "illiterate": {
+   "meaning": "Illiterate",
+   "summary": "You cannot read written documents, map notes or coded texts; your rolls for rune abilities get one step harder."
+  },
+  "indebted": {
+   "meaning": "Indebted",
+   "summary": "You start the game without any Lumre, and a creditor who is a GM story hook is after you."
+  },
+  "monolingual": {
+   "meaning": "Monolingual",
+   "summary": "You start the game knowing only one language."
+  },
+  "recovered": {
+   "meaning": "Recovered",
+   "summary": "If you use Düşotu, alcohol or tobacco you roll Sebahat (Medium); on failure, the perk of your old addiction comes back."
+  },
+  "rival": {
+   "meaning": "Rival",
+   "summary": "You have a rival chasing the same prize who never gives up; while they are in the scene you take -1 to Sebahat rolls."
+  },
+  "secret": {
+   "meaning": "Secret",
+   "summary": "You have a great secret you define with the GM; if it comes out, you gain the Wanted effect with the faction concerned."
+  },
+  "shortsighted": {
+   "meaning": "Nearsighted",
+   "summary": "-2 to Görü rolls at long range and to ranged attacks."
+  },
+  "superstitious": {
+   "meaning": "Superstitious",
+   "summary": "When you see a bad omen you roll Sebahat (Easy); on failure you take -1 to all rolls for that scene."
+  },
+  "weak-stomach": {
+   "meaning": "Weak Stomach",
+   "summary": "Your stomach is easily upset: -3 to rolls against spoiled food, dirty water and swallowed poison."
+  },
+  "blood-feud": {
+   "meaning": "Blood Feud",
+   "summary": "You have a blood feud with a family: you are not safe on their lands, and their members attack you or call for men when they see you."
+  },
+  "bloodshy": {
+   "meaning": "Squeamish",
+   "summary": "When you see a severe wound you roll Sebahat (Easy), -2 to your next action on failure; -2 to first aid and healing rolls."
+  },
+  "branded": {
+   "meaning": "Branded",
+   "summary": "When your slave brand is seen, your Cazibe roll with nobles and soldiers gets one step harder; with servants, rowers and slaves, however, you roll Cazibe at Easy."
+  },
+  "claustrophobic": {
+   "meaning": "Claustrophobic",
+   "summary": "-1 to all rolls in cramped spaces such as dungeons, tunnels, cellars and ship holds."
+  },
+  "cursed-heirloom": {
+   "meaning": "Cursed Heirloom",
+   "summary": "You carry an item you cannot get rid of: you start with +1 Corruption, the item gives +1 to decayed rolls, but the GM secretly works its curse."
+  },
+  "devout": {
+   "meaning": "Devout",
+   "summary": "You take -3 to decayed rolls and +1 extra Corruption on every decayed ability; if you cannot pray during a long rest, -2 to Sebahat the next day."
+  },
+  "dream-haunted": {
+   "meaning": "Dream-Haunted",
+   "summary": "After a long rest you roll Sebahat (Medium); on failure, -1 to all rolls until the next long rest."
+  },
+  "exiled": {
+   "meaning": "Exile",
+   "summary": "You risk capture on the lands of the house that exiled you; your Cazibe roll with that house's nobles gets one step harder."
+  },
+  "haughty": {
+   "meaning": "Arrogant",
+   "summary": "Your Cazibe roll with people you look down on gets one step harder; you roll Sebahat (Medium) to admit a mistake or apologize."
+  },
+  "loud": {
+   "meaning": "Loud",
+   "summary": "-3 to Giz rolls made while moving."
+  },
+  "night-blind": {
+   "meaning": "Night-Blind",
+   "summary": "-3 to Görü rolls in dim light and darkness."
+  },
+  "oaf": {
+   "meaning": "Clumsy",
+   "summary": "A 1 or 2 on a Kaçınç roll counts as a Nat1; your Marifet rolls requiring fine handiwork get one step harder."
+  },
+  "oathbound": {
+   "meaning": "Oathbound",
+   "summary": "You cannot harm someone who has surrendered or is unarmed; if you do, you gain +2 Corruption."
+  },
+  "occultphobia": {
+   "meaning": "Fear of the Occult",
+   "summary": "When you see a ritual, a raised corpse or decayed magic you roll Sebahat (Medium); on failure you enter the Cower state for 1 turn."
+  },
+  "one-eyed": {
+   "meaning": "One-Eyed",
+   "summary": "-1 to Görü rolls and -2 to ranged attacks; noticing attacks from your blind side gets harder."
+  },
+  "rune-blind": {
+   "meaning": "Rune-Blind",
+   "summary": "You cannot take Rune Script, Ward Rune or Runa Magna; you cannot notice rune traps, and protective runes do not hold on you."
+  },
+  "thermo-sensitive": {
+   "meaning": "Heat-Sensitive",
+   "summary": "-2 to all physical rolls in the cold of the north and the heat of the desert."
+  },
+  "wanted": {
+   "meaning": "Wanted",
+   "summary": "You risk being recognized on the lands of a house or institution chosen by the GM; -2 to Cazibe rolls with its members."
+  },
+  "delicate": {
+   "meaning": "Frail",
+   "summary": "Your wounds do not heal on their own during a long rest and drop only with healing and potions; healing rolls made on you get harder."
+  },
+  "dreamweed-addict": {
+   "meaning": "Düşotu Addict",
+   "summary": "If you go a day without using Düşotu you roll Sebahat (Hard); with regular use your Sebahat stat increases by Corruption/3."
+  },
+  "introvert": {
+   "meaning": "Introvert",
+   "summary": "You struggle to communicate with strangers: -2 Cazibe."
+  },
+  "volatile-mana": {
+   "meaning": "Volatile Mana",
+   "summary": "A 1 or 2 on spell rolls counts as a Nat1; in moments of strong emotion your mana can burst and inflict Scratched on everyone nearby."
+  },
+  "war-shaken": {
+   "meaning": "Shell-Shocked",
+   "summary": "On an explosion, the sound of gunpowder or a large fire spell you roll Sebahat (Medium); on failure you enter the Cower state for 1 turn."
+  },
+  "faint-hearted": {
+   "meaning": "Faint-Hearted",
+   "summary": "Your soul is fragile: -2 to all rolls made against Corruption increases."
+  },
+  "maimed": {
+   "meaning": "Crippled",
+   "summary": "One or two of your limbs start as Severed on the body chart; one limb grants 5 perk points, two limbs grant 9."
+  },
+  "mana-deaf": {
+   "meaning": "Mana-Deaf",
+   "summary": "Your Efsun stat cannot exceed 3 and allied spells barely take hold on you; but +2 to Corruption rolls in Decayed Mana zones."
+  },
+  "frail": {
+   "meaning": "Puny",
+   "summary": "-2 to Yalman rolls on physical actions; you cannot use heavy weapons or heavy armor."
+  },
+  "vow-of-mercy": {
+   "meaning": "Vow of Mercy",
+   "summary": "You swore not to shed blood: you gain +1 Corruption when you harm someone and +3 when you kill."
+  },
+  "dream-touched": {
+   "meaning": "Dream-Touched",
+   "summary": "You start with -2 Cazibe, -2 Giz and +1 Corruption; you see things that aren't there, and the GM may describe scenes to you differently."
+  }
+ },
+ "stats": {
+  "yalman": {
+   "meaning": "The sharp edge of the sword",
+   "summary": "Brute force. Melee roll with heavy weapons and in grappling. Symbol stat of the Brute, Berserker and Will of God branches."
+  },
+  "kacinc": {
+   "meaning": "Evasion, avoidance",
+   "summary": "Agility. Attack, evasion and parry rolls with light weapons and swordplay. Symbol stat of the Swordsman, Duelist and Stormer branches."
+  },
+  "goru": {
+   "meaning": "Sight, vision",
+   "summary": "Eye and aim. Ranged attacks and rolls to notice something. Symbol stat of the Ranger branch."
+  },
+  "giz": {
+   "meaning": "Secret, stealth",
+   "summary": "Hiding, moving silently and ambush. Symbol stat of the Lurcher and Shade branches."
+  },
+  "marifet": {
+   "meaning": "Skill, mastery",
+   "summary": "Manual dexterity: locks, traps, mechanisms, weapon and armor repair. Symbol stat of the Artisan branch."
+  },
+  "hikmet": {
+   "meaning": "Wisdom",
+   "summary": "Knowledge and intellect: theory, tactics, rune and mana lore. Symbol stat of the Runecaster, Shackled and Slayer branches."
+  },
+  "efsun": {
+   "meaning": "Magic",
+   "summary": "Measures internal mana; most spell rolls are made with d20 + Efsun. Symbol stat of the Wizard, Arcanist, Unleashed and Catastrophe branches."
+  },
+  "sebahat": {
+   "summary": "Mental resistance and faith: rolls against fear, Cower and mind control, and Corruption rolls. Symbol stat of the Prayer, Archpriest, Shinigami and Divine branches."
+  },
+  "hakimiyet": {
+   "meaning": "Sovereignty, dominion",
+   "summary": "Mental pressure: intimidation, giving orders and interrogation. Symbol stat of the Men of Will and Occultist branches."
+  },
+  "cazibe": {
+   "meaning": "Charm",
+   "summary": "Persuasion, influence and social relations. Symbol stat of the Preacher branch."
+  }
+ },
+ "terms": {
+  "yozlasma": {
+   "meaning": "Decay",
+   "summary": "The void that mana shattered by magic opens in the soul (0–15). At each ring a Surrender or Resistance fork opens; Surrender makes that ring the floor. It drops by at most 2 per session.",
+   "match": [
+    "Corruption",
+    "Decay"
+   ]
+  },
+  "sinme": {
+   "meaning": "Frozen with fear",
+   "summary": "You cannot take actions until the condition passes; at the start of each turn you roll d20 + Sebahat (Medium) to break free.",
+   "match": [
+    "Cower"
+   ]
+  },
+  "kirik": {
+   "meaning": "Broken limb",
+   "summary": "Imposes an extra penalty, on top of the wound penalty, on rolls that use that limb. A bandage does not fix it; it needs a splint and a long rest, or healing.",
+   "match": [
+    "Fracture"
+   ]
+  },
+  "esin": {
+   "meaning": "Inspiration point",
+   "summary": "A point the GM awards for good RP and for creative solutions that don't use abilities. With 1 Inspiration you reroll a roll; it can also be spent to renew a Death Save.",
+   "match": [
+    "Inspiration Point",
+    "Inspiration"
+   ]
+  },
+  "nat20": {
+   "meaning": "Natural 20",
+   "summary": "Rolling a 20 on the d20: off the table, the best possible outcome.",
+   "match": [
+    "Nat20",
+    "Nat 20"
+   ]
+  },
+  "nat1": {
+   "meaning": "Natural 1",
+   "summary": "Rolling a 1 on the d20: the worst possible outcome. On a spell roll, the mana backlashes and you gain +1 Corruption.",
+   "match": [
+    "Nat1",
+    "Nat 1"
+   ]
+  },
+  "death-save": {
+   "meaning": "Death saving roll",
+   "summary": "The last resort when facing death: roll a d6, 1-3 Death, 4-6 Save; whichever reaches 3 first happens.",
+   "match": [
+    "Death Save Throw",
+    "Death Save"
+   ]
+  },
+  "yoz-zar": {
+   "meaning": "Rotten roll",
+   "summary": "A roll made with Decayed Mana, dead souls, esoteric faiths and dream powers. It gains at most +3 bonus from the Corruption table.",
+   "match": [
+    "Decayed roll",
+    "decayed roll"
+   ]
+  },
+  "buyu-zari": {
+   "meaning": "Mana roll",
+   "summary": "Any action roll made with mana, usually d20 + Efsun. On a Nat1, +1 Corruption.",
+   "match": [
+    "Spell roll",
+    "spell roll"
+   ]
+  },
+  "decayed-mana": {
+   "meaning": "Decayed mana",
+   "summary": "Displaced or shattered mana. It cannot be used; it drains the mana of any soul it touches and is the source of Corruption.",
+   "match": [
+    "Decayed Mana"
+   ]
+  },
+  "blu-mana": {
+   "meaning": "Stored mana",
+   "summary": "A crystal formed by internal mana channeled into ores that hold external mana. When broken, it powers a spell or can purge Corruption.",
+   "match": [
+    "Blu Mana"
+   ]
+  },
+  "ic-mana": {
+   "meaning": "Internal Mana",
+   "summary": "The mana produced by every living thing with a soul: produced very quickly, very short-lived, easily directed. It is the trigger of magic; Efsun measures it.",
+   "match": [
+    "Internal Mana",
+    "Internal mana",
+    "internal mana"
+   ]
+  },
+  "dis-mana": {
+   "meaning": "External Mana",
+   "summary": "The mana of inanimate things such as stone, metal and earth: produced slowly, long-lived, hard to direct. It is the fuel of great spells.",
+   "match": [
+    "External Mana",
+    "External mana",
+    "external mana"
+   ]
+  },
+  "primordial-mana": {
+   "meaning": "First mana",
+   "summary": "Mana of unknown origin, believed to belong to the gods. What the Divine branch seeks.",
+   "match": [
+    "Primordial Mana"
+   ]
+  },
+  "dinamizm": {
+   "meaning": "Flow rate of mana",
+   "summary": "How fast internal mana flows from the soul: Normal, High (explosive, hard to control) or Low (calm, efficient).",
+   "match": [
+    "Dynamism",
+    "dynamism"
+   ]
+  },
+  "lumre": {
+   "meaning": "Currency",
+   "summary": "The game's money; used in trade, bribery and gambling.",
+   "match": [
+    "Lumre"
+   ]
+  },
+  "dusotu": {
+   "meaning": "Somnaria",
+   "summary": "A calming plant with purple leaves. It soothes fear and Cower, but afterwards you make a Corruption roll.",
+   "match": [
+    "Düşotu",
+    "Somnaria"
+   ]
+  },
+  "akis": {
+   "meaning": "Flow",
+   "summary": "The Shinigami's pool that fills each combat (Efsun + Sebahat/2, at least 2). It is spent while Erwachen and Apotheosis stay active.",
+   "match": [
+    "Flow"
+   ]
+  },
+  "sembol-stat": {
+   "meaning": "The branch's main stat",
+   "summary": "The stat each branch is tied to. Ability requirements are built on it, and it gains +1 at each level in that tier.",
+   "match": [
+    "symbol stat",
+    "Symbol stat",
+    "Symbol Stat",
+    "SYMBOL STAT"
+   ]
+  },
+  "kayip-an": {
+   "meaning": "Lost moment",
+   "summary": "Corruption 8: at the start of every combat you roll a d20; if the result is Corruption − 5 or lower, the GM plays your first turn.",
+   "match": [
+    "Lost Moment"
+   ]
+  },
+  "uber": {
+   "meaning": "Supreme",
+   "summary": "The highest difficulty the GM can set; for tasks normally considered impossible.",
+   "match": [
+    "Uber"
+   ]
+  },
+  "kademe": {
+   "meaning": "Difficulty step",
+   "summary": "A roll gets one step easier: +3 to the roll. One step harder: −3 to the roll. A wound \"advancing 1 stage\" is a separate thing.",
+   "match": [
+    "one step easier",
+    "one step harder",
+    "two steps easier",
+    "two steps harder",
+    "one more step easier",
+    "one more step harder"
+   ]
+  },
+  "bonus-tavani": {
+   "meaning": "Bonus limit",
+   "summary": "The maximum that bonuses from outside stats can add to a roll: +4 at Lv 0, +1 with each new tier (+5 at Lv 5, +6 at Lv 10, +7 at Lv 15). The GM turns any overflow bonus into narration.",
+   "match": [
+    "Bonus cap",
+    "bonus cap",
+    "the bonus cap"
+   ]
+  },
+  "dogaclama": {
+   "meaning": "Using an ability in a new way",
+   "summary": "You use an ability in a way not written on the sheet: the roll gets one step harder, and on success the GM adapts the effect to the situation. No usage limit and no Inspiration cost.",
+   "match": [
+    "Improvisation",
+    "improvisation"
+   ]
+  },
+  "halka-tabani": {
+   "meaning": "Corruption floor",
+   "summary": "Each fork where Surrender is chosen makes the first level of that ring the floor (1, 4, 7, 10); Corruption cannot drop below it. Resistance leaves no floor.",
+   "match": [
+    "Ring floor"
+   ]
+  },
+  "tasan-bonus": {
+   "meaning": "Bonus over the cap",
+   "summary": "Bonuses beyond the bonus cap are not lost; the GM turns them into results outside the roll, such as removing the action's penalty or finishing the job faster or cleaner.",
+   "match": [
+    "Overflow bonus",
+    "overflow bonus"
+   ]
+  },
+  "guclu-basari": {
+   "meaning": "Success with a natural 15+",
+   "summary": "On a successful roll, if the d20 itself shows 15 or higher, it is a strong success. Some abilities grant an extra effect on a strong success.",
+   "match": [
+    "Strong success",
+    "strong success",
+    "On a strong success",
+    "on a strong success"
+   ]
+  },
+  "vertex": {
+   "meaning": "Summit, peak (Latin)",
+   "summary": "The branch's single-level summit ability with heavy requirements. Each branch has two Vertices; rollless effects exist only on T3 Vertices.",
+   "match": [
+    "Vertex"
+   ]
+  },
+  "aciklik": {
+   "meaning": "The gap left by the opponent",
+   "summary": "Duelist mechanic: gained each time you foil your Duel Rival's attack (up to 3); spent for +2 to an attack, to reroll an evasion, or for +1 wound stage.",
+   "match": [
+    "Opening"
+   ]
+  },
+  "atilim": {
+   "meaning": "Charge momentum",
+   "summary": "Stormer mechanic: gained as you move and attack (up to 3), fades when you stand still; spent on an attack bonus, evasion, or the cost of Sturmflut.",
+   "match": [
+    "Momentum"
+   ]
+  },
+  "lutuf": {
+   "meaning": "Power granted by God",
+   "summary": "Archpriest mechanic: fills to Sebahat/2 − Corruption/3 at the start of the session; spent for +3 to prayer rolls or to reduce Corruption coming to an ally.",
+   "match": [
+    "Grace"
+   ]
+  },
+  "kizil-yuk": {
+   "meaning": "Rotten mana accumulated in the body",
+   "summary": "Catastrophe mechanic: builds up on successful decayed rolls; if not spent, it overflows or turns into Corruption at the end of combat.",
+   "match": [
+    "Crimson Burden"
+   ]
+  },
+  "rezonans": {
+   "meaning": "Resonating with the soul-sword",
+   "summary": "The bond the Shinigami forms with the soul-sword. Gained through Jinzen; 1 Resonance gives 2 Flow.",
+   "match": [
+    "Resonance"
+   ]
+  }
+ }
+}

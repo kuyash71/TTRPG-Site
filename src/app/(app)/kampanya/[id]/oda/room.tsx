@@ -19,6 +19,8 @@ import { checkModifiers, effectiveStats, installedAugments, normalizeBody, outco
 import { campaignHref, characterHref, createCharHref, panelHref, type Sys } from "@/lib/links";
 import { UC_STAT_KEYS, UC_STAT_LABELS, type UcStatKey } from "@/lib/uc/constants";
 import { UC_DECAY_EFFECTS, UC_DECAY_MAX, UC_DECAY_MODES, ucBonusCap, ucCheckParts, ucNormalizeStats, type UcDecayMode, type UcRules } from "@/lib/uc/rules";
+import { useLocale, useT, useTLoose } from "@/i18n/client";
+import { intlLocale, type Locale, type TFn } from "@/i18n/core";
 
 /** Odanın oyun sistemi ve masa ayarları (Schwarzesonne / Umbra Caelis, fiziksel zar). */
 interface RoomSys {
@@ -32,6 +34,39 @@ const useSys = () => useContext(SysCtx);
 const pointName = (sys: Sys) => (sys === "UC" ? "Esin" : "Inspiration");
 const decayName = (sys: Sys) => (sys === "UC" ? "Yozlaşma" : "Corruption");
 const statKeysOf = (sys: Sys): readonly string[] => (sys === "UC" ? UC_STAT_KEYS : STAT_KEYS);
+/** Sunucudan Türkçe gelen zar parçası etiketini gösterim diline çevirir ("Sol Kol yarası", "Durum + Yoz zar"). */
+function partLabelOf(t: TFn, tl: (s: string) => string, label: string) {
+  const m = /^(.+) yarası$/.exec(label);
+  if (m) return t("{part} yarası", { part: t(m[1]) });
+  return label
+    .split(" + ")
+    .map((x) => tl(x))
+    .join(" + ");
+}
+/** Sistem mesajı: "GM zar istedi: …" içindeki parçalar da ayrı ayrı çevrilir. */
+function systemTextOf(tl: (s: string) => string, t: TFn, s: string) {
+  const m = /^GM zar istedi: ([\s\S]*?)(?: \(([^()]*)\))? → ([\s\S]*)$/.exec(s);
+  if (m) {
+    const bits = m[2]
+      ? m[2]
+          .split(", ")
+          .map((b) => {
+            const d = /^durum (.+)$/.exec(b);
+            return d ? t("durum {mod}", { mod: d[1] }) : tl(b);
+          })
+          .join(", ")
+      : "";
+    return bits ? t("GM zar istedi: {label} ({bits}) → {names}", { label: tl(m[1]), bits, names: m[3] }) : t("GM zar istedi: {label} → {names}", { label: tl(m[1]), names: m[3] });
+  }
+  return tl(s);
+}
+/** Zar ek notu birden çok cümleden oluşabilir (taşan bonus + büyü geri tepmesi): her biri ayrı çevrilir. */
+function extraText(tl: (s: string) => string, s: string) {
+  return s
+    .split(/ (?=Büyü zarında Nat1)/)
+    .map((x) => tl(x))
+    .join(" ");
+}
 function statLabelOf(sys: Sys, k: string | null) {
   if (!k) return "";
   return sys === "UC" ? (UC_STAT_LABELS[k as UcStatKey] ?? k) : (STAT_LABELS[k as StatKey] ?? k);
@@ -122,6 +157,8 @@ export function Room({
   needsCharacter: boolean;
 }) {
   const go = useGo();
+  const t = useT();
+  const loc = useLocale();
   const [settings, setSettings] = useState({ physicalDice: campaign.physicalDice, deathSaveEnabled: campaign.deathSaveEnabled });
   const sys: RoomSys = useMemo(
     () => ({ system: campaign.system, uc: ucData, physical: settings.physicalDice, deathSaveEnabled: settings.deathSaveEnabled }),
@@ -200,19 +237,19 @@ export function Room({
       const once = () =>
         new Promise<Ack>((resolve) => {
           const s = sock.current;
-          if (!s?.connected) return resolve({ ok: false, error: "Bağlantı yok. Birkaç saniye içinde yeniden bağlanılacak." });
-          s.timeout(10_000).emit(ev, payload, (err: Error | null, r: Ack) => resolve(err ? { ok: false, error: "Sunucu yanıt vermedi." } : r));
+          if (!s?.connected) return resolve({ ok: false, error: t("Bağlantı yok. Birkaç saniye içinde yeniden bağlanılacak.") });
+          s.timeout(10_000).emit(ev, payload, (err: Error | null, r: Ack) => resolve(err ? { ok: false, error: t("Sunucu yanıt vermedi.") } : r));
         });
       let r = await once();
       // Bağlantı koptuysa ya da oda üyeliği düştüyse bir kez yeniden katılıp tekrar dene.
-      if (!r.ok && /odaya katıl|Bağlantı yok/.test(r.error)) {
+      if (!r.ok && (r.error === t("Bağlantı yok. Birkaç saniye içinde yeniden bağlanılacak.") || r.error === t("Önce odaya katıl.") || /odaya katıl|Bağlantı yok/.test(r.error))) {
         sock.current?.connect();
         await new Promise((res) => setTimeout(res, 600));
         if (await join()) r = await once();
       }
       return r;
     },
-    [join],
+    [join, t],
   );
 
   const refreshChar = useCallback(async (characterId: string) => {
@@ -236,7 +273,7 @@ export function Room({
   }, []);
 
   useEffect(() => {
-    const s = io({ path: `${BASE_PATH}/socket.io`, withCredentials: true, transports: ["websocket", "polling"] });
+    const s = io({ path: `${BASE_PATH}/socket.io`, withCredentials: true, transports: ["websocket", "polling"], auth: { loc } });
     sock.current = s;
     s.on("connect", () => {
       setConnected(true);
@@ -277,7 +314,7 @@ export function Room({
     });
     s.on("kicked", (p: { campaignId: string; campaignName: string }) => {
       if (p.campaignId !== campaign.id) return;
-      toast(`${p.campaignName} kampanyasından çıkarıldın.`, "error");
+      toast(t("{name} kampanyasından çıkarıldın.", { name: p.campaignName }), "error");
       try {
         sessionStorage.removeItem("shz:lastRoom");
       } catch {
@@ -287,7 +324,7 @@ export function Room({
     });
     s.on("campaign:closed", (p: { campaignId: string; campaignName: string }) => {
       if (p.campaignId !== campaign.id) return;
-      toast(`${p.campaignName} odası kapatıldı.`, "error");
+      toast(t("{name} odası kapatıldı.", { name: p.campaignName }), "error");
       try {
         sessionStorage.removeItem("shz:lastRoom");
       } catch {
@@ -297,11 +334,11 @@ export function Room({
     });
     s.on("campaign:settings", (p: { physicalDice: boolean; deathSaveEnabled: boolean }) => {
       setSettings((x) => {
-        if (x.physicalDice !== p.physicalDice) toast(p.physicalDice ? "GM fiziksel zar modunu açtı: zarlar masada atılır, sonucu GM girer." : "Fiziksel zar modu kapandı: dijital zar açık.", "ok");
+        if (x.physicalDice !== p.physicalDice) toast(p.physicalDice ? t("GM fiziksel zar modunu açtı: zarlar masada atılır, sonucu GM girer.") : t("Fiziksel zar modu kapandı: dijital zar açık."), "ok");
         return { physicalDice: p.physicalDice, deathSaveEnabled: p.deathSaveEnabled };
       });
     });
-    s.on("reset:request", (p: { name: string }) => toast(`${p.name} şifre sıfırlama istedi. Panelden onaylayabilirsin.`, "ok"));
+    s.on("reset:request", (p: { name: string }) => toast(t("{name} şifre sıfırlama istedi. Panelden onaylayabilirsin.", { name: p.name }), "ok"));
     s.on("character:deleted", ({ characterId }: { characterId: string }) => {
       setChars((list) => list.filter((e) => e.character.id !== characterId));
       setViewing((v) => (v === characterId ? null : v));
@@ -316,7 +353,7 @@ export function Room({
     return () => {
       s.disconnect();
     };
-  }, [campaign.id, campaign.system, refreshChar, toast, join, me.id, pushPopup, go]);
+  }, [campaign.id, campaign.system, refreshChar, toast, join, me.id, pushPopup, go, t]);
 
   const feed = useMemo<FeedItem[]>(
     () => [...msgs.map((m) => ({ t: "m" as const, at: m.createdAt, m })), ...rolls.map((r) => ({ t: "r" as const, at: r.createdAt, r }))].sort((a, b) => a.at.localeCompare(b.at)),
@@ -373,20 +410,20 @@ export function Room({
     <div className="-mx-4 -my-8 sm:-mx-6 sm:-my-10">
       <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-2.5 sm:px-6 sm:py-3">
         <div className="min-w-0">
-          <p className="kicker">Oyun odası</p>
+          <p className="kicker">{t("Oyun odası")}</p>
           <AppLink href={campaignHref(campaign.system, campaign.id)} className="block truncate font-serif text-base text-ink hover:text-accent sm:text-lg">
             {campaign.name}
           </AppLink>
         </div>
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           {settings.physicalDice && (
-            <span className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-accent/40 px-3 text-xs text-accent" title="Zarlar masada atılır; sonucu GM girer" data-testid="physical-badge">
-              <Dices className="h-4 w-4" /> <span className="hidden sm:inline">Fiziksel zar</span>
+            <span className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-accent/40 px-3 text-xs text-accent" title={t("Zarlar masada atılır; sonucu GM girer")} data-testid="physical-badge">
+              <Dices className="h-4 w-4" /> <span className="hidden sm:inline">{t("Fiziksel zar")}</span>
             </span>
           )}
           {spectator && (
-            <span className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-line px-3 text-sm text-muted" title="İzleyici: sahneye yazamaz, zar atamazsın">
-              <Eye className="h-4 w-4" /> İzleyici
+            <span className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-line px-3 text-sm text-muted" title={t("İzleyici: sahneye yazamaz, zar atamazsın")}>
+              <Eye className="h-4 w-4" /> {t("İzleyici")}
             </span>
           )}
           {!isGM &&
@@ -398,17 +435,17 @@ export function Room({
                 title={ownChar.character.name}
               >
                 <UserRound className="h-4 w-4" />
-                <span>Karakterim</span>
+                <span>{t("Karakterim")}</span>
               </AppLink>
             ) : (
               <AppLink href={createCharHref(campaign.system, campaign.id)} className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-accent px-3 text-sm font-semibold text-onAccent hover:bg-accent/90">
                 <UserPlus className="h-4 w-4" />
-                <span>Karakter Oluştur</span>
+                <span>{t("Karakter Oluştur")}</span>
               </AppLink>
             ))}
-          <span className={cx("flex items-center gap-1.5 text-xs", connected ? "text-ok" : "text-danger")} title={connected ? "Canlı bağlantı" : "Bağlanıyor"}>
+          <span className={cx("flex items-center gap-1.5 text-xs", connected ? "text-ok" : "text-danger")} title={connected ? t("Canlı bağlantı") : t("Bağlanıyor")}>
             <span className={cx("h-2 w-2 rounded-full", connected ? "animate-pulse bg-ok" : "bg-danger")} />
-            <span className="hidden sm:inline">{connected ? "Canlı" : "Bağlanıyor…"}</span>
+            <span className="hidden sm:inline">{connected ? t("Canlı") : t("Bağlanıyor…")}</span>
           </span>
         </div>
       </div>
@@ -418,9 +455,9 @@ export function Room({
           value={mobileTab}
           onChange={setMobileTab}
           tabs={[
-            { key: "parti", label: "Parti" },
-            { key: "akis", label: "Akış", badge: myRequests.length ? <span className="h-2 w-2 rounded-full bg-accent" /> : undefined },
-            { key: "zar", label: "Zar" },
+            { key: "parti", label: t("Parti") },
+            { key: "akis", label: t("Akış"), badge: myRequests.length ? <span className="h-2 w-2 rounded-full bg-accent" /> : undefined },
+            { key: "zar", label: t("Zar") },
           ]}
         />
       </div>
@@ -431,20 +468,20 @@ export function Room({
       </div>
       <RollPopups items={popups} me={me.id} onOpen={() => setMobileTab("akis")} onClose={(id) => setPopups((x) => x.filter((r) => r.id !== id))} />
       <CharacterQuick entry={viewed} data={data} onClose={() => setViewing(null)} />
-      <Modal open={askChar} onClose={closeAsk} title="Masaya hoş geldin">
+      <Modal open={askChar} onClose={closeAsk} title={t("Masaya hoş geldin")}>
         <div className="space-y-4">
           <div className="flex items-start gap-3">
             <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-accent/15 text-accent">
               <UserPlus className="h-5 w-5" />
             </span>
             <p className="text-sm text-ink/90">
-              Bu kampanyada henüz bir karakterin yok. Şimdi karakter oluşturmak ister misin? Sihirbaz seni adım adım yönlendirir; karakterin GM onayından sonra masaya katılır.
+              {t("Bu kampanyada henüz bir karakterin yok. Şimdi karakter oluşturmak ister misin? Sihirbaz seni adım adım yönlendirir; karakterin GM onayından sonra masaya katılır.")}
             </p>
           </div>
           <div className="flex flex-wrap justify-end gap-2">
-            <Button onClick={closeAsk}>Şimdilik izle</Button>
+            <Button onClick={closeAsk}>{t("Şimdilik izle")}</Button>
             <AppLink href={createCharHref(campaign.system, campaign.id)} onClick={closeAsk} className="inline-flex h-10 items-center rounded-lg bg-accent px-4 text-sm font-semibold text-onAccent hover:bg-accent/90">
-              Karakter oluştur
+              {t("Karakter oluştur")}
             </AppLink>
           </div>
         </div>
@@ -454,8 +491,18 @@ export function Room({
   );
 }
 
+/** Umbra Caelis güçlü başarı: başarılı (ya da değerlendirilmemiş) zarda d20'nin kendisi 15+. */
+function ucStrong(d: RollV["detail"]) {
+  const d20 = d.parts[0]?.value ?? 0;
+  if (d20 < 15 || d.outcome === "fail" || d.outcome === "crit-fail") return null;
+  return d.outcome === "success" || d.outcome === "crit-success" ? "sure" : "maybe";
+}
+
 // ------------------------------------------------------------------ zar bildirimi
 function RollPopups({ items, me, onOpen, onClose }: { items: RollV[]; me: string; onOpen: () => void; onClose: (id: string) => void }) {
+  const { system } = useSys();
+  const t = useT();
+  const tl = useTLoose();
   if (!items.length) return null;
   return (
     <div aria-live="polite" className="pointer-events-none fixed inset-x-0 top-20 z-[90] flex flex-col items-center gap-2 px-3">
@@ -486,14 +533,24 @@ function RollPopups({ items, me, onOpen, onClose }: { items: RollV[]; me: string
             </span>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-[11px] text-muted">
-                {mine ? "Senin zarın" : (r.characterName ?? r.userName)} · {r.label}
+                {mine ? t("Senin zarın") : (r.characterName ?? r.userName)} · {tl(r.label)}
               </span>
               <span className="block font-serif text-lg leading-tight text-ink">
-                {death ? (d.deathTrack?.final === "death" ? "ÖLDÜ" : d.deathTrack?.final === "save" ? "HAYATTA KALDI" : d.outcome === "death" ? `Ölüm ${d.deathTrack?.deaths ?? ""}/3` : `Kurtuluş ${d.deathTrack?.saves ?? ""}/3`) : outcomeLabel(d.outcome) || `Toplam ${d.total}`}
+                {death
+                  ? d.deathTrack?.final === "death"
+                    ? t("ÖLDÜ")
+                    : d.deathTrack?.final === "save"
+                      ? t("HAYATTA KALDI")
+                      : d.outcome === "death"
+                        ? t("Ölüm {n}/3", { n: d.deathTrack?.deaths ?? "" })
+                        : t("Kurtuluş {n}/3", { n: d.deathTrack?.saves ?? "" })
+                  : system === "UC" && ucStrong(d) === "sure" && d.outcome === "success"
+                    ? t("Güçlü başarı")
+                    : (outcomeLabel(d.outcome) && t(outcomeLabel(d.outcome))) || t("Toplam {n}", { n: d.total })}
               </span>
               <span className="block truncate font-mono text-[11px] text-muted">
                 {d.parts.map((p, i) => (i === 0 ? `${p.label} ${p.value}` : `${p.value >= 0 ? "+" : "−"}${Math.abs(p.value)}`)).join(" ")}
-                {d.threshold != null && !death ? ` · eşik ${d.threshold}` : ""}
+                {d.threshold != null && !death ? ` · ${system === "UC" ? t("hedef {n}", { n: d.threshold }) : t("eşik {n}", { n: d.threshold })}` : ""}
               </span>
             </span>
           </button>
@@ -526,11 +583,15 @@ function Party({
   onMuted: (m: Member) => void;
 }) {
   const toast = useToast();
+  const t = useT();
   const { system, uc, deathSaveEnabled } = useSys();
   const [kick, setKick] = useState<Member | null>(null);
   const gmPath = (id: string) => (system === "UC" ? `/api/uc/characters/${id}/gm` : `/api/characters/${id}/gm`);
   const decayMax = system === "UC" ? UC_DECAY_MAX : 13;
-  const decayHint = (v: number) => (system === "UC" ? UC_DECAY_EFFECTS[v] : CORRUPTION_EFFECTS[v]);
+  const decayHint = (v: number) => {
+    const h = system === "UC" ? UC_DECAY_EFFECTS[v] : CORRUPTION_EFFECTS[v];
+    return h ? t(h) : h;
+  };
   const setMute = async (u: Member, body: { chatMuted?: boolean; rollMuted?: boolean }) => {
     try {
       const r = await api<{ chatMuted: boolean; rollMuted: boolean; role: Member["role"] }>(`/api/campaigns/${campaign.id}/members/${u.id}`, { method: "PATCH", body });
@@ -549,8 +610,8 @@ function Party({
   };
   return (
     <div className="space-y-3 p-4">
-      <p className="text-[11px] font-semibold uppercase tracking-widest text-muted">Parti</p>
-      {chars.length === 0 && <p className="text-sm text-muted">Aktif karakter yok.</p>}
+      <p className="text-[11px] font-semibold uppercase tracking-widest text-muted">{t("Parti")}</p>
+      {chars.length === 0 && <p className="text-sm text-muted">{t("Aktif karakter yok.")}</p>}
       {chars.map((e) => {
         const c = e.character;
         const on = !!c.userId && online.includes(c.userId);
@@ -561,7 +622,7 @@ function Party({
         return (
           <div key={c.id} className={cx("rounded-xl border bg-surface p-3", dead ? "border-danger/50 bg-danger/[0.05]" : c.userId === me ? "border-accent/40" : "border-line")}>
             <div className="flex items-start justify-between gap-2">
-              <button type="button" onClick={() => onOpen(c.id)} className={cx("relative shrink-0", dead && "grayscale")} title="Karakteri görüntüle">
+              <button type="button" onClick={() => onOpen(c.id)} className={cx("relative shrink-0", dead && "grayscale")} title={t("Karakteri görüntüle")}>
                 <Portrait id={c.id} version={c.portraitVersion} name={c.name} className="h-12 w-10" />
                 {dead && <Skull className="absolute -bottom-1 -right-1 h-4 w-4 rounded bg-bg text-danger" />}
               </button>
@@ -570,29 +631,29 @@ function Party({
                   {c.name}
                 </button>
                 <p className="text-[11px] text-muted">
-                  Sv {c.level} · {c.userId ? (members.find((m) => m.id === c.userId)?.displayName ?? (c.userId === gm.id ? gm.displayName : "")) : <span className="text-warn">sahipsiz</span>}
-                  {system === "UC" && uc && c.trees.length > 0 && ` · ${c.trees.map((t) => uc.dals[t]?.name ?? t).join(" / ")}`}
+                  {t("Sv {n}", { n: c.level })} · {c.userId ? (members.find((m) => m.id === c.userId)?.displayName ?? (c.userId === gm.id ? gm.displayName : "")) : <span className="text-warn">{t("sahipsiz")}</span>}
+                  {system === "UC" && uc && c.trees.length > 0 && ` · ${c.trees.map((k) => uc.dals[k]?.name ?? k).join(" / ")}`}
                 </p>
-                {c.languages?.length > 0 && <p className="truncate text-[10px] text-muted" title="Diller">{c.languages.join(" · ")}</p>}
+                {c.languages?.length > 0 && <p className="truncate text-[10px] text-muted" title={t("Diller")}>{c.languages.join(" · ")}</p>}
               </div>
-              <span title={on ? "Çevrimiçi" : "Çevrimdışı"} className={cx("mt-1.5 h-2 w-2 shrink-0 rounded-full", on ? "bg-ok" : "bg-line")} />
+              <span title={on ? t("Çevrimiçi") : t("Çevrimdışı")} className={cx("mt-1.5 h-2 w-2 shrink-0 rounded-full", on ? "bg-ok" : "bg-line")} />
             </div>
             {dead && (
               <div className="mt-2 flex items-center justify-between gap-2">
-                <Badge tone="danger">Öldü</Badge>
+                <Badge tone="danger">{t("Öldü")}</Badge>
                 {isGM && (
-                  <Button size="sm" variant="outline" onClick={() => quick(c.id, { revive: true }, `${c.name} diriltildi.`)}>
-                    <HeartPulse className="h-3.5 w-3.5" /> Dirilt
+                  <Button size="sm" variant="outline" onClick={() => quick(c.id, { revive: true }, t("{name} diriltildi.", { name: c.name }))}>
+                    <HeartPulse className="h-3.5 w-3.5" /> {t("Dirilt")}
                   </Button>
                 )}
               </div>
             )}
-            {!dead && c.status !== "ACTIVE" && <Badge tone="warn" className="mt-2">{c.status === "PENDING" ? "Onay bekliyor" : c.status}</Badge>}
+            {!dead && c.status !== "ACTIVE" && <Badge tone="warn" className="mt-2">{c.status === "PENDING" ? t("Onay bekliyor") : c.status}</Badge>}
             {full && !dead && (
               <div className="mt-2 space-y-1.5 text-xs">
                 <div className="flex items-center justify-between">
                   <span className="text-muted" title={decayHint(full.corruption)}>
-                    {decayName(system)}
+                    {t(decayName(system))}
                   </span>
                   <span className="flex items-center gap-1.5">
                     {isGM && <MiniBtn onClick={() => quick(c.id, { corruption: Math.max(0, full.corruption - 1) })}>−</MiniBtn>}
@@ -601,7 +662,7 @@ function Party({
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-muted">{pointName(system)}</span>
+                  <span className="text-muted">{t(pointName(system))}</span>
                   <span className="flex items-center gap-1.5">
                     {isGM && <MiniBtn onClick={() => quick(c.id, { inspiration: full.inspiration - 1 })}>−</MiniBtn>}
                     <span className={cx("w-8 text-center font-mono", full.inspiration < 0 && "text-danger")}>{full.inspiration}</span>
@@ -614,15 +675,15 @@ function Party({
                     <DeathPips ds={full.deathSave} />
                   </div>
                 )}
-                {hurt.length > 0 && <p className="text-danger/90">{hurt.map((p) => `${p.label} −${woundPenalty(body![p.key])}`).join(" · ")}</p>}
-                {full.abilityPoints > 0 && <p className="text-accent">{full.abilityPoints} yetenek puanı harcanmamış</p>}
+                {hurt.length > 0 && <p className="text-danger/90">{hurt.map((p) => `${t(p.label)} −${woundPenalty(body![p.key])}`).join(" · ")}</p>}
+                {full.abilityPoints > 0 && <p className="text-accent">{t("Harcanmamış yetenek puanı: {n}", { n: full.abilityPoints })}</p>}
               </div>
             )}
           </div>
         );
       })}
       <div className="pt-2">
-        <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted">Masada</p>
+        <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted">{t("Masada")}</p>
         <ul className="space-y-1 text-sm">
           <li className="flex items-center gap-2">
             <span className={cx("h-1.5 w-1.5 rounded-full", online.includes(gm.id) ? "bg-ok" : "bg-line")} />
@@ -634,19 +695,19 @@ function Party({
               <span className={cx("h-1.5 w-1.5 shrink-0 rounded-full", online.includes(u.id) ? "bg-ok" : "bg-line")} />
               <span className={cx("min-w-0 flex-1 truncate", online.includes(u.id) ? "text-ink" : "text-muted")}>
                 {u.displayName}
-                {u.role === "SPECTATOR" && <span className="ml-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted">izleyici</span>}
+                {u.role === "SPECTATOR" && <span className="ml-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted">{t("izleyici")}</span>}
               </span>
               {isGM ? (
                 <span className="flex shrink-0 gap-1">
-                  <MuteBtn active={u.chatMuted} title={u.chatMuted ? "Sohbet susturmasını kaldır" : "Sohbette sustur"} onClick={() => setMute(u, { chatMuted: !u.chatMuted })}>
+                  <MuteBtn active={u.chatMuted} title={u.chatMuted ? t("Sohbet susturmasını kaldır") : t("Sohbette sustur")} onClick={() => setMute(u, { chatMuted: !u.chatMuted })}>
                     <MessageCircleOff className="h-3.5 w-3.5" />
                   </MuteBtn>
-                  <MuteBtn active={u.rollMuted} title={u.rollMuted ? "Zar susturmasını kaldır" : "Zar atmada sustur"} onClick={() => setMute(u, { rollMuted: !u.rollMuted })}>
+                  <MuteBtn active={u.rollMuted} title={u.rollMuted ? t("Zar susturmasını kaldır") : t("Zar atmada sustur")} onClick={() => setMute(u, { rollMuted: !u.rollMuted })}>
                     <Dices className="h-3.5 w-3.5" />
                   </MuteBtn>
                   <MuteBtn
                     active={u.role === "SPECTATOR"}
-                    title={u.role === "SPECTATOR" ? "Oyuncu yap" : "İzleyici yap"}
+                    title={u.role === "SPECTATOR" ? t("Oyuncu yap") : t("İzleyici yap")}
                     onClick={async () => {
                       try {
                         const r = await api<{ chatMuted: boolean; rollMuted: boolean; role: Member["role"] }>(`/api/campaigns/${campaign.id}/members/${u.id}`, {
@@ -661,27 +722,27 @@ function Party({
                   >
                     <Eye className="h-3.5 w-3.5" />
                   </MuteBtn>
-                  <MuteBtn active={false} title="Oyundan at" onClick={() => setKick(u)}>
+                  <MuteBtn active={false} title={t("Oyundan at")} onClick={() => setKick(u)}>
                     <UserX className="h-3.5 w-3.5" />
                   </MuteBtn>
                 </span>
               ) : (
                 <span className="flex shrink-0 gap-1 text-danger">
-                  {u.chatMuted && <MessageCircleOff className="h-3.5 w-3.5" aria-label="Sohbette susturuldu" />}
-                  {u.rollMuted && <Dices className="h-3.5 w-3.5" aria-label="Zar atmada susturuldu" />}
+                  {u.chatMuted && <MessageCircleOff className="h-3.5 w-3.5" aria-label={t("Sohbette susturuldu")} />}
+                  {u.rollMuted && <Dices className="h-3.5 w-3.5" aria-label={t("Zar atmada susturuldu")} />}
                 </span>
               )}
             </li>
           ))}
         </ul>
       </div>
-      <Modal open={!!kick} onClose={() => setKick(null)} title="Oyuncuyu oyundan at">
+      <Modal open={!!kick} onClose={() => setKick(null)} title={t("Oyuncuyu oyundan at")}>
         <p className="text-sm text-ink/90">
-          <strong>{kick?.displayName}</strong> kampanyadan çıkarılacak ve odadan hemen atılacak. Karakterleri silinmez; katılma koduyla yeniden katılabilir (kodu yenileyerek bunu
-          engelleyebilirsin).
+          <strong>{kick?.displayName}</strong>{" "}
+          {t("kampanyadan çıkarılacak ve odadan hemen atılacak. Karakterleri silinmez; katılma koduyla yeniden katılabilir (kodu yenileyerek bunu engelleyebilirsin).")}
         </p>
         <div className="mt-4 flex justify-end gap-2">
-          <Button onClick={() => setKick(null)}>Vazgeç</Button>
+          <Button onClick={() => setKick(null)}>{t("Vazgeç")}</Button>
           <Button
             variant="danger"
             onClick={async () => {
@@ -689,13 +750,13 @@ function Party({
               setKick(null);
               try {
                 await api(`/api/campaigns/${campaign.id}/members/${u.id}`, { method: "DELETE" });
-                toast(`${u.displayName} oyundan atıldı.`, "ok");
+                toast(t("{name} oyundan atıldı.", { name: u.displayName }), "ok");
               } catch (e) {
                 toast((e as Error).message, "error");
               }
             }}
           >
-            Oyundan at
+            {t("Oyundan at")}
           </Button>
         </div>
       </Modal>
@@ -704,9 +765,10 @@ function Party({
 }
 
 function DeathPips({ ds }: { ds: FullChar["deathSave"] }) {
-  if (!ds.available) return <span className="font-medium text-danger/90">Yok</span>;
+  const t = useT();
+  if (!ds.available) return <span className="font-medium text-danger/90">{t("Yok")}</span>;
   return (
-    <span className="flex items-center gap-2" title={`Ölüm ${ds.deaths}/3 · Kurtuluş ${ds.saves}/3`}>
+    <span className="flex items-center gap-2" title={t("Ölüm {deaths}/3 · Kurtuluş {saves}/3", { deaths: ds.deaths, saves: ds.saves })}>
       <span className="flex gap-0.5">
         {[0, 1, 2].map((i) => (
           <span key={i} className={cx("h-2 w-2 rounded-full", i < ds.deaths ? "bg-danger" : "bg-surface2 ring-1 ring-danger/40")} />
@@ -791,8 +853,9 @@ function Feed({
   rollKey: number;
 }) {
   const toast = useToast();
+  const t = useT();
   const { system, physical } = useSys();
-  const pn = pointName(system);
+  const pn = t(pointName(system));
   const end = useRef<HTMLDivElement>(null);
   const box = useRef<HTMLDivElement>(null);
   const [text, setText] = useState("");
@@ -822,7 +885,7 @@ function Feed({
   const speaker = isGM ? null : (myChars[0] ?? null);
   // Fısıltı konuşmaları: GM için her üye + oyuncular arası; oyuncu için GM + diğer oyuncular (izleyiciler yalnızca GM'e yazar).
   const peers: { id: string; name: string }[] = isGM
-    ? [...members.map((m) => ({ id: m.id, name: m.displayName })), { id: PLAYERS_THREAD, name: "Oyuncular arası" }]
+    ? [...members.map((m) => ({ id: m.id, name: m.displayName })), { id: PLAYERS_THREAD, name: t("Oyuncular arası") }]
     : [
         { id: gm.id, name: `${gm.displayName} (GM)` },
         ...(spectator ? [] : members.filter((m) => m.id !== me && (m.role ?? "PLAYER") === "PLAYER").map((m) => ({ id: m.id, name: m.displayName }))),
@@ -834,19 +897,19 @@ function Feed({
   }, [peers, peer]);
 
   const inTab = useCallback(
-    (it: FeedItem, t: ChatTab, p?: string) => {
-      if (it.t === "r") return t === "ic";
+    (it: FeedItem, tb: ChatTab, p?: string) => {
+      if (it.t === "r") return tb === "ic";
       const ch = it.m.channel;
-      if (t === "ic") return ch === "IC" || ch === "SYSTEM";
-      if (t === "ooc") return ch === "OOC";
+      if (tb === "ic") return ch === "IC" || ch === "SYSTEM";
+      if (tb === "ooc") return ch === "OOC";
       return ch === "WHISPER" && (!p || whisperPeer(it.m, me) === p);
     },
     [me],
   );
   const view = items.filter((it) => inTab(it, tab, tab === "fisilti" ? peer : undefined));
-  const countOf = (t: ChatTab, p?: string) => items.filter((it) => inTab(it, t, p) && !(it.t === "m" && it.m.userId === me)).length;
-  const keyOf = (t: ChatTab, p?: string) => (t === "fisilti" ? `f:${p}` : t);
-  const unread = (t: ChatTab, p?: string) => Math.max(0, countOf(t, p) - (seen[keyOf(t, p)] ?? 0));
+  const countOf = (tb: ChatTab, p?: string) => items.filter((it) => inTab(it, tb, p) && !(it.t === "m" && it.m.userId === me)).length;
+  const keyOf = (tb: ChatTab, p?: string) => (tb === "fisilti" ? `f:${p}` : tb);
+  const unread = (tb: ChatTab, p?: string) => Math.max(0, countOf(tb, p) - (seen[keyOf(tb, p)] ?? 0));
   const whisperUnread = peers.reduce((a, x) => a + unread("fisilti", x.id), 0);
 
   const openKey = keyOf(tab, tab === "fisilti" ? peer : undefined);
@@ -882,14 +945,14 @@ function Feed({
 
   const channel = tab === "ic" ? "IC" : tab === "ooc" ? "OOC" : "WHISPER";
   const send = async () => {
-    const t = text.trim();
-    if (!t) return;
-    if (channel === "WHISPER" && (!peer || readOnlyThread)) return toast("Fısıldayacağın kişiyi seç.", "error");
+    const body = text.trim();
+    if (!body) return;
+    if (channel === "WHISPER" && (!peer || readOnlyThread)) return toast(t("Fısıldayacağın kişiyi seç."), "error");
     setSending(true);
     const r = await emit("chat", {
       campaignId,
       channel,
-      text: t,
+      text: body,
       characterId: channel === "IC" && speaker ? speaker.id : null,
       recipientId: channel === "WHISPER" ? peer : null,
     });
@@ -907,7 +970,7 @@ function Feed({
     const r = await emit("deleteMany", { campaignId, messageIds, rollIds });
     if (!r.ok) return toast(r.error, "error");
     const d = r.data as { messages: number; rolls: number };
-    toast(`${d.messages} mesaj${d.rolls ? `, ${d.rolls} zar` : ""} silindi.`, "ok");
+    toast(d.rolls ? t("Silindi: {m} mesaj, {r} zar.", { m: d.messages, r: d.rolls }) : t("Silindi: {m} mesaj.", { m: d.messages }), "ok");
     stopSelecting();
   };
   const removeRoll = async (id: string) => {
@@ -915,18 +978,18 @@ function Feed({
     if (!r.ok) toast(r.error, "error");
   };
 
-  const nameOf = (id: string | null) => (id === gm.id ? gm.displayName : id === PLAYERS_THREAD ? "Oyuncular arası" : (members.find((m) => m.id === id)?.displayName ?? "?"));
-  const tabBtn = (t: ChatTab, label: string, n: number) => (
+  const nameOf = (id: string | null) => (id === gm.id ? gm.displayName : id === PLAYERS_THREAD ? t("Oyuncular arası") : (members.find((m) => m.id === id)?.displayName ?? "?"));
+  const tabBtn = (tb: ChatTab, label: string, n: number) => (
     <button
-      key={t}
+      key={tb}
       type="button"
       role="tab"
-      aria-selected={tab === t}
-      onClick={() => setTab(t)}
-      className={cx("-mb-px flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-2.5 text-sm transition", tab === t ? "border-accent text-ink" : "border-transparent text-muted hover:text-ink")}
+      aria-selected={tab === tb}
+      onClick={() => setTab(tb)}
+      className={cx("-mb-px flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-2.5 text-sm transition", tab === tb ? "border-accent text-ink" : "border-transparent text-muted hover:text-ink")}
     >
       {label}
-      {n > 0 && tab !== t && <span className="rounded-full bg-accent px-1.5 text-[10px] font-semibold leading-4 text-onAccent">{n > 99 ? "99+" : n}</span>}
+      {n > 0 && tab !== tb && <span className="rounded-full bg-accent px-1.5 text-[10px] font-semibold leading-4 text-onAccent">{n > 99 ? "99+" : n}</span>}
     </button>
   );
   const charOf = (id: string | null) => myChars.find((c) => c.id === id) ?? null;
@@ -934,28 +997,28 @@ function Feed({
   return (
     <div className="flex min-h-0 w-full flex-col">
       <div role="tablist" className="flex shrink-0 items-center gap-1 overflow-x-auto border-b border-line px-2 sm:px-4">
-        {tabBtn("ic", "Sahne", unread("ic"))}
-        {tabBtn("ooc", "Masa", unread("ooc"))}
-        {tabBtn("fisilti", "Fısıltılar", whisperUnread)}
+        {tabBtn("ic", t("Sahne"), unread("ic"))}
+        {tabBtn("ooc", t("Masa"), unread("ooc"))}
+        {tabBtn("fisilti", t("Fısıltılar"), whisperUnread)}
         <span className="ml-auto flex shrink-0 items-center gap-1">
           <button
             type="button"
             onClick={() => (selecting ? stopSelecting() : setSelecting(true))}
             className={cx("flex items-center gap-1 rounded-md px-2 py-1 text-xs", selecting ? "bg-accent/15 text-ink" : "text-muted hover:text-ink")}
-            title={isGM ? "Birden çok mesaj ve zar seçip sil" : "Kendi mesajlarından birkaçını seçip sil"}
+            title={isGM ? t("Birden çok mesaj ve zar seçip sil") : t("Kendi mesajlarından birkaçını seçip sil")}
           >
-            <CheckSquare className="h-3.5 w-3.5" /> <span className="hidden sm:inline">{selecting ? "Seçimi bitir" : "Seç"}</span>
+            <CheckSquare className="h-3.5 w-3.5" /> <span className="hidden sm:inline">{selecting ? t("Seçimi bitir") : t("Seç")}</span>
           </button>
           {isGM && (
-            <button type="button" onClick={() => setClearOpen(true)} className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted hover:text-danger" title="Sohbet veya zar geçmişini temizle">
-              <Trash2 className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Temizle</span>
+            <button type="button" onClick={() => setClearOpen(true)} className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted hover:text-danger" title={t("Sohbet veya zar geçmişini temizle")}>
+              <Trash2 className="h-3.5 w-3.5" /> <span className="hidden sm:inline">{t("Temizle")}</span>
             </button>
           )}
         </span>
       </div>
       {tab === "fisilti" && (
         <div className="flex shrink-0 gap-1.5 overflow-x-auto border-b border-line px-3 py-2 sm:px-5" data-testid="whisper-peers">
-          {isGM && members.length === 0 && <span className="text-xs text-muted">Kampanyada oyuncu yok.</span>}
+          {isGM && members.length === 0 && <span className="text-xs text-muted">{t("Kampanyada oyuncu yok.")}</span>}
           {peers.map((m) => {
             const n = unread("fisilti", m.id);
             const pp = m.id === PLAYERS_THREAD;
@@ -964,7 +1027,7 @@ function Feed({
                 key={m.id}
                 type="button"
                 onClick={() => setPeer(m.id)}
-                title={pp ? "Oyuncuların birbirine fısıldadıkları (salt okunur)" : undefined}
+                title={pp ? t("Oyuncuların birbirine fısıldadıkları (salt okunur)") : undefined}
                 className={cx(
                   "flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1 text-xs",
                   pp && "border-dashed",
@@ -983,18 +1046,18 @@ function Feed({
         {view.length === 0 && (
           <p className="py-10 text-center text-sm text-muted">
             {tab === "ic"
-              ? "Sahne boş. Karakterinle konuş ya da zar at."
+              ? t("Sahne boş. Karakterinle konuş ya da zar at.")
               : tab === "ooc"
-                ? "Oyun dışı sohbet burada. Herkes görür."
+                ? t("Oyun dışı sohbet burada. Herkes görür.")
                 : readOnlyThread
-                  ? "Oyuncuların birbirine fısıldadıkları burada görünür. Bu konuşmalara yazamazsın."
+                  ? t("Oyuncuların birbirine fısıldadıkları burada görünür. Bu konuşmalara yazamazsın.")
                   : !peer
-                    ? "Fısıldamak için birini seç."
+                    ? t("Fısıldamak için birini seç.")
                     : peer === gm.id
-                      ? "GM ile özel konuşma. Bunu yalnızca sen ve GM görürsünüz."
+                      ? t("GM ile özel konuşma. Bunu yalnızca sen ve GM görürsünüz.")
                       : isGM
-                        ? `${nameOf(peer)} ile özel konuşma. Bunu yalnızca ikiniz görürsünüz.`
-                        : `${nameOf(peer)} ile özel konuşma. Diğer oyuncular göremez; GM masadaki tüm fısıltıları görür.`}
+                        ? t("{name} ile özel konuşma. Bunu yalnızca ikiniz görürsünüz.", { name: nameOf(peer) })
+                        : t("{name} ile özel konuşma. Diğer oyuncular göremez; GM masadaki tüm fısıltıları görür.", { name: nameOf(peer) })}
           </p>
         )}
         {view.map((it) => {
@@ -1024,7 +1087,7 @@ function Feed({
                 disabled={!ok}
                 onClick={() => toggleSel(k)}
                 className={cx("mt-2 shrink-0 rounded p-0.5", ok ? "text-accent hover:bg-accent/15" : "invisible")}
-                aria-label={on ? "Seçimi kaldır" : "Seç"}
+                aria-label={on ? t("Seçimi kaldır") : t("Seç")}
                 aria-pressed={on}
               >
                 {on ? <CheckSquare className="h-4 w-4" /> : <Square className="h-4 w-4" />}
@@ -1039,25 +1102,25 @@ function Feed({
       </div>
       {selecting && (
         <div className="flex shrink-0 flex-wrap items-center gap-2 border-t border-accent/40 bg-accent/[0.06] px-3 py-2 text-sm sm:px-6">
-          <span className="text-ink">{sel.size} öğe seçildi</span>
+          <span className="text-ink">{t("Seçilen öğe: {n}", { n: sel.size })}</span>
           <button
             type="button"
             className="text-xs text-muted hover:text-ink"
             onClick={() => setSel(new Set(view.filter(canSelect).map(keyOfItem)))}
           >
-            Görünenlerin tümünü seç
+            {t("Görünenlerin tümünü seç")}
           </button>
           {sel.size > 0 && (
             <button type="button" className="text-xs text-muted hover:text-ink" onClick={() => setSel(new Set())}>
-              Temizle
+              {t("Temizle")}
             </button>
           )}
           <span className="ml-auto flex gap-2">
             <Button size="sm" onClick={stopSelecting}>
-              Vazgeç
+              {t("Vazgeç")}
             </Button>
             <Button size="sm" variant="danger" disabled={!sel.size} onClick={removeSelected}>
-              <Trash2 className="h-3.5 w-3.5" /> Seçilenleri sil
+              <Trash2 className="h-3.5 w-3.5" /> {t("Seçilenleri sil")}
             </Button>
           </span>
         </div>
@@ -1072,11 +1135,11 @@ function Feed({
       >
         {tab === "ic" && !isGM && !speaker && (
           <p className="mb-2 text-xs text-muted">
-            {spectator ? "İzleyicisin: sahneye yazamazsın. Masa sohbetine ya da GM'e fısıltıyla yazabilirsin." : "Sahnede konuşmak için onaylanmış bir karakterin olmalı. Masa ve Fısıltılar herkese açık."}
+            {spectator ? t("İzleyicisin: sahneye yazamazsın. Masa sohbetine ya da GM'e fısıltıyla yazabilirsin.") : t("Sahnede konuşmak için onaylanmış bir karakterin olmalı. Masa ve Fısıltılar herkese açık.")}
           </p>
         )}
         {chatMuted && (tab !== "fisilti" || peer !== gm.id) && (
-          <p className="mb-2 rounded-md border border-danger/40 bg-danger/10 px-3 py-1.5 text-xs text-danger">GM seni sohbette susturdu. Yine de GM&apos;e fısıldayabilirsin.</p>
+          <p className="mb-2 rounded-md border border-danger/40 bg-danger/10 px-3 py-1.5 text-xs text-danger">{t("GM seni sohbette susturdu. Yine de GM'e fısıldayabilirsin.")}</p>
         )}
         <div className="flex gap-2">
           <textarea
@@ -1093,41 +1156,41 @@ function Feed({
             placeholder={
               tab === "ic"
                 ? isGM
-                  ? "Anlatıcı olarak yaz…"
+                  ? t("Anlatıcı olarak yaz…")
                   : speaker
-                    ? `${speaker.name} ne söylüyor / yapıyor?`
+                    ? t("{name} ne söylüyor / yapıyor?", { name: speaker.name })
                     : spectator
-                      ? "İzleyiciler sahneye yazamaz"
-                      : "Karakterin yok"
+                      ? t("İzleyiciler sahneye yazamaz")
+                      : t("Karakterin yok")
                 : tab === "ooc"
-                  ? "Masaya bir not… (herkes görür)"
+                  ? t("Masaya bir not… (herkes görür)")
                   : readOnlyThread
-                    ? "Oyuncular arası konuşmalar salt okunur"
+                    ? t("Oyuncular arası konuşmalar salt okunur")
                     : peer === gm.id
-                      ? "GM'e gizli mesaj…"
-                      : `${nameOf(peer)} için gizli mesaj…`
+                      ? t("GM'e gizli mesaj…")
+                      : t("{name} için gizli mesaj…", { name: nameOf(peer) })
             }
             className="input min-h-[44px] resize-none"
           />
           <Button type="submit" variant="primary" className="h-11" disabled={sending || !text.trim() || (chatMuted && (tab !== "fisilti" || peer !== gm.id)) || (tab === "ic" && !isGM && !speaker) || (tab === "fisilti" && readOnlyThread)}>
-            Gönder
+            {t("Gönder")}
           </Button>
         </div>
       </form>
-      <Modal open={!!confirmReroll} onClose={() => setConfirmReroll(null)} title={`${pn} harcansın mı?`}>
+      <Modal open={!!confirmReroll} onClose={() => setConfirmReroll(null)} title={t("{point} harcansın mı?", { point: pn })}>
         {confirmReroll && (
           <div className="space-y-4">
             <p className="text-sm text-ink/90">
-              Bu zarı <strong>1 {pn}</strong> harcayarak yeniden atacaksın. Yeni sonuç geçerli olur, eskisi iptal edilir.
+              {t("Bu zarı 1 {point} harcayarak yeniden atacaksın. Yeni sonuç geçerli olur, eskisi iptal edilir.", { point: pn })}
             </p>
             <RollCard r={confirmReroll} canReroll={false} onReroll={() => {}} />
             {!isGM && charOf(confirmReroll.characterId) && (
               <p className="text-xs text-muted">
-                Kalan {pn}: <span className="font-mono text-ink">{charOf(confirmReroll.characterId)!.inspiration}</span> → <span className="font-mono text-ink">{charOf(confirmReroll.characterId)!.inspiration - 1}</span>
+                {t("Kalan {point}:", { point: pn })} <span className="font-mono text-ink">{charOf(confirmReroll.characterId)!.inspiration}</span> → <span className="font-mono text-ink">{charOf(confirmReroll.characterId)!.inspiration - 1}</span>
               </p>
             )}
             <div className="flex justify-end gap-2">
-              <Button onClick={() => setConfirmReroll(null)}>Vazgeç</Button>
+              <Button onClick={() => setConfirmReroll(null)}>{t("Vazgeç")}</Button>
               <Button
                 variant="primary"
                 onClick={async () => {
@@ -1137,7 +1200,7 @@ function Feed({
                   if (!res.ok) toast(res.error, "error");
                 }}
               >
-                Harca ve yeniden at
+                {t("Harca ve yeniden at")}
               </Button>
             </div>
           </div>
@@ -1151,21 +1214,22 @@ function Feed({
 type ClearChoice = "IC" | "OOC" | "WHISPER_PEER" | "WHISPER" | "ROLLS" | "ALL";
 function ClearModal({ open, onClose, emit, campaignId, tab, peer, peerName }: { open: boolean; onClose: () => void; emit: Emit; campaignId: string; tab: ChatTab; peer: string; peerName: string }) {
   const toast = useToast();
+  const t = useT();
   const [choice, setChoice] = useState<ClearChoice>("IC");
   const [busy, setBusy] = useState(false);
   useEffect(() => {
     if (open) setChoice(tab === "ic" ? "IC" : tab === "ooc" ? "OOC" : "WHISPER_PEER");
   }, [open, tab]);
   const opts: [ClearChoice, string, string][] = [
-    ["IC", "Sahne mesajları", "Karakter konuşmaları ve sistem mesajları. Zarlar kalır."],
-    ["OOC", "Masa sohbeti", "Oyun dışı sohbetin tamamı."],
-    ["WHISPER_PEER", `${peerName} ile fısıltılar`, "Yalnızca bu oyuncuyla olan özel konuşma."],
-    ["WHISPER", "Tüm fısıltılar", "Bütün oyuncularla olan özel konuşmalar."],
-    ["ROLLS", "Zar geçmişi", "Tüm zar kayıtları. Mesajlar kalır."],
-    ["ALL", "Her şey", "Bütün mesajlar, fısıltılar ve zarlar."],
+    ["IC", t("Sahne mesajları"), t("Karakter konuşmaları ve sistem mesajları. Zarlar kalır.")],
+    ["OOC", t("Masa sohbeti"), t("Oyun dışı sohbetin tamamı.")],
+    ["WHISPER_PEER", t("{name} ile fısıltılar", { name: peerName }), t("Yalnızca bu oyuncuyla olan özel konuşma.")],
+    ["WHISPER", t("Tüm fısıltılar"), t("Bütün oyuncularla olan özel konuşmalar.")],
+    ["ROLLS", t("Zar geçmişi"), t("Tüm zar kayıtları. Mesajlar kalır.")],
+    ["ALL", t("Her şey"), t("Bütün mesajlar, fısıltılar ve zarlar.")],
   ];
   return (
-    <Modal open={open} onClose={onClose} title="Geçmişi temizle">
+    <Modal open={open} onClose={onClose} title={t("Geçmişi temizle")}>
       <div className="space-y-2">
         {opts
           .filter(([k]) => k !== "WHISPER_PEER" || !!peer)
@@ -1178,9 +1242,9 @@ function ClearModal({ open, onClose, emit, campaignId, tab, peer, peerName }: { 
               </span>
             </label>
           ))}
-        <p className="pt-1 text-xs text-muted">Silinenler geri getirilemez. Tek tek silmek için &quot;Seç&quot; düğmesini kullan.</p>
+        <p className="pt-1 text-xs text-muted">{t("Silinenler geri getirilemez. Tek tek silmek için \"Seç\" düğmesini kullan.")}</p>
         <div className="flex justify-end gap-2 pt-2">
-          <Button onClick={onClose}>Vazgeç</Button>
+          <Button onClick={onClose}>{t("Vazgeç")}</Button>
           <Button
             variant="danger"
             disabled={busy}
@@ -1199,11 +1263,11 @@ function ClearModal({ open, onClose, emit, campaignId, tab, peer, peerName }: { 
                 }
               }
               setBusy(false);
-              toast("Temizlendi.", "ok");
+              toast(t("Temizlendi."), "ok");
               onClose();
             }}
           >
-            Temizle
+            {t("Temizle")}
           </Button>
         </div>
       </div>
@@ -1211,21 +1275,23 @@ function ClearModal({ open, onClose, emit, campaignId, tab, peer, peerName }: { 
   );
 }
 
-function reqSummary(q: RollReq, system: Sys) {
+function reqSummary(q: RollReq, system: Sys, t: TFn, tl: (s: string) => string) {
   const bits: string[] = [];
-  if (q.kind === "check") bits.push(q.stat ? statLabelOf(system, q.stat) : "Statsız");
-  if (q.kind === "decay" && q.decayMode) bits.push(UC_DECAY_MODES[q.decayMode].label);
-  if (q.thresholdLabel) bits.push(q.thresholdLabel + (q.thresholdValue == null && q.threshold ? ` (${THRESHOLDS.find((t) => t.key === q.threshold)?.value})` : ""));
-  if (q.modifier) bits.push(`durum ${q.modifier > 0 ? "+" : ""}${q.modifier}`);
-  if (q.blackMagic) bits.push("kara büyü");
-  if (q.magic) bits.push("büyü zarı");
-  if (q.decay) bits.push("yoz zar");
-  if (q.hidden) bits.push("sonuç gizli");
+  if (q.kind === "check") bits.push(q.stat ? statLabelOf(system, q.stat) : t("Statsız"));
+  if (q.kind === "decay" && q.decayMode) bits.push(t(UC_DECAY_MODES[q.decayMode].label));
+  if (q.thresholdLabel) bits.push(tl(q.thresholdLabel) + (q.thresholdValue == null && q.threshold ? ` (${THRESHOLDS.find((x) => x.key === q.threshold)?.value})` : ""));
+  if (q.modifier) bits.push(t("durum {mod}", { mod: `${q.modifier > 0 ? "+" : ""}${q.modifier}` }));
+  if (q.blackMagic) bits.push(t("kara büyü"));
+  if (q.magic) bits.push(t("büyü zarı"));
+  if (q.decay) bits.push(t("yoz zar"));
+  if (q.hidden) bits.push(t("sonuç gizli"));
   return bits.join(" · ");
 }
 
 function RequestBar({ requests, isGM, myChars, emit, campaignId, rollMuted }: { requests: RollReq[]; isGM: boolean; myChars: FullChar[]; emit: Emit; campaignId: string; rollMuted: boolean }) {
   const toast = useToast();
+  const t = useT();
+  const tl = useTLoose();
   const { system } = useSys();
   const [parts, setParts] = useState<Record<string, BodyPartKey | "">>({});
   const [busy, setBusy] = useState(false);
@@ -1264,14 +1330,14 @@ function RequestBar({ requests, isGM, myChars, emit, campaignId, rollMuted }: { 
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div className="min-w-0">
                 <p>
-                  <strong className={q.kind === "death" ? "text-danger" : "text-accent"}>{q.kind === "death" ? "☠ Death Save" : q.kind === "pervitin" ? "Pervitin zarı" : q.kind === "decay" ? "Yozlaşma zarı" : "GM zar istiyor"}:</strong> {q.label}
+                  <strong className={q.kind === "death" ? "text-danger" : "text-accent"}>{q.kind === "death" ? "☠ Death Save" : q.kind === "pervitin" ? t("Pervitin zarı") : q.kind === "decay" ? t("Yozlaşma zarı") : t("GM zar istiyor")}:</strong> {tl(q.label)}
                 </p>
-                <p className="text-xs text-muted">{reqSummary(q, system)}</p>
-                {isGM && <p className="mt-0.5 text-xs text-muted">Bekleniyor: {q.characters.map((c) => c.name).join(", ")}</p>}
+                <p className="text-xs text-muted">{reqSummary(q, system, t, tl)}</p>
+                {isGM && <p className="mt-0.5 text-xs text-muted">{t("Bekleniyor:")} {q.characters.map((c) => c.name).join(", ")}</p>}
               </div>
               {isGM && (
                 <Button size="sm" variant="ghost" onClick={() => emit("cancelRequest", { campaignId, requestId: q.id })}>
-                  İptal
+                  {t("İptal")}
                 </Button>
               )}
             </div>
@@ -1279,17 +1345,17 @@ function RequestBar({ requests, isGM, myChars, emit, campaignId, rollMuted }: { 
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 {q.playerPart && (
                   <select className="input h-8 w-auto py-0 text-xs" value={parts[q.id] ?? ""} onChange={(e) => setParts({ ...parts, [q.id]: e.target.value as BodyPartKey | "" })}>
-                    <option value="">Uzuv yok</option>
+                    <option value="">{t("Uzuv yok")}</option>
                     {BODY_PARTS.map((p) => (
                       <option key={p.key} value={p.key}>
-                        {p.label}
+                        {t(p.label)}
                       </option>
                     ))}
                   </select>
                 )}
                 {mine.map((c) => (
                   <Button key={c.id} size="sm" variant={q.kind === "death" ? "danger" : "primary"} disabled={rollMuted || busy} onClick={() => answer(q, c.id)}>
-                    {mine.length > 1 ? `${c.name} için at` : q.kind === "death" ? "Death Save at (d6)" : "Zarı at"}
+                    {mine.length > 1 ? t("{name} için at", { name: c.name }) : q.kind === "death" ? t("Death Save at (d6)") : t("Zarı at")}
                   </Button>
                 ))}
               </div>
@@ -1301,19 +1367,21 @@ function RequestBar({ requests, isGM, myChars, emit, campaignId, rollMuted }: { 
   );
 }
 
-function time(s: string) {
-  return new Date(s).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
+function time(s: string, loc: Locale) {
+  return new Date(s).toLocaleTimeString(intlLocale(loc), { hour: "2-digit", minute: "2-digit" });
 }
 
-function DeleteBtn({ onDelete, title = "Mesajı sil" }: { onDelete: () => void; title?: string }) {
+function DeleteBtn({ onDelete, title: titleProp }: { onDelete: () => void; title?: string }) {
+  const t = useT();
+  const title = titleProp ?? t("Mesajı sil");
   const [ask, setAsk] = useState(false);
   return ask ? (
     <span className="ml-2 inline-flex items-center gap-1 text-[11px]">
       <button type="button" className="rounded bg-danger/20 px-1.5 text-danger hover:bg-danger/30" onClick={onDelete}>
-        Sil
+        {t("Sil")}
       </button>
       <button type="button" className="rounded px-1.5 text-muted hover:text-ink" onClick={() => setAsk(false)}>
-        Vazgeç
+        {t("Vazgeç")}
       </button>
     </span>
   ) : (
@@ -1330,11 +1398,14 @@ function DeleteBtn({ onDelete, title = "Mesajı sil" }: { onDelete: () => void; 
 }
 
 function MessageRow({ m, me, nameOf, canDelete, onDelete }: { m: Msg; me: string; nameOf: (id: string | null) => string; canDelete: boolean; onDelete: () => void }) {
+  const t = useT();
+  const tl = useTLoose();
+  const loc = useLocale();
   const del = canDelete ? <DeleteBtn onDelete={onDelete} /> : null;
   if (m.channel === "SYSTEM")
     return (
       <div className="group flex items-center justify-center py-1">
-        <span className="rounded-full border border-line bg-surface2/60 px-3 py-1 text-center text-xs text-muted">{m.content}</span>
+        <span className="rounded-full border border-line bg-surface2/60 px-3 py-1 text-center text-xs text-muted">{systemTextOf(tl, t, m.content)}</span>
         {del}
       </div>
     );
@@ -1344,7 +1415,7 @@ function MessageRow({ m, me, nameOf, canDelete, onDelete }: { m: Msg; me: string
       <div className={cx("group flex", mine ? "justify-end" : "justify-start")}>
         <div className={cx("max-w-[85%] rounded-2xl px-3.5 py-2 text-sm", mine ? "rounded-br-sm bg-accent/20" : "rounded-bl-sm border border-line bg-surface2")}>
           <p className="mb-0.5 text-[11px] text-muted">
-            {mine ? "Sen" : m.recipientId === me ? nameOf(m.userId) : `${nameOf(m.userId)} → ${nameOf(m.recipientId)}`} · {time(m.createdAt)}
+            {mine ? t("Sen") : m.recipientId === me ? nameOf(m.userId) : `${nameOf(m.userId)} → ${nameOf(m.recipientId)}`} · {time(m.createdAt, loc)}
             {del}
           </p>
           <p className="whitespace-pre-wrap break-words">{m.content}</p>
@@ -1356,7 +1427,7 @@ function MessageRow({ m, me, nameOf, canDelete, onDelete }: { m: Msg; me: string
     return (
       <div className="group rounded-lg px-2 py-1 hover:bg-surface2/40">
         <p className="text-[11px] text-muted">
-          <span className="font-medium text-ink/80">{m.userName}</span> · {time(m.createdAt)}
+          <span className="font-medium text-ink/80">{m.userName}</span> · {time(m.createdAt, loc)}
           {del}
         </p>
         <p className="whitespace-pre-wrap break-words text-sm text-ink/90">{m.content}</p>
@@ -1365,7 +1436,7 @@ function MessageRow({ m, me, nameOf, canDelete, onDelete }: { m: Msg; me: string
   return (
     <div className="group rounded-lg px-2 py-1 hover:bg-surface2/30">
       <p className="text-[11px] text-muted">
-        <span className="font-serif text-[15px] text-accent">{m.characterName ?? `${m.userName} (anlatıcı)`}</span> · {time(m.createdAt)}
+        <span className="font-serif text-[15px] text-accent">{m.characterName ?? t("{name} (anlatıcı)", { name: m.userName })}</span> · {time(m.createdAt, loc)}
         {del}
       </p>
       <p className="whitespace-pre-wrap break-words font-serif text-[15px] text-ink">{m.content}</p>
@@ -1386,45 +1457,57 @@ const OUTCOME_TONE: Record<string, string> = {
 function RollCard({ r, canReroll, onReroll, canDelete, onDelete }: { r: RollV; canReroll: boolean; onReroll: () => void; canDelete?: boolean; onDelete?: () => void }) {
   const d = r.detail;
   const { system } = useSys();
+  const t = useT();
+  const tl = useTLoose();
+  const loc = useLocale();
   if (r.kind === "death") return <DeathCard r={r} canDelete={canDelete} onDelete={onDelete} />;
   return (
     <div className={cx("group rounded-xl border bg-surface px-3 py-3 sm:px-4", r.rerolled ? "border-line opacity-50" : "border-line", r.hidden && "border-dashed")}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[11px] text-muted">
-            {r.characterName ?? r.userName} · {time(r.createdAt)}
-            {r.hidden && " · gizli"}
-            {r.rerolled && " · yeniden atıldı"}
-            {d.requested && " · GM isteği"}
-            {d.physical && " · fiziksel zar (GM girdi)"}
-            {r.kind === "buyu" && " · büyü zarı"}
-            {r.kind === "yoz" && " · yoz zar"}
-            {canDelete && onDelete && <DeleteBtn onDelete={onDelete} title="Zarı sil" />}
+            {r.characterName ?? r.userName} · {time(r.createdAt, loc)}
+            {r.hidden && ` · ${t("gizli")}`}
+            {r.rerolled && ` · ${t("yeniden atıldı")}`}
+            {d.requested && ` · ${t("GM isteği")}`}
+            {d.physical && ` · ${t("fiziksel zar (GM girdi)")}`}
+            {r.kind === "buyu" && ` · ${t("büyü zarı")}`}
+            {r.kind === "yoz" && ` · ${t("yoz zar")}`}
+            {canDelete && onDelete && <DeleteBtn onDelete={onDelete} title={t("Zarı sil")} />}
           </p>
-          <p className="font-medium text-ink">{r.label}</p>
+          <p className="font-medium text-ink">{tl(r.label)}</p>
         </div>
         <div className="flex items-center gap-2">
-          {d.outcome !== "info" && <span className={cx("rounded-md border px-2 py-0.5 text-xs font-semibold", OUTCOME_TONE[d.outcome])}>{outcomeLabel(d.outcome)}</span>}
+          {d.outcome !== "info" && <span className={cx("rounded-md border px-2 py-0.5 text-xs font-semibold", OUTCOME_TONE[d.outcome])}>{t(outcomeLabel(d.outcome))}</span>}
+          {system === "UC" && ucStrong(d) && (
+            <span
+              className="rounded-md border border-accent/50 bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent"
+              title={ucStrong(d) === "sure" ? t("Başarılı zarda d20 15+") : t("d20 15+: başarılıysa güçlü başarıdır (GM değerlendirir)")}
+              data-testid="uc-strong"
+            >
+              {ucStrong(d) === "sure" ? t("Güçlü") : "d20 15+"}
+            </span>
+          )}
           <span className="grid h-11 min-w-11 place-items-center rounded-lg bg-surface2 px-2 font-mono text-2xl text-ink">{d.total}</span>
         </div>
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px]">
         {d.parts.map((p, i) => (
           <span key={i} className={cx("rounded px-1.5 py-0.5 font-mono", i === 0 ? "bg-accent/15 text-accent" : p.value < 0 ? "bg-danger/10 text-danger" : "bg-surface2 text-ink/80")}>
-            {p.label} {i === 0 ? p.value : `${p.value >= 0 ? "+" : ""}${p.value}`}
+            {partLabelOf(t, tl, p.label)} {i === 0 ? p.value : `${p.value >= 0 ? "+" : ""}${p.value}`}
           </span>
         ))}
         {d.threshold != null && (
           <span className="text-muted">
-            ≥ {d.threshold} ({d.thresholdLabel})
+            ≥ {d.threshold} ({d.thresholdLabel ? tl(d.thresholdLabel) : d.thresholdLabel})
           </span>
         )}
       </div>
-      {d.note && (r.kind === "pervitin" || r.kind === "decay") && <p className="mt-1.5 text-xs text-ink/80">{d.note}</p>}
-      {d.extra && <p className="mt-1.5 rounded-md bg-lav/10 px-2 py-1 text-xs text-ink/85">{d.extra}</p>}
+      {d.note && (r.kind === "pervitin" || r.kind === "decay") && <p className="mt-1.5 text-xs text-ink/80">{tl(d.note)}</p>}
+      {d.extra && <p className="mt-1.5 rounded-md bg-lav/10 px-2 py-1 text-xs text-ink/85">{extraText(tl, d.extra)}</p>}
       {canReroll && (
         <button type="button" onClick={onReroll} className="mt-2 text-xs text-accent hover:underline">
-          {pointName(system)} harca, yeniden at
+          {t("{point} harca, yeniden at", { point: t(pointName(system)) })}
         </button>
       )}
     </div>
@@ -1436,6 +1519,9 @@ function DeathCard({ r, canDelete, onDelete }: { r: RollV; canDelete?: boolean; 
   const tr = d.deathTrack;
   const dead = d.outcome === "death";
   const final = tr?.final;
+  const t = useT();
+  const tl = useTLoose();
+  const loc = useLocale();
   return (
     <div
       className={cx(
@@ -1446,15 +1532,15 @@ function DeathCard({ r, canDelete, onDelete }: { r: RollV; canDelete?: boolean; 
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[11px] text-muted">
-            {r.characterName ?? r.userName} · {time(r.createdAt)} · Death Save
-            {d.physical && " · fiziksel zar"}
-            {canDelete && onDelete && <DeleteBtn onDelete={onDelete} title="Zarı sil" />}
+            {r.characterName ?? r.userName} · {time(r.createdAt, loc)} · Death Save
+            {d.physical && ` · ${t("fiziksel zar")}`}
+            {canDelete && onDelete && <DeleteBtn onDelete={onDelete} title={t("Zarı sil")} />}
           </p>
           <p className={cx("font-serif text-lg", dead ? "text-danger" : "text-ok")}>
-            {final === "death" ? "☠ Karakter öldü" : final === "save" ? "✚ Hayatta kaldı" : dead ? "Ölüme bir adım daha…" : "Hayata tutunuyor"}
+            {final === "death" ? t("☠ Karakter öldü") : final === "save" ? t("✚ Hayatta kaldı") : dead ? t("Ölüme bir adım daha…") : t("Hayata tutunuyor")}
           </p>
         </div>
-        <span className={cx("grid h-12 w-12 shrink-0 place-items-center rounded-lg font-mono text-2xl", dead ? "bg-danger/20 text-danger" : "bg-ok/20 text-ok")} title="d6: 1–3 ölüm, 4–6 kurtuluş">
+        <span className={cx("grid h-12 w-12 shrink-0 place-items-center rounded-lg font-mono text-2xl", dead ? "bg-danger/20 text-danger" : "bg-ok/20 text-ok")} title={t("d6: 1–3 ölüm, 4–6 kurtuluş")}>
           {d.total}
         </span>
       </div>
@@ -1472,10 +1558,10 @@ function DeathCard({ r, canDelete, onDelete }: { r: RollV; canDelete?: boolean; 
               <span key={i} className={cx("h-2.5 w-2.5 rounded-full", i < (final ? (final === "save" ? 3 : 0) : tr.saves) ? "bg-ok" : "bg-surface2 ring-1 ring-ok/40")} />
             ))}
           </span>
-          <span className="text-muted">d6: 1–3 ölüm · 4–6 kurtuluş</span>
+          <span className="text-muted">{t("d6: 1–3 ölüm · 4–6 kurtuluş")}</span>
         </div>
       )}
-      {d.note && <p className="mt-1.5 text-xs text-ink/85">{d.note}</p>}
+      {d.note && <p className="mt-1.5 text-xs text-ink/85">{tl(d.note)}</p>}
     </div>
   );
 }
@@ -1483,25 +1569,26 @@ function DeathCard({ r, canDelete, onDelete }: { r: RollV; canDelete?: boolean; 
 // ------------------------------------------------------------------ zar paneli
 function ThresholdPicker({ value, manual, onChange, allowManual }: { value: string | null; manual: number | null; onChange: (key: string | null, manual: number | null) => void; allowManual: boolean }) {
   const { system } = useSys();
-  // Umbra Caelis: sabit eşik tablosu yok; eşiği GM sayı olarak koyar (oyuncuya söylemek zorunda değil).
+  const t = useT();
+  // Umbra Caelis: eşik yok; zorluğu GM belirler. İsterse sonucun otomatik değerlendirilmesi için bir hedef sayı girer (oyuncu görmez).
   if (system === "UC")
     return (
       <div>
-        <span className="label">Eşik</span>
+        <span className="label">{t("Hedef sayı (isteğe bağlı)")}</span>
         {allowManual ? (
           <div className="flex items-center gap-2">
             <button type="button" onClick={() => onChange(null, null)} className={cx("rounded-md border px-3 py-1.5 text-xs", manual === null ? "border-accent bg-accent/15" : "border-line text-muted")}>
-              Yok
+              {t("Yok")}
             </button>
             <label className={cx("flex flex-1 items-center gap-2 rounded-md border px-2 text-xs", manual !== null ? "border-accent bg-accent/15" : "border-line text-muted")}>
-              <span>Sayı</span>
+              <span>{t("Sayı")}</span>
               <input
                 type="number"
                 min={1}
                 max={60}
                 inputMode="numeric"
                 value={manual ?? ""}
-                placeholder="GM belirler"
+                placeholder={t("GM belirler")}
                 data-testid="uc-threshold"
                 onChange={(e) => onChange(null, e.target.value === "" ? null : Math.max(1, Math.min(60, Number(e.target.value))))}
                 className="h-8 w-full min-w-0 bg-transparent text-center font-mono text-ink outline-none"
@@ -1509,30 +1596,30 @@ function ThresholdPicker({ value, manual, onChange, allowManual }: { value: stri
             </label>
           </div>
         ) : (
-          <p className="rounded-md border border-line bg-surface2/50 px-3 py-1.5 text-xs text-muted">Eşiği GM belirler; sonucu GM değerlendirir.</p>
+          <p className="rounded-md border border-line bg-surface2/50 px-3 py-1.5 text-xs text-muted">{t("Zorluğu GM belirler; sonucu GM değerlendirir.")}</p>
         )}
       </div>
     );
   return (
     <div>
-      <span className="label">Eşik</span>
+      <span className="label">{t("Eşik")}</span>
       <div className="grid grid-cols-4 gap-1">
         <button type="button" onClick={() => onChange(null, null)} className={cx("rounded-md border px-1 py-1.5 text-xs", value === null && manual === null ? "border-accent bg-accent/15" : "border-line text-muted")}>
-          Yok
+          {t("Yok")}
         </button>
-        {THRESHOLDS.map((t) => (
+        {THRESHOLDS.map((th) => (
           <button
-            key={t.key}
+            key={th.key}
             type="button"
-            onClick={() => onChange(t.key, null)}
-            className={cx("rounded-md border px-1 py-1.5 text-xs", value === t.key && manual === null ? "border-accent bg-accent/15 text-ink" : "border-line text-muted hover:text-ink")}
+            onClick={() => onChange(th.key, null)}
+            className={cx("rounded-md border px-1 py-1.5 text-xs", value === th.key && manual === null ? "border-accent bg-accent/15 text-ink" : "border-line text-muted hover:text-ink")}
           >
-            {t.label} <span className="font-mono">{t.value}</span>
+            {t(th.label)} <span className="font-mono">{th.value}</span>
           </button>
         ))}
         {allowManual && (
           <label className={cx("flex items-center gap-1 rounded-md border px-1.5 text-xs", manual !== null ? "border-accent bg-accent/15" : "border-line text-muted")}>
-            <span>Elle</span>
+            <span>{t("Elle")}</span>
             <input
               type="number"
               min={1}
@@ -1552,12 +1639,13 @@ function ThresholdPicker({ value, manual, onChange, allowManual }: { value: stri
 
 function StatPicker({ value, onChange }: { value: string; onChange: (k: string) => void }) {
   const { system } = useSys();
+  const t = useT();
   return (
     <div>
       <span className="label">Stat</span>
       <div className="grid grid-cols-4 gap-1">
         <button type="button" onClick={() => onChange("")} className={cx("rounded-md border px-1 py-1.5 text-xs", value === "" ? "border-accent bg-accent/15 text-ink" : "border-line text-muted hover:text-ink")}>
-          Statsız
+          {t("Statsız")}
         </button>
         {statKeysOf(system).map((k) => (
           <button
@@ -1575,16 +1663,17 @@ function StatPicker({ value, onChange }: { value: string; onChange: (k: string) 
 }
 
 function ModifierPicker({ value, onChange, label = "Durum düzenleyici" }: { value: number; onChange: (n: number) => void; label?: string }) {
+  const t = useT();
   return (
     <div className="flex items-center justify-between">
-      <span className="label mb-0">{label}</span>
+      <span className="label mb-0">{t(label)}</span>
       <span className="flex items-center gap-1.5">
         <MiniBtn onClick={() => onChange(Math.max(-20, value - 1))}>−</MiniBtn>
         <span className={cx("w-9 text-center font-mono", value > 0 ? "text-ok" : value < 0 && "text-danger")}>{value > 0 ? `+${value}` : value}</span>
         <MiniBtn onClick={() => onChange(Math.min(20, value + 1))}>+</MiniBtn>
         {value !== 0 && (
           <button type="button" className="text-[11px] text-muted hover:text-ink" onClick={() => onChange(0)}>
-            sıfırla
+            {t("sıfırla")}
           </button>
         )}
       </span>
@@ -1603,9 +1692,10 @@ function Check({ checked, onChange, children }: { checked: boolean; onChange: (v
 
 /** Fiziksel zar: masada gelen değer (GM girer). */
 function DieInput({ sides, value, onChange }: { sides: 6 | 20; value: number | null; onChange: (n: number | null) => void }) {
+  const t = useT();
   return (
     <label className="block">
-      <span className="label">Masada gelen zar (d{sides})</span>
+      <span className="label">{t("Masada gelen zar (d{sides})", { sides })}</span>
       <div className="flex items-center gap-2">
         <input
           type="number"
@@ -1654,6 +1744,8 @@ function DicePanel({
   spectator: boolean;
 }) {
   const toast = useToast();
+  const t = useT();
+  const tl = useTLoose();
   const { system, physical } = useSys();
   const uc = system === "UC";
   const choices = isGM ? allChars : myChars;
@@ -1689,7 +1781,7 @@ function DicePanel({
       ? [{ label: "Düzenleyici", value: mod }]
       : [];
   const sum = parts.reduce((a, b) => a + b.value, 0);
-  const thValue = manual ?? (uc ? null : (THRESHOLDS.find((t) => t.key === threshold)?.value ?? null));
+  const thValue = manual ?? (uc ? null : (THRESHOLDS.find((x) => x.key === threshold)?.value ?? null));
 
   const doEmit = async (ev: string, payload: unknown) => {
     setBusy(true);
@@ -1716,9 +1808,9 @@ function DicePanel({
 
   const charSelect = (allowNone: boolean) => (
     <label className="block">
-      <span className="label">{physical ? "Zarı atan" : "Karakter"}</span>
+      <span className="label">{physical ? t("Zarı atan") : t("Karakter")}</span>
       <select className="input" value={charId} onChange={(e) => setCharId(e.target.value)} data-testid="dice-char">
-        {allowNone && <option value="">GM (karaktersiz d20)</option>}
+        {allowNone && <option value="">{t("GM (karaktersiz d20)")}</option>}
         {choices.map((c) => (
           <option key={c.id} value={c.id}>
             {c.name}
@@ -1732,29 +1824,29 @@ function DicePanel({
       {uc ? (
         <>
           <Check checked={magic} onChange={setMagic}>
-            Büyü zarı <span className="text-xs text-muted">(Nat1 → mana geri tepmesi)</span>
+            {t("Büyü zarı")} <span className="text-xs text-muted">{t("(Nat1 → mana geri tepmesi)")}</span>
           </Check>
           <Check checked={yoz} onChange={setYoz}>
-            Yoz zar <span className="text-xs text-muted">(Yozlaşma bonusu, tavana sayılır)</span>
+            {t("Yoz zar")} <span className="text-xs text-muted">{t("(Yozlaşma bonusu, tavana sayılır)")}</span>
           </Check>
         </>
       ) : (
         <Check checked={bm} onChange={setBm}>
-          Kara büyü zarı (Corruption etkileri)
+          {t("Kara büyü zarı (Corruption etkileri)")}
         </Check>
       )}
     </>
   );
   const partSelect = ch && (
     <label className="block">
-      <span className="label">Kullanılan uzuv (yara cezası)</span>
+      <span className="label">{t("Kullanılan uzuv (yara cezası)")}</span>
       <select className="input" value={part} onChange={(e) => setPart(e.target.value as BodyPartKey | "")}>
-        <option value="">Yok</option>
+        <option value="">{t("Yok")}</option>
         {BODY_PARTS.map((p) => {
           const pen = woundPenalty(normalizeBody(ch.body)[p.key]);
           return (
             <option key={p.key} value={p.key}>
-              {p.label}
+              {t(p.label)}
               {pen ? ` (−${pen})` : ""}
             </option>
           );
@@ -1768,15 +1860,15 @@ function DicePanel({
       {parts.map((p, i) => (
         <span key={i} className={cx(p.value < 0 ? "text-danger" : "text-ink/80")}>
           {" "}
-          {p.value >= 0 ? "+" : "−"} {Math.abs(p.value)} <span className="text-muted">{p.label}</span>
+          {p.value >= 0 ? "+" : "−"} {Math.abs(p.value)} <span className="text-muted">{partLabelOf(t, tl, p.label)}</span>
         </span>
       ))}
       <span className="ml-1 font-mono text-ink"> = {first} {sum >= 0 ? "+" : "−"} {Math.abs(sum)}</span>
       {thValue != null && <span className="ml-1 text-muted">≥ {thValue}</span>}
       {ucr && (
         <span className="mt-1 block text-[11px] text-muted">
-          Bonus tavanı +{ucr.cap}
-          {ucr.overflow > 0 && <span className="text-lav"> · taşan +{ucr.overflow} anlatıma döner</span>}
+          {t("Bonus tavanı +{n}", { n: ucr.cap })}
+          {ucr.overflow > 0 && <span className="text-lav"> · {t("taşan +{n} anlatıma döner", { n: ucr.overflow })}</span>}
         </span>
       )}
     </div>
@@ -1786,12 +1878,12 @@ function DicePanel({
   if (physical && !isGM)
     return (
       <div className="space-y-4 p-4">
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-muted">Zar · fiziksel masa</p>
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-muted">{t("Zar · fiziksel masa")}</p>
         <div className="rounded-lg border border-accent/40 bg-accent/10 px-3 py-3 text-sm" data-testid="physical-player-note">
           <p className="flex items-center gap-2 font-medium text-ink">
-            <Dices className="h-4 w-4 text-accent" /> Zarlar masada atılıyor
+            <Dices className="h-4 w-4 text-accent" /> {t("Zarlar masada atılıyor")}
           </p>
-          <p className="mt-1 text-ink/85">Zarını gerçek zarla at ve sonucu GM&apos;e söyle. GM sonucu sisteme girer; başarı ve karakterine etkisi Akış&apos;ta görünür.</p>
+          <p className="mt-1 text-ink/85">{t("Zarını gerçek zarla at ve sonucu GM'e söyle. GM sonucu sisteme girer; başarı ve karakterine etkisi Akış'ta görünür.")}</p>
         </div>
       </div>
     );
@@ -1801,13 +1893,13 @@ function DicePanel({
     const canSend = die != null && !busy && (pkind === "check" || !!ch) && (!needTh || thValue != null) && (pkind !== "death" || (deathSaveEnabled && !!ch?.deathSave.available));
     return (
       <div className="space-y-4 p-4" data-testid="physical-gm">
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-muted">Fiziksel zar · sonucu gir</p>
-        <p className="text-xs text-muted">Oyuncu zarı masada attı: atan karakteri, zar türünü ve gelen sayıyı seç. Sistem başarıyı ve {decayName(system)} / Death Save etkisini hesaplar.</p>
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-muted">{t("Fiziksel zar · sonucu gir")}</p>
+        <p className="text-xs text-muted">{t("Oyuncu zarı masada attı: atan karakteri, zar türünü ve gelen sayıyı seç. Sistem başarıyı ve {decay} / Death Save etkisini hesaplar.", { decay: t(decayName(system)) })}</p>
         <div role="tablist" className="grid grid-cols-3 gap-1 rounded-lg border border-line bg-surface p-1">
           {(
             [
-              ["check", "Normal zar"],
-              ["corr", uc ? "Yozlaşma" : "Pervitin"],
+              ["check", t("Normal zar")],
+              ["corr", uc ? t("Yozlaşma") : "Pervitin"],
               ["death", "Death Save"],
             ] as const
           ).map(([k, l]) => (
@@ -1836,9 +1928,9 @@ function DicePanel({
             <ModifierPicker value={mod} onChange={setMod} label={uc ? "Bonus / ceza" : "Durum düzenleyici"} />
             {flags}
             <Check checked={hidden} onChange={setHidden}>
-              Gizli (yalnızca GM görür)
+              {t("Gizli (yalnızca GM görür)")}
             </Check>
-            <input className="input" placeholder="Açıklama (ör. Kapıyı kır)" maxLength={80} value={label} onChange={(e) => setLabel(e.target.value)} />
+            <input className="input" placeholder={t("Açıklama (ör. Kapıyı kır)")} maxLength={80} value={label} onChange={(e) => setLabel(e.target.value)} />
             {preview(die != null ? String(die) : "d20")}
           </>
         )}
@@ -1846,25 +1938,25 @@ function DicePanel({
           <>
             {uc && (
               <label className="block">
-                <span className="label">Yozlaşma zarı</span>
+                <span className="label">{t("Yozlaşma zarı")}</span>
                 <select className="input" value={dmode} onChange={(e) => setDmode(e.target.value as UcDecayMode)}>
                   {(Object.keys(UC_DECAY_MODES) as UcDecayMode[]).map((k) => (
                     <option key={k} value={k}>
-                      {UC_DECAY_MODES[k].label}
+                      {t(UC_DECAY_MODES[k].label)}
                     </option>
                   ))}
                 </select>
-                <span className="mt-1 block text-[11px] text-muted">{UC_DECAY_MODES[dmode].hint}</span>
+                <span className="mt-1 block text-[11px] text-muted">{t(UC_DECAY_MODES[dmode].hint)}</span>
               </label>
             )}
-            {!uc && <p className="text-[11px] text-muted">d20 + Sanita − Corruption/3 + durum ≥ eşik; başarısızlıkta +1 Corruption.</p>}
+            {!uc && <p className="text-[11px] text-muted">{t("d20 + Sanita − Corruption/3 + durum ≥ eşik; başarısızlıkta +1 Corruption.")}</p>}
             <ThresholdPicker value={threshold} manual={manual} allowManual onChange={(k, m) => (setThreshold(k), setManual(m))} />
             <ModifierPicker value={mod} onChange={setMod} label="GM düzenleyici (±)" />
           </>
         )}
         {pkind === "death" && (
           <p className="rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-xs">
-            d6: 1–3 ölüm, 4–6 kurtuluş. {ch && !ch.deathSave.available && <strong className="text-danger">{ch.name} için Death Save hakkı yok.</strong>}
+            {t("d6: 1–3 ölüm, 4–6 kurtuluş.")} {ch && !ch.deathSave.available && <strong className="text-danger">{t("{name} için Death Save hakkı yok.", { name: ch.name })}</strong>}
           </p>
         )}
         <DieInput sides={sides} value={die} onChange={setDie} />
@@ -1889,7 +1981,7 @@ function DicePanel({
             }
           }}
         >
-          <Dices className="h-5 w-5" /> Sonucu gir
+          <Dices className="h-5 w-5" /> {t("Sonucu gir")}
         </Button>
       </div>
     );
@@ -1898,17 +1990,17 @@ function DicePanel({
   // ---------------- dijital zar
   return (
     <div className="space-y-4 p-4">
-      <p className="text-[11px] font-semibold uppercase tracking-widest text-muted">Zar · d20 + stat{uc ? " + bonus" : ""} ≥ eşik</p>
-      {rollMuted && <p className="rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">GM seni zar atmada susturdu.</p>}
+      <p className="text-[11px] font-semibold uppercase tracking-widest text-muted">{uc ? t("Zar · d20 + stat + bonus · güçlü başarı: d20 15+") : t("Zar · d20 + stat ≥ eşik")}</p>
+      {rollMuted && <p className="rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">{t("GM seni zar atmada susturdu.")}</p>}
       {!isGM && requests.some((q) => q.characters.some((c) => myChars.some((m) => m.id === c.id))) && (
-        <p className="rounded-md border border-accent/40 bg-accent/10 px-3 py-2 text-xs text-ink">GM senden zar istiyor. Akış sekmesinin altındaki isteği yanıtla.</p>
+        <p className="rounded-md border border-accent/40 bg-accent/10 px-3 py-2 text-xs text-ink">{t("GM senden zar istiyor. Akış sekmesinin altındaki isteği yanıtla.")}</p>
       )}
       {spectator && (
         <p className="flex items-start gap-2 rounded-md border border-line bg-surface2/60 px-3 py-2 text-sm text-muted">
-          <Eye className="mt-0.5 h-4 w-4 shrink-0" /> İzleyicisin: zar atamazsın. Atılan zarlar Sahne sekmesinde görünür.
+          <Eye className="mt-0.5 h-4 w-4 shrink-0" /> {t("İzleyicisin: zar atamazsın. Atılan zarlar Sahne sekmesinde görünür.")}
         </p>
       )}
-      {choices.length === 0 && !isGM && !spectator && <p className="text-sm text-muted">Zar atmak için onaylanmış bir karakterin olmalı.</p>}
+      {choices.length === 0 && !isGM && !spectator && <p className="text-sm text-muted">{t("Zar atmak için onaylanmış bir karakterin olmalı.")}</p>}
       {(choices.length > 0 || isGM) && (
         <>
           {charSelect(isGM)}
@@ -1927,56 +2019,56 @@ function DicePanel({
           {flags}
           {isGM && (
             <Check checked={hidden} onChange={setHidden}>
-              Gizli at (yalnızca GM görür)
+              {t("Gizli at (yalnızca GM görür)")}
             </Check>
           )}
-          <input className="input" placeholder="Açıklama (ör. Kapıyı kır)" maxLength={80} value={label} onChange={(e) => setLabel(e.target.value)} />
+          <input className="input" placeholder={t("Açıklama (ör. Kapıyı kır)")} maxLength={80} value={label} onChange={(e) => setLabel(e.target.value)} />
           {preview("d20")}
           <div className="sticky bottom-0 -mx-4 bg-bg/95 px-4 py-2 backdrop-blur lg:static lg:mx-0 lg:bg-transparent lg:p-0">
             <Button variant="primary" size="lg" className="w-full" disabled={busy || rollMuted || (!ch && !isGM)} onClick={() => doEmit("roll", checkPayload()).then((ok) => ok && setLabel(""))}>
-              <Dices className="h-5 w-5" /> Zar at
+              <Dices className="h-5 w-5" /> {t("Zar at")}
             </Button>
           </div>
           {isGM && ch && (
             <div className="grid grid-cols-2 gap-2">
-              <Button disabled={busy || !deathSaveEnabled || !ch.deathSave.available} onClick={() => doEmit("death", { campaignId, characterId: ch.id })} title={!deathSaveEnabled ? "Kampanyada kapalı" : "GM doğrudan atar"}>
+              <Button disabled={busy || !deathSaveEnabled || !ch.deathSave.available} onClick={() => doEmit("death", { campaignId, characterId: ch.id })} title={!deathSaveEnabled ? t("Kampanyada kapalı") : t("GM doğrudan atar")}>
                 <Skull className="h-4 w-4" /> Death Save
               </Button>
               {uc ? (
                 <Button
                   disabled={busy || thValue == null}
                   onClick={() => doEmit("decay", { campaignId, characterId: ch.id, mode: dmode, thresholdValue: thValue, modifier: mod })}
-                  title={thValue == null ? "Önce eşik gir" : UC_DECAY_MODES[dmode].hint}
+                  title={thValue == null ? t("Önce hedef sayı gir") : t(UC_DECAY_MODES[dmode].hint)}
                 >
-                  <MoonStar className="h-4 w-4" /> {UC_DECAY_MODES[dmode].label}
+                  <MoonStar className="h-4 w-4" /> {t(UC_DECAY_MODES[dmode].label)}
                 </Button>
               ) : (
                 <Button
                   disabled={busy || thValue == null}
                   onClick={() => doEmit("pervitin", { campaignId, characterId: ch.id, threshold: manual === null ? threshold : null, thresholdValue: manual, modifier: mod })}
-                  title="d20 + Sanita − Corruption/3 + durum ≥ eşik"
+                  title={t("d20 + Sanita − Corruption/3 + durum ≥ eşik")}
                 >
                   Pervitin
                 </Button>
               )}
               {uc && (
-                <select className="input col-span-2 h-9 py-1 text-xs" value={dmode} onChange={(e) => setDmode(e.target.value as UcDecayMode)} aria-label="Yozlaşma zarı türü">
+                <select className="input col-span-2 h-9 py-1 text-xs" value={dmode} onChange={(e) => setDmode(e.target.value as UcDecayMode)} aria-label={t("Yozlaşma zarı türü")}>
                   {(Object.keys(UC_DECAY_MODES) as UcDecayMode[]).map((k) => (
                     <option key={k} value={k}>
-                      Yozlaşma zarı: {UC_DECAY_MODES[k].label}
+                      {t("Yozlaşma zarı: {mode}", { mode: t(UC_DECAY_MODES[k].label) })}
                     </option>
                   ))}
                 </select>
               )}
             </div>
           )}
-          {!isGM && <p className="text-[11px] text-muted">Death Save ve {uc ? "Yozlaşma" : "Pervitin"} zarlarını GM ister; istek gelince Akış&apos;ın altında belirir.</p>}
+          {!isGM && <p className="text-[11px] text-muted">{t("Death Save ve {kind} zarlarını GM ister; istek gelince Akış'ın altında belirir.", { kind: uc ? t("Yozlaşma") : "Pervitin" })}</p>}
         </>
       )}
       {isGM && !physical && (
         <div className="border-t border-line pt-4">
           <Button variant="outline" className="w-full" disabled={!allChars.length} onClick={() => setReqOpen(true)}>
-            Oyunculardan zar iste
+            {t("Oyunculardan zar iste")}
           </Button>
           <RequestModal open={reqOpen} onClose={() => setReqOpen(false)} chars={allChars} emit={emit} campaignId={campaignId} deathSaveEnabled={deathSaveEnabled} />
         </div>
@@ -1987,6 +2079,7 @@ function DicePanel({
 
 function RequestModal({ open, onClose, chars, emit, campaignId, deathSaveEnabled }: { open: boolean; onClose: () => void; chars: FullChar[]; emit: Emit; campaignId: string; deathSaveEnabled: boolean }) {
   const toast = useToast();
+  const t = useT();
   const { system } = useSys();
   const uc = system === "UC";
   const [kind, setKind] = useState<RollReq["kind"]>("check");
@@ -2007,14 +2100,14 @@ function RequestModal({ open, onClose, chars, emit, campaignId, deathSaveEnabled
   const needTh = kind === "pervitin" || kind === "decay";
   const hasTh = uc ? manual !== null : threshold !== null || manual !== null;
   return (
-    <Modal open={open} onClose={onClose} title="Oyunculardan zar iste" wide>
+    <Modal open={open} onClose={onClose} title={t("Oyunculardan zar iste")} wide>
       <div className="space-y-4">
         <div role="tablist" className="inline-flex flex-wrap rounded-lg border border-line bg-surface p-1">
           {(
             [
-              ["check", "Normal zar"],
+              ["check", t("Normal zar")],
               ["death", "Death Save"],
-              uc ? ["decay", "Yozlaşma zarı"] : ["pervitin", "Pervitin"],
+              uc ? ["decay", t("Yozlaşma zarı")] : ["pervitin", "Pervitin"],
             ] as const
           ).map(([k, l]) => (
             <button
@@ -2031,15 +2124,15 @@ function RequestModal({ open, onClose, chars, emit, campaignId, deathSaveEnabled
           ))}
         </div>
         <div>
-          <span className="label">Kimler?</span>
+          <span className="label">{t("Kimler?")}</span>
           <div className="flex flex-wrap gap-2">
             <button type="button" className="chip" onClick={() => setIds(ids.length === eligible.length ? [] : eligible.map((c) => c.id))}>
-              {ids.length === eligible.length && eligible.length ? "Hiçbiri" : "Herkes"}
+              {ids.length === eligible.length && eligible.length ? t("Hiçbiri") : t("Herkes")}
             </button>
             {chars.map((c) => {
               const ok = eligible.includes(c);
               return (
-                <label key={c.id} className={cx("chip cursor-pointer", ids.includes(c.id) && "border-accent text-accent", !ok && "opacity-40")} title={!ok ? "Death Save hakkı yok" : undefined}>
+                <label key={c.id} className={cx("chip cursor-pointer", ids.includes(c.id) && "border-accent text-accent", !ok && "opacity-40")} title={!ok ? t("Death Save hakkı yok") : undefined}>
                   <input type="checkbox" className="hidden" disabled={!ok} checked={ids.includes(c.id)} onChange={(e) => setIds(e.target.checked ? [...ids, c.id] : ids.filter((x) => x !== c.id))} />
                   {c.name}
                 </label>
@@ -2050,15 +2143,15 @@ function RequestModal({ open, onClose, chars, emit, campaignId, deathSaveEnabled
         {kind === "check" && <StatPicker value={stat} onChange={setStat} />}
         {kind === "decay" && (
           <label className="block">
-            <span className="label">Yozlaşma zarı</span>
+            <span className="label">{t("Yozlaşma zarı")}</span>
             <select className="input" value={dmode} onChange={(e) => setDmode(e.target.value as UcDecayMode)}>
               {(Object.keys(UC_DECAY_MODES) as UcDecayMode[]).map((k) => (
                 <option key={k} value={k}>
-                  {UC_DECAY_MODES[k].label}
+                  {t(UC_DECAY_MODES[k].label)}
                 </option>
               ))}
             </select>
-            <span className="mt-1 block text-[11px] text-muted">{UC_DECAY_MODES[dmode].hint}</span>
+            <span className="mt-1 block text-[11px] text-muted">{t(UC_DECAY_MODES[dmode].hint)}</span>
           </label>
         )}
         {kind !== "death" && (
@@ -2072,37 +2165,37 @@ function RequestModal({ open, onClose, chars, emit, campaignId, deathSaveEnabled
             }}
           />
         )}
-        {kind === "death" && <p className="rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-sm">d6 atılır: 1–3 ölüm, 4–6 kurtuluş. Üç ölümde karakter ölür, üç kurtuluşta kritik yaralı hayatta kalır.</p>}
+        {kind === "death" && <p className="rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-sm">{t("d6 atılır: 1–3 ölüm, 4–6 kurtuluş. Üç ölümde karakter ölür, üç kurtuluşta kritik yaralı hayatta kalır.")}</p>}
         {kind !== "death" && <ModifierPicker value={mod} onChange={setMod} label={kind === "check" ? (uc ? "Bonus / ceza" : "Durum düzenleyici") : "GM düzenleyici (±)"} />}
-        <input className="input" placeholder="Açıklama (ör. Ritüeli gördünüz)" maxLength={80} value={label} onChange={(e) => setLabel(e.target.value)} />
+        <input className="input" placeholder={t("Açıklama (ör. Ritüeli gördünüz)")} maxLength={80} value={label} onChange={(e) => setLabel(e.target.value)} />
         <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
           {kind === "check" && (
             <>
               {uc ? (
                 <>
                   <Check checked={magic} onChange={setMagic}>
-                    Büyü zarı
+                    {t("Büyü zarı")}
                   </Check>
                   <Check checked={yoz} onChange={setYoz}>
-                    Yoz zar
+                    {t("Yoz zar")}
                   </Check>
                 </>
               ) : (
                 <Check checked={bm} onChange={setBm}>
-                  Kara büyü zarı
+                  {t("Kara büyü zarı")}
                 </Check>
               )}
               <Check checked={playerPart} onChange={setPlayerPart}>
-                Oyuncu kullandığı uzvu seçsin
+                {t("Oyuncu kullandığı uzvu seçsin")}
               </Check>
             </>
           )}
           <Check checked={hidden} onChange={setHidden}>
-            Sonucu yalnızca ben ve atan görsün
+            {t("Sonucu yalnızca ben ve atan görsün")}
           </Check>
         </div>
         <div className="flex justify-end gap-2">
-          <Button onClick={onClose}>Vazgeç</Button>
+          <Button onClick={onClose}>{t("Vazgeç")}</Button>
           <Button
             variant="primary"
             disabled={!ids.length || busy || (needTh && !hasTh)}
@@ -2126,13 +2219,13 @@ function RequestModal({ open, onClose, chars, emit, campaignId, deathSaveEnabled
               });
               setBusy(false);
               if (!r.ok) return toast(r.error, "error");
-              toast("Zar isteği gönderildi.", "ok");
+              toast(t("Zar isteği gönderildi."), "ok");
               onClose();
               setIds([]);
               setLabel("");
             }}
           >
-            İste
+            {t("İste")}
           </Button>
         </div>
       </div>
@@ -2143,6 +2236,7 @@ function RequestModal({ open, onClose, chars, emit, campaignId, deathSaveEnabled
 // ------------------------------------------------------------------ karakter görünümü (oda içinde)
 function CharacterQuick({ entry, data, onClose }: { entry: Entry | null; data: RulesData; onClose: () => void }) {
   const { system, uc } = useSys();
+  const t = useT();
   const c = entry?.character;
   const full = entry && entry.view !== "public" ? (entry.character as FullChar) : null;
   return (
@@ -2153,27 +2247,27 @@ function CharacterQuick({ entry, data, onClose }: { entry: Entry | null; data: R
             <Portrait id={c.id} version={c.portraitVersion} name={c.name} className="h-[125px] w-[100px]" />
             <div className="min-w-0 space-y-1.5 text-sm">
               <p className="text-muted">
-                Seviye {c.level} · {c.age} yaş · {c.nationality} · {c.alignment}
+                {t("Seviye {n}", { n: c.level })} · {t("{n} yaş", { n: c.age })} · {c.nationality} · {c.alignment}
               </p>
-              {c.status === "DEAD" && <Badge tone="danger">Öldü</Badge>}
+              {c.status === "DEAD" && <Badge tone="danger">{t("Öldü")}</Badge>}
               <div className="flex flex-wrap gap-2">
-                {c.trees.map((t) =>
+                {c.trees.map((tk) =>
                   system === "UC" ? (
-                    <span key={t} className="rounded-full border border-accent/40 bg-accent/10 px-2.5 py-0.5 text-xs text-accent">
-                      K{uc?.dals[t]?.tier} · {uc?.dals[t]?.name ?? t}
+                    <span key={tk} className="rounded-full border border-accent/40 bg-accent/10 px-2.5 py-0.5 text-xs text-accent">
+                      {t("K{n}", { n: uc?.dals[tk]?.tier })} · {uc?.dals[tk]?.name ?? tk}
                     </span>
                   ) : (
-                    <span key={t} className="flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 py-0.5 pl-0.5 pr-2.5 text-xs text-accent">
-                      <TreeIcon treeKey={t} className="h-6 w-6 rounded-full" />
-                      {data.trees.find((x) => x.key === t)?.name}
+                    <span key={tk} className="flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 py-0.5 pl-0.5 pr-2.5 text-xs text-accent">
+                      <TreeIcon treeKey={tk} className="h-6 w-6 rounded-full" />
+                      {data.trees.find((x) => x.key === tk)?.name}
                     </span>
                   ),
                 )}
               </div>
-              {c.languages?.length > 0 && <p className="text-xs text-muted">Diller: {c.languages.join(", ")}</p>}
+              {c.languages?.length > 0 && <p className="text-xs text-muted">{t("Diller:")} {c.languages.join(", ")}</p>}
               {c.appearance && <p className="text-ink/80">{c.appearance}</p>}
               <AppLink href={characterHref(system, c.id)} target="_blank" className="inline-block text-xs text-accent hover:underline">
-                Tam karakter kağıdını yeni sekmede aç ↗
+                {t("Tam karakter kağıdını yeni sekmede aç ↗")}
               </AppLink>
             </div>
           </div>
@@ -2184,7 +2278,7 @@ function CharacterQuick({ entry, data, onClose }: { entry: Entry | null; data: R
               <QuickFull c={full} data={data} />
             )
           ) : (
-            <p className="text-sm text-muted">Diğer oyuncuların karakter kağıtlarının yalnızca bu kısmı görünür.</p>
+            <p className="text-sm text-muted">{t("Diğer oyuncuların karakter kağıtlarının yalnızca bu kısmı görünür.")}</p>
           )}
         </div>
       )}
@@ -2194,6 +2288,7 @@ function CharacterQuick({ entry, data, onClose }: { entry: Entry | null; data: R
 
 function QuickFullUc({ c }: { c: FullChar }) {
   const { uc } = useSys();
+  const t = useT();
   const stats = ucNormalizeStats(c.stats as unknown as Record<string, number>);
   const body = normalizeBody(c.body);
   const owned = Object.entries(c.abilities).filter(([, v]) => v > 0);
@@ -2211,25 +2306,25 @@ function QuickFullUc({ c }: { c: FullChar }) {
         <BodyDiagram body={body} className="mx-auto max-w-[160px]" />
         <div className="space-y-2 text-sm">
           <p>
-            <span className="text-muted">Yozlaşma:</span> <span className="font-mono">{c.corruption}</span> · <span className="text-muted">Esin:</span> <span className="font-mono">{c.inspiration}</span> ·{" "}
-            <span className="text-muted">Bonus tavanı:</span> <span className="font-mono">+{ucBonusCap(c.level)}</span> · <span className="text-muted">Death Save:</span>{" "}
-            {c.deathSave.available ? "Var" : "Yok"}
+            <span className="text-muted">{t("Yozlaşma:")}</span> <span className="font-mono">{c.corruption}</span> · <span className="text-muted">{t("Esin:")}</span> <span className="font-mono">{c.inspiration}</span> ·{" "}
+            <span className="text-muted">{t("Bonus tavanı:")}</span> <span className="font-mono">+{ucBonusCap(c.level)}</span> · <span className="text-muted">Death Save:</span>{" "}
+            {c.deathSave.available ? t("Var") : t("Yok")}
           </p>
-          {c.corruption > 0 && <p className="text-xs text-lav">{UC_DECAY_EFFECTS[c.corruption]}</p>}
+          {c.corruption > 0 && UC_DECAY_EFFECTS[c.corruption] && <p className="text-xs text-lav">{t(UC_DECAY_EFFECTS[c.corruption])}</p>}
           {BODY_PARTS.filter((p) => body[p.key].wound !== "saglam").map((p) => (
             <p key={p.key} className="text-danger/90">
-              {p.label}: −{woundPenalty(body[p.key])}
+              {t(p.label)}: −{woundPenalty(body[p.key])}
             </p>
           ))}
         </div>
       </div>
       {owned.length > 0 && (
         <div>
-          <p className="kicker mb-2">Yetenekler</p>
+          <p className="kicker mb-2">{t("Yetenekler")}</p>
           <ul className="grid gap-1.5 text-sm sm:grid-cols-2">
             {owned.map(([k, lv]) => (
               <li key={k} className="rounded-md border border-line px-3 py-1.5">
-                {uc?.abilities[k]?.name ?? k} <span className="font-mono text-xs text-accent">Sv {lv}</span>
+                {uc?.abilities[k]?.name ?? k} <span className="font-mono text-xs text-accent">{t("Sv {n}", { n: lv })}</span>
               </li>
             ))}
           </ul>
@@ -2237,7 +2332,7 @@ function QuickFullUc({ c }: { c: FullChar }) {
       )}
       {c.perks.length > 0 && (
         <div>
-          <p className="kicker mb-2">Perkler</p>
+          <p className="kicker mb-2">{t("Perkler")}</p>
           <p className="text-sm">{c.perks.map((k) => uc?.perks.find((p) => p.key === k)?.name ?? k).join(", ")}</p>
         </div>
       )}
@@ -2246,6 +2341,7 @@ function QuickFullUc({ c }: { c: FullChar }) {
 }
 
 function QuickFull({ c, data }: { c: FullChar; data: RulesData }) {
+  const t = useT();
   const eff = effectiveStats(c, data);
   const body = normalizeBody(c.body);
   const augs = installedAugments(c.body, data);
@@ -2267,16 +2363,16 @@ function QuickFull({ c, data }: { c: FullChar; data: RulesData }) {
         <div className="space-y-2 text-sm">
           <p>
             <span className="text-muted">Corruption:</span> <span className="font-mono">{c.corruption}</span> · <span className="text-muted">Inspiration:</span>{" "}
-            <span className="font-mono">{c.inspiration}</span> · <span className="text-muted">Death Save:</span> {c.deathSave.available ? "Var" : "Yok"}
+            <span className="font-mono">{c.inspiration}</span> · <span className="text-muted">Death Save:</span> {c.deathSave.available ? t("Var") : t("Yok")}
           </p>
           {BODY_PARTS.filter((p) => body[p.key].wound !== "saglam").map((p) => (
             <p key={p.key} className="text-danger/90">
-              {p.label}: −{woundPenalty(body[p.key])}
+              {t(p.label)}: −{woundPenalty(body[p.key])}
             </p>
           ))}
           {augs.map(({ part, augment }) => (
             <p key={part}>
-              <span className="text-accent">{augment.name}</span> <span className="text-muted">({BODY_PARTS.find((b) => b.key === part)?.label})</span>
+              <span className="text-accent">{augment.name}</span> <span className="text-muted">({t(BODY_PARTS.find((b) => b.key === part)?.label ?? part)})</span>
             </p>
           ))}
         </div>
@@ -2284,13 +2380,13 @@ function QuickFull({ c, data }: { c: FullChar; data: RulesData }) {
       {c.corruption > 0 && <CorruptionEffects value={c.corruption} />}
       {owned.length > 0 && (
         <div>
-          <p className="kicker mb-2">Yetenekler</p>
+          <p className="kicker mb-2">{t("Yetenekler")}</p>
           <div className="grid gap-2 md:grid-cols-2">{owned.map(([k, lv]) => (data.abilities[k] ? <AbilityCard key={k} ability={data.abilities[k]} level={lv} /> : null))}</div>
         </div>
       )}
       {c.perks.length > 0 && (
         <div>
-          <p className="kicker mb-2">Perkler</p>
+          <p className="kicker mb-2">{t("Perkler")}</p>
           <div className="grid gap-2 md:grid-cols-2">
             {c.perks.map((k) => {
               const p = data.perks.find((x) => x.key === k);

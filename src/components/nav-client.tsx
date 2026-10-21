@@ -2,10 +2,12 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useT } from "@/i18n/client";
 import { api } from "@/lib/client";
 
 export function LogoutButton({ className }: { className?: string }) {
   const router = useRouter();
+  const t = useT();
   return (
     <button
       type="button"
@@ -16,7 +18,7 @@ export function LogoutButton({ className }: { className?: string }) {
         router.refresh();
       }}
     >
-      Çıkış
+      {t("Çıkış")}
     </button>
   );
 }
@@ -33,13 +35,14 @@ export function MobileMenu({
   loggedIn: boolean;
   name: string | null;
 }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const path = usePathname();
   useEffect(() => setOpen(false), [path]);
   return (
     <div className="md:hidden">
-      <button type="button" aria-label="Menü" aria-expanded={open} onClick={() => setOpen(!open)} className="rounded-md border border-line px-3 py-1.5 text-sm text-ink">
-        {open ? "Kapat" : "Menü"}
+      <button type="button" aria-label={t("Menü")} aria-expanded={open} onClick={() => setOpen(!open)} className="rounded-md border border-line px-3 py-1.5 text-sm text-ink">
+        {open ? t("Kapat") : t("Menü")}
       </button>
       {open && (
         <div className="absolute inset-x-0 top-16 border-b border-line bg-bg px-4 pb-4 pt-2 shadow-card">

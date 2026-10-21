@@ -1,3 +1,4 @@
+import type { Locale } from "../../i18n/core";
 import { UC_STAT_LABELS } from "./constants";
 import { UC_TERM_TIPS } from "./tips";
 
@@ -13,16 +14,29 @@ const MOD_BEFORE = new RegExp(`([+\\-−]\\s?\\d+)(\\s+)(${STAT_RX})(?![${L}])`,
 const MOD_AFTER = new RegExp(`(?<![${L}])(${STAT_RX})(\\s+)([+\\-−]\\s?\\d+)(?![\\d%])`, "g");
 const STAT_ONLY = new RegExp(`(?<![${L}])(${STAT_RX})(?![${L}])`, "g");
 const DICE = /(?<![A-Za-z0-9])(\d*d(?:4|6|8|10|12|20))(?![A-Za-z0-9])/g;
-const TERM_LIST = Object.entries(UC_TERM_TIPS)
-  .flatMap(([key, t]) => t.match.map((m) => [m, key] as const))
-  .sort((a, b) => b[0].length - a[0].length);
-const TERM_KEY = new Map(TERM_LIST.map(([m, k]) => [m, k]));
 const reEsc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 // Terimden sonra Türkçe ek gelebilir (yoz zarlara, Yozlaşma'yı); ek de vurgunun içinde kalır.
-const TERMS = new RegExp(`(?<![${L}])(${TERM_LIST.map(([m]) => reEsc(m)).join("|")})((?:'[${L}]+|[${L}]{0,6})?)(?![${L}])`, "g");
+// Terim listesi dile göre ayrı kurulur ve önbelleğe alınır (İngilizce metinde ek kuralı zararsızdır).
+type TermRx = { rx: RegExp; key: Map<string, string> };
+const termCache = new Map<Locale, TermRx>();
+function termsFor(loc: Locale): TermRx {
+  const hit = termCache.get(loc);
+  if (hit) return hit;
+  const list = Object.entries(UC_TERM_TIPS[loc] ?? UC_TERM_TIPS.tr)
+    .flatMap(([key, t]) => t.match.map((m) => [m, key] as const))
+    .filter(([m]) => !!m)
+    .sort((a, b) => b[0].length - a[0].length);
+  const e: TermRx = {
+    key: new Map(list.map(([m, k]) => [m, k])),
+    rx: !list.length ? /(?!)/g : new RegExp(`(?<![${L}])(${list.map(([m]) => reEsc(m)).join("|")})((?:'[${L}]+|[${L}]{0,6})?)(?![${L}])`, "g"),
+  };
+  termCache.set(loc, e);
+  return e;
+}
 const attr = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
 
-export function ucEnrich(html: string) {
+export function ucEnrich(html: string, loc: Locale = "tr") {
+  const T = termsFor(loc);
   return html
     .split(/(<!--[\s\S]*?-->|<(?:"[^"]*"|'[^']*'|[^'">])*>)/)
     .map((seg, i, all) => {
@@ -37,8 +51,8 @@ export function ucEnrich(html: string) {
         .replace(MOD_AFTER, (_m, st: string, sp: string, n: string) => keep(`<span class="stat-mod ${/^[+]/.test(n) ? "pos" : "neg"}">${st}${sp}${n.replace("-", "−")}</span>`));
       t = t
         .replace(STAT_ONLY, (s) => keep(`<span class="stat-name" data-tip-src="uc" data-tip-kind="stats" data-tip-key="${STAT_KEY.get(s)}" data-tip-title="${attr(s)}">${s}</span>`))
-        .replace(TERMS, (_m, term: string, suffix: string) =>
-          keep(`<span class="term" data-tip-src="uc" data-tip-kind="terms" data-tip-key="${TERM_KEY.get(term)}" data-tip-title="${attr(term)}">${term}${suffix}</span>`),
+        .replace(T.rx, (_m, term: string, suffix: string) =>
+          keep(`<span class="term" data-tip-src="uc" data-tip-kind="terms" data-tip-key="${T.key.get(term)}" data-tip-title="${attr(term)}">${term}${suffix}</span>`),
         )
         .replace(DICE, (s) => keep(`<span class="dice">${s}</span>`));
       return t.replace(/\u0000(\d+)\u0000/g, (_m, k: string) => marks[Number(k)]);

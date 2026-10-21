@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { characters } from "@/db/schema";
 import { bad, forbidden, route } from "@/lib/api";
+import { fmt } from "@/i18n/core";
 import { addLog, characterAccess } from "@/lib/access";
 import { characterChanged } from "@/lib/realtime-bus";
 
@@ -34,10 +35,10 @@ export const PATCH = route(
     await db.update(characters).set(set).where(eq(characters.id, c.id));
 
     const parts: string[] = [];
-    if (set.name) parts.push(`isim: ${c.name} → ${set.name}`);
-    if (set.background !== undefined) parts.push("geçmiş güncellendi");
-    if (set.appearance !== undefined) parts.push("görünüş güncellendi");
-    await addLog(c.id, user.id, a.isGM && !a.isOwner ? "gm" : "profile", `Profil: ${parts.join(", ")}`);
+    if (set.name) parts.push(fmt("isim: {from} → {to}", { from: c.name, to: set.name }));
+    if (set.background !== undefined) parts.push(fmt("geçmiş güncellendi"));
+    if (set.appearance !== undefined) parts.push(fmt("görünüş güncellendi"));
+    await addLog(c.id, user.id, a.isGM && !a.isOwner ? "gm" : "profile", fmt("Profil: {changes}", { changes: parts.join(", ") }));
 
     characterChanged(a.campaign.id, c.id);
     return { ok: true, name: set.name ?? c.name };

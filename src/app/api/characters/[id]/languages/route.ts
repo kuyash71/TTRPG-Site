@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { characters } from "@/db/schema";
 import { forbidden, route } from "@/lib/api";
+import { fmt } from "@/i18n/core";
 import { addLog, characterAccess } from "@/lib/access";
 import { cleanLanguages } from "@/lib/languages";
 import { characterChanged } from "@/lib/realtime-bus";
@@ -15,7 +16,7 @@ export const PATCH = route({ body: z.object({ languages: z.array(z.string().max(
   const c = a.character;
   if (JSON.stringify(next) === JSON.stringify(c.languages)) return { ok: true };
   await db.update(characters).set({ languages: next }).where(eq(characters.id, c.id));
-  await addLog(c.id, user.id, "gm", `GM: diller ${c.languages.join(", ") || "yok"} → ${next.join(", ") || "yok"}`);
+  await addLog(c.id, user.id, "gm", fmt("GM: diller {from} → {to}", { from: c.languages.join(", ") || "yok", to: next.join(", ") || "yok" }));
   characterChanged(a.campaign.id, c.id);
   return { ok: true };
 });

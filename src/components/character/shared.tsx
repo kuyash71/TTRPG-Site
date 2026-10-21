@@ -7,6 +7,7 @@ import { Modal, useAction } from "@/components/interactive";
 import { Button, Card, Field, cx } from "@/components/ui";
 import type { Character, InventoryItem } from "@/db/schema";
 import { api } from "@/lib/client";
+import { useT } from "@/i18n/client";
 
 type Act = (fn: () => Promise<unknown>, ok?: string) => Promise<void>;
 type InvChar = Pick<Character, "id" | "inventory" | "money" | "notes" | "gmNotes">;
@@ -44,6 +45,7 @@ export function InventoryTab({
   /** GM notunun kaydedileceği uç (sisteme göre). */
   gmPath?: string;
 }) {
+  const t = useT();
   const [items, setItems] = useState<InventoryItem[]>(c.inventory);
   const [money, setMoney] = useState(c.money);
   const [notes, setNotes] = useState(c.notes);
@@ -53,22 +55,22 @@ export function InventoryTab({
     <div className="grid gap-6 lg:grid-cols-[1.3fr_1fr]">
       <Card className="p-5">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-serif text-lg">Envanter</h2>
+          <h2 className="font-serif text-lg">{t("Envanter")}</h2>
           {canEdit && (
             <Button size="sm" onClick={() => setItems([...items, { id: Math.random().toString(36).slice(2, 10), name: "", qty: 1, note: "" }])}>
-              Eşya ekle
+              {t("Eşya ekle")}
             </Button>
           )}
         </div>
         <div className="space-y-2">
-          {items.length === 0 && <p className="text-sm text-muted">Envanter boş.</p>}
+          {items.length === 0 && <p className="text-sm text-muted">{t("Envanter boş.")}</p>}
           {items.map((it, i) => (
             <div key={it.id} className="grid grid-cols-[1fr_64px_auto] gap-2 sm:grid-cols-[1fr_64px_1fr_auto]">
-              <input className="input" placeholder="Eşya" value={it.name} disabled={!canEdit} maxLength={80} onChange={(e) => setItems(items.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} />
+              <input className="input" placeholder={t("Eşya")} value={it.name} disabled={!canEdit} maxLength={80} onChange={(e) => setItems(items.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} />
               <input className="input" type="number" min={0} max={9999} value={it.qty} disabled={!canEdit} onChange={(e) => setItems(items.map((x, j) => (j === i ? { ...x, qty: Number(e.target.value) } : x)))} />
-              <input className="input order-last col-span-3 sm:order-none sm:col-span-1" placeholder="Not" value={it.note} disabled={!canEdit} maxLength={200} onChange={(e) => setItems(items.map((x, j) => (j === i ? { ...x, note: e.target.value } : x)))} />
+              <input className="input order-last col-span-3 sm:order-none sm:col-span-1" placeholder={t("Not")} value={it.note} disabled={!canEdit} maxLength={200} onChange={(e) => setItems(items.map((x, j) => (j === i ? { ...x, note: e.target.value } : x)))} />
               {canEdit && (
-                <button type="button" className="px-2 text-muted hover:text-danger" aria-label="Sil" onClick={() => setItems(items.filter((_, j) => j !== i))}>
+                <button type="button" className="px-2 text-muted hover:text-danger" aria-label={t("Sil")} onClick={() => setItems(items.filter((_, j) => j !== i))}>
                   ✕
                 </button>
               )}
@@ -83,16 +85,16 @@ export function InventoryTab({
       </Card>
       <div className="space-y-6">
         <Card className="p-5">
-          <h2 className="mb-3 font-serif text-lg">Notlar</h2>
+          <h2 className="mb-3 font-serif text-lg">{t("Notlar")}</h2>
           <textarea className="input min-h-[180px]" value={notes} disabled={!canEdit} maxLength={8000} onChange={(e) => setNotes(e.target.value)} />
         </Card>
         {isGM && (
           <Card className="border-accent/30 p-5">
-            <h2 className="mb-1 font-serif text-lg">GM notları</h2>
-            <p className="mb-3 text-xs text-muted">Oyuncu bunu görmez.</p>
+            <h2 className="mb-1 font-serif text-lg">{t("GM notları")}</h2>
+            <p className="mb-3 text-xs text-muted">{t("Oyuncu bunu görmez.")}</p>
             <textarea className="input min-h-[120px]" value={gmNotes} maxLength={8000} onChange={(e) => setGmNotes(e.target.value)} />
-            <Button size="sm" className="mt-3" disabled={gmNotes === c.gmNotes} onClick={() => act(() => api(gmPath ?? `/api/characters/${c.id}/gm`, { method: "PATCH", body: { gmNotes } }), "GM notu kaydedildi.")}>
-              GM notunu kaydet
+            <Button size="sm" className="mt-3" disabled={gmNotes === c.gmNotes} onClick={() => act(() => api(gmPath ?? `/api/characters/${c.id}/gm`, { method: "PATCH", body: { gmNotes } }), t("GM notu kaydedildi."))}>
+              {t("GM notunu kaydet")}
             </Button>
           </Card>
         )}
@@ -100,9 +102,9 @@ export function InventoryTab({
           <Button
             variant="primary"
             disabled={!dirty || items.some((x) => !x.name.trim())}
-            onClick={() => act(() => api(`/api/characters/${c.id}/sheet`, { method: "PATCH", body: { inventory: items, money, notes } }), "Kaydedildi.")}
+            onClick={() => act(() => api(`/api/characters/${c.id}/sheet`, { method: "PATCH", body: { inventory: items, money, notes } }), t("Kaydedildi."))}
           >
-            Envanter ve notları kaydet
+            {t("Envanter ve notları kaydet")}
           </Button>
         )}
       </div>
@@ -112,15 +114,16 @@ export function InventoryTab({
 
 // ------------------------------------------------------------------ gizli notlar
 export function SecretNotes({ c, canEdit, act }: { c: Pick<Character, "id" | "secretNotes">; canEdit: boolean; act: Act }) {
+  const t = useT();
   const [v, setV] = useState(c.secretNotes);
   if (!canEdit) return null;
   return (
     <Card className="border-accent/30 p-5">
-      <h2 className="font-serif text-lg">GM&apos;e özel notlar ve gizli geçmiş</h2>
-      <p className="mb-3 text-xs text-muted">Yalnızca sen ve GM görürsünüz. Diğer oyuncular bu alanı göremez.</p>
-      <textarea className="input min-h-[120px]" value={v} maxLength={6000} onChange={(e) => setV(e.target.value)} placeholder="Sırlar, gizli bağlantılar, GM'den istediğin hikâye kancaları…" />
-      <Button size="sm" className="mt-3" disabled={v === c.secretNotes} onClick={() => act(() => api(`/api/characters/${c.id}/sheet`, { method: "PATCH", body: { secretNotes: v } }), "Kaydedildi.")}>
-        Kaydet
+      <h2 className="font-serif text-lg">{t("GM'e özel notlar ve gizli geçmiş")}</h2>
+      <p className="mb-3 text-xs text-muted">{t("Yalnızca sen ve GM görürsünüz. Diğer oyuncular bu alanı göremez.")}</p>
+      <textarea className="input min-h-[120px]" value={v} maxLength={6000} onChange={(e) => setV(e.target.value)} placeholder={t("Sırlar, gizli bağlantılar, GM'den istediğin hikâye kancaları…")} />
+      <Button size="sm" className="mt-3" disabled={v === c.secretNotes} onClick={() => act(() => api(`/api/characters/${c.id}/sheet`, { method: "PATCH", body: { secretNotes: v } }), t("Kaydedildi."))}>
+        {t("Kaydet")}
       </Button>
     </Card>
   );
@@ -128,6 +131,7 @@ export function SecretNotes({ c, canEdit, act }: { c: Pick<Character, "id" | "se
 
 // ------------------------------------------------------------------ silme
 export function ProfileEditor({ c, small }: { c: Pick<Character, "id" | "name" | "background" | "appearance">; small?: boolean }) {
+  const t = useT();
   const router = useRouter();
   const { busy, run } = useAction();
   const [open, setOpen] = useState(false);
@@ -148,7 +152,7 @@ export function ProfileEditor({ c, small }: { c: Pick<Character, "id" | "name" |
     if (n !== c.name) body.name = n;
     if (background.trim() !== c.background) body.background = background;
     if (appearance.trim() !== c.appearance) body.appearance = appearance;
-    const r = await run(() => api(`/api/characters/${c.id}/profile`, { method: "PATCH", body }), "Profil güncellendi.");
+    const r = await run(() => api(`/api/characters/${c.id}/profile`, { method: "PATCH", body }), t("Profil güncellendi."));
     if (r !== undefined) {
       setOpen(false);
       router.refresh();
@@ -157,24 +161,24 @@ export function ProfileEditor({ c, small }: { c: Pick<Character, "id" | "name" |
   return (
     <>
       <Button size={small ? "sm" : undefined} variant="outline" onClick={start}>
-        {small ? "Düzenle" : "İsim / açıklama"}
+        {small ? t("Düzenle") : t("İsim / açıklama")}
       </Button>
-      <Modal open={open} onClose={() => setOpen(false)} title="Karakter profili">
+      <Modal open={open} onClose={() => setOpen(false)} title={t("Karakter profili")}>
         <div className="space-y-4">
-          <Field label="İsim">
+          <Field label={t("İsim")}>
             <input className="input" value={name} maxLength={60} onChange={(e) => setName(e.target.value)} autoComplete="off" />
           </Field>
-          {!valid && <p className="-mt-2 text-xs text-danger">İsim 2–60 karakter olmalı.</p>}
-          <Field label={`Geçmiş (${background.length}/4000)`}>
-            <textarea className="input min-h-40" value={background} maxLength={4000} onChange={(e) => setBackground(e.target.value)} placeholder="Karakterin hikâyesi, kökeni, motivasyonu…" />
+          {!valid && <p className="-mt-2 text-xs text-danger">{t("İsim 2–60 karakter olmalı.")}</p>}
+          <Field label={t("Geçmiş ({n}/4000)", { n: background.length })}>
+            <textarea className="input min-h-40" value={background} maxLength={4000} onChange={(e) => setBackground(e.target.value)} placeholder={t("Karakterin hikâyesi, kökeni, motivasyonu…")} />
           </Field>
-          <Field label={`Görünüş (${appearance.length}/1000)`}>
-            <textarea className="input min-h-24" value={appearance} maxLength={1000} onChange={(e) => setAppearance(e.target.value)} placeholder="Dış görünüş, kıyafet, ayırt edici izler…" />
+          <Field label={t("Görünüş ({n}/1000)", { n: appearance.length })}>
+            <textarea className="input min-h-24" value={appearance} maxLength={1000} onChange={(e) => setAppearance(e.target.value)} placeholder={t("Dış görünüş, kıyafet, ayırt edici izler…")} />
           </Field>
           <div className="flex justify-end gap-2">
-            <Button onClick={() => setOpen(false)}>Vazgeç</Button>
+            <Button onClick={() => setOpen(false)}>{t("Vazgeç")}</Button>
             <Button variant="primary" disabled={busy || !changed || !valid} onClick={save}>
-              Kaydet
+              {t("Kaydet")}
             </Button>
           </div>
         </div>
@@ -184,6 +188,7 @@ export function ProfileEditor({ c, small }: { c: Pick<Character, "id" | "name" |
 }
 
 export function DeleteCharacter({ id, name, afterHref }: { id: string; name: string; afterHref: string }) {
+  const t = useT();
   const go = useGo();
   const { busy, run } = useAction();
   const [open, setOpen] = useState(false);
@@ -191,28 +196,28 @@ export function DeleteCharacter({ id, name, afterHref }: { id: string; name: str
   return (
     <>
       <Button variant="danger" onClick={() => setOpen(true)}>
-        Karakteri sil
+        {t("Karakteri sil")}
       </Button>
-      <Modal open={open} onClose={() => setOpen(false)} title="Karakteri sil">
+      <Modal open={open} onClose={() => setOpen(false)} title={t("Karakteri sil")}>
         <div className="space-y-4">
           <p className="text-sm text-ink/90">
-            <strong>{name}</strong> kalıcı olarak silinecek: statlar, yetenekler, envanter, notlar, portre ve kayıt. Bu işlem geri alınamaz. Oyun odasındaki eski mesajlar ve zarlar
-            kalır.
+            <strong>{name}</strong>{" "}
+            {t("kalıcı olarak silinecek: statlar, yetenekler, envanter, notlar, portre ve kayıt. Bu işlem geri alınamaz. Oyun odasındaki eski mesajlar ve zarlar kalır.")}
           </p>
-          <Field label="Onaylamak için karakterin adını yaz">
+          <Field label={t("Onaylamak için karakterin adını yaz")}>
             <input className="input" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder={name} autoComplete="off" />
           </Field>
           <div className="flex justify-end gap-2">
-            <Button onClick={() => setOpen(false)}>Vazgeç</Button>
+            <Button onClick={() => setOpen(false)}>{t("Vazgeç")}</Button>
             <Button
               variant="danger"
               disabled={busy || confirm.trim() !== name}
               onClick={async () => {
-                const ok = await run(() => api(`/api/characters/${id}`, { method: "DELETE", body: { confirmName: confirm.trim() } }), "Karakter silindi.");
+                const ok = await run(() => api(`/api/characters/${id}`, { method: "DELETE", body: { confirmName: confirm.trim() } }), t("Karakter silindi."));
                 if (ok) go(afterHref, { replace: true });
               }}
             >
-              Kalıcı olarak sil
+              {t("Kalıcı olarak sil")}
             </Button>
           </div>
         </div>

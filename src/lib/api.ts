@@ -4,19 +4,27 @@ import { z } from "zod";
 import { hit } from "./auth/ratelimit";
 import { clientIp, currentUser, type SessionUser } from "./auth/session";
 import { appOrigin, isProd } from "./env";
+import { localeFromHeaders, translate, translateLoose, type TVars } from "../i18n/core";
 
+/**
+ * API hatası. Mesaj Türkçe kaynak metindir; cevap verilirken isteğin diline çevrilir.
+ * Değişken içeren mesajlar şablonla yazılır: bad("{stat} zaten {max}.", { stat, max }).
+ */
 export class ApiError extends Error {
   constructor(
     public status: number,
     message: string,
+    public vars?: TVars,
   ) {
-    super(message);
+    super(translate("tr", message, vars));
+    this.template = message;
   }
+  template: string;
 }
-export const bad = (m: string) => new ApiError(400, m);
-export const forbidden = (m = "Bu işlem için yetkin yok.") => new ApiError(403, m);
-export const notFound = (m = "Bulunamadı.") => new ApiError(404, m);
-export const conflict = (m: string) => new ApiError(409, m);
+export const bad = (m: string, vars?: TVars) => new ApiError(400, m, vars);
+export const forbidden = (m = "Bu işlem için yetkin yok.", vars?: TVars) => new ApiError(403, m, vars);
+export const notFound = (m = "Bulunamadı.", vars?: TVars) => new ApiError(404, m, vars);
+export const conflict = (m: string, vars?: TVars) => new ApiError(409, m, vars);
 
 const MAX_BODY = 64 * 1024;
 
@@ -74,7 +82,7 @@ export function route<S extends z.ZodType = z.ZodType<undefined>, A extends Auth
         const r = opts.body.safeParse(parsed);
         if (!r.success) {
           const first = r.error.issues[0];
-          throw bad(first ? `${first.path.join(".") || "gövde"}: ${first.message}` : "Geçersiz veri.");
+          throw first ? bad("{field}: {msg}", { field: first.path.join(".") || "gövde", msg: translateLoose(localeFromHeaders(req.headers.get("cookie"), req.headers.get("accept-language")), first.message) }) : bad("Geçersiz veri.");
         }
         body = r.data;
       }
@@ -83,9 +91,13 @@ export function route<S extends z.ZodType = z.ZodType<undefined>, A extends Auth
       if (out instanceof Response) return out;
       return NextResponse.json(out ?? { ok: true });
     } catch (e) {
-      if (e instanceof ApiError) return NextResponse.json({ error: e.message }, { status: e.status });
+      if (e instanceof ApiError) {
+        const loc = localeFromHeaders(req.headers.get("cookie"), req.headers.get("accept-language"));
+        return NextResponse.json({ error: translate(loc, e.template, e.vars) }, { status: e.status });
+      }
       console.error("[api]", req.method, req.nextUrl.pathname, e);
-      return NextResponse.json({ error: "Sunucu hatası." }, { status: 500 });
+      const loc = localeFromHeaders(req.headers.get("cookie"), req.headers.get("accept-language"));
+      return NextResponse.json({ error: translate(loc, "Sunucu hatası.") }, { status: 500 });
     }
   };
 }

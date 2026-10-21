@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { characters } from "@/db/schema";
 import { bad, conflict, route } from "@/lib/api";
+import { fmt } from "@/i18n/core";
 import { addLog, characterEditor, requireSystem } from "@/lib/access";
 import { characterChanged } from "@/lib/realtime-bus";
 import { UC_FORK_INFO, UC_FORK_LEVELS, ucClampDecay } from "@/lib/uc/rules";
@@ -21,7 +22,9 @@ export const POST = route({ body: z.object({ level: z.enum(UC_FORK_LEVELS), choi
     .returning({ id: characters.id });
   if (!upd.length) throw conflict("Karakter bu sırada değişti, sayfayı yenile.");
   const info = UC_FORK_INFO[body.level];
-  await addLog(c.id, user.id, "corruption", `${info.title}: ${body.choice === "teslim" ? `Teslim · ${info.teslim}` : `Direniş · ${info.direnis}`}`);
+  await addLog(c.id, user.id, "corruption", body.choice === "teslim"
+      ? fmt("{title}: Teslim · {effect}", { title: info.title, effect: info.teslim })
+      : fmt("{title}: Direniş · {effect}", { title: info.title, effect: info.direnis }));
   characterChanged(campaign.id, c.id);
   return { ok: true };
 });

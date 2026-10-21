@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { StatusText } from "./status-text";
 
 export function cx(...c: (string | false | null | undefined | 0)[]) {
   return c.filter(Boolean).join(" ");
@@ -139,5 +140,9 @@ export const STATUS_LABEL: Record<string, { label: string; tone: Tone }> = {
 
 export function StatusBadge({ status }: { status: string }) {
   const s = STATUS_LABEL[status] ?? { label: status, tone: "neutral" as Tone };
-  return <Badge tone={s.tone}>{s.label}</Badge>;
+  return (
+    <Badge tone={s.tone}>
+      <StatusText label={s.label} />
+    </Badge>
+  );
 }

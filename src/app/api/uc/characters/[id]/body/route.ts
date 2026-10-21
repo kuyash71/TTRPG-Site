@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { characters } from "@/db/schema";
 import { forbidden, route } from "@/lib/api";
+import { fmt } from "@/i18n/core";
 import { addLog, characterAccess, requireSystem } from "@/lib/access";
 import { characterChanged } from "@/lib/realtime-bus";
 import { BANDAGES, BANDAGE_KEYS, BODY_PART_KEYS, WOUNDS, WOUND_KEYS, bodyPartLabel } from "@/lib/shz/constants";
@@ -28,12 +29,12 @@ export const PATCH = route(
     const part = all[body.part as keyof typeof all];
     const log: string[] = [];
     if (body.wound && body.wound !== part.wound) {
-      log.push(`yara: ${WOUNDS.find((w) => w.key === part.wound)?.label} → ${WOUNDS.find((w) => w.key === body.wound)?.label}`);
+      log.push(fmt("yara: {from} → {to}", { from: WOUNDS.find((w) => w.key === part.wound)?.label, to: WOUNDS.find((w) => w.key === body.wound)?.label }));
       part.wound = body.wound as typeof part.wound;
       if (part.wound === "saglam") part.bandage = "yok";
     }
     if (body.bandage && body.bandage !== part.bandage) {
-      log.push(`sargı: ${BANDAGES.find((b) => b.key === body.bandage)?.label}`);
+      log.push(fmt("sargı: {label}", { label: BANDAGES.find((b) => b.key === body.bandage)?.label }));
       part.bandage = body.bandage as typeof part.bandage;
     }
     if (body.note !== undefined) part.note = body.note;

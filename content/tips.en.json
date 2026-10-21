@@ -1,0 +1,782 @@
+{
+ "abilities": {
+  "kampfmedizin": {
+   "meaning": "Battle medicine",
+   "say": "kampf-meditsin",
+   "summary": "You bandage your own wounds in the middle of combat; at higher levels bandaging costs no turn and can even reduce the wound's severity."
+  },
+  "grosse-macht": {
+   "meaning": "Great strength",
+   "say": "grose maht",
+   "summary": "You gain a bonus to Krach rolls on brute-force tasks such as breaking doors, lifting and grappling."
+  },
+  "sturmbrecher": {
+   "meaning": "Storm breaker",
+   "say": "ştuırm-breher",
+   "summary": "You charge the enemy at a run and knock them to the ground; at higher level you can also topple a second person in your path."
+  },
+  "titan": {
+   "meaning": "Titan",
+   "say": "titan",
+   "summary": "Once per combat, you land a devastating blow that hits without a roll and advances the wound 2 stages; you must rest the next turn."
+  },
+  "wurgegriff": {
+   "meaning": "Choke hold",
+   "say": "vürge-grif",
+   "summary": "You lock an enemy and stop them from attacking; if you hold for two turns, they silently pass out."
+  },
+  "herr-der-toten": {
+   "meaning": "Master of the dead",
+   "say": "her der toten",
+   "summary": "Each enemy you kill gives you a Death Burden; you spend these to lessen the wounds you take."
+  },
+  "mein-liebe": {
+   "meaning": "My love",
+   "say": "mayn libe",
+   "summary": "You don't feel the penalties of light wounds at all and feel severe wounds less. In exchange, you permanently lose your Death Save."
+  },
+  "endsieg-der-mann": {
+   "meaning": "The man's final victory",
+   "say": "endzik der man",
+   "summary": "At the moment of your death you fight on for 2 more turns; if you kill your killer during this time, you survive."
+  },
+  "kampfveteran": {
+   "meaning": "War veteran",
+   "say": "kampf-veteran",
+   "summary": "You shoot accurately even while wounded; at higher levels you also gain a bonus to panic (Cower) rolls."
+  },
+  "snipe": {
+   "meaning": "Sniper shot",
+   "say": "snayp",
+   "summary": "You aim for a turn to empower your next shot, and if it hits, you choose the limb you strike."
+  },
+  "lauerstellung": {
+   "meaning": "Ambush position",
+   "say": "lauer-ştelung",
+   "summary": "When you fire from a hidden position, it becomes very hard for the enemy to locate you."
+  },
+  "ein-schuss": {
+   "meaning": "One shot",
+   "say": "ayn şus",
+   "summary": "A critical Snipe shot instantly takes out an ordinary enemy; on elite targets the wound advances 3 stages."
+  },
+  "feuerleitung": {
+   "meaning": "Fire control",
+   "say": "foyer-laytung",
+   "summary": "You mark a target; your teammates' shots at that target get easier."
+  },
+  "zweihandler": {
+   "meaning": "Two-pistol",
+   "say": "tsvay-hendler",
+   "summary": "In the same turn you make two separate shots with two one-handed weapons; the penalty goes away as the level rises."
+  },
+  "panzerknacker": {
+   "meaning": "Tank breaker",
+   "say": "pantser-knaker",
+   "summary": "Your shots that hit vehicles, armored vehicles and augmented limbs deal more wounds."
+  },
+  "engel-des-todes": {
+   "meaning": "Angel of death",
+   "say": "engel des todes",
+   "summary": "Your Aim rolls grow stronger with each kill; but a combat that ends with too much built up brings Corruption."
+  },
+  "silent-step-low-profile": {
+   "meaning": "Silent step, low profile",
+   "say": "sayılınt step, lov profayl",
+   "summary": "You gain a bonus to Leis rolls while moving stealthily."
+  },
+  "throwing-expertise": {
+   "meaning": "Throwing mastery",
+   "say": "srouing ekspörtiz",
+   "summary": "With thrown weapons such as knives you use Leis instead of Aim; if you hit unnoticed, you wound more."
+  },
+  "giftmischer": {
+   "meaning": "Poison mixer",
+   "say": "gift-mişer",
+   "summary": "You prepare poisons: you coat your weapon, make knockout drugs, or mix them into food."
+  },
+  "silent-takedown": {
+   "meaning": "Silent neutralization",
+   "say": "sayılınt teykdaun",
+   "summary": "You silently take out an enemy you approached unnoticed in a single move."
+  },
+  "dunkelhand": {
+   "meaning": "Dark hand",
+   "say": "dunkel-hand",
+   "summary": "You master pickpocketing and theft; you can even plant something on the target."
+  },
+  "the-great-pretender": {
+   "meaning": "Great impersonator",
+   "say": "dı greyt pritendır",
+   "summary": "With clothing and documents you disguise yourself as someone else; at higher level you can do it even unprepared."
+  },
+  "der-maulwurf": {
+   "meaning": "Mole",
+   "say": "der maul-vurf",
+   "summary": "You establish a lasting false identity in a faction and gather information from the inside."
+  },
+  "saboteur": {
+   "meaning": "Saboteur",
+   "say": "sabotör",
+   "summary": "You sabotage vehicles, weapons and machines unnoticed; at higher level you choose when the malfunction occurs."
+  },
+  "geist-la-resistance": {
+   "meaning": "Spirit of the resistance",
+   "say": "gayst la rezistans"
+  },
+  "authority-like-herr-a": {
+   "meaning": "Authority like Herr A",
+   "say": "otorati layk her a"
+  },
+  "volksredner": {
+   "meaning": "Public orator",
+   "say": "folks-redner",
+   "summary": "You call out to your allies, ending their panic (Cower) and strengthening their rolls."
+  },
+  "fahnentrager": {
+   "meaning": "Standard-bearer",
+   "say": "fanen-treger",
+   "summary": "Once per session you rally a crowd or a small unit to a cause."
+  },
+  "ihr-preis": {
+   "meaning": "Their price",
+   "say": "ir prays",
+   "summary": "Bribery costs you less."
+  },
+  "see-through-em": {
+   "meaning": "Seeing inside them",
+   "say": "si sru em",
+   "summary": "You read the intentions, lies and weaknesses of the person you are talking to."
+  },
+  "schlangenzunge": {
+   "meaning": "Serpent's tongue",
+   "say": "şlangen-tsunge",
+   "summary": "Your lies become more convincing; you can save an exposed lie with a new lie."
+  },
+  "verhormeister": {
+   "meaning": "Master interrogator",
+   "say": "fer-hör-mayster",
+   "summary": "You get a subdued person to talk and give true answers to your questions (no torture involved)."
+  },
+  "kriegsengineer": {
+   "meaning": "Combat engineer",
+   "say": "kriks-enciniır",
+   "summary": "You repair broken equipment; at higher levels also in the middle of combat, and augments too."
+  },
+  "maschinengehirn": {
+   "meaning": "Machine brain",
+   "say": "maşinen-gehirn",
+   "summary": "You find the weak points of machines and augmented enemies and deal more wounds."
+  },
+  "sprengmeister": {
+   "meaning": "Explosives expert",
+   "say": "şpreng-mayster",
+   "summary": "You prepare and place explosives; you can set up timers, traps and directional charges."
+  },
+  "eiserner-kamerad": {
+   "meaning": "Iron companion",
+   "say": "ayzerner kamerat",
+   "summary": "Once per campaign, you build a small combat robot that accompanies you."
+  },
+  "panzerschrauber": {
+   "meaning": "Tank mechanic",
+   "say": "pantser-şrauber",
+   "summary": "You drive military vehicles better, repair them in the field, and use vehicle weapons with Werk."
+  },
+  "knowledge-of-future": {
+   "meaning": "Knowledge of the future",
+   "say": "nalıc of fyuçır",
+   "summary": "Makes it easier to figure out and use unknown experimental devices (Wunderwaffe)."
+  },
+  "kriegssheilung": {
+   "meaning": "Battlefield healing",
+   "say": "kriks-haylung",
+   "summary": "The bandages you apply to others are more effective; you can heal wounds outside of combat."
+  },
+  "aryan-cryptology": {
+   "meaning": "Aryan cryptology (SS cipher science)",
+   "say": "eriyın kriptolıci",
+   "summary": "You decipher coded SS science texts and learn secrets and plans; the cost is Corruption."
+  },
+  "kluger-kopf": {
+   "meaning": "Clever head",
+   "say": "klüger kopf",
+   "summary": "During a long rest you try to lower your Corruption."
+  },
+  "siegel-der-leere": {
+   "meaning": "Seal of the void",
+   "say": "zigel der lere",
+   "summary": "Black magic that marks a target with a void rune; each use gives Corruption."
+  },
+  "siegel-der-verdamm": {
+   "meaning": "Seal of the cursed",
+   "say": "zigel der ferdam",
+   "summary": "You draw a curse rune into the flesh of a subdued enemy; each use gives Corruption."
+  },
+  "grosses-siegel": {
+   "meaning": "Great seal",
+   "say": "groses zigel",
+   "summary": "You draw a large rune on the ground and either protect or curse the area; it carries a heavy Corruption cost."
+  },
+  "extracio-aus-ss": {
+   "meaning": "Extraction from the dead",
+   "say": "ekstrasyo aus es-es",
+   "summary": "You ask a corpse questions and gain information (black magic)."
+  },
+  "totenruf": {
+   "meaning": "Call of the dead",
+   "say": "toten-ruf",
+   "summary": "You summon the soul of someone recently dead and use it as an invisible scout that passes through walls."
+  },
+  "toter-soldaten": {
+   "meaning": "Dead soldiers",
+   "say": "toter zoldaten",
+   "summary": "You raise a corpse as a servant that obeys simple orders; the cost is heavy Corruption."
+  },
+  "blutopfer": {
+   "meaning": "Blood sacrifice",
+   "say": "blut-opfer",
+   "summary": "You wound your own limb to empower a black magic roll."
+  },
+  "stahlnerv": {
+   "meaning": "Steel nerve",
+   "say": "ştal-nerf",
+   "summary": "Reduces the negative stat effects of your augments."
+  },
+  "zweite-haut": {
+   "meaning": "Second skin",
+   "say": "tsvayte haut",
+   "summary": "Your augmented limbs become resistant to wounds and cannot be severed; they can be repaired."
+  },
+  "kalte-seele": {
+   "meaning": "Cold soul",
+   "say": "kalte zele",
+   "summary": "You benefit from Corruption's Klang bonus earlier and use Klang on panic rolls; the more augments you have, the harder speaking gets."
+  },
+  "neuer-mensch": {
+   "meaning": "New man",
+   "say": "noyer menş",
+   "summary": "You can fit a second augment to a limb; with many augments, passing the Death Save gets easier."
+  },
+  "ersatzteil": {
+   "meaning": "Spare part",
+   "say": "ersats-tayl",
+   "summary": "You remove and fit your augments in the field, repair them, or transfer them to another limb."
+  },
+  "uberladung": {
+   "meaning": "Overload",
+   "say": "über-ladung",
+   "summary": "You overload one of your augments to empower your next augment action; it requires a control roll."
+  },
+  "schnittstelle": {
+   "meaning": "Interface",
+   "say": "şnit-ştele",
+   "summary": "You connect your augmented hand or arm to vehicles and machines and control them directly."
+  },
+  "kriegsmaschine": {
+   "meaning": "War machine",
+   "say": "kriks-maşine",
+   "summary": "Once per combat, for 2 turns, you overload all your augments without rolling and take extra actions."
+  }
+ },
+ "augments": {
+  "federfuss": {
+   "meaning": "Feather foot",
+   "say": "feder-fus",
+   "summary": "Spring-loaded foot prosthesis: you stay silent while running and are wounded less by falls."
+  },
+  "funkohr": {
+   "meaning": "Radio ear",
+   "say": "funk-or",
+   "summary": "A radio built into your head: you listen to open frequencies and communicate silently with others who have the same augment."
+  },
+  "glasauge": {
+   "meaning": "Glass eye",
+   "say": "glas-auge",
+   "summary": "You see distant details better; in sudden bright light you are blinded for a turn."
+  },
+  "laufwerk": {
+   "meaning": "Walking mechanism",
+   "say": "lauf-verk",
+   "summary": "Motorized leg frame: running, jumping and climbing get easier. If the Akku (battery) runs out, you take a penalty."
+  },
+  "stahlfinger": {
+   "meaning": "Steel fingers",
+   "say": "ştal-finger",
+   "summary": "You never let go of what you grip, and squeezing and tearing grow stronger; you struggle with fine handiwork."
+  },
+  "akkutrager": {
+   "meaning": "Battery carrier",
+   "say": "aku-treger",
+   "summary": "A large battery worn on your belt gives extra charge to your augments that use Akku; it can explode on a severe wound."
+  },
+  "klingenarm": {
+   "meaning": "Blade arm",
+   "say": "klingen-arm",
+   "summary": "A blade hidden in your arm: hard to find when you are searched, it wounds more in melee."
+  },
+  "panzerhaut": {
+   "meaning": "Armor skin",
+   "say": "pantser-haut",
+   "summary": "Covers your upper body with armor, so you are wounded less; but you become cumbersome and struggle to swim."
+  },
+  "sturmarm": {
+   "meaning": "Assault arm",
+   "say": "ştuırm-arm",
+   "summary": "Powerful motorized arm: by spending battery you strike very hard and lift heavy objects."
+  },
+  "geistauge": {
+   "meaning": "Soul eye",
+   "say": "gayst-auge",
+   "summary": "You see living beings behind walls and gain a bonus to black magic; each use carries a risk of Corruption."
+  },
+  "gletschkanon": {
+   "meaning": "Glacier cannon",
+   "say": "gleç-kanon",
+   "summary": "A heavy Gletschmetall cannon integrated into the arm. In exchange for great firepower it brings very heavy stat penalties (especially -5 Werk)."
+  },
+  "schwarzes-herz": {
+   "meaning": "Black heart",
+   "say": "şvartses herts",
+   "summary": "Saves you from death once and heals your wounds; each use gives Corruption."
+  }
+ },
+ "trees": {
+  "ubermann": {
+   "meaning": "Superior man",
+   "say": "über-man",
+   "summary": "Physical strength tree (Korp): melee, endurance and not dying."
+  },
+  "stahlkrieg": {
+   "meaning": "Battle of steel",
+   "say": "ştal-krik",
+   "summary": "Marksmanship tree (Aim): sniping, fire support and assault troops."
+  },
+  "spionage": {
+   "meaning": "Espionage",
+   "say": "şpiyonaje",
+   "summary": "Stealth tree (Leis): assassination, disguise and sabotage."
+  },
+  "diplomat": {
+   "meaning": "Diplomat",
+   "say": "diplomat",
+   "summary": "Communication tree (Rede): persuasion, leadership, lies and interrogation."
+  },
+  "wunderwaffe": {
+   "meaning": "Miracle weapon",
+   "say": "vunder-vafe",
+   "summary": "Engineering tree (Werk): repair, explosives, vehicles and experimental technology."
+  },
+  "schwarzesonne": {
+   "meaning": "Black sun",
+   "say": "şvartse-zone",
+   "summary": "Black magic tree (Wissen): runes and the dead. It is powerful but carries a Corruption cost."
+  },
+  "metallkorp": {
+   "meaning": "Metal body",
+   "say": "metal-korp",
+   "summary": "Augment tree (Klang): a body fused with the machine."
+  }
+ },
+ "branches": {
+  "Koloss": "Giant",
+  "Ringer": "Wrestler",
+  "Unkaputtbar": "Unbreakable",
+  "Scharfschütze": "Sniper",
+  "Spotter": "Scout",
+  "Sturmtruppe": "Assault unit",
+  "Schatten": "Shadow",
+  "Maske": "Mask",
+  "Sabotage": "Sabotage",
+  "Demagog": "Mass orator",
+  "Unterhändler": "Negotiator",
+  "Verhör": "Interrogation",
+  "Maschinen": "Machines",
+  "Fahrzeug": "Vehicle",
+  "Labor": "Laboratory",
+  "Runen": "Runes",
+  "Totenkult": "Cult of the dead",
+  "Blut": "Blood",
+  "Panzerung": "Armoring",
+  "Feldumbau": "Field conversion",
+  "Waffenarm": "Weapon arm"
+ },
+ "perks": {
+  "careful-runner": {
+   "meaning": "Careful Runner",
+   "summary": "You fall and collide less when running fast; you cannot run fast in the dark."
+  },
+  "one-hander": {
+   "meaning": "One-handed",
+   "summary": "You are good with one-handed melee weapons and bad with two-handed ones."
+  },
+  "speed-demon": {
+   "meaning": "Speed demon",
+   "summary": "You drive vehicles very fast."
+  },
+  "two-hander": {
+   "meaning": "Two-handed",
+   "summary": "You are good with two-handed melee weapons and bad with one-handed ones."
+  },
+  "kench": {
+   "meaning": "Iron Stomach",
+   "summary": "You are resistant to food poisoning."
+  },
+  "bladesmith": {
+   "meaning": "Knife master",
+   "summary": "You are more successful with short blades."
+  },
+  "eisblut": {
+   "meaning": "Ice blood",
+   "summary": "You automatically pass Frenzy rolls."
+  },
+  "falscher": {
+   "meaning": "Forger",
+   "summary": "You are a master of forging documents, seals and identities."
+  },
+  "feldsanitater": {
+   "meaning": "Field medic",
+   "summary": "The bandages you apply do not get dirty."
+  },
+  "katze": {
+   "meaning": "Cat",
+   "summary": "You see better in the dark."
+  },
+  "ortskundig": {
+   "meaning": "Local",
+   "summary": "In a region you choose, finding your way and communicating with the locals get easier."
+  },
+  "schwarzmarkt": {
+   "meaning": "Black market",
+   "summary": "Finding forbidden and scarce goods gets easier, and prices drop."
+  },
+  "trilingual": {
+   "meaning": "Trilingual",
+   "summary": "You start the game knowing 3 languages."
+  },
+  "adlerauge": {
+   "meaning": "Eagle eye",
+   "summary": "You aim faster and land critical hits more often."
+  },
+  "extrovert": {
+   "meaning": "Extrovert",
+   "summary": "+2 Rede: you communicate easily with strangers."
+  },
+  "gluckspilz": {
+   "meaning": "Lucky",
+   "summary": "Once per session you reroll a Nat1 without spending Inspiration."
+  },
+  "heimwerker": {
+   "meaning": "DIY master",
+   "summary": "Your rolls on mechanical work get easier."
+  },
+  "runenkundig": {
+   "meaning": "Rune scholar",
+   "summary": "Your black magic rolls for Siegel (rune) abilities get easier."
+  },
+  "schnell": {
+   "meaning": "Fast",
+   "summary": "You move faster under stress."
+  },
+  "tesla": {
+   "meaning": "Tesla",
+   "summary": "Your rolls on electronics work get easier."
+  },
+  "cheetah": {
+   "meaning": "Cheetah",
+   "summary": "+2 Agil: you run fast and do parkour."
+  },
+  "follower-of-dreamer": {
+   "meaning": "Follower of the Dreamer",
+   "summary": "+1 Inspiration point."
+  },
+  "metallvertraglich": {
+   "meaning": "Metal-attuned",
+   "summary": "+2 Klang: you adapt to augments more easily."
+  },
+  "ruthig": {
+   "meaning": "Calm",
+   "summary": "Moving stealthily gets easier for you."
+  },
+  "beherzt": {
+   "meaning": "Brave",
+   "summary": "Your Corruption rises with more difficulty."
+  },
+  "tdt-teich-der-toten": {
+   "meaning": "Lake of the dead",
+   "summary": "Your wounds heal much faster."
+  },
+  "adaptable": {
+   "meaning": "Adaptive",
+   "summary": "You are far less affected by environmental conditions such as heat and cold."
+  },
+  "ubermuscler": {
+   "meaning": "Super-muscled",
+   "summary": "You lift very heavy things and handle heavy weapons more easily."
+  },
+  "ubermensch": {
+   "meaning": "Superhuman",
+   "summary": "Your physical rolls get easier and you take fewer wounds."
+  },
+  "veteran-of-47": {
+   "meaning": "Veteran of '47",
+   "summary": "You are unaffected by psychological conditions (panic, shock)."
+  },
+  "sunday-driver": {
+   "meaning": "Sunday driver",
+   "summary": "You drive vehicles very slowly."
+  },
+  "tiryaki": {
+   "summary": "Cigarette addiction: as the addiction grows, you gain Corruption."
+  },
+  "analphabet": {
+   "meaning": "Illiterate",
+   "summary": "You cannot read; you cannot take the Aryan Cryptology ability."
+  },
+  "ayyas": {
+   "summary": "Alcohol addiction: as the addiction grows, you gain Corruption."
+  },
+  "empfi": {
+   "meaning": "Sensitive",
+   "summary": "Sensitive stomach: you are prone to food poisoning."
+  },
+  "kurzsichtig": {
+   "meaning": "Nearsighted",
+   "summary": "Without your glasses, -2 to Sicht and Aim rolls against distant targets."
+  },
+  "monolingual": {
+   "meaning": "Monolingual",
+   "summary": "You start the game knowing one language."
+  },
+  "verschuldet": {
+   "meaning": "Indebted",
+   "summary": "You start with no money, and a creditor is after you."
+  },
+  "blutscheu": {
+   "meaning": "Afraid of blood",
+   "summary": "You are shaken when you see severe wounds and struggle with first aid."
+  },
+  "ehrenkodex": {
+   "meaning": "Code of honor",
+   "summary": "If you harm someone who has surrendered or is unarmed, you gain +2 Corruption."
+  },
+  "gesucht": {
+   "meaning": "Wanted",
+   "summary": "A faction is looking for you; you may be recognized in their territory."
+  },
+  "klaustrophob": {
+   "meaning": "Claustrophobic",
+   "summary": "-1 to all rolls in cramped and enclosed spaces."
+  },
+  "oaf": {
+   "meaning": "Clumsy",
+   "summary": "You are clumsy and may make faulty moves."
+  },
+  "okkultphobie": {
+   "meaning": "Occult phobia",
+   "summary": "When you see black magic you may fall into panic (Cower)."
+  },
+  "schlaflos": {
+   "meaning": "Sleepless",
+   "summary": "If you sleep badly, -1 to all rolls until the next long rest."
+  },
+  "gottesfurchtig": {
+   "meaning": "God-fearing",
+   "summary": "You struggle greatly with black magic and gain extra Corruption."
+  },
+  "introvert": {
+   "meaning": "Introvert",
+   "summary": "-2 Rede: you struggle to communicate with strangers."
+  },
+  "kriegszitterer": {
+   "meaning": "War-traumatized",
+   "summary": "You may fall into panic (Cower) at the sound of explosions and artillery."
+  },
+  "laut": {
+   "meaning": "Loud",
+   "summary": "Moving stealthily gets much harder for you."
+  },
+  "recovered": {
+   "meaning": "Recovered (former addict)",
+   "summary": "If you use drugs, alcohol or tobacco, you gain Corruption directly."
+  },
+  "delicate": {
+   "meaning": "Frail",
+   "summary": "You are wounded more easily and heal more slowly."
+  },
+  "metallabstossung": {
+   "meaning": "Metal rejection",
+   "summary": "-2 Klang: your body rejects augments, with a risk of injury at each fitting."
+  },
+  "runenblind": {
+   "meaning": "Rune-Blind",
+   "summary": "You cannot take Siegel abilities and struggle with black magic."
+  },
+  "such-tiger": {
+   "meaning": "Addict",
+   "summary": "Pervitin addiction: affects your Krach, and as the addiction grows, you gain Corruption."
+  },
+  "unthermo": {
+   "meaning": "Intolerant of temperature",
+   "summary": "You are strongly affected by heat and cold."
+  },
+  "scheu": {
+   "meaning": "Timid",
+   "summary": "Your Corruption rises more easily."
+  },
+  "kriegsversehrt": {
+   "meaning": "War invalid",
+   "summary": "One or two of your limbs start severed; one limb grants 4 perk points, two limbs grant 7."
+  },
+  "zargana": {
+   "summary": "Your physical rolls get harder and you take more wounds."
+  },
+  "schizo": {
+   "meaning": "Schizophrenic",
+   "summary": "You see things that aren't there; -2 Rede, -2 Leis."
+  },
+  "pressured-pacifism": {
+   "meaning": "Compulsory pacifism",
+   "summary": "If you harm someone you gain Corruption; if you kill, +3."
+  }
+ },
+ "stats": {
+  "korp": {
+   "meaning": "Body (Körper)",
+   "say": "korp",
+   "summary": "Physical resistance: withstanding wounds, poison and fatigue."
+  },
+  "krach": {
+   "meaning": "Crash, violence",
+   "say": "krah",
+   "summary": "Physical power: melee and brute force."
+  },
+  "klang": {
+   "meaning": "Timbre, sound",
+   "say": "klang",
+   "summary": "Augment compatibility: the ability to bear and use augments. Everyone starts at 2."
+  },
+  "sanita": {
+   "meaning": "Sanity (Lat. sanitas)",
+   "say": "sanita",
+   "summary": "Mental resistance: withstanding fear, panic and terror."
+  },
+  "rede": {
+   "meaning": "Speech, talk",
+   "say": "rede",
+   "summary": "Communication: persuasion, lies, bargaining and leadership."
+  },
+  "wissen": {
+   "meaning": "Knowledge",
+   "say": "visen",
+   "summary": "Accumulated knowledge; Schwarzesonne black magic is also rolled with this stat."
+  },
+  "sicht": {
+   "meaning": "Sight",
+   "say": "ziht",
+   "summary": "Noticing, catching details, finding someone who is hiding."
+  },
+  "agil": {
+   "meaning": "Nimble",
+   "say": "agil",
+   "summary": "Agility: running, climbing, escaping."
+  },
+  "werk": {
+   "meaning": "Work, workshop",
+   "say": "verk",
+   "summary": "Engineering and manual dexterity: repair, explosives, machines."
+  },
+  "leis": {
+   "meaning": "Quiet",
+   "say": "lays",
+   "summary": "Stealth: moving unnoticed, pickpocketing."
+  },
+  "aim": {
+   "meaning": "Aim (Eng.)",
+   "say": "eym",
+   "summary": "Aiming: accuracy with firearms and thrown weapons."
+  }
+ },
+ "terms": {
+  "corruption": {
+   "meaning": "Corruption",
+   "summary": "Dark forces gnawing at the character. It ranges from 0 to 13; new effects unlock as it rises, and at 13 the character dies. Once it reaches 7, it never drops below 7 again.",
+   "match": [
+    "Corruption"
+   ]
+  },
+  "cower": {
+   "meaning": "Cowering, panic",
+   "summary": "The state of cowering in fear (unlocks at Corruption 5). You roll Sanita to break free.",
+   "match": [
+    "Cower"
+   ]
+  },
+  "frenzy": {
+   "meaning": "Frenzy",
+   "summary": "The state of losing yourself after killing an enemy (unlocks at Corruption 9).",
+   "match": [
+    "Frenzy"
+   ]
+  },
+  "nat20": {
+   "meaning": "Natural 20",
+   "summary": "Rolling a 20 on the d20: critical success.",
+   "match": [
+    "Nat20",
+    "Nat 20"
+   ]
+  },
+  "nat1": {
+   "meaning": "Natural 1",
+   "summary": "Rolling a 1 on the d20: critical failure.",
+   "match": [
+    "Nat1",
+    "Nat 1"
+   ]
+  },
+  "death-save": {
+   "meaning": "Death saving roll",
+   "summary": "The roll that decides whether you survive when you take a mortal wound.",
+   "match": [
+    "Death Save Throw",
+    "Death Save"
+   ]
+  },
+  "inspiration": {
+   "meaning": "Inspiration",
+   "summary": "A point the GM awards; spend it to reroll a roll.",
+   "match": [
+    "Inspiration"
+   ]
+  },
+  "pervitin": {
+   "meaning": "Pervitin",
+   "summary": "A methamphetamine pill issued to soldiers. It affects Corruption and is addictive; used only at the GM's request.",
+   "match": [
+    "Pervitin"
+   ]
+  },
+  "akku": {
+   "meaning": "Battery",
+   "summary": "The charge of some augments and machines; it recharges only in a place with grid electricity.",
+   "match": [
+    "Akku"
+   ]
+  },
+  "gletschmetall": {
+   "meaning": "Glacier metal",
+   "summary": "A light but extremely hard, supernatural metal developed by the Germans at Narvik.",
+   "match": [
+    "Gletschmetall"
+   ]
+  },
+  "uber": {
+   "meaning": "Supreme",
+   "summary": "The highest difficulty threshold (22). For tasks normally considered impossible.",
+   "match": [
+    "Uber"
+   ]
+  }
+ }
+}

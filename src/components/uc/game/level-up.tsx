@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAction } from "@/components/interactive";
 import { Button, Card, Empty, cx } from "@/components/ui";
+import { useT } from "@/i18n/client";
 import { api } from "@/lib/client";
 import { UC_STAT_KEYS, UC_STAT_LABELS, type UcStatKey } from "@/lib/uc/constants";
 import { UC_STAT_MAX } from "@/lib/uc/rules";
@@ -20,20 +21,22 @@ interface LvChar {
 
 /** Umbra Caelis toplu seviye atlatma: aksiyon stat'ı + sembol stat + MVP. */
 export function UcLevelUpPanel({ campaignId, characters, levelCap }: { campaignId: string; characters: LvChar[]; levelCap: number }) {
+  const t = useT();
   const router = useRouter();
   const { busy, run } = useAction();
   const [sel, setSel] = useState<Record<string, UcStatKey | "">>({});
   const [mvp, setMvp] = useState<{ id: string; stat: UcStatKey | "" }>({ id: "", stat: "" });
-  if (!characters.length) return <Empty title="Aktif karakter yok">Onaylanmış karakterler burada görünür.</Empty>;
+  if (!characters.length) return <Empty title={t("Aktif karakter yok")}>{t("Onaylanmış karakterler burada görünür.")}</Empty>;
   const chosen = Object.keys(sel);
   const maxLv = Math.max(0, ...characters.filter((c) => chosen.includes(c.id)).map((c) => c.level + 1));
   const ready = chosen.length > 0 && chosen.every((id) => sel[id]) && (!mvp.id || mvp.stat);
   return (
     <Card className="p-5">
       <p className="mb-4 text-sm text-muted">
-        Seçilen her karakter: <strong className="text-ink">+1 seviye</strong> ve katmanında <strong className="text-ink">+1 yetenek puanı</strong> alır. Statlar: seçtiğin{" "}
-        <strong className="text-ink">aksiyon stat&apos;ı</strong> +1, puanın kazanıldığı katmandaki dalın <strong className="text-ink">sembol stat&apos;ı</strong> +1 (Sv 5 ve 10&apos;da yeni dal
-        seçilince eklenir), MVP&apos;ye ayrıca +1. MVP hesabında, seviyenin 3 veya daha fazla gerisindeki oyuncular sayılmaz.
+        {t("Seçilen her karakter:")} <strong className="text-ink">{t("+1 seviye")}</strong> {t("ve katmanında")} <strong className="text-ink">{t("+1 yetenek puanı")}</strong>
+        {t(" alır. Statlar: seçtiğin")} <strong className="text-ink">{t("aksiyon stat'ı")}</strong> {t("+1, puanın kazanıldığı katmandaki dalın")}{" "}
+        <strong className="text-ink">{t("sembol stat'ı")}</strong>{" "}
+        {t("+1 (Sv 5 ve 10'da yeni dal seçilince eklenir), MVP'ye ayrıca +1. MVP hesabında, seviyenin 3 veya daha fazla gerisindeki oyuncular sayılmaz.")}
       </p>
       <div className="space-y-2">
         {characters.map((c) => {
@@ -59,15 +62,18 @@ export function UcLevelUpPanel({ campaignId, characters, levelCap }: { campaignI
                 <span>
                   <span className="text-ink">{c.name}</span>
                   <span className="ml-2 text-xs text-muted">
-                    {c.owner} · Sv {c.level} → {c.level + 1}
-                    {c.level >= levelCap && " (sınırda)"}
-                    {c.nextSymbol ? ` · sembol: ${UC_STAT_LABELS[c.nextSymbol.stat]} ${c.stats[c.nextSymbol.stat]} (${c.nextSymbol.dal})` : ` · K${c.nextTier} dalı seçilince sembol +1`}
+                    {c.owner} · {t("Sv {from} → {to}", { from: c.level, to: c.level + 1 })}
+                    {c.level >= levelCap && ` ${t("(sınırda)")}`}
+                    {" · "}
+                    {c.nextSymbol
+                      ? t("sembol: {stat} {value} ({dal})", { stat: UC_STAT_LABELS[c.nextSymbol.stat], value: c.stats[c.nextSymbol.stat], dal: c.nextSymbol.dal })
+                      : t("K{tier} dalı seçilince sembol +1", { tier: c.nextTier })}
                   </span>
                 </span>
               </label>
               {on && (
-                <select value={sel[c.id]} onChange={(e) => setSel((s) => ({ ...s, [c.id]: e.target.value as UcStatKey }))} className="input h-9 w-44 py-1 text-sm" aria-label={`${c.name} aksiyon stat'ı`}>
-                  <option value="">Aksiyon stat&apos;ı…</option>
+                <select value={sel[c.id]} onChange={(e) => setSel((s) => ({ ...s, [c.id]: e.target.value as UcStatKey }))} className="input h-9 w-44 py-1 text-sm" aria-label={t("{name} aksiyon stat'ı", { name: c.name })}>
+                  <option value="">{t("Aksiyon stat'ı…")}</option>
                   {UC_STAT_KEYS.map((k) => (
                     <option key={k} value={k} disabled={c.stats[k] >= UC_STAT_MAX}>
                       {UC_STAT_LABELS[k]} ({c.stats[k]})
@@ -75,7 +81,7 @@ export function UcLevelUpPanel({ campaignId, characters, levelCap }: { campaignI
                   ))}
                 </select>
               )}
-              {behind && <span className="text-xs text-warn">MVP hesabı dışında</span>}
+              {behind && <span className="text-xs text-warn">{t("MVP hesabı dışında")}</span>}
             </div>
           );
         })}
@@ -84,7 +90,7 @@ export function UcLevelUpPanel({ campaignId, characters, levelCap }: { campaignI
         <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg border border-line bg-surface2/50 px-3 py-3">
           <span className="text-sm text-ink">MVP</span>
           <select value={mvp.id} onChange={(e) => setMvp({ id: e.target.value, stat: "" })} className="input h-9 w-48 py-1 text-sm">
-            <option value="">Yok</option>
+            <option value="">{t("Yok")}</option>
             {characters
               .filter((c) => chosen.includes(c.id) && maxLv - (c.level + 1) < 3)
               .map((c) => (
@@ -95,7 +101,7 @@ export function UcLevelUpPanel({ campaignId, characters, levelCap }: { campaignI
           </select>
           {mvp.id && (
             <select value={mvp.stat} onChange={(e) => setMvp((m) => ({ ...m, stat: e.target.value as UcStatKey }))} className="input h-9 w-44 py-1 text-sm">
-              <option value="">MVP stat&apos;ı…</option>
+              <option value="">{t("MVP stat'ı…")}</option>
               {UC_STAT_KEYS.map((k) => (
                 <option key={k} value={k}>
                   {UC_STAT_LABELS[k]}
@@ -115,7 +121,7 @@ export function UcLevelUpPanel({ campaignId, characters, levelCap }: { campaignI
                 api(`/api/uc/campaigns/${campaignId}/level-up`, {
                   body: { entries: chosen.map((id) => ({ characterId: id, actionStat: sel[id] })), mvp: mvp.id && mvp.stat ? { characterId: mvp.id, stat: mvp.stat } : null },
                 }),
-              "Seviye atlatıldı.",
+              t("Seviye atlatıldı."),
             );
             if (ok) {
               setSel({});
@@ -124,7 +130,7 @@ export function UcLevelUpPanel({ campaignId, characters, levelCap }: { campaignI
             }
           }}
         >
-          {chosen.length ? `${chosen.length} karakteri seviye atlat` : "Karakter seç"}
+          {chosen.length ? t("{n} karakteri seviye atlat", { n: chosen.length }) : t("Karakter seç")}
         </Button>
       </div>
     </Card>

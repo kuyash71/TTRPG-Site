@@ -3,6 +3,8 @@ import { Lightbulb, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { tipFor, type Tip, type TipKind } from "@/lib/shz/tips";
 import { ucTipFor } from "@/lib/uc/tips";
+import { useLocale, useT } from "@/i18n/client";
+import type { Locale } from "@/i18n/core";
 
 interface Open {
   title: string;
@@ -11,12 +13,12 @@ interface Open {
 }
 
 /** data-tip-src="uc" olan öğeler Umbra Caelis ipuçlarından, diğerleri SHZ ipuçlarından okunur. */
-function lookup(el: HTMLElement): Tip | null {
+function lookup(el: HTMLElement, loc: Locale): Tip | null {
   const kind = el.dataset.tipKind ?? "";
   const key = el.dataset.tipKey ?? "";
-  if (el.dataset.tipSrc === "uc") return ucTipFor(kind, key);
+  if (el.dataset.tipSrc === "uc") return ucTipFor(kind, key, loc);
   try {
-    return tipFor(kind as TipKind, key);
+    return tipFor(kind as TipKind, key, loc);
   } catch {
     return null;
   }
@@ -27,13 +29,15 @@ function lookup(el: HTMLElement): Tip | null {
  * Hem TipButton düğmeleri hem de kural metnindeki terimler (stat adları, Corruption, Cower…) bunu kullanır.
  */
 export function TipLayer() {
+  const loc = useLocale();
+  const t = useT();
   const [open, setOpen] = useState<Open | null>(null);
   const box = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
 
   useEffect(() => {
     const show = (el: HTMLElement) => {
-      const tip = lookup(el);
+      const tip = lookup(el, loc);
       if (!tip) return false;
       setOpen({ tip, title: el.dataset.tipTitle || el.textContent || "", el });
       return true;
@@ -66,7 +70,7 @@ export function TipLayer() {
       document.removeEventListener("click", onClick, true);
       document.removeEventListener("keydown", onKey, true);
     };
-  }, []);
+  }, [loc]);
 
   // Balonu hedefin altına (sığmazsa üstüne) yerleştir, ekran dışına taşırma; kaydırınca hedefi izle.
   useEffect(() => {
@@ -97,7 +101,7 @@ export function TipLayer() {
     <div
       ref={box}
       role="dialog"
-      aria-label={`${open.title} açıklaması`}
+      aria-label={t("{title} açıklaması", { title: open.title })}
       style={{ left: pos?.left ?? -9999, top: pos?.top ?? -9999 }}
       className="fixed z-[60] w-[min(20rem,calc(100vw-16px))] rounded-xl border border-warn/40 bg-surface p-4 text-left shadow-2xl"
     >
@@ -106,7 +110,7 @@ export function TipLayer() {
           <Lightbulb className="h-4 w-4 shrink-0 text-warn" aria-hidden />
           {open.title}
         </p>
-        <button type="button" onClick={() => setOpen(null)} className="-mr-1 -mt-1 rounded p-1 text-muted hover:text-ink" aria-label="Kapat">
+        <button type="button" onClick={() => setOpen(null)} className="-mr-1 -mt-1 rounded p-1 text-muted hover:text-ink" aria-label={t("Kapat")}>
           <X className="h-4 w-4" />
         </button>
       </div>
@@ -114,19 +118,19 @@ export function TipLayer() {
         <p className="text-sm text-ink/90">
           {tip.meaning && (
             <>
-              <span className="text-muted">Anlamı:</span> {tip.meaning}
+              <span className="text-muted">{t("Anlamı:")}</span> {tip.meaning}
             </>
           )}
-          {tip.say && <span className="ml-1 text-xs text-muted">{tip.meaning ? "· " : ""}okunuşu “{tip.say}”</span>}
+          {tip.say && <span className="ml-1 text-xs text-muted">{tip.meaning ? "· " : ""}{t("okunuşu “{say}”", { say: tip.say })}</span>}
         </p>
       )}
       {tip.summary ? (
         <p className="mt-2 rounded-lg bg-surface2/70 px-3 py-2 text-sm leading-relaxed text-ink">
-          <span className="mb-0.5 block text-[10px] font-semibold uppercase tracking-widest text-warn">Ne işe yarar?</span>
+          <span className="mb-0.5 block text-[10px] font-semibold uppercase tracking-widest text-warn">{t("Ne işe yarar?")}</span>
           {tip.summary}
         </p>
       ) : (
-        <p className="mt-2 text-xs text-muted">Bu yeteneğin açıklaması henüz yazılmadı.</p>
+        <p className="mt-2 text-xs text-muted">{t("Bu yeteneğin açıklaması henüz yazılmadı.")}</p>
       )}
     </div>
   );

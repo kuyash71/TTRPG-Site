@@ -3,8 +3,12 @@ import Link from "next/link";
 import { Empty, PageHeader } from "@/components/ui";
 import { content } from "@/lib/shz/content";
 import { tipText } from "@/lib/shz/tips";
+import { getLocale, getT } from "@/i18n/server";
 
-export const metadata: Metadata = { title: "Arama" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t("Arama") };
+}
 
 function snippet(text: string, q: string) {
   const i = text.indexOf(q);
@@ -15,27 +19,30 @@ function snippet(text: string, q: string) {
 
 export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { q: raw } = await searchParams;
-  const q = (raw ?? "").trim().toLocaleLowerCase("tr-TR").slice(0, 60);
-  const c = content();
+  const t = await getT();
+  const loc = await getLocale();
+  const q = (raw ?? "").trim().toLocaleLowerCase(loc === "en" ? "en-GB" : "tr-TR").slice(0, 60);
+  const c = content(loc);
+  const tip = (kind: "abilities" | "perks" | "augments", key: string) => tipText(kind, key, loc);
   const hits: { href: string; title: string; kind: string; text: string }[] = [];
   if (q.length >= 2) {
-    for (const d of c.docs) if (d.searchText.includes(q)) hits.push({ href: `/kurallar/${d.key}`, title: d.title, kind: "Kural", text: snippet(d.searchText, q) });
+    for (const d of c.docs) if (d.searchText.includes(q)) hits.push({ href: `/kurallar/${d.key}`, title: d.title, kind: t("Kural"), text: snippet(d.searchText, q) });
     for (const a of Object.values(c.abilities))
-      if (a.searchText.includes(q) || tipText("abilities", a.key).includes(q))
-        hits.push({ href: `/kurallar/yetenekler/${a.tree}#${a.key}`, title: a.name, kind: "Yetenek", text: snippet(a.searchText.includes(q) ? a.searchText : tipText("abilities", a.key), q) });
+      if (a.searchText.includes(q) || tip("abilities", a.key).includes(q))
+        hits.push({ href: `/kurallar/yetenekler/${a.tree}#${a.key}`, title: a.name, kind: t("Yetenek"), text: snippet(a.searchText.includes(q) ? a.searchText : tip("abilities", a.key), q) });
     for (const p of c.perks)
-      if (p.searchText.includes(q) || tipText("perks", p.key).includes(q))
-        hits.push({ href: `/kurallar/perkler#${p.key}`, title: p.name, kind: "Perk", text: snippet(p.searchText.includes(q) ? p.searchText : tipText("perks", p.key), q) });
+      if (p.searchText.includes(q) || tip("perks", p.key).includes(q))
+        hits.push({ href: `/kurallar/perkler#${p.key}`, title: p.name, kind: "Perk", text: snippet(p.searchText.includes(q) ? p.searchText : tip("perks", p.key), q) });
     for (const a of c.augments)
-      if (a.searchText.includes(q) || tipText("augments", a.key).includes(q))
-        hits.push({ href: `/kurallar/augmentler#${a.key}`, title: a.name, kind: "Augment", text: snippet(a.searchText.includes(q) ? a.searchText : tipText("augments", a.key), q) });
+      if (a.searchText.includes(q) || tip("augments", a.key).includes(q))
+        hits.push({ href: `/kurallar/augmentler#${a.key}`, title: a.name, kind: "Augment", text: snippet(a.searchText.includes(q) ? a.searchText : tip("augments", a.key), q) });
   }
   return (
     <div className="max-w-3xl">
-      <PageHeader kicker="Arama" title={raw ? `“${raw.slice(0, 60)}”` : "Arama"}>
-        {q.length >= 2 ? `${hits.length} sonuç` : "En az 2 harf yaz."}
+      <PageHeader kicker={t("Arama")} title={raw ? `“${raw.slice(0, 60)}”` : t("Arama")}>
+        {q.length >= 2 ? t("{n} sonuç", { n: hits.length }) : t("En az 2 harf yaz.")}
       </PageHeader>
-      {q.length >= 2 && hits.length === 0 && <Empty title="Sonuç yok" />}
+      {q.length >= 2 && hits.length === 0 && <Empty title={t("Sonuç yok")} />}
       <ul className="space-y-2">
         {hits.slice(0, 60).map((h) => (
           <li key={h.href}>

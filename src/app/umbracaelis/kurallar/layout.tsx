@@ -2,24 +2,26 @@ import { UcTopNav } from "@/components/uc/nav";
 import { UcRulesNav, type UcNavGroup } from "@/components/uc/nav-client";
 import { UC_BASE } from "@/lib/uc/constants";
 import { ucContent } from "@/lib/uc/content";
+import { getLocale, getT } from "@/i18n/server";
 
-export default function UcRulesLayout({ children }: { children: React.ReactNode }) {
-  const c = ucContent();
+export default async function UcRulesLayout({ children }: { children: React.ReactNode }) {
+  const t = await getT();
+  const c = ucContent(await getLocale());
   const groups: UcNavGroup[] = [
     {
-      title: "Kurallar",
-      items: [...c.docs.map((d) => ({ href: `${UC_BASE}/${d.key}`, label: d.title, icon: d.key })), { href: `${UC_BASE}/sozluk`, label: "Sözlük", icon: "sozluk" }],
+      title: t("Kurallar"),
+      items: [...c.docs.map((d) => ({ href: `${UC_BASE}/${d.key}`, label: d.title, icon: d.key })), { href: `${UC_BASE}/sozluk`, label: t("Sözlük"), icon: "sozluk" }],
     },
-    { title: "Karakter", items: [{ href: `${UC_BASE}/perkler`, label: "Perkler", icon: "perkler" }] },
+    { title: t("Karakter"), items: [{ href: `${UC_BASE}/perkler`, label: t("Perkler"), icon: "perkler" }] },
     {
-      title: "Sınıflar",
+      title: t("Sınıflar"),
       items: [
-        { href: `${UC_BASE}/siniflar`, label: "Tüm sınıflar", icon: "siniflar" },
+        { href: `${UC_BASE}/siniflar`, label: t("Tüm sınıflar"), icon: "siniflar" },
         ...c.classes.flatMap((cl) => [
           { href: `${UC_BASE}/siniflar/${cl.key}`, label: cl.name, icon: cl.key },
           ...cl.dals.map((dk) => ({
             href: `${UC_BASE}/siniflar/${cl.key}/${dk}`,
-            label: `K${c.dals[dk].tier} · ${c.dals[dk].name}`,
+            label: `${t("K{n}", { n: c.dals[dk].tier })} · ${c.dals[dk].name}`,
             sub: true,
             tier: c.dals[dk].tier,
             parent: `${UC_BASE}/siniflar/${cl.key}`,

@@ -3,10 +3,15 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { TopNav } from "@/components/nav";
 import { RoomReturn } from "@/components/room-return";
+import type { TFn } from "@/i18n/core";
+import { getLocale, getT } from "@/i18n/server";
 import { currentUser } from "@/lib/auth/session";
 import { START_FREE_STATS, START_KLANG, THRESHOLDS, WOUNDS } from "@/lib/shz/constants";
 
-export const metadata: Metadata = { title: "Yardım" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t("Yardım") };
+}
 
 const SECTIONS = [
   { id: "baslarken", title: "Başlarken" },
@@ -55,310 +60,624 @@ function Tip({ children, tone = "accent" }: { children: ReactNode; tone?: "accen
 
 export default async function HelpPage() {
   const user = await currentUser();
+  const t = await getT();
+  const loc = await getLocale();
   return (
     <>
       <TopNav user={user} />
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[220px_1fr] lg:py-10">
         <aside className="lg:sticky lg:top-24 lg:self-start">
-          <p className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-widest text-muted">Yardım</p>
+          <p className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-widest text-muted">{t("Yardım")}</p>
           <nav className="flex flex-wrap gap-1 lg:block">
             {SECTIONS.map((s) => (
               <a key={s.id} href={`#${s.id}`} className="block rounded-md px-2 py-1.5 text-sm text-muted hover:bg-surface2 hover:text-ink">
-                {s.title}
+                {t(s.title)}
               </a>
             ))}
           </nav>
         </aside>
         <main className="min-w-0 max-w-3xl space-y-10">
           <header className="border-b border-line pb-6">
-            <p className="kicker mb-2">Rehber</p>
-            <h1 className="text-3xl sm:text-4xl">Yardım</h1>
+            <p className="kicker mb-2">{t("Rehber")}</p>
+            <h1 className="text-3xl sm:text-4xl">{t("Yardım")}</h1>
             <p className="mt-2 text-muted">
-              Siteyi ve Schwarzesonne kurallarını hızlıca öğrenmek için kısa bir rehber. Kuralların tam metni{" "}
-              <Link href="/kurallar" className="text-accent hover:underline">
-                Kurallar
-              </Link>{" "}
-              bölümünde.
+              {loc === "en" ? (
+                <>
+                  A short guide to learning the site and the Schwarzesonne rules quickly. The full rules text is in the{" "}
+                  <Link href="/kurallar" className="text-accent hover:underline">
+                    Rules
+                  </Link>{" "}
+                  section.
+                </>
+              ) : (
+                <>
+                  Siteyi ve Schwarzesonne kurallarını hızlıca öğrenmek için kısa bir rehber. Kuralların tam metni{" "}
+                  <Link href="/kurallar" className="text-accent hover:underline">
+                    Kurallar
+                  </Link>{" "}
+                  bölümünde.
+                </>
+              )}
             </p>
           </header>
-
-          <Section id="baslarken" title="Başlarken">
-            <Steps
-              items={[
-                { title: "Hesap aç", body: <>GM&apos;inden bir davet bağlantısı al. Bağlantıyı açıp kullanıcı adı ve en az 10 karakterlik bir şifre belirle. Kod tek kullanımlıktır.</> },
-                {
-                  title: "Kampanyaya katıl",
-                  body: <>Davet bir kampanyaya bağlıysa otomatik katılırsın. Değilse Panel&apos;deki &quot;Kampanyaya katıl&quot; kutusuna GM&apos;in verdiği katılma kodunu (ör. ABCD-EFGH) yaz.</>,
-                },
-                { title: "Karakterini oluştur", body: <>Kampanya sayfasındaki &quot;Karakter oluştur&quot; düğmesiyle sihirbazı başlat. Karakterin GM onayından sonra aktif olur.</> },
-                { title: "Oyun odasına gir", body: <>Oyun günü kampanyadaki &quot;Oyun odası&quot; düğmesiyle masaya otur. Sohbet, zarlar ve parti burada.</> },
-              ]}
-            />
-          </Section>
-
-          <Section id="karakter" title="Karakter oluşturma">
-            <p>Sihirbaz altı adımdan oluşur. Sağdaki özet her seçimde güncellenir ve eksik bir şey varsa orada yazar.</p>
-            <Steps
-              items={[
-                {
-                  title: "Kimlik",
-                  body: (
-                    <>
-                      Ad, yaş (18–60), milliyet ve taraf (alignment). <strong>Geçmiş</strong> herkesin görebileceği hikâyedir. <strong>GM&apos;e özel notlar</strong> alanını yalnızca sen ve GM
-                      görürsünüz: sırlar ve hikâye kancaları için ideal.
-                    </>
-                  ),
-                },
-                {
-                  title: "Ekspertiz ağacı",
-                  body: (
-                    <>
-                      Başlangıç ağacın sembol stat&apos;ına +2 verir ve ağaca özel bir bonus kazandırır (ör. Ubermann +1 Krach, Schwarzesonne +1 Corruption, Metallkorp bir T1 augment).
-                      İkinci ağacı oyunda yetenek puanıyla açarsın; en fazla 2 ağaç olabilir.
-                    </>
-                  ),
-                },
-                {
-                  title: "Perkler",
-                  body: (
-                    <>
-                      Pozitif perkler perk puanı harcar, negatifler kazandırır. Toplam negatife düşemez. Kalan puan (puan + 1) / 2 olarak stat puanına dönüşür. Turuncu etiketli perkler
-                      birlikte alınamaz; seçilen bir perkle çakışanlar kilitlenir. <strong>Kriegsversehrt</strong> seçersen kopuk başlayacak 1 ya da 2 uzuv seçersin (kol seçilirse el,
-                      bacak seçilirse ayak da kopar; baş ve gövde seçilemez). Tek uzuv 4, iki uzuv 7 perk puanı kazandırır.
-                    </>
-                  ),
-                },
-                {
-                  title: "Augment (yalnızca Metallkorp)",
-                  body: (
-                    <>
-                      İlk ağacın Metallkorp ise perklerden sonra ayrı bir Augment adımı açılır: bir T1 augment ve takılacağı uzvu seçersin. Kopuk uzvuna augment takarsan protez olarak çalışır ve uzuv
-                      sağlam sayılır; kopuk bir kolun eline ya da kopuk bir bacağın ayağına augment takılamaz.
-                    </>
-                  ),
-                },
-                {
-                  title: "Statlar",
-                  body: (
-                    <>
-                      {START_FREE_STATS} varsayılan puan + perklerden gelen puanları dağıtırsın. Ağaç stat&apos;ın zaten +2 aldığı için ona yalnızca perklerden gelen kadar puan ekleyebilirsin.
-                      Klang herkese +{START_KLANG} başlar.
-                    </>
-                  ),
-                },
-                { title: "İlk yetenek", body: <>Seviye 0&apos;da 1 yetenek puanın var. Şartlarını karşıladığın bir yeteneği şimdi alabilir ya da puanı saklayabilirsin.</> },
-                { title: "Özet ve onay", body: <>Her şeyi kontrol et ve &quot;Onaya gönder&quot; de. GM reddederse nedenini karakter sayfasında görürsün.</> },
-              ]}
-            />
-            <Tip>Portreni karakter oluşturduktan sonra karakter kağıdında portre alanına tıklayarak ekleyebilirsin (PNG, JPEG veya WebP).</Tip>
-            <Tip>Karakterin adını, geçmişini ve görünüşünü sonradan karakter kağıdındaki "İsim / açıklama" düğmesiyle değiştirebilirsin. GM de oyuncuların karakterlerinde bunu yapabilir; değişiklik karakter kaydına yazılır.</Tip>
-          </Section>
-
-          <Section id="dikkat" title="Nelere dikkat etmeli?">
-            <ul className="list-disc space-y-2 pl-5">
-              <li>
-                <strong>Rolünü düşün, sayıyı değil.</strong> Negatif perkler puan kazandırır ama oyunda gerçekten oynanır. GM bunları hikâyeye taşıyacaktır.
-              </li>
-              <li>
-                <strong>Ağacın ilerisine bak.</strong> Kol bitirici yetenekler ana stat 7, ikincil stat 4–5 ve seviye 6–7 ister. Kurallar &gt; Yetenek ağaçları sayfasından hangi ikincil
-                statlara ihtiyacın olacağını önceden gör.
-              </li>
-              <li>
-                <strong>Klang&apos;ı ihmal etme.</strong> Augmentler Klang düşürür. Klang negatife inerse <em>bütün</em> zarlarına o kadar ceza gelir.
-              </li>
-              <li>
-                <strong>Corruption geri gelmez.</strong> 7&apos;ye ulaşan Corruption bir daha 7&apos;nin altına inmez; 13 ölüm demektir. Pervitin kullanırken iki kez düşün.
-              </li>
-              <li>
-                <strong>Inspiration borcu.</strong> Inspiration eksiye düşerse her eksi puan için tüm zarlarına −2 uygulanır.
-              </li>
-              <li>
-                <strong>Tek karakter.</strong> Bir kampanyada aynı anda yalnızca bir aktif ya da onay bekleyen karakterin olabilir.
-              </li>
-            </ul>
-          </Section>
-
-          <Section id="zar" title="Zarlar nasıl çalışır?">
-            <p>
-              Temel kural: <strong>d20 + stat ≥ eşik</strong>. Zarları her zaman sunucu atar; herkes aynı sonucu ve tüm eklemeleri görür.
-            </p>
-            <div className="overflow-x-auto">
-              <table className="w-full max-w-md text-sm">
-                <tbody>
-                  {THRESHOLDS.map((t) => (
-                    <tr key={t.key} className="border-b border-line">
-                      <td className="py-1.5 pr-4">{t.label}</td>
-                      <td className="py-1.5 font-mono">{t.value}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <ul className="list-disc space-y-1.5 pl-5">
-              <li>Nat 20 ve Nat 1 eşikten bağımsızdır: olası en iyi ve en kötü sonuç.</li>
-              <li>Zar panelinde kullandığın uzvu seçersen o uzvun yara cezası otomatik eklenir.</li>
-              <li>Negatif Klang, Inspiration borcu ve kara büyü zarlarındaki Corruption etkileri otomatik hesaplanır.</li>
-              <li>Bir zarın altındaki &quot;Inspiration harca, yeniden at&quot; ile 1 Inspiration karşılığında zarı yeniden atabilirsin.</li>
-              <li>&quot;Durum düzenleyici&quot; GM&apos;in söylediği anlık artı/eksiler içindir; herkes görür.</li>
-            </ul>
-          </Section>
-
-          <Section id="gelisim" title="Seviye ve yetenekler">
-            <ul className="list-disc space-y-1.5 pl-5">
-              <li>Seviye atlamayı GM yapar. Her seviyede +1 yetenek puanı, ağaç stat&apos;ına +1 ve GM&apos;in seçtiği aksiyon stat&apos;ına +1 alırsın. MVP ayrıca +1 alır.</li>
-              <li>Ağaç stat&apos;ın 10 olduysa o puan &quot;serbest stat&quot; olarak gelir; karakter kağıdında istediğin stat&apos;a verirsin.</li>
-              <li>
-                Yetenek puanını karakter kağıdının <strong>Yetenekler</strong> sekmesinde harcarsın. Yeşil kenarlı yetenekler alınabilir; kilitli olanların altında eksik şart yazar
-                (öncül, stat, seviye, Corruption).
-              </li>
-              <li>Bir yeteneğin 3. seviyesi için karakter seviyesi en az 4 olmalı.</li>
-              <li>
-                Ağaç görünümünde <strong>Kök</strong> yetenek üstte, iki ana kol (A ve B) yan yana durur. Kartlar arasındaki çizgi öncül sırasını gösterir; kesik çizgili blok bir{" "}
-                <strong>yan daldır</strong> (A′, B′) ve üstündeki yetenekten ayrılır. Kartın üstündeki &quot;Öncül&quot; satırı kırmızıysa önce o yeteneği almalısın.
-              </li>
-              <li>İkinci ağacı açabilecek durumdaysan Yetenekler sekmesinde &quot;YENİ AĞAÇ AÇILABİLİR&quot; uyarısı ve &quot;Ağaç aç&quot; düğmesi çıkar.</li>
-              <li>Perklerin sabit stat etkileri (ör. +2 Rede, −2 Leis) statlarına otomatik yansır; statın altında hangi perk ya da augment&apos;ten geldiği yazar. Olumsuz etkiler statı 0&apos;ın altına da düşürebilir.</li>
-              <li>GM izin verirse perklerini bir kez yeniden düzenleyebilirsin (karakter kağıdında &quot;Perkleri düzenle&quot;).</li>
-              <li>Bazı yetenekler başka bir yetenekle birlikte alındığında <strong>sinerji</strong> kazanır; aktif sinerjiler kartta yazar.</li>
-            </ul>
-          </Section>
-
-          <Section id="oda" title="Oyun odası">
-            <ul className="list-disc space-y-1.5 pl-5">
-              <li>
-                <strong>Sahne (IC):</strong> karakterinin söyledikleri ve yaptıkları, zarlar ve sistem mesajları. <strong>Masa (OOC):</strong> oyun dışı sohbet.{" "}
-                <strong>Fısıltılar:</strong> GM&apos;le ya da başka bir oyuncuyla özel konuşma; üstteki listeden kime yazacağını seçersin. Diğer oyuncular göremez, ama GM masadaki tüm
-                fısıltıları (oyuncular arası olanlar dahil, salt okunur) görür. Sohbette susturulan oyuncu yalnızca GM&apos;e fısıldayabilir.
-              </li>
-              <li>
-                Kendi mesajını silebilirsin (mesajın üstüne gelince çıkan çöp kutusu). Birden çok mesajı silmek için sekme çubuğundaki <strong>Seç</strong> düğmesine bas, mesajları işaretle
-                ve &quot;Seçilenleri sil&quot;. GM her mesajı ve zarı silebilir.
-              </li>
-              <li>
-                <strong>İzleyiciler</strong> masayı izler: karakter oluşturamaz, sahneye yazamaz ve zar atamaz; Masa sohbetine ve GM&apos;e fısıltıyla yazabilir. Oda başlığında
-                &quot;İzleyici&quot; etiketi görünür.
-              </li>
-              <li>GM bir oyuncuyu sohbette ya da zar atmada susturabilir. Sohbette susturulan oyuncu yine de GM&apos;e fısıldayabilir.</li>
-              <li>Kampanyada karakterin yoksa odaya girince sana karakter oluşturmak isteyip istemediğin sorulur.</li>
-              <li>Partideki bir karakterin portresine ya da adına tıklayınca karakteri odadan çıkmadan görürsün.</li>
-              <li>GM &quot;zar iste&quot; dediğinde akışın altında bir kart çıkar; tek tıkla doğru zarı atarsın. Eşik, düzenleyici ve stat&apos;ı GM belirler.</li>
-              <li>Zar attığında sonuç ekranın üstünde kısa bir bildirim olarak görünür ve sahne en alta kayar. Bildirime dokununca akışa gidersin.</li>
-              <li>Inspiration ile yeniden atmadan önce zarın ayrıntıları ve kalan Inspiration&apos;ın gösterilir; onaylayınca harcanır.</li>
-              <li>
-                <strong>Death Save</strong> ve <strong>Pervitin</strong> zarlarını yalnızca GM ister. Death Save kartı ölüm ve kurtuluş sayısını gösterir; üç ölümde karakter
-                &quot;Öldü&quot; olarak işaretlenir, GM diriltebilir.
-              </li>
-              <li>Sağ üstteki &quot;Karakterim&quot; düğmesi seni karakter kağıdına götürür; karakterin yoksa &quot;Karakter Oluştur&quot; yazar.</li>
-              <li>Odadan başka bir sayfaya geçersen sağ alttaki &quot;Oyun odasına dön&quot; düğmesiyle geri dönersin.</li>
-            </ul>
-          </Section>
-
-          <Section id="beden" title="Yara, Corruption, Death Save">
-            <p>Can puanı yoktur; her uzvun kendi yara durumu vardır. Yaralı uzvun kullanıldığı zarlara ceza gelir:</p>
-            <div className="flex flex-wrap gap-2">
-              {WOUNDS.map((w) => (
-                <span key={w.key} className="chip">
-                  {w.label} {w.penalty ? `−${w.penalty}` : ""}
-                </span>
-              ))}
-            </div>
-            <p className="text-sm text-ink/80">Temiz sargı cezayı yarıya, kirli sargı dörtte üçe indirir (aşağı yuvarlanır).</p>
-            <ul className="list-disc space-y-1.5 pl-5">
-              <li>Corruption 0–13 arasıdır; her seviyenin etkisi karakter kağıdındaki çizgide ve Kurallar &gt; Corruption sayfasında yazar.</li>
-              <li>Death Save: d6 atılır, 1–3 ölüm, 4–6 kurtuluş. Hangisi önce 3 olursa o gerçekleşir. Hak kullanılınca Inspiration ile yenilenir; her yenileme 1 fazla Inspiration ister.</li>
-            </ul>
-          </Section>
-
-          <Section id="gm" title="GM için">
-            <ul className="list-disc space-y-1.5 pl-5">
-              <li>
-                <strong>Davet:</strong> Yönetim &gt; Yeni davet. Kampanya seçersen oyuncu kayıt olunca otomatik katılır.
-              </li>
-              <li>
-                <strong>Onay:</strong> Kampanya sayfasında &quot;Onay bekleyen karakterler&quot;. Reddederken bir not yazabilirsin.
-              </li>
-              <li>
-                <strong>Seviye atlatma:</strong> Kampanya sayfasında karakterleri seç, her biri için aksiyon stat&apos;ını ve MVP&apos;yi belirle.
-              </li>
-              <li>
-                <strong>Düzenleme:</strong> Karakter kağıdında &quot;GM düzenle&quot; ile stat, puan, Corruption, Inspiration, yetenek ve perkleri değiştirebilirsin; her değişiklik kayda geçer.
-                Yara, sargı ve augmentler Beden sekmesinden.
-              </li>
-              <li>
-                <strong>Oyun odasında:</strong> gizli zar atabilir, oyunculardan zar isteyebilir, parti kartlarından Corruption ve Inspiration&apos;ı hızlıca değiştirebilirsin.
-                &quot;Masada&quot; listesindeki simgelerle bir oyuncuyu sohbette ya da zar atmada susturabilir ya da oyundan atabilirsin.
-              </li>
-              <li>
-                <strong>Zar paneli:</strong> &quot;Statsız&quot; ile stat eklenmeyen aksiyonlar atılır; &quot;Elle&quot; kutusuna istediğin eşiği yazabilirsin. Death Save ve Pervitin&apos;i
-                doğrudan atabilirsin; Pervitin&apos;e durum düzenleyicisi eklenir.
-              </li>
-              <li>
-                <strong>Zar iste:</strong> Normal zar, Death Save veya Pervitin isteyebilirsin; stat (ya da statsız), hazır ya da elle eşik, durum düzenleyicisi, kara büyü, oyuncunun
-                uzuv seçmesi ve sonucu gizleme seçenekleri var. Bekleyen istekleri akışın altından iptal edebilirsin.
-              </li>
-              <li>
-                <strong>Odayı kapatma:</strong> Kampanya sayfasının en altındaki &quot;Odayı kapat&quot; kampanyayı karakterleri, sohbet ve zar geçmişiyle birlikte kalıcı olarak siler.
-                Kapatabilmek için önce tüm oyuncuları ve izleyicileri çıkarman gerekir. Yalnızca dondurmak istiyorsan ayarlardan durumu &quot;Arşiv&quot; yap.
-              </li>
-              <li>
-                <strong>Geçmişi silme:</strong> &quot;Seç&quot; ile mesaj ve zarları toplu seçip silebilirsin. &quot;Temizle&quot; düğmesi sahne mesajlarını, masa sohbetini, bir oyuncuyla
-                ya da tüm oyuncularla olan fısıltıları, zar geçmişini veya her şeyi tek seferde siler.
-              </li>
-              <li>
-                <strong>İzleyiciler:</strong> Kampanya sayfasındaki &quot;İzleyici kodu&quot; ile hesabı olanlar izleyici olarak katılır; yeni kişiler için Yönetim &gt; Yeni davet&apos;te
-                rolü &quot;İzleyici&quot; seç. Var olan bir üyeyi kampanya sayfasından ya da odadaki göz simgesiyle izleyici/oyuncu yapabilirsin.
-              </li>
-              <li>
-                <strong>İade ve izinler:</strong> GM düzenle ekranındaki &quot;Puanları iade et&quot; tüm dağıtılmış stat ve yetenek puanlarını oyuncuya geri verir. &quot;Oyuncu perklerini
-                düzenleyebilir&quot; kutusu tek seferlik perk düzenleme izni verir. Ölü karakteri parti kartından ya da karakter kağıdından diriltebilirsin.
-              </li>
-              <li>
-                <strong>Fiziksel atılmış zar:</strong> Kampanya ayarlarındaki &quot;Fiziksel atılmış zar&quot; kutusu masada gerçek zarla oynanan oyunlar içindir. Açıkken oyuncular odada
-                dijital zar atamaz. Sen zar panelinde atan karakteri, zar türünü (normal zar, Pervitin / Yozlaşma, Death Save), stat&apos;ı, eşiği, uzvu ve düzenleyiciyi seçip masada gelen
-                sayıyı girersin; sistem başarıyı, Corruption / Yozlaşma ve Death Save etkisini hesaplar.
-              </li>
-              <li>
-                <strong>Şifre sıfırlama:</strong> Oyuncu giriş ekranındaki &quot;Şifremi unuttum&quot; ile istek bırakınca panelinde ve üst çubukta bildirim görürsün. &quot;Onayla, kod
-                üret&quot; tek kullanımlık bir kod verir (24 saat geçerli); kodu oyuncuya ilet. Oyuncu kodla girince yeni şifresini belirlemek zorunda kalır.
-              </li>
-              <li>
-                <strong>Karakter devretme:</strong> Kampanya sayfasındaki parti kartında &quot;Sahibini değiştir&quot; ile karakteri başka bir oyuncuya ya da kendine devredebilir veya
-                sahipsiz bırakabilirsin. Sahipsiz karakterin zarlarını GM atar.
-              </li>
-              <li>
-                <strong>Diller:</strong> Oyuncular karakter oluştururken dillerini listeden seçer (2 dil; Monolingual 1, Trilingual 3). Karakter kağıdındaki Diller kartından dil ekleyip
-                değiştirebilirsin; listede olmayan bir dili de elle yazabilirsin.
-              </li>
-              <li>
-                <strong>Umbra Caelis:</strong> Aynı hesapla umbracaelis.com/umbracaelis/panel adresinden Umbra Caelis kampanyaları açılır. Üst çubuktaki düğmeyle iki sistem arasında
-                geçebilirsin.
-              </li>
-              <li>
-                <strong>Kurallar:</strong> Obsidian&apos;daki kuralları güncelledikten sonra <code className="rounded bg-surface2 px-1">npm run sync</code> çalıştırıp push etmen yeterli.
-              </li>
-            </ul>
-          </Section>
-
-          <Section id="sss" title="Sık sorulanlar">
-            <dl className="space-y-4">
-              {[
-                ["Şifremi unuttum.", "Giriş ekranında 'Şifremi unuttum'a bas ve kullanıcı adını yaz. GM'in onaylayınca sana tek kullanımlık bir kod verir; girişte 'Sıfırlama kodum var'ı seçip kodla gir ve yeni şifreni belirle."],
-                ["Karakterim reddedildi, ne yapmalıyım?", "Karakter sayfasındaki GM notunu oku ve kampanya sayfasından yeni bir karakter oluştur."],
-                ["Bir yeteneği yanlışlıkla aldım.", "GM'ine söyle; GM düzenle ekranından geri alıp puanını iade edebilir."],
-                ["Karakterimi silmek istiyorum.", "Karakter kağıdında 'Karakteri sil' düğmesine bas ve onay için karakterin adını yaz. Silme geri alınamaz."],
-                ["Oyun odası 'Bağlanıyor…' yazıyor.", "Sayfayı yenile. Devam ederse oturumun kapanmış olabilir; yeniden giriş yap."],
-                ["Bir sayfada 'Bir şeyler ters gitti' yazdı.", "Site bu durumda sayfayı bir kez kendiliğinden yeniler. Sorun sürerse ekrandaki kodu GM'ine ilet."],
-              ].map(([q, a]) => (
-                <div key={q}>
-                  <dt className="font-medium text-ink">{q}</dt>
-                  <dd className="text-sm text-ink/80">{a}</dd>
-                </div>
-              ))}
-            </dl>
-          </Section>
+          {loc === "en" ? <HelpEn t={t} /> : <HelpTr />}
         </main>
       </div>
       {user && <RoomReturn />}
+    </>
+  );
+}
+
+/** Türkçe metin (kaynak). İngilizce karşılığı HelpEn'dedir; birini değiştirirsen ötekini de güncelle. */
+function HelpTr() {
+  return (
+    <>
+      <Section id="baslarken" title="Başlarken">
+        <Steps
+          items={[
+            { title: "Hesap aç", body: <>GM&apos;inden bir davet bağlantısı al. Bağlantıyı açıp kullanıcı adı ve en az 10 karakterlik bir şifre belirle. Kod tek kullanımlıktır.</> },
+            {
+              title: "Kampanyaya katıl",
+              body: <>Davet bir kampanyaya bağlıysa otomatik katılırsın. Değilse Panel&apos;deki &quot;Kampanyaya katıl&quot; kutusuna GM&apos;in verdiği katılma kodunu (ör. ABCD-EFGH) yaz.</>,
+            },
+            { title: "Karakterini oluştur", body: <>Kampanya sayfasındaki &quot;Karakter oluştur&quot; düğmesiyle sihirbazı başlat. Karakterin GM onayından sonra aktif olur.</> },
+            { title: "Oyun odasına gir", body: <>Oyun günü kampanyadaki &quot;Oyun odası&quot; düğmesiyle masaya otur. Sohbet, zarlar ve parti burada.</> },
+          ]}
+        />
+      </Section>
+
+      <Section id="karakter" title="Karakter oluşturma">
+        <p>Sihirbaz altı adımdan oluşur. Sağdaki özet her seçimde güncellenir ve eksik bir şey varsa orada yazar.</p>
+        <Steps
+          items={[
+            {
+              title: "Kimlik",
+              body: (
+                <>
+                  Ad, yaş (18–60), milliyet ve taraf (alignment). <strong>Geçmiş</strong> herkesin görebileceği hikâyedir. <strong>GM&apos;e özel notlar</strong> alanını yalnızca sen ve GM
+                  görürsünüz: sırlar ve hikâye kancaları için ideal.
+                </>
+              ),
+            },
+            {
+              title: "Ekspertiz ağacı",
+              body: (
+                <>
+                  Başlangıç ağacın sembol stat&apos;ına +2 verir ve ağaca özel bir bonus kazandırır (ör. Ubermann +1 Krach, Schwarzesonne +1 Corruption, Metallkorp bir T1 augment).
+                  İkinci ağacı oyunda yetenek puanıyla açarsın; en fazla 2 ağaç olabilir.
+                </>
+              ),
+            },
+            {
+              title: "Perkler",
+              body: (
+                <>
+                  Pozitif perkler perk puanı harcar, negatifler kazandırır. Toplam negatife düşemez. Kalan puan (puan + 1) / 2 olarak stat puanına dönüşür. Turuncu etiketli perkler
+                  birlikte alınamaz; seçilen bir perkle çakışanlar kilitlenir. <strong>Kriegsversehrt</strong> seçersen kopuk başlayacak 1 ya da 2 uzuv seçersin (kol seçilirse el,
+                  bacak seçilirse ayak da kopar; baş ve gövde seçilemez). Tek uzuv 4, iki uzuv 7 perk puanı kazandırır.
+                </>
+              ),
+            },
+            {
+              title: "Augment (yalnızca Metallkorp)",
+              body: (
+                <>
+                  İlk ağacın Metallkorp ise perklerden sonra ayrı bir Augment adımı açılır: bir T1 augment ve takılacağı uzvu seçersin. Kopuk uzvuna augment takarsan protez olarak çalışır ve uzuv
+                  sağlam sayılır; kopuk bir kolun eline ya da kopuk bir bacağın ayağına augment takılamaz.
+                </>
+              ),
+            },
+            {
+              title: "Statlar",
+              body: (
+                <>
+                  {START_FREE_STATS} varsayılan puan + perklerden gelen puanları dağıtırsın. Ağaç stat&apos;ın zaten +2 aldığı için ona yalnızca perklerden gelen kadar puan ekleyebilirsin.
+                  Klang herkese +{START_KLANG} başlar.
+                </>
+              ),
+            },
+            { title: "İlk yetenek", body: <>Seviye 0&apos;da 1 yetenek puanın var. Şartlarını karşıladığın bir yeteneği şimdi alabilir ya da puanı saklayabilirsin.</> },
+            { title: "Özet ve onay", body: <>Her şeyi kontrol et ve &quot;Onaya gönder&quot; de. GM reddederse nedenini karakter sayfasında görürsün.</> },
+          ]}
+        />
+        <Tip>Portreni karakter oluşturduktan sonra karakter kağıdında portre alanına tıklayarak ekleyebilirsin (PNG, JPEG veya WebP).</Tip>
+        <Tip>Karakterin adını, geçmişini ve görünüşünü sonradan karakter kağıdındaki "İsim / açıklama" düğmesiyle değiştirebilirsin. GM de oyuncuların karakterlerinde bunu yapabilir; değişiklik karakter kaydına yazılır.</Tip>
+      </Section>
+
+      <Section id="dikkat" title="Nelere dikkat etmeli?">
+        <ul className="list-disc space-y-2 pl-5">
+          <li>
+            <strong>Rolünü düşün, sayıyı değil.</strong> Negatif perkler puan kazandırır ama oyunda gerçekten oynanır. GM bunları hikâyeye taşıyacaktır.
+          </li>
+          <li>
+            <strong>Ağacın ilerisine bak.</strong> Kol bitirici yetenekler ana stat 7, ikincil stat 4–5 ve seviye 6–7 ister. Kurallar &gt; Yetenek ağaçları sayfasından hangi ikincil
+            statlara ihtiyacın olacağını önceden gör.
+          </li>
+          <li>
+            <strong>Klang&apos;ı ihmal etme.</strong> Augmentler Klang düşürür. Klang negatife inerse <em>bütün</em> zarlarına o kadar ceza gelir.
+          </li>
+          <li>
+            <strong>Corruption geri gelmez.</strong> 7&apos;ye ulaşan Corruption bir daha 7&apos;nin altına inmez; 13 ölüm demektir. Pervitin kullanırken iki kez düşün.
+          </li>
+          <li>
+            <strong>Inspiration borcu.</strong> Inspiration eksiye düşerse her eksi puan için tüm zarlarına −2 uygulanır.
+          </li>
+          <li>
+            <strong>Tek karakter.</strong> Bir kampanyada aynı anda yalnızca bir aktif ya da onay bekleyen karakterin olabilir.
+          </li>
+        </ul>
+      </Section>
+
+      <Section id="zar" title="Zarlar nasıl çalışır?">
+        <p>
+          Temel kural: <strong>d20 + stat ≥ eşik</strong>. Zarları her zaman sunucu atar; herkes aynı sonucu ve tüm eklemeleri görür.
+        </p>
+        <div className="overflow-x-auto">
+          <table className="w-full max-w-md text-sm">
+            <tbody>
+              {THRESHOLDS.map((t) => (
+                <tr key={t.key} className="border-b border-line">
+                  <td className="py-1.5 pr-4">{t.label}</td>
+                  <td className="py-1.5 font-mono">{t.value}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <ul className="list-disc space-y-1.5 pl-5">
+          <li>Nat 20 ve Nat 1 eşikten bağımsızdır: olası en iyi ve en kötü sonuç.</li>
+          <li>
+            <strong>Umbra Caelis&apos;te eşik tablosu yoktur:</strong> zar d20 + stat + bonuslardır ve sonucu GM işin zorluğuna göre değerlendirir. &quot;Bir kademe kolaylaşır/zorlaşır&quot;
+            zara ±3 demektir; başarılı zarda d20&apos;nin kendisi 15+ ise <strong>güçlü başarı</strong> sayılır ve zar kartında &quot;Güçlü&quot; etiketi çıkar. GM isterse otomatik
+            değerlendirme için gizli bir hedef sayı girebilir.
+          </li>
+          <li>Zar panelinde kullandığın uzvu seçersen o uzvun yara cezası otomatik eklenir.</li>
+          <li>Negatif Klang, Inspiration borcu ve kara büyü zarlarındaki Corruption etkileri otomatik hesaplanır.</li>
+          <li>Bir zarın altındaki &quot;Inspiration harca, yeniden at&quot; ile 1 Inspiration karşılığında zarı yeniden atabilirsin.</li>
+          <li>&quot;Durum düzenleyici&quot; GM&apos;in söylediği anlık artı/eksiler içindir; herkes görür.</li>
+        </ul>
+      </Section>
+
+      <Section id="gelisim" title="Seviye ve yetenekler">
+        <ul className="list-disc space-y-1.5 pl-5">
+          <li>Seviye atlamayı GM yapar. Her seviyede +1 yetenek puanı, ağaç stat&apos;ına +1 ve GM&apos;in seçtiği aksiyon stat&apos;ına +1 alırsın. MVP ayrıca +1 alır.</li>
+          <li>Ağaç stat&apos;ın 10 olduysa o puan &quot;serbest stat&quot; olarak gelir; karakter kağıdında istediğin stat&apos;a verirsin.</li>
+          <li>
+            Yetenek puanını karakter kağıdının <strong>Yetenekler</strong> sekmesinde harcarsın. Yeşil kenarlı yetenekler alınabilir; kilitli olanların altında eksik şart yazar
+            (öncül, stat, seviye, Corruption).
+          </li>
+          <li>Bir yeteneğin 3. seviyesi için karakter seviyesi en az 4 olmalı.</li>
+          <li>
+            Ağaç görünümünde <strong>Kök</strong> yetenek üstte, iki ana kol (A ve B) yan yana durur. Kartlar arasındaki çizgi öncül sırasını gösterir; kesik çizgili blok bir{" "}
+            <strong>yan daldır</strong> (A′, B′) ve üstündeki yetenekten ayrılır. Kartın üstündeki &quot;Öncül&quot; satırı kırmızıysa önce o yeteneği almalısın.
+          </li>
+          <li>İkinci ağacı açabilecek durumdaysan Yetenekler sekmesinde &quot;YENİ AĞAÇ AÇILABİLİR&quot; uyarısı ve &quot;Ağaç aç&quot; düğmesi çıkar.</li>
+          <li>Perklerin sabit stat etkileri (ör. +2 Rede, −2 Leis) statlarına otomatik yansır; statın altında hangi perk ya da augment&apos;ten geldiği yazar. Olumsuz etkiler statı 0&apos;ın altına da düşürebilir.</li>
+          <li>GM izin verirse perklerini bir kez yeniden düzenleyebilirsin (karakter kağıdında &quot;Perkleri düzenle&quot;).</li>
+          <li>Bazı yetenekler başka bir yetenekle birlikte alındığında <strong>sinerji</strong> kazanır; aktif sinerjiler kartta yazar.</li>
+        </ul>
+      </Section>
+
+      <Section id="oda" title="Oyun odası">
+        <ul className="list-disc space-y-1.5 pl-5">
+          <li>
+            <strong>Sahne (IC):</strong> karakterinin söyledikleri ve yaptıkları, zarlar ve sistem mesajları. <strong>Masa (OOC):</strong> oyun dışı sohbet.{" "}
+            <strong>Fısıltılar:</strong> GM&apos;le ya da başka bir oyuncuyla özel konuşma; üstteki listeden kime yazacağını seçersin. Diğer oyuncular göremez, ama GM masadaki tüm
+            fısıltıları (oyuncular arası olanlar dahil, salt okunur) görür. Sohbette susturulan oyuncu yalnızca GM&apos;e fısıldayabilir.
+          </li>
+          <li>
+            Kendi mesajını silebilirsin (mesajın üstüne gelince çıkan çöp kutusu). Birden çok mesajı silmek için sekme çubuğundaki <strong>Seç</strong> düğmesine bas, mesajları işaretle
+            ve &quot;Seçilenleri sil&quot;. GM her mesajı ve zarı silebilir.
+          </li>
+          <li>
+            <strong>İzleyiciler</strong> masayı izler: karakter oluşturamaz, sahneye yazamaz ve zar atamaz; Masa sohbetine ve GM&apos;e fısıltıyla yazabilir. Oda başlığında
+            &quot;İzleyici&quot; etiketi görünür.
+          </li>
+          <li>GM bir oyuncuyu sohbette ya da zar atmada susturabilir. Sohbette susturulan oyuncu yine de GM&apos;e fısıldayabilir.</li>
+          <li>Kampanyada karakterin yoksa odaya girince sana karakter oluşturmak isteyip istemediğin sorulur.</li>
+          <li>Partideki bir karakterin portresine ya da adına tıklayınca karakteri odadan çıkmadan görürsün.</li>
+          <li>GM &quot;zar iste&quot; dediğinde akışın altında bir kart çıkar; tek tıkla doğru zarı atarsın. Eşik, düzenleyici ve stat&apos;ı GM belirler.</li>
+          <li>Zar attığında sonuç ekranın üstünde kısa bir bildirim olarak görünür ve sahne en alta kayar. Bildirime dokununca akışa gidersin.</li>
+          <li>Inspiration ile yeniden atmadan önce zarın ayrıntıları ve kalan Inspiration&apos;ın gösterilir; onaylayınca harcanır.</li>
+          <li>
+            <strong>Death Save</strong> ve <strong>Pervitin</strong> zarlarını yalnızca GM ister. Death Save kartı ölüm ve kurtuluş sayısını gösterir; üç ölümde karakter
+            &quot;Öldü&quot; olarak işaretlenir, GM diriltebilir.
+          </li>
+          <li>Sağ üstteki &quot;Karakterim&quot; düğmesi seni karakter kağıdına götürür; karakterin yoksa &quot;Karakter Oluştur&quot; yazar.</li>
+          <li>Odadan başka bir sayfaya geçersen sağ alttaki &quot;Oyun odasına dön&quot; düğmesiyle geri dönersin.</li>
+        </ul>
+      </Section>
+
+      <Section id="beden" title="Yara, Corruption, Death Save">
+        <p>Can puanı yoktur; her uzvun kendi yara durumu vardır. Yaralı uzvun kullanıldığı zarlara ceza gelir:</p>
+        <div className="flex flex-wrap gap-2">
+          {WOUNDS.map((w) => (
+            <span key={w.key} className="chip">
+              {w.label} {w.penalty ? `−${w.penalty}` : ""}
+            </span>
+          ))}
+        </div>
+        <p className="text-sm text-ink/80">Temiz sargı cezayı yarıya, kirli sargı dörtte üçe indirir (aşağı yuvarlanır).</p>
+        <ul className="list-disc space-y-1.5 pl-5">
+          <li>Corruption 0–13 arasıdır; her seviyenin etkisi karakter kağıdındaki çizgide ve Kurallar &gt; Corruption sayfasında yazar.</li>
+          <li>Death Save: d6 atılır, 1–3 ölüm, 4–6 kurtuluş. Hangisi önce 3 olursa o gerçekleşir. Hak kullanılınca Inspiration ile yenilenir; her yenileme 1 fazla Inspiration ister.</li>
+        </ul>
+      </Section>
+
+      <Section id="gm" title="GM için">
+        <ul className="list-disc space-y-1.5 pl-5">
+          <li>
+            <strong>Davet:</strong> Yönetim &gt; Yeni davet. Kampanya seçersen oyuncu kayıt olunca otomatik katılır.
+          </li>
+          <li>
+            <strong>Onay:</strong> Kampanya sayfasında &quot;Onay bekleyen karakterler&quot;. Reddederken bir not yazabilirsin.
+          </li>
+          <li>
+            <strong>Seviye atlatma:</strong> Kampanya sayfasında karakterleri seç, her biri için aksiyon stat&apos;ını ve MVP&apos;yi belirle.
+          </li>
+          <li>
+            <strong>Düzenleme:</strong> Karakter kağıdında &quot;GM düzenle&quot; ile stat, puan, Corruption, Inspiration, yetenek ve perkleri değiştirebilirsin; her değişiklik kayda geçer.
+            Yara, sargı ve augmentler Beden sekmesinden.
+          </li>
+          <li>
+            <strong>Oyun odasında:</strong> gizli zar atabilir, oyunculardan zar isteyebilir, parti kartlarından Corruption ve Inspiration&apos;ı hızlıca değiştirebilirsin.
+            &quot;Masada&quot; listesindeki simgelerle bir oyuncuyu sohbette ya da zar atmada susturabilir ya da oyundan atabilirsin.
+          </li>
+          <li>
+            <strong>Zar paneli:</strong> &quot;Statsız&quot; ile stat eklenmeyen aksiyonlar atılır; &quot;Elle&quot; kutusuna istediğin eşiği yazabilirsin. Death Save ve Pervitin&apos;i
+            doğrudan atabilirsin; Pervitin&apos;e durum düzenleyicisi eklenir.
+          </li>
+          <li>
+            <strong>Zar iste:</strong> Normal zar, Death Save veya Pervitin isteyebilirsin; stat (ya da statsız), hazır ya da elle eşik, durum düzenleyicisi, kara büyü, oyuncunun
+            uzuv seçmesi ve sonucu gizleme seçenekleri var. Bekleyen istekleri akışın altından iptal edebilirsin.
+          </li>
+          <li>
+            <strong>Odayı kapatma:</strong> Kampanya sayfasının en altındaki &quot;Odayı kapat&quot; kampanyayı karakterleri, sohbet ve zar geçmişiyle birlikte kalıcı olarak siler.
+            Kapatabilmek için önce tüm oyuncuları ve izleyicileri çıkarman gerekir. Yalnızca dondurmak istiyorsan ayarlardan durumu &quot;Arşiv&quot; yap.
+          </li>
+          <li>
+            <strong>Geçmişi silme:</strong> &quot;Seç&quot; ile mesaj ve zarları toplu seçip silebilirsin. &quot;Temizle&quot; düğmesi sahne mesajlarını, masa sohbetini, bir oyuncuyla
+            ya da tüm oyuncularla olan fısıltıları, zar geçmişini veya her şeyi tek seferde siler.
+          </li>
+          <li>
+            <strong>İzleyiciler:</strong> Kampanya sayfasındaki &quot;İzleyici kodu&quot; ile hesabı olanlar izleyici olarak katılır; yeni kişiler için Yönetim &gt; Yeni davet&apos;te
+            rolü &quot;İzleyici&quot; seç. Var olan bir üyeyi kampanya sayfasından ya da odadaki göz simgesiyle izleyici/oyuncu yapabilirsin.
+          </li>
+          <li>
+            <strong>İade ve izinler:</strong> GM düzenle ekranındaki &quot;Puanları iade et&quot; tüm dağıtılmış stat ve yetenek puanlarını oyuncuya geri verir. &quot;Oyuncu perklerini
+            düzenleyebilir&quot; kutusu tek seferlik perk düzenleme izni verir. Ölü karakteri parti kartından ya da karakter kağıdından diriltebilirsin.
+          </li>
+          <li>
+            <strong>Fiziksel atılmış zar:</strong> Kampanya ayarlarındaki &quot;Fiziksel atılmış zar&quot; kutusu masada gerçek zarla oynanan oyunlar içindir. Açıkken oyuncular odada
+            dijital zar atamaz. Sen zar panelinde atan karakteri, zar türünü (normal zar, Pervitin / Yozlaşma, Death Save), stat&apos;ı, eşiği, uzvu ve düzenleyiciyi seçip masada gelen
+            sayıyı girersin; sistem başarıyı, Corruption / Yozlaşma ve Death Save etkisini hesaplar.
+          </li>
+          <li>
+            <strong>Şifre sıfırlama:</strong> Oyuncu giriş ekranındaki &quot;Şifremi unuttum&quot; ile istek bırakınca panelinde ve üst çubukta bildirim görürsün. &quot;Onayla, kod
+            üret&quot; tek kullanımlık bir kod verir (24 saat geçerli); kodu oyuncuya ilet. Oyuncu kodla girince yeni şifresini belirlemek zorunda kalır.
+          </li>
+          <li>
+            <strong>Karakter devretme:</strong> Kampanya sayfasındaki parti kartında &quot;Sahibini değiştir&quot; ile karakteri başka bir oyuncuya ya da kendine devredebilir veya
+            sahipsiz bırakabilirsin. Sahipsiz karakterin zarlarını GM atar.
+          </li>
+          <li>
+            <strong>Diller:</strong> Oyuncular karakter oluştururken dillerini listeden seçer (2 dil; Monolingual 1, Trilingual 3). Karakter kağıdındaki Diller kartından dil ekleyip
+            değiştirebilirsin; listede olmayan bir dili de elle yazabilirsin.
+          </li>
+          <li>
+            <strong>Umbra Caelis:</strong> Aynı hesapla umbracaelis.com/umbracaelis/panel adresinden Umbra Caelis kampanyaları açılır. Üst çubuktaki düğmeyle iki sistem arasında
+            geçebilirsin.
+          </li>
+          <li>
+            <strong>Kurallar:</strong> Obsidian&apos;daki kuralları güncelledikten sonra <code className="rounded bg-surface2 px-1">npm run sync</code> çalıştırıp push etmen yeterli.
+          </li>
+        </ul>
+      </Section>
+
+      <Section id="sss" title="Sık sorulanlar">
+        <dl className="space-y-4">
+          {[
+            ["Şifremi unuttum.", "Giriş ekranında 'Şifremi unuttum'a bas ve kullanıcı adını yaz. GM'in onaylayınca sana tek kullanımlık bir kod verir; girişte 'Sıfırlama kodum var'ı seçip kodla gir ve yeni şifreni belirle."],
+            ["Karakterim reddedildi, ne yapmalıyım?", "Karakter sayfasındaki GM notunu oku ve kampanya sayfasından yeni bir karakter oluştur."],
+            ["Bir yeteneği yanlışlıkla aldım.", "GM'ine söyle; GM düzenle ekranından geri alıp puanını iade edebilir."],
+            ["Karakterimi silmek istiyorum.", "Karakter kağıdında 'Karakteri sil' düğmesine bas ve onay için karakterin adını yaz. Silme geri alınamaz."],
+            ["Oyun odası 'Bağlanıyor…' yazıyor.", "Sayfayı yenile. Devam ederse oturumun kapanmış olabilir; yeniden giriş yap."],
+            ["Bir sayfada 'Bir şeyler ters gitti' yazdı.", "Site bu durumda sayfayı bir kez kendiliğinden yeniler. Sorun sürerse ekrandaki kodu GM'ine ilet."],
+          ].map(([q, a]) => (
+            <div key={q}>
+              <dt className="font-medium text-ink">{q}</dt>
+              <dd className="text-sm text-ink/80">{a}</dd>
+            </div>
+          ))}
+        </dl>
+      </Section>
+    </>
+  );
+}
+
+function HelpEn({ t }: { t: TFn }) {
+  return (
+    <>
+      <Section id="baslarken" title="Getting started">
+        <Steps
+          items={[
+            { title: "Create an account", body: <>Get an invite link from your GM. Open it and choose a username and a password of at least 10 characters. The code can be used only once.</> },
+            {
+              title: "Join a campaign",
+              body: <>If the invite is tied to a campaign, you join it automatically. Otherwise, enter the join code your GM gave you (e.g. ABCD-EFGH) in the &quot;Join a campaign&quot; box on the Dashboard.</>,
+            },
+            { title: "Create your character", body: <>Start the wizard with the &quot;Create character&quot; button on the campaign page. Your character becomes active once the GM approves it.</> },
+            { title: "Enter the game room", body: <>On game day, take your seat at the table with the campaign&apos;s &quot;Game room&quot; button. Chat, dice and the party are all here.</> },
+          ]}
+        />
+      </Section>
+
+      <Section id="karakter" title="Character creation">
+        <p>The wizard has six steps. The summary on the right updates with every choice and tells you if anything is missing.</p>
+        <Steps
+          items={[
+            {
+              title: "Identity",
+              body: (
+                <>
+                  Name, age (18–60), nationality and alignment. Your <strong>background</strong> is the story everyone can see. Only you and the GM can see the <strong>notes for the GM</strong>{" "}
+                  field: ideal for secrets and story hooks.
+                </>
+              ),
+            },
+            {
+              title: "Expertise tree",
+              body: (
+                <>
+                  Your starting tree gives +2 to its symbol stat and a tree-specific bonus (e.g. Ubermann +1 Krach, Schwarzesonne +1 Corruption, Metallkorp a T1 augment). You unlock a
+                  second tree during play with an ability point; you can have at most 2 trees.
+                </>
+              ),
+            },
+            {
+              title: "Perks",
+              body: (
+                <>
+                  Positive perks cost perk points, negative ones grant them. Your total can&apos;t go below zero. Leftover points convert to stat points as (points + 1) / 2. Perks with an orange
+                  tag are mutually exclusive; perks that conflict with a chosen one are locked. If you choose <strong>Kriegsversehrt</strong>, you pick 1 or 2 limbs that start severed (choosing an
+                  arm also severs the hand, choosing a leg also severs the foot; head and torso can&apos;t be chosen). One limb grants 4 perk points, two limbs grant 7.
+                </>
+              ),
+            },
+            {
+              title: "Augment (Metallkorp only)",
+              body: (
+                <>
+                  If your first tree is Metallkorp, a separate Augment step opens after perks: you choose a T1 augment and the limb to fit it to. An augment fitted to a severed limb works as a
+                  prosthesis and the limb counts as intact; you can&apos;t fit an augment to the hand of a severed arm or the foot of a severed leg.
+                </>
+              ),
+            },
+            {
+              title: "Stats",
+              body: (
+                <>
+                  You distribute {START_FREE_STATS} default points plus the points from perks. Since your tree stat already gets +2, you can only add as many points to it as you got from perks.
+                  Everyone starts with +{START_KLANG} Klang.
+                </>
+              ),
+            },
+            { title: "First ability", body: <>At level 0 you have 1 ability point. You can take an ability whose requirements you meet now, or save the point.</> },
+            { title: "Summary and approval", body: <>Check everything and hit &quot;Submit for approval&quot;. If the GM rejects it, you&apos;ll see the reason on the character page.</> },
+          ]}
+        />
+        <Tip>After creating your character, you can add a portrait by clicking the portrait area on the character sheet (PNG, JPEG or WebP).</Tip>
+        <Tip>You can change your character&apos;s name, background and appearance later with the &quot;Name / description&quot; button on the character sheet. The GM can do this on players&apos; characters too; the change is written to the character log.</Tip>
+      </Section>
+
+      <Section id="dikkat" title="What to watch out for">
+        <ul className="list-disc space-y-2 pl-5">
+          <li>
+            <strong>Think about your role, not the numbers.</strong> Negative perks grant points, but they really do get played. The GM will bring them into the story.
+          </li>
+          <li>
+            <strong>Look ahead in your tree.</strong> Arm finisher abilities require a main stat of 7, a secondary stat of 4–5 and level 6–7. Check the Rules &gt; Ability trees page in
+            advance to see which secondary stats you&apos;ll need.
+          </li>
+          <li>
+            <strong>Don&apos;t neglect Klang.</strong> Augments lower Klang. If Klang goes negative, <em>all</em> your rolls take that much of a penalty.
+          </li>
+          <li>
+            <strong>Corruption doesn&apos;t come back down.</strong> Once Corruption reaches 7 it never drops below 7 again; 13 means death. Think twice before using Pervitin.
+          </li>
+          <li>
+            <strong>Inspiration debt.</strong> If Inspiration goes negative, every negative point applies −2 to all your rolls.
+          </li>
+          <li>
+            <strong>One character.</strong> In a campaign you can have only one active or pending-approval character at a time.
+          </li>
+        </ul>
+      </Section>
+
+      <Section id="zar" title="How do rolls work?">
+        <p>
+          The core rule: <strong>d20 + stat ≥ threshold</strong>. The server always rolls the dice; everyone sees the same result and every modifier.
+        </p>
+        <div className="overflow-x-auto">
+          <table className="w-full max-w-md text-sm">
+            <tbody>
+              {THRESHOLDS.map((x) => (
+                <tr key={x.key} className="border-b border-line">
+                  <td className="py-1.5 pr-4">{t(x.label)}</td>
+                  <td className="py-1.5 font-mono">{x.value}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <ul className="list-disc space-y-1.5 pl-5">
+          <li>Nat 20 and Nat 1 ignore the threshold: they are the best and worst possible results.</li>
+          <li>
+            <strong>Umbra Caelis has no threshold table:</strong> a roll is d20 + stat + bonuses, and the GM judges the result against the difficulty of the task. &quot;The roll gets one step
+            easier/harder&quot; means ±3 to the roll; on a successful roll, if the d20 itself shows 15+, it counts as a <strong>strong success</strong> and the roll card shows a &quot;Strong&quot;
+            tag. If they like, the GM can enter a hidden target number for automatic evaluation.
+          </li>
+          <li>If you select the limb you&apos;re using in the dice panel, that limb&apos;s wound penalty is added automatically.</li>
+          <li>Negative Klang, Inspiration debt and Corruption effects on dark magic rolls are calculated automatically.</li>
+          <li>With &quot;Spend Inspiration, reroll&quot; under a roll you can reroll it for 1 Inspiration.</li>
+          <li>The &quot;Situation modifier&quot; is for on-the-spot bonuses and penalties the GM calls out; everyone sees it.</li>
+        </ul>
+      </Section>
+
+      <Section id="gelisim" title="Levels and abilities">
+        <ul className="list-disc space-y-1.5 pl-5">
+          <li>The GM levels characters up. Each level you get +1 ability point, +1 to your tree stat and +1 to the action stat the GM picks. The MVP gets an extra +1.</li>
+          <li>If your tree stat is already 10, that point comes as a &quot;free stat&quot; point; you assign it to any stat you like on the character sheet.</li>
+          <li>
+            You spend ability points on the <strong>Abilities</strong> tab of the character sheet. Abilities with a green border can be taken; locked ones show the missing requirement
+            below them (prerequisite, stat, level, Corruption).
+          </li>
+          <li>Level 3 of an ability requires a character level of at least 4.</li>
+          <li>
+            In the tree view the <strong>Root</strong> ability sits at the top, with the two main arms (A and B) side by side. The lines between cards show the prerequisite order; a dashed
+            block is a <strong>side branch</strong> (A′, B′) that splits off from the ability above it. If the &quot;Prerequisite&quot; line at the top of a card is red, you need to take that
+            ability first.
+          </li>
+          <li>When you&apos;re able to unlock a second tree, the Abilities tab shows a &quot;NEW TREE AVAILABLE&quot; notice and an &quot;Open tree&quot; button.</li>
+          <li>Fixed stat effects of perks (e.g. +2 Rede, −2 Leis) apply to your stats automatically; under each stat it says which perk or augment they come from. Negative effects can push a stat below 0.</li>
+          <li>If the GM allows it, you can rearrange your perks once (&quot;Edit perks&quot; on the character sheet).</li>
+          <li>Some abilities gain a <strong>synergy</strong> when taken together with another ability; active synergies are shown on the card.</li>
+        </ul>
+      </Section>
+
+      <Section id="oda" title="Game room">
+        <ul className="list-disc space-y-1.5 pl-5">
+          <li>
+            <strong>Scene (IC):</strong> what your character says and does, rolls and system messages. <strong>Table (OOC):</strong> out-of-character chat.{" "}
+            <strong>Whispers:</strong> private conversation with the GM or another player; choose who to write to from the list at the top. Other players can&apos;t see them, but the GM
+            sees every whisper at the table (including those between players, read-only). A player muted in chat can only whisper to the GM.
+          </li>
+          <li>
+            You can delete your own messages (the trash can that appears when you hover over a message). To delete several messages, press the <strong>Select</strong> button in the tab bar,
+            tick the messages and choose &quot;Delete selected&quot;. The GM can delete any message or roll.
+          </li>
+          <li>
+            <strong>Spectators</strong> watch the table: they can&apos;t create characters, write in the scene or roll dice; they can write in the Table chat and whisper to the GM. A
+            &quot;Spectator&quot; tag appears in the room header.
+          </li>
+          <li>The GM can mute a player in chat or in rolling. A player muted in chat can still whisper to the GM.</li>
+          <li>If you have no character in the campaign, you&apos;re asked when you enter the room whether you want to create one.</li>
+          <li>Click the portrait or name of a character in the party to view that character without leaving the room.</li>
+          <li>When the GM requests a roll, a card appears below the feed; one click rolls the right dice. The GM sets the threshold, modifier and stat.</li>
+          <li>When you roll, the result shows briefly as a notification at the top of the screen and the scene scrolls to the bottom. Tap the notification to jump to the feed.</li>
+          <li>Before you reroll with Inspiration, you&apos;re shown the details of the roll and your remaining Inspiration; it&apos;s spent once you confirm.</li>
+          <li>
+            Only the GM requests <strong>Death Save</strong> and <strong>Pervitin</strong> rolls. The Death Save card shows the number of deaths and saves; at three deaths the character is
+            marked &quot;Dead&quot;, and the GM can revive them.
+          </li>
+          <li>The &quot;My character&quot; button at the top right takes you to your character sheet; if you have no character it says &quot;Create Character&quot;.</li>
+          <li>If you move from the room to another page, the &quot;Back to the game room&quot; button at the bottom right takes you back.</li>
+        </ul>
+      </Section>
+
+      <Section id="beden" title="Wounds, Corruption, Death Save">
+        <p>There are no hit points; each limb has its own wound state. Rolls that use a wounded limb take a penalty:</p>
+        <div className="flex flex-wrap gap-2">
+          {WOUNDS.map((w) => (
+            <span key={w.key} className="chip">
+              {t(w.label)} {w.penalty ? `−${w.penalty}` : ""}
+            </span>
+          ))}
+        </div>
+        <p className="text-sm text-ink/80">A clean bandage halves the penalty, a dirty bandage reduces it to three quarters (rounded down).</p>
+        <ul className="list-disc space-y-1.5 pl-5">
+          <li>Corruption ranges from 0 to 13; the effect of each level is shown on the track on the character sheet and on the Rules &gt; Corruption page.</li>
+          <li>Death Save: roll a d6, 1–3 is a death, 4–6 is a save. Whichever reaches 3 first happens. Once used up, the save can be renewed with Inspiration; each renewal costs 1 more Inspiration.</li>
+        </ul>
+      </Section>
+
+      <Section id="gm" title="For the GM">
+        <ul className="list-disc space-y-1.5 pl-5">
+          <li>
+            <strong>Invites:</strong> Admin &gt; New invite. If you choose a campaign, the player joins it automatically on sign-up.
+          </li>
+          <li>
+            <strong>Approval:</strong> &quot;Characters pending approval&quot; on the campaign page. You can write a note when rejecting.
+          </li>
+          <li>
+            <strong>Levelling up:</strong> Select characters on the campaign page and set the action stat and MVP for each.
+          </li>
+          <li>
+            <strong>Editing:</strong> With &quot;GM edit&quot; on the character sheet you can change stats, points, Corruption, Inspiration, abilities and perks; every change is logged.
+            Wounds, bandages and augments are on the Body tab.
+          </li>
+          <li>
+            <strong>In the game room:</strong> you can make hidden rolls, request rolls from players, and quickly change Corruption and Inspiration from the party cards. With the icons in
+            the &quot;At the table&quot; list you can mute a player in chat or in rolling, or kick them from the game.
+          </li>
+          <li>
+            <strong>Dice panel:</strong> &quot;No stat&quot; rolls actions without a stat; in the &quot;Manual&quot; box you can type any threshold. You can roll Death Save and Pervitin directly;
+            the situation modifier is added to Pervitin.
+          </li>
+          <li>
+            <strong>Request a roll:</strong> You can request a normal roll, a Death Save or Pervitin; there are options for the stat (or no stat), a preset or manual threshold, a situation
+            modifier, dark magic, letting the player choose a limb, and hiding the result. You can cancel pending requests below the feed.
+          </li>
+          <li>
+            <strong>Closing the room:</strong> &quot;Close room&quot; at the bottom of the campaign page permanently deletes the campaign along with its characters, chat and roll history. To
+            close it you first have to remove all players and spectators. If you only want to freeze it, set its status to &quot;Archived&quot; in the settings.
+          </li>
+          <li>
+            <strong>Deleting history:</strong> With &quot;Select&quot; you can pick messages and rolls in bulk and delete them. The &quot;Clear&quot; button deletes scene messages, table chat,
+            whispers with one player or all players, roll history, or everything in one go.
+          </li>
+          <li>
+            <strong>Spectators:</strong> With the &quot;Spectator code&quot; on the campaign page, people who already have an account join as spectators; for new people choose the role
+            &quot;Spectator&quot; under Admin &gt; New invite. You can switch an existing member between spectator and player on the campaign page or with the eye icon in the room.
+          </li>
+          <li>
+            <strong>Refunds and permissions:</strong> &quot;Refund points&quot; on the GM edit screen gives all distributed stat and ability points back to the player. The &quot;Player can
+            edit perks&quot; box grants a one-time perk edit. You can revive a dead character from the party card or the character sheet.
+          </li>
+          <li>
+            <strong>Physical dice:</strong> The &quot;Physical dice&quot; box in the campaign settings is for games played with real dice at the table. While it&apos;s on, players can&apos;t
+            roll digital dice in the room. In the dice panel you choose the rolling character, the roll type (normal roll, Pervitin / Corruption, Death Save), the stat, threshold, limb and
+            modifier, then enter the number rolled at the table; the system works out success and the Corruption and Death Save effects.
+          </li>
+          <li>
+            <strong>Password reset:</strong> When a player leaves a request with &quot;Forgot password&quot; on the login screen, you see a notification on your dashboard and in the top bar.
+            &quot;Approve and generate code&quot; gives a one-time code (valid for 24 hours); pass it on to the player. When the player logs in with the code, they must set a new password.
+          </li>
+          <li>
+            <strong>Transferring characters:</strong> With &quot;Change owner&quot; on the party card on the campaign page you can hand a character over to another player or to yourself, or
+            leave it without an owner. The GM rolls for characters without an owner.
+          </li>
+          <li>
+            <strong>Languages:</strong> Players pick their languages from a list when creating a character (2 languages; Monolingual 1, Trilingual 3). You can add and change languages from
+            the Languages card on the character sheet; you can also type in a language that isn&apos;t on the list.
+          </li>
+          <li>
+            <strong>Umbra Caelis:</strong> With the same account, Umbra Caelis campaigns are at umbracaelis.com/umbracaelis/panel. Use the button in the top bar to switch between the two
+            systems.
+          </li>
+          <li>
+            <strong>Rules:</strong> After updating the rules in Obsidian, just run <code className="rounded bg-surface2 px-1">npm run sync</code> and push.
+          </li>
+        </ul>
+      </Section>
+
+      <Section id="sss" title="FAQ">
+        <dl className="space-y-4">
+          {[
+            ["I forgot my password.", "Press 'Forgot password' on the login screen and enter your username. Once your GM approves, they'll give you a one-time code; choose 'I have a reset code' at login, sign in with the code and set a new password."],
+            ["My character was rejected. What should I do?", "Read the GM's note on the character page and create a new character from the campaign page."],
+            ["I took an ability by mistake.", "Tell your GM; they can undo it from the GM edit screen and refund the point."],
+            ["I want to delete my character.", "Press the 'Delete character' button on the character sheet and type the character's name to confirm. Deletion can't be undone."],
+            ["The game room says 'Connecting…'.", "Refresh the page. If it keeps happening, your session may have ended; log in again."],
+            ["A page said 'Something went wrong'.", "In that case the site reloads the page once by itself. If the problem persists, pass the code on the screen to your GM."],
+          ].map(([q, a]) => (
+            <div key={q}>
+              <dt className="font-medium text-ink">{q}</dt>
+              <dd className="text-sm text-ink/80">{a}</dd>
+            </div>
+          ))}
+        </dl>
+      </Section>
     </>
   );
 }

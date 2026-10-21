@@ -4,22 +4,28 @@ import { UcClassIcon, UcDalIcon, UcPageIcon } from "@/components/uc/icons";
 import { PageHeader } from "@/components/ui";
 import { UC_BASE, UC_STAT_KEYS } from "@/lib/uc/constants";
 import { ucContent } from "@/lib/uc/content";
+import { intlLocale } from "@/i18n/core";
+import { getLocale, getT } from "@/i18n/server";
 
-export const metadata: Metadata = { title: "Kurallar" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t("Kurallar") };
+}
 
-export default function UcRulesIndex() {
-  const c = ucContent();
+export default async function UcRulesIndex() {
+  const tt = await getT();
+  const loc = await getLocale();
+  const c = ucContent(loc);
   const cards = [
-    ...c.docs.map((d) => ({ href: `${UC_BASE}/${d.key}`, icon: d.key, title: d.title, text: "Temel kural metni" })),
-    { href: `${UC_BASE}/siniflar`, icon: "siniflar", title: "Sınıflar", text: `${c.classes.length} ana sınıf · ${Object.keys(c.dals).length} dal · ${Object.keys(c.abilities).length} yetenek` },
-    { href: `${UC_BASE}/perkler`, icon: "perkler", title: "Perkler", text: `${c.perks.filter((p) => p.kind === "positive").length} pozitif · ${c.perks.filter((p) => p.kind === "negative").length} negatif` },
-    { href: `${UC_BASE}/sozluk`, icon: "sozluk", title: "Sözlük", text: "Yabancı adların anlamları, okunuşları ve ne işe yaradıkları" },
+    ...c.docs.map((d) => ({ href: `${UC_BASE}/${d.key}`, icon: d.key, title: d.title, text: tt("Temel kural metni") })),
+    { href: `${UC_BASE}/siniflar`, icon: "siniflar", title: tt("Sınıflar"), text: tt("{c} ana sınıf · {d} dal · {a} yetenek", { c: c.classes.length, d: Object.keys(c.dals).length, a: Object.keys(c.abilities).length }) },
+    { href: `${UC_BASE}/perkler`, icon: "perkler", title: tt("Perkler"), text: tt("{pos} pozitif · {neg} negatif", { pos: c.perks.filter((p) => p.kind === "positive").length, neg: c.perks.filter((p) => p.kind === "negative").length }) },
+    { href: `${UC_BASE}/sozluk`, icon: "sozluk", title: tt("Sözlük"), text: tt("Yabancı adların anlamları, okunuşları ve ne işe yaradıkları") },
   ];
   return (
     <div>
-      <PageHeader kicker="Umbra Caelis TTRPG" title="Oyuncu Kural Kitabı">
-        d20 üzerine kurulu, hikâye odaklı bir sistem. Temel mekanikler, karakter yaratma, mana ve Yozlaşma, dört ana sınıf ve perkler. İçerik doğrudan GM&apos;in kural dosyalarından
-        üretilir.
+      <PageHeader kicker="Umbra Caelis TTRPG" title={tt("Oyuncu Kural Kitabı")}>
+        {tt("d20 üzerine kurulu, hikâye odaklı bir sistem. Temel mekanikler, karakter yaratma, mana ve Yozlaşma, dört ana sınıf ve perkler. İçerik doğrudan GM'in kural dosyalarından üretilir.")}
       </PageHeader>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {cards.map((x) => (
@@ -33,7 +39,7 @@ export default function UcRulesIndex() {
         ))}
       </div>
 
-      <h2 className="mb-3 mt-10 text-xl">Ana sınıflar</h2>
+      <h2 className="mb-3 mt-10 text-xl">{tt("Ana sınıflar")}</h2>
       <div className="grid gap-3 md:grid-cols-2">
         {c.classes.map((cl) => (
           <a key={cl.key} href={`${UC_BASE}/siniflar/${cl.key}`} className="card group p-5 transition hover:border-accent/45">
@@ -50,7 +56,7 @@ export default function UcRulesIndex() {
             <div className="mt-4 grid grid-cols-3 gap-2">
               {[1, 2, 3].map((t) => (
                 <div key={t} className="rounded-lg border border-line bg-surface2/50 p-2">
-                  <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted">K{t}</p>
+                  <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted">{tt("K{n}", { n: t })}</p>
                   <ul className="space-y-1.5">
                     {cl.dals
                       .map((k) => c.dals[k])
@@ -69,16 +75,16 @@ export default function UcRulesIndex() {
         ))}
       </div>
 
-      <h2 className="mb-3 mt-10 text-xl">Statlar</h2>
+      <h2 className="mb-3 mt-10 text-xl">{tt("Statlar")}</h2>
       <div className="flex flex-wrap gap-2">
         {UC_STAT_KEYS.map((k) => (
           <StatBadge key={k} stat={k} />
         ))}
       </div>
-      <p className="mt-2 text-xs text-muted">Bir stat adına tıklayınca ne işe yaradığını görürsün. Statlar 0 ile 10 arasındadır.</p>
+      <p className="mt-2 text-xs text-muted">{tt("Bir stat adına tıklayınca ne işe yaradığını görürsün. Statlar 0 ile 10 arasındadır.")}</p>
 
       <p className="mt-10 text-xs text-muted">
-        Sürüm {c.hash} · {new Date(c.generatedAt).toLocaleDateString("tr-TR")}
+        {tt("Sürüm {v}", { v: c.hash })} · {new Date(c.generatedAt).toLocaleDateString(intlLocale(loc))}
       </p>
     </div>
   );

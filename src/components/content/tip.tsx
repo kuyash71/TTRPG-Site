@@ -1,4 +1,6 @@
+"use client";
 import { Lightbulb } from "lucide-react";
+import { useLocale, useT } from "@/i18n/client";
 import { tipFor, type TipKind } from "@/lib/shz/tips";
 import { cx } from "../ui";
 
@@ -8,7 +10,9 @@ import { cx } from "../ui";
  * Bir <button> ya da <a> içinde kalabileceği için kendisi <span role="button"> olarak çizilir.
  */
 export function TipButton({ kind, id, title, className }: { kind: TipKind; id: string; title: string; className?: string }) {
-  if (!tipFor(kind, id)) return null;
+  const loc = useLocale();
+  const t = useT();
+  if (!tipFor(kind, id, loc)) return null;
   return (
     <span
       role="button"
@@ -16,8 +20,8 @@ export function TipButton({ kind, id, title, className }: { kind: TipKind; id: s
       data-tip-kind={kind}
       data-tip-key={id}
       data-tip-title={title}
-      aria-label={`${title}: ne işe yarar?`}
-      title="Ne işe yarar?"
+      aria-label={t("{title}: ne işe yarar?", { title })}
+      title={t("Ne işe yarar?")}
       className={cx(
         "inline-grid h-6 w-6 shrink-0 cursor-pointer place-items-center rounded-full border border-warn/40 bg-warn/10 align-middle text-warn transition hover:bg-warn/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-warn",
         className,
@@ -28,9 +32,10 @@ export function TipButton({ kind, id, title, className }: { kind: TipKind; id: s
   );
 }
 
-/** Adın Türkçe anlamı (ör. "Würgegriff · Boğma tutuşu"). */
+/** Adın anlamı (ör. "Würgegriff · Boğma tutuşu"). */
 export function Meaning({ kind, id, className }: { kind: TipKind; id: string; className?: string }) {
-  const m = tipFor(kind, id)?.meaning;
+  const loc = useLocale();
+  const m = tipFor(kind, id, loc)?.meaning;
   if (!m) return null;
   return <span className={cx("text-xs italic text-muted", className)}>{m}</span>;
 }

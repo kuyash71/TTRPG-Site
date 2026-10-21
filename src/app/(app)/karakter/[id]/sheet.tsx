@@ -7,7 +7,9 @@ import { AbilityTree } from "@/components/content/ability-tree";
 import { AbilityCard, Html, PerkCard } from "@/components/content/cards";
 import { PerkPicker } from "@/components/content/perk-picker";
 import { HeartPulse, Skull, Sparkles } from "lucide-react";
-import { Modal, Tabs, useAction, useHashTab } from "@/components/interactive";
+import { Modal, SubTabs, Tabs, useAction, useHashTab } from "@/components/interactive";
+import { CustomAbilitiesSection } from "@/components/character/custom-abilities";
+import { Lock } from "lucide-react";
 import { CorruptionEffects } from "@/components/corruption";
 import { Portrait, PortraitEditor } from "@/components/portrait";
 import { DeleteCharacter, InventoryTab, ProfileEditor, Resource, SecretNotes } from "@/components/character/shared";
@@ -16,6 +18,8 @@ import { SHZ_LANGUAGES } from "@/lib/languages";
 import { Badge, Button, Card, Field, StatusBadge, cx } from "@/components/ui";
 import type { Character, InventoryItem } from "@/db/schema";
 import { api } from "@/lib/client";
+import { useLocale, useT, useTLoose } from "@/i18n/client";
+import { intlLocale } from "@/i18n/core";
 import {
   BANDAGES,
   BODY_PARTS,
@@ -31,6 +35,7 @@ import {
 } from "@/lib/shz/constants";
 import type { RulesData } from "@/lib/shz/content";
 import type { Ability } from "@/lib/shz/content-types";
+import { MAX_TREES } from "@/lib/shz/constants";
 import { activeSynergies, kriegsversehrtLimbs, perkPoints, canOpenTree, effectiveStats, installedAugments, learnState, normalizeBody, perkBudget, refundPlan, woundPenalty, type CharLike } from "@/lib/shz/rules";
 
 type Ch = Omit<Character, "createdAt" | "updatedAt"> & { createdAt: string; updatedAt: string };
@@ -61,6 +66,9 @@ export function Sheet({
   data: RulesData;
   logs: Log[];
 }) {
+  const t = useT();
+  const tLoose = useTLoose();
+  const loc = useLocale();
   const router = useRouter();
   const { busy, run } = useAction();
   const [tab, setTab] = useHashTab<Tab>(TABS, "genel");
@@ -95,13 +103,13 @@ export function Sheet({
             {c.name} <StatusBadge status={c.status} />
           </h1>
           <p className="mt-2 text-sm text-muted">
-            {ownerName} · {c.age} yaş · {c.nationality} · {c.alignment}
+            {ownerName} · {t("{n} yaş", { n: c.age })} · {c.nationality} · {c.alignment}
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
-            {c.trees.map((t, i) => (
-              <Badge key={t} tone="accent">
-                {data.trees.find((x) => x.key === t)?.name ?? t}
-                {i === 0 && " · başlangıç"}
+            {c.trees.map((tk, i) => (
+              <Badge key={tk} tone="accent">
+                {data.trees.find((x) => x.key === tk)?.name ?? tk}
+                {i === 0 && ` · ${t("başlangıç")}`}
               </Badge>
             ))}
           </div>
@@ -109,11 +117,11 @@ export function Sheet({
         </div>
         <div className="flex w-full flex-wrap gap-2 sm:w-auto">
           <Link href={`/kampanya/${campaign.id}/oda`} className="inline-flex h-10 items-center rounded-lg bg-accent px-4 text-sm font-semibold text-onAccent hover:bg-accent/90">
-            Oyun odası
+            {t("Oyun odası")}
           </Link>
           {isGM && (
             <Button variant="outline" onClick={() => setGmOpen(true)}>
-              GM düzenle
+              {t("GM düzenle")}
             </Button>
           )}
           {(isGM || isOwner) && <ProfileEditor c={c} />}
@@ -122,16 +130,16 @@ export function Sheet({
       </header>
 
       {c.status === "PENDING" && (
-        <div className="mb-6 rounded-lg border border-warn/40 bg-warn/10 px-4 py-3 text-sm">Karakter GM onayı bekliyor. Onaylanınca puan harcayabilir ve oyun odasında zar atabilirsin.</div>
+        <div className="mb-6 rounded-lg border border-warn/40 bg-warn/10 px-4 py-3 text-sm">{t("Karakter GM onayı bekliyor. Onaylanınca puan harcayabilir ve oyun odasında zar atabilirsin.")}</div>
       )}
       {c.status === "DEAD" && (
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-danger/50 bg-danger/10 px-4 py-3 text-sm">
           <span className="flex items-center gap-2">
-            <Skull className="h-5 w-5 text-danger" /> <strong>{c.name} öldü.</strong> Ölü karakterler zar atamaz ve puan harcayamaz.
+            <Skull className="h-5 w-5 text-danger" /> <strong>{t("{name} öldü.", { name: c.name })}</strong> {t("Ölü karakterler zar atamaz ve puan harcayamaz.")}
           </span>
           {isGM && (
-            <Button size="sm" variant="outline" disabled={busy} onClick={() => act(() => api(`/api/characters/${c.id}/gm`, { method: "PATCH", body: { revive: true } }), `${c.name} diriltildi.`)}>
-              <HeartPulse className="h-4 w-4" /> Dirilt
+            <Button size="sm" variant="outline" disabled={busy} onClick={() => act(() => api(`/api/characters/${c.id}/gm`, { method: "PATCH", body: { revive: true } }), t("{name} diriltildi.", { name: c.name }))}>
+              <HeartPulse className="h-4 w-4" /> {t("Dirilt")}
             </Button>
           )}
         </div>
@@ -139,42 +147,43 @@ export function Sheet({
       {c.perkEditAllowed && isOwner && c.status === "ACTIVE" && (
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-accent/50 bg-accent/10 px-4 py-3 text-sm">
           <span className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-accent" /> GM perklerini yeniden düzenlemene izin verdi (tek seferlik).
+            <Sparkles className="h-4 w-4 text-accent" /> {t("GM perklerini yeniden düzenlemene izin verdi (tek seferlik).")}
           </span>
           <Button size="sm" variant="primary" onClick={() => setPerkOpen(true)}>
-            Perkleri düzenle
+            {t("Perkleri düzenle")}
           </Button>
         </div>
       )}
       {c.status === "REJECTED" && (
         <div className="mb-6 rounded-lg border border-danger/40 bg-danger/10 px-4 py-3 text-sm">
-          GM bu karakteri reddetti{c.reviewNote ? `: ${c.reviewNote}` : "."} Kampanya sayfasından yeni bir karakter oluşturabilirsin.
+          {t("GM bu karakteri reddetti")}
+          {c.reviewNote ? `: ${c.reviewNote}` : "."} {t("Kampanya sayfasından yeni bir karakter oluşturabilirsin.")}
         </div>
       )}
 
       {/* Kaynak şeridi */}
       <div className="mb-6 grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-3 lg:grid-cols-7">
-        <Resource label="Seviye" value={`${c.level}`} sub={`sınır ${campaign.levelCap}`} />
-        <Resource label="Yetenek puanı" value={c.abilityPoints} tone={c.abilityPoints > 0 ? "accent" : undefined} />
-        <Resource label="Serbest stat" value={c.freeStatPoints} tone={c.freeStatPoints > 0 ? "accent" : undefined} />
-        <Resource label="Inspiration" value={c.inspiration} tone={c.inspiration < 0 ? "danger" : undefined} sub={c.inspiration < 0 ? `her zara ${c.inspiration * 2}` : undefined} />
+        <Resource label={t("Seviye")} value={`${c.level}`} sub={t("sınır {n}", { n: campaign.levelCap })} />
+        <Resource label={t("Yetenek puanı")} value={c.abilityPoints} tone={c.abilityPoints > 0 ? "accent" : undefined} />
+        <Resource label={t("Serbest stat")} value={c.freeStatPoints} tone={c.freeStatPoints > 0 ? "accent" : undefined} />
+        <Resource label="Inspiration" value={c.inspiration} tone={c.inspiration < 0 ? "danger" : undefined} sub={c.inspiration < 0 ? t("her zara {n}", { n: c.inspiration * 2 }) : undefined} />
         <Resource
           label="Death Save"
-          value={!campaign.deathSaveEnabled ? "Kapalı" : ds.available ? "Var" : "Yok"}
-          sub={ds.available && (ds.deaths || ds.saves) ? `Ö ${ds.deaths} · K ${ds.saves}` : !ds.available && campaign.deathSaveEnabled ? `yenileme ${ds.resets + 1} insp.` : undefined}
+          value={!campaign.deathSaveEnabled ? t("Kapalı") : ds.available ? t("Var") : t("Yok")}
+          sub={ds.available && (ds.deaths || ds.saves) ? t("Ö {d} · K {s}", { d: ds.deaths, s: ds.saves }) : !ds.available && campaign.deathSaveEnabled ? t("yenileme {n} insp.", { n: ds.resets + 1 }) : undefined}
           tone={campaign.deathSaveEnabled && !ds.available ? "danger" : undefined}
         />
-        <Resource label="Reichsmark" value={c.money.toLocaleString("tr-TR")} />
-        <Resource label="Corruption" value={`${c.corruption}/13`} tone={c.corruption >= 7 ? "danger" : c.corruption >= 4 ? "warn" : undefined} sub={c.corruptionLocked ? "7 altına inemez" : undefined} />
+        <Resource label="Reichsmark" value={c.money.toLocaleString(intlLocale(loc))} />
+        <Resource label="Corruption" value={`${c.corruption}/13`} tone={c.corruption >= 7 ? "danger" : c.corruption >= 4 ? "warn" : undefined} sub={c.corruptionLocked ? t("7 altına inemez") : undefined} />
       </div>
 
       <CorruptionBar value={c.corruption} />
 
       {campaign.deathSaveEnabled && !ds.available && canAct && (
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-line bg-surface px-4 py-3 text-sm">
-          <span>Death Save hakkını {ds.resets + 1} Inspiration harcayarak yenileyebilirsin.</span>
-          <Button size="sm" disabled={busy || c.inspiration < ds.resets + 1} onClick={() => act(() => api(`/api/characters/${c.id}/death-save`, { body: {} }), "Death Save yenilendi.")}>
-            Yenile
+          <span>{t("Death Save hakkını {n} Inspiration harcayarak yenileyebilirsin.", { n: ds.resets + 1 })}</span>
+          <Button size="sm" disabled={busy || c.inspiration < ds.resets + 1} onClick={() => act(() => api(`/api/characters/${c.id}/death-save`, { body: {} }), t("Death Save yenilendi."))}>
+            {t("Yenile")}
           </Button>
         </div>
       )}
@@ -184,20 +193,21 @@ export function Sheet({
         value={tab}
         onChange={setTab}
         tabs={[
-          { key: "genel", label: "Genel" },
-          { key: "yetenekler", label: "Yetenekler", badge: c.abilityPoints > 0 && canAct ? <span className="h-2 w-2 rounded-full bg-accent" /> : undefined },
-          { key: "beden", label: "Beden & Augment" },
-          { key: "envanter", label: "Envanter & Notlar" },
-          { key: "kayit", label: "Kayıt" },
+          { key: "genel", label: t("Genel") },
+          { key: "yetenekler", label: t("Yetenekler"), badge: c.abilityPoints > 0 && canAct ? <span className="h-2 w-2 rounded-full bg-accent" /> : undefined },
+          { key: "beden", label: t("Beden & Augment") },
+          { key: "envanter", label: t("Envanter & Notlar") },
+          { key: "kayit", label: t("Kayıt") },
         ]}
       />
 
       {tab === "genel" && (
-        <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
+        <div className="grid items-start gap-6 md:grid-cols-2 xl:grid-cols-[1.15fr_1fr]">
+          <div className="space-y-6">
           <Card className="p-5">
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="font-serif text-lg">Statlar</h2>
-              {c.freeStatPoints > 0 && canAct && <Badge tone="accent">{c.freeStatPoints} serbest puan</Badge>}
+              <h2 className="font-serif text-lg">{t("Statlar")}</h2>
+              {c.freeStatPoints > 0 && canAct && <Badge tone="accent">{t("{n} serbest puan", { n: c.freeStatPoints })}</Badge>}
             </div>
             <div className="divide-y divide-line">
               {STAT_KEYS.map((k) => {
@@ -207,12 +217,12 @@ export function Sheet({
                   <div key={k} className="flex items-center gap-3 py-2">
                     <div className="min-w-0 flex-1">
                       <span className={cx("text-ink", isTree && "text-accent")}>{STAT_LABELS[k]}</span>
-                      <span className="ml-2 text-xs text-muted">{STAT_HINTS[k]}</span>
+                      <span className="ml-2 text-xs text-muted">{t(STAT_HINTS[k])}</span>
                       {e.parts.length > 0 && (
                         <span className="block text-[11px] text-muted">
-                          taban {e.base}
-                          {e.parts.map((p) => ` · ${p.label} ${p.value > 0 ? "+" : ""}${p.value}`).join("")}
-                          {e.capped && " · sınırlandı"}
+                          {t("taban {n}", { n: e.base })}
+                          {e.parts.map((p) => ` · ${tLoose(p.label)} ${p.value > 0 ? "+" : ""}${p.value}`).join("")}
+                          {e.capped && ` · ${t("sınırlandı")}`}
                         </span>
                       )}
                     </div>
@@ -227,7 +237,7 @@ export function Sheet({
                         className="w-8 px-0"
                         disabled={busy || c.stats[k] >= STAT_MAX}
                         onClick={() => act(() => api(`/api/characters/${c.id}/spend-stat`, { body: { stat: k } }))}
-                        title="Serbest puan harca"
+                        title={t("Serbest puan harca")}
                       >
                         +
                       </Button>
@@ -237,48 +247,25 @@ export function Sheet({
               })}
             </div>
           </Card>
-          <div className="space-y-6">
-            <Card className="p-5">
-              <div className="mb-3 flex items-center justify-between gap-2">
-                <h2 className="font-serif text-lg">Perkler</h2>
-                {(isGM || (isOwner && c.perkEditAllowed && c.status === "ACTIVE")) && (
-                  <Button size="sm" variant="outline" onClick={() => setPerkOpen(true)}>
-                    Düzenle
-                  </Button>
-                )}
-              </div>
-              {c.perks.length === 0 ? (
-                <p className="text-sm text-muted">Perk yok.</p>
-              ) : (
-                <div className="space-y-2">
-                  {c.perks.map((k) => {
-                    const p = data.perks.find((x) => x.key === k);
-                    const limbs = k === "kriegsversehrt" ? kriegsversehrtLimbs(c.body) : 0;
-                    return p ? <PerkCard key={k} perk={p} pointsLabel={limbs ? `${perkPoints(p, { limbs })} · ${limbs} uzuv` : undefined} /> : null;
-                  })}
-                </div>
-              )}
-            </Card>
             <LanguagesCard characterId={c.id} languages={c.languages} list={SHZ_LANGUAGES} isGM={isGM} onSaved={() => router.refresh()} />
-            <AugmentsCard c={c} data={data} />
             {(c.background || c.appearance || isGM || isOwner) && (
               <Card className="space-y-3 p-5">
                 {(isGM || isOwner) && (
                   <div className="flex items-center justify-between gap-3">
-                    <p className="kicker">Açıklama</p>
+                    <p className="kicker">{t("Açıklama")}</p>
                     <ProfileEditor c={c} small />
                   </div>
                 )}
-                {!c.background && !c.appearance && <p className="text-sm text-muted">Henüz geçmiş veya görünüş yazılmamış.</p>}
+                {!c.background && !c.appearance && <p className="text-sm text-muted">{t("Henüz geçmiş veya görünüş yazılmamış.")}</p>}
                 {c.background && (
                   <div>
-                    <p className="kicker mb-1">Geçmiş</p>
+                    <p className="kicker mb-1">{t("Geçmiş")}</p>
                     <p className="whitespace-pre-line text-sm text-ink/90">{c.background}</p>
                   </div>
                 )}
                 {c.appearance && (
                   <div>
-                    <p className="kicker mb-1">Görünüş</p>
+                    <p className="kicker mb-1">{t("Görünüş")}</p>
                     <p className="whitespace-pre-line text-sm text-ink/90">{c.appearance}</p>
                   </div>
                 )}
@@ -286,19 +273,43 @@ export function Sheet({
             )}
             <SecretNotes c={c} canEdit={isGM || isOwner} act={act} />
           </div>
+          <div className="space-y-6">
+            <Card className="p-5">
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <h2 className="font-serif text-lg">{t("Perkler")}</h2>
+                {(isGM || (isOwner && c.perkEditAllowed && c.status === "ACTIVE")) && (
+                  <Button size="sm" variant="outline" onClick={() => setPerkOpen(true)}>
+                    {t("Düzenle")}
+                  </Button>
+                )}
+              </div>
+              {c.perks.length === 0 ? (
+                <p className="text-sm text-muted">{t("Perk yok.")}</p>
+              ) : (
+                <div className="space-y-2">
+                  {c.perks.map((k) => {
+                    const p = data.perks.find((x) => x.key === k);
+                    const limbs = k === "kriegsversehrt" ? kriegsversehrtLimbs(c.body) : 0;
+                    return p ? <PerkCard key={k} perk={p} pointsLabel={limbs ? t("{points} · {n} uzuv", { points: perkPoints(p, { limbs }), n: limbs }) : undefined} /> : null;
+                  })}
+                </div>
+              )}
+            </Card>
+            <AugmentsCard c={c} data={data} />
+          </div>
         </div>
       )}
 
-      {tab === "yetenekler" && <AbilitiesTab c={c} data={data} canAct={canAct} busy={busy} act={act} />}
+      {tab === "yetenekler" && <AbilitiesTab c={c} data={data} canAct={canAct} busy={busy} act={act} isGM={isGM} onSaved={() => router.refresh()} />}
       {tab === "beden" && <BodyTab c={c} data={data} isGM={isGM} act={act} />}
       {tab === "envanter" && <InventoryTab c={c} isGM={isGM} canEdit={canAct} act={act} />}
       {tab === "kayit" && (
         <Card className="divide-y divide-line">
-          {logs.length === 0 && <p className="p-5 text-sm text-muted">Kayıt yok.</p>}
+          {logs.length === 0 && <p className="p-5 text-sm text-muted">{t("Kayıt yok.")}</p>}
           {logs.map((l) => (
             <div key={l.id} className="flex flex-wrap gap-x-4 gap-y-1 px-5 py-3 text-sm">
-              <span className="w-36 shrink-0 font-mono text-xs text-muted">{new Date(l.createdAt).toLocaleString("tr-TR", { dateStyle: "short", timeStyle: "short" })}</span>
-              <span className="min-w-0 flex-1">{l.text}</span>
+              <span className="w-36 shrink-0 font-mono text-xs text-muted">{new Date(l.createdAt).toLocaleString(intlLocale(loc), { dateStyle: "short", timeStyle: "short" })}</span>
+              <span className="min-w-0 flex-1">{tLoose(l.text)}</span>
               {l.actor && <span className="text-xs text-muted">{l.actor}</span>}
             </div>
           ))}
@@ -312,6 +323,7 @@ export function Sheet({
 }
 
 export function CorruptionBar({ value }: { value: number }) {
+  const t = useT();
   if (value === 0)
     return (
       <div className="mb-6">
@@ -336,7 +348,7 @@ export function CorruptionBar({ value }: { value: number }) {
         {Array.from({ length: CORRUPTION_MAX + 1 }).map((_, i) => (
           <div
             key={i}
-            title={`${i}: ${CORRUPTION_EFFECTS[i]}`}
+            title={`${i}: ${t(CORRUPTION_EFFECTS[i])}`}
             className={cx("h-2 flex-1 rounded-sm", i === 0 ? "hidden" : i <= value ? (i >= 9 ? "bg-danger" : i >= 5 ? "bg-warn" : "bg-accent") : "bg-surface2", i === 7 && "ring-1 ring-danger/50")}
           />
         ))}
@@ -347,59 +359,162 @@ export function CorruptionBar({ value }: { value: number }) {
 }
 
 // ------------------------------------------------------------------ yetenekler
-function AbilitiesTab({ c, data, canAct, busy, act }: { c: Ch; data: RulesData; canAct: boolean; busy: boolean; act: (fn: () => Promise<unknown>, ok?: string) => Promise<void> }) {
+function AbilitiesTab({
+  c,
+  data,
+  canAct,
+  busy,
+  act,
+  isGM,
+  onSaved,
+}: {
+  c: Ch;
+  data: RulesData;
+  canAct: boolean;
+  busy: boolean;
+  act: (fn: () => Promise<unknown>, ok?: string) => Promise<void>;
+  isGM: boolean;
+  onSaved: () => void;
+}) {
+  const t = useT();
+  const [sub, setSub] = useState<"mevcut" | "agaclar">("mevcut");
+  const tabs = (
+    <SubTabs
+      value={sub}
+      onChange={setSub}
+      tabs={[
+        { key: "mevcut", label: t("Mevcut yetenekler") },
+        { key: "agaclar", label: t("Yetenek ağaçları"), badge: canAct && c.abilityPoints > 0 ? <span className="h-2 w-2 rounded-full bg-accent" /> : undefined },
+      ]}
+    />
+  );
+  if (sub === "mevcut")
+    return (
+      <div className="space-y-8">
+        {tabs}
+        <OwnedAbilities c={c} data={data} canAct={canAct} />
+        <CustomAbilitiesSection characterId={c.id} list={c.customAbilities ?? []} isGM={isGM} onSaved={onSaved} />
+      </div>
+    );
+  return (
+    <div className="space-y-8">
+      {tabs}
+      <TreesView c={c} data={data} canAct={canAct} busy={busy} act={act} />
+    </div>
+  );
+}
+
+/** Mevcut yetenekler: açılmış ağaçlardaki alınmış yetenekler alt alta; açılmamış ağaç yuvası kilitli kart olarak. */
+function OwnedAbilities({ c, data, canAct }: { c: Ch; data: RulesData; canAct: boolean }) {
+  const t = useT();
+  const closed = data.trees.filter((x) => !c.trees.includes(x.key));
+  const slots = Array.from({ length: MAX_TREES }, (_, i) => c.trees[i] ?? null);
+  return (
+    <div className="space-y-8" data-testid="owned-abilities">
+      {slots.map((tk, i) => {
+        const tree = tk ? data.trees.find((x) => x.key === tk) : null;
+        if (!tree)
+          return (
+            <section key={`slot-${i}`} className="card flex flex-col gap-2 border-dashed p-5 opacity-80" data-testid="locked-tree">
+              <p className="flex items-center gap-2 font-serif text-xl text-ink">
+                <Lock className="h-5 w-5 text-muted" /> {t("{n}. ekspertiz ağacı · kilitli", { n: i + 1 })}
+              </p>
+              <p className="text-sm text-muted">{canAct ? t("1 yetenek puanı harcanarak açılır; Yetenek ağaçları sekmesinden açabilirsin.") : t("1 yetenek puanı harcanarak açılır.")}</p>
+              <p className="text-xs text-muted">{t("Seçilebilecek ağaçlar: {list}", { list: closed.map((x) => x.name).join(", ") })}</p>
+            </section>
+          );
+        const owned = tree.abilities.filter((k) => (c.abilities[k] ?? 0) > 0);
+        return (
+          <section key={tk}>
+            <div className="mb-4 flex flex-wrap items-center gap-3 border-b border-line pb-3">
+              <h2 className="font-serif text-2xl">{tree.name}</h2>
+              <Badge tone="accent">{STAT_LABELS[tree.stat]}</Badge>
+              <span className="text-sm text-muted">
+                {t("{n}/{total} yetenek", { n: owned.length, total: tree.abilities.length })}
+                {i === 0 ? ` · ${t("başlangıç ağacı")}` : ""}
+              </span>
+            </div>
+            {owned.length === 0 ? (
+              <p className="text-sm text-muted">{t("Bu ağaçta henüz alınmış yetenek yok.")}</p>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2">
+                {owned.map((k) => {
+                  const a = data.abilities[k];
+                  const syn = activeSynergies(c, a);
+                  return (
+                    <AbilityCard
+                      key={k}
+                      ability={a}
+                      level={c.abilities[k]}
+                      highlight="owned"
+                      prereqName={a.prerequisite ? data.abilities[a.prerequisite]?.name : null}
+                      footer={syn.length > 0 ? <p className="text-[11px] text-accent">{t("Sinerji aktif: {list}", { list: syn.map((x) => data.abilities[x]?.name).join(", ") })}</p> : undefined}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        );
+      })}
+    </div>
+  );
+}
+
+function TreesView({ c, data, canAct, busy, act }: { c: Ch; data: RulesData; canAct: boolean; busy: boolean; act: (fn: () => Promise<unknown>, ok?: string) => Promise<void> }) {
+  const t = useT();
   const [showAll, setShowAll] = useState(false);
   const [treeModal, setTreeModal] = useState(false);
-  const closed = data.trees.filter((t) => !c.trees.includes(t.key));
-  const openable = canAct ? closed.filter((t) => canOpenTree(c, t.key, data).length === 0) : [];
-  const openTree = (key: string, name: string) => act(() => api(`/api/characters/${c.id}/open-tree`, { body: { tree: key } }), `${name} açıldı.`).then(() => setTreeModal(false));
+  const closed = data.trees.filter((x) => !c.trees.includes(x.key));
+  const openable = canAct ? closed.filter((x) => canOpenTree(c, x.key, data).length === 0) : [];
+  const openTree = (key: string, name: string) => act(() => api(`/api/characters/${c.id}/open-tree`, { body: { tree: key } }), t("{name} açıldı.", { name })).then(() => setTreeModal(false));
   return (
     <div className="space-y-10">
       {openable.length > 0 && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-ok/50 bg-ok/10 px-4 py-3">
           <div>
-            <p className="font-mono text-xs font-semibold tracking-[0.2em] text-ok">YENİ AĞAÇ AÇILABİLİR</p>
-            <p className="text-sm text-ink/90">1 yetenek puanı harcayarak ikinci ekspertiz ağacını açabilirsin.</p>
+            <p className="font-mono text-xs font-semibold tracking-[0.2em] text-ok">{t("YENİ AĞAÇ AÇILABİLİR")}</p>
+            <p className="text-sm text-ink/90">{t("1 yetenek puanı harcayarak ikinci ekspertiz ağacını açabilirsin.")}</p>
           </div>
           <Button variant="primary" onClick={() => setTreeModal(true)}>
-            Ağaç aç
+            {t("Ağaç aç")}
           </Button>
         </div>
       )}
       {canAct && c.abilityPoints > 0 && (
         <div className="rounded-lg border border-accent/40 bg-accent/10 px-4 py-3 text-sm">
-          <strong>{c.abilityPoints}</strong> yetenek puanın var. Yeşil kenarlı yetenekleri alabilirsin; kilitli olanların altında eksik şart yazar.
+          <strong>{c.abilityPoints}</strong> {t("yetenek puanın var. Yeşil kenarlı yetenekleri alabilirsin; kilitli olanların altında eksik şart yazar.")}
         </div>
       )}
       {c.trees.map((tk) => {
-        const t = data.trees.find((x) => x.key === tk);
-        if (!t) return null;
+        const tree = data.trees.find((x) => x.key === tk);
+        if (!tree) return null;
         return (
           <section key={tk}>
             <div className="mb-5 flex flex-wrap items-center gap-3 border-b border-line pb-3">
-              <h2 className="font-serif text-2xl">{t.name}</h2>
-              <Badge tone="accent">{STAT_LABELS[t.stat]}</Badge>
+              <h2 className="font-serif text-2xl">{tree.name}</h2>
+              <Badge tone="accent">{STAT_LABELS[tree.stat]}</Badge>
               <span className="text-sm text-muted">
-                {t.abilities.filter((k) => c.abilities[k]).length}/{t.abilities.length} yetenek
+                {t("{n}/{total} yetenek", { n: tree.abilities.filter((k) => c.abilities[k]).length, total: tree.abilities.length })}
               </span>
             </div>
-            <AbilityTree tree={t} abilities={data.abilities} owned={c.abilities} render={(a) => <AbilityTile key={a.key} a={a} c={c} data={data} canAct={canAct} busy={busy} act={act} />} />
+            <AbilityTree tree={tree} abilities={data.abilities} owned={c.abilities} render={(a) => <AbilityTile key={a.key} a={a} c={c} data={data} canAct={canAct} busy={busy} act={act} />} />
           </section>
         );
       })}
       {closed.length > 0 && (
         <section>
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-serif text-xl">Diğer ağaçlar</h2>
+            <h2 className="font-serif text-xl">{t("Diğer ağaçlar")}</h2>
             <button type="button" className="text-sm text-muted hover:text-ink" onClick={() => setShowAll(!showAll)}>
-              {showAll ? "Gizle" : "Göster"}
+              {showAll ? t("Gizle") : t("Göster")}
             </button>
           </div>
           {showAll && <TreeChoices c={c} data={data} trees={closed} canAct={canAct} busy={busy} onOpen={openTree} />}
         </section>
       )}
-      <Modal open={treeModal} onClose={() => setTreeModal(false)} title="Yeni ekspertiz ağacı aç" wide>
-        <p className="mb-4 text-sm text-muted">En fazla 2 ağaç açılabilir. Açmak 1 yetenek puanı harcar; ağacın yetenekleri için yine puan gerekir.</p>
+      <Modal open={treeModal} onClose={() => setTreeModal(false)} title={t("Yeni ekspertiz ağacı aç")} wide>
+        <p className="mb-4 text-sm text-muted">{t("En fazla 2 ağaç açılabilir. Açmak 1 yetenek puanı harcar; ağacın yetenekleri için yine puan gerekir.")}</p>
         <TreeChoices c={c} data={data} trees={closed} canAct={canAct} busy={busy} onOpen={openTree} />
       </Modal>
     </div>
@@ -407,23 +522,25 @@ function AbilitiesTab({ c, data, canAct, busy, act }: { c: Ch; data: RulesData; 
 }
 
 function TreeChoices({ c, data, trees, canAct, busy, onOpen }: { c: Ch; data: RulesData; trees: RulesData["trees"]; canAct: boolean; busy: boolean; onOpen: (key: string, name: string) => void }) {
+  const t = useT();
+  const tLoose = useTLoose();
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {trees.map((t) => {
-        const problems = canOpenTree(c, t.key, data);
+      {trees.map((tree) => {
+        const problems = canOpenTree(c, tree.key, data).map(tLoose);
         return (
-          <Card key={t.key} className="p-4">
+          <Card key={tree.key} className="p-4">
             <div className="flex items-center justify-between">
-              <span className="font-serif text-lg">{t.name}</span>
-              <Badge>{STAT_LABELS[t.stat]}</Badge>
+              <span className="font-serif text-lg">{tree.name}</span>
+              <Badge>{STAT_LABELS[tree.stat]}</Badge>
             </div>
             <div className="mt-3 flex items-center justify-between gap-3">
-              <Link href={`/kurallar/yetenekler/${t.key}`} target="_blank" className="text-xs text-muted hover:text-ink">
-                Ağacı incele ↗
+              <Link href={`/kurallar/yetenekler/${tree.key}`} target="_blank" className="text-xs text-muted hover:text-ink">
+                {t("Ağacı incele ↗")}
               </Link>
               {canAct && (
-                <Button size="sm" variant={problems.length ? "outline" : "primary"} disabled={busy || problems.length > 0} title={problems.join(" · ")} onClick={() => onOpen(t.key, t.name)}>
-                  1 puanla aç
+                <Button size="sm" variant={problems.length ? "outline" : "primary"} disabled={busy || problems.length > 0} title={problems.join(" · ")} onClick={() => onOpen(tree.key, tree.name)}>
+                  {t("1 puanla aç")}
                 </Button>
               )}
             </div>
@@ -436,6 +553,8 @@ function TreeChoices({ c, data, trees, canAct, busy, onOpen }: { c: Ch; data: Ru
 }
 
 function AbilityTile({ a, c, data, canAct, busy, act }: { a: Ability; c: Ch; data: RulesData; canAct: boolean; busy: boolean; act: (fn: () => Promise<unknown>, ok?: string) => Promise<void> }) {
+  const t = useT();
+  const tLoose = useTLoose();
   const [open, setOpen] = useState(false);
   const lv = c.abilities[a.key] ?? 0;
   const st = learnState(c, a.key, data);
@@ -451,15 +570,15 @@ function AbilityTile({ a, c, data, canAct, busy, act }: { a: Ability; c: Ch; dat
       prereqMissing={!!a.prerequisite && !lv && !(c.abilities[a.prerequisite] > 0)}
       footer={
         <div className="space-y-2">
-          {syn.length > 0 && <p className="text-[11px] text-accent">Sinerji aktif: {syn.map((k) => data.abilities[k]?.name).join(", ")}</p>}
-          {st.state === "locked" && canAct && <p className="text-xs text-muted">{st.problems.join(" · ")}</p>}
+          {syn.length > 0 && <p className="text-[11px] text-accent">{t("Sinerji aktif: {list}", { list: syn.map((k) => data.abilities[k]?.name).join(", ") })}</p>}
+          {st.state === "locked" && canAct && <p className="text-xs text-muted">{st.problems.map(tLoose).join(" · ")}</p>}
           <div className="flex items-center justify-between gap-2">
             <button type="button" className="rounded-md border border-line px-2.5 py-1 text-xs text-ink/80 hover:border-accent hover:text-ink" onClick={() => setOpen(!open)}>
-              {open ? "Kısalt" : "Ayrıntıları göster"}
+              {open ? t("Kısalt") : t("Ayrıntıları göster")}
             </button>
             {canAct && st.state === "available" && (
-              <Button size="sm" variant="primary" disabled={busy} onClick={() => act(() => api(`/api/characters/${c.id}/learn`, { body: { ability: a.key } }), lv ? `${a.name} seviye ${st.nextLevel}` : `${a.name} açıldı.`)}>
-                {lv ? `Sv ${st.nextLevel}'e yükselt` : "Aç (1 puan)"}
+              <Button size="sm" variant="primary" disabled={busy} onClick={() => act(() => api(`/api/characters/${c.id}/learn`, { body: { ability: a.key } }), lv ? t("{name} seviye {n}", { name: a.name, n: st.nextLevel }) : t("{name} açıldı.", { name: a.name }))}>
+                {lv ? t("Sv {n}'e yükselt", { n: st.nextLevel }) : t("Aç (1 puan)")}
               </Button>
             )}
           </div>
@@ -471,6 +590,7 @@ function AbilityTile({ a, c, data, canAct, busy, act }: { a: Ability; c: Ch; dat
 
 // ------------------------------------------------------------------ beden
 function BodyTab({ c, data, isGM, act }: { c: Ch; data: RulesData; isGM: boolean; act: (fn: () => Promise<unknown>, ok?: string) => Promise<void> }) {
+  const t = useT();
   const body = normalizeBody(c.body);
   const [sel, setSel] = useState<BodyPartKey>("upper-torso");
   const part = body[sel];
@@ -486,32 +606,32 @@ function BodyTab({ c, data, isGM, act }: { c: Ch; data: RulesData; isGM: boolean
       <div className="space-y-6">
         <Card className="p-5">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-serif text-lg">{bodyPartLabel(sel)}</h2>
-            {woundPenalty(part) > 0 && <Badge tone="danger">Zar cezası −{woundPenalty(part)}</Badge>}
+            <h2 className="font-serif text-lg">{t(bodyPartLabel(sel))}</h2>
+            {woundPenalty(part) > 0 && <Badge tone="danger">{t("Zar cezası −{n}", { n: woundPenalty(part) })}</Badge>}
           </div>
           {isGM ? (
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Yara">
+              <Field label={t("Yara")}>
                 <select className="input" value={part.wound} onChange={(e) => patch({ wound: e.target.value })}>
                   {WOUNDS.map((w) => (
                     <option key={w.key} value={w.key}>
-                      {w.label} {w.penalty ? `(−${w.penalty})` : ""}
+                      {t(w.label)} {w.penalty ? `(−${w.penalty})` : ""}
                     </option>
                   ))}
                 </select>
               </Field>
-              <Field label="Sargı">
+              <Field label={t("Sargı")}>
                 <select className="input" value={part.bandage} disabled={part.wound === "saglam"} onChange={(e) => patch({ bandage: e.target.value })}>
                   {BANDAGES.map((b) => (
                     <option key={b.key} value={b.key}>
-                      {b.label}
+                      {t(b.label)}
                     </option>
                   ))}
                 </select>
               </Field>
               <Field label="Augment">
                 <select className="input" value={part.augment ?? ""} onChange={(e) => patch({ augment: e.target.value || null })}>
-                  <option value="">Yok</option>
+                  <option value="">{t("Yok")}</option>
                   {fits.map((a) => (
                     <option key={a.key} value={a.key}>
                       {a.tier} · {a.name}
@@ -519,21 +639,21 @@ function BodyTab({ c, data, isGM, act }: { c: Ch; data: RulesData; isGM: boolean
                   ))}
                 </select>
               </Field>
-              <Field label="Not">
+              <Field label={t("Not")}>
                 <input className="input" defaultValue={part.note} maxLength={200} key={sel} onBlur={(e) => e.target.value !== part.note && patch({ note: e.target.value })} />
               </Field>
             </div>
           ) : (
             <dl className="grid grid-cols-2 gap-3 text-sm">
-              <dt className="text-muted">Yara</dt>
-              <dd>{WOUNDS.find((w) => w.key === part.wound)?.label}</dd>
-              <dt className="text-muted">Sargı</dt>
-              <dd>{BANDAGES.find((b) => b.key === part.bandage)?.label}</dd>
+              <dt className="text-muted">{t("Yara")}</dt>
+              <dd>{t(WOUNDS.find((w) => w.key === part.wound)?.label ?? "")}</dd>
+              <dt className="text-muted">{t("Sargı")}</dt>
+              <dd>{t(BANDAGES.find((b) => b.key === part.bandage)?.label ?? "")}</dd>
               <dt className="text-muted">Augment</dt>
-              <dd>{data.augments.find((a) => a.key === part.augment)?.name ?? "Yok"}</dd>
+              <dd>{data.augments.find((a) => a.key === part.augment)?.name ?? t("Yok")}</dd>
               {part.note && (
                 <>
-                  <dt className="text-muted">Not</dt>
+                  <dt className="text-muted">{t("Not")}</dt>
                   <dd>{part.note}</dd>
                 </>
               )}
@@ -544,9 +664,9 @@ function BodyTab({ c, data, isGM, act }: { c: Ch; data: RulesData; isGM: boolean
           <table className="w-full min-w-[440px] text-sm">
             <thead className="border-b border-line bg-surface2/60 text-left text-xs uppercase tracking-wider text-muted">
               <tr>
-                <th className="px-4 py-2.5 font-medium">Uzuv</th>
-                <th className="px-4 py-2.5 font-medium">Durum</th>
-                <th className="px-4 py-2.5 font-medium">Ceza</th>
+                <th className="px-4 py-2.5 font-medium">{t("Uzuv")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("Durum")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("Ceza")}</th>
                 <th className="px-4 py-2.5 font-medium">Augment</th>
               </tr>
             </thead>
@@ -556,10 +676,10 @@ function BodyTab({ c, data, isGM, act }: { c: Ch; data: RulesData; isGM: boolean
                 const pen = woundPenalty(s);
                 return (
                   <tr key={p.key} onClick={() => setSel(p.key)} className={cx("cursor-pointer border-b border-line/50 last:border-0 hover:bg-surface2/50", sel === p.key && "bg-accent/5")}>
-                    <td className="px-4 py-2">{p.label}</td>
+                    <td className="px-4 py-2">{t(p.label)}</td>
                     <td className="px-4 py-2">
-                      {WOUNDS.find((w) => w.key === s.wound)?.label}
-                      {s.bandage !== "yok" && <span className="text-xs text-muted"> · {BANDAGES.find((b) => b.key === s.bandage)?.label}</span>}
+                      {t(WOUNDS.find((w) => w.key === s.wound)?.label ?? "")}
+                      {s.bandage !== "yok" && <span className="text-xs text-muted"> · {t(BANDAGES.find((b) => b.key === s.bandage)?.label ?? "")}</span>}
                     </td>
                     <td className={cx("px-4 py-2 font-mono", pen > 0 && "text-danger")}>{pen ? `−${pen}` : "—"}</td>
                     <td className="px-4 py-2 text-accent">{data.augments.find((a) => a.key === s.augment)?.name ?? ""}</td>
@@ -573,7 +693,7 @@ function BodyTab({ c, data, isGM, act }: { c: Ch; data: RulesData; isGM: boolean
           <div className="grid gap-3 md:grid-cols-2">
             {augs.map(({ part: p, augment }) => (
               <Card key={p} className="p-4">
-                <p className="kicker mb-1">{bodyPartLabel(p)}</p>
+                <p className="kicker mb-1">{t(bodyPartLabel(p))}</p>
                 <p className="font-serif text-lg">{augment.name}</p>
                 <Html html={augment.usageHtml} className="mt-2 text-sm" />
               </Card>
@@ -600,16 +720,17 @@ function GMEditor({ open, onClose, c, data, act }: { open: boolean; onClose: () 
     perkEditAllowed: c.perkEditAllowed,
     reason: "",
   });
+  const t = useT();
   const [refund, setRefund] = useState(false);
   const num = (k: "level" | "abilityPoints" | "freeStatPoints" | "corruption" | "inspiration", min: number, max: number) => (
-    <Field lang={k === "corruption" || k === "inspiration" ? "en" : undefined} label={{ level: "Seviye", abilityPoints: "Yetenek puanı", freeStatPoints: "Serbest stat", corruption: "Corruption", inspiration: "Inspiration" }[k]}>
+    <Field lang={k === "corruption" || k === "inspiration" ? "en" : undefined} label={t({ level: "Seviye", abilityPoints: "Yetenek puanı", freeStatPoints: "Serbest stat", corruption: "Corruption", inspiration: "Inspiration" }[k])}>
       <input type="number" className="input" min={min} max={max} value={v[k]} onChange={(e) => setV({ ...v, [k]: Number(e.target.value) })} />
     </Field>
   );
   return (
-    <Modal open={open} onClose={onClose} title="GM düzenle" wide>
+    <Modal open={open} onClose={onClose} title={t("GM düzenle")} wide>
       <div className="space-y-5">
-        <p className="text-sm text-muted">Her değişiklik karakterin kaydına yazılır. Yetenek ve ağaç düzeltmeleri için kural kitabındaki önkoşullar uygulanmaz.</p>
+        <p className="text-sm text-muted">{t("Her değişiklik karakterin kaydına yazılır. Yetenek ve ağaç düzeltmeleri için kural kitabındaki önkoşullar uygulanmaz.")}</p>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
           {num("level", 0, 15)}
           {num("abilityPoints", 0, 50)}
@@ -618,30 +739,30 @@ function GMEditor({ open, onClose, c, data, act }: { open: boolean; onClose: () 
           {num("inspiration", -20, 50)}
         </div>
         <div className="flex flex-wrap gap-4">
-          <Field label="Durum">
+          <Field label={t("Durum")}>
             <select className="input" value={v.status} onChange={(e) => setV({ ...v, status: e.target.value as Ch["status"] })}>
-              <option value="ACTIVE">Aktif</option>
-              <option value="PENDING">Onay bekliyor</option>
-              <option value="REJECTED">Reddedildi</option>
-              <option value="DEAD">Öldü</option>
-              <option value="RETIRED">Emekli</option>
+              <option value="ACTIVE">{t("Aktif")}</option>
+              <option value="PENDING">{t("Onay bekliyor")}</option>
+              <option value="REJECTED">{t("Reddedildi")}</option>
+              <option value="DEAD">{t("Öldü")}</option>
+              <option value="RETIRED">{t("Emekli")}</option>
             </select>
           </Field>
           <label className="mt-6 flex items-center gap-2 text-sm">
             <input type="checkbox" checked={v.corruptionLocked} onChange={(e) => setV({ ...v, corruptionLocked: e.target.checked })} className="h-4 w-4 accent-[rgb(186,168,240)]" />
-            Corruption 7 kilidi
+            {t("Corruption 7 kilidi")}
           </label>
           <label className="mt-6 flex items-center gap-2 text-sm">
             <input type="checkbox" checked={v.deathAvailable} onChange={(e) => setV({ ...v, deathAvailable: e.target.checked })} className="h-4 w-4 accent-[rgb(186,168,240)]" />
-            Death Save hakkı var
+            {t("Death Save hakkı var")}
           </label>
-          <label className="mt-6 flex items-center gap-2 text-sm" title="Oyuncu perklerini bir kez yeniden seçebilir">
+          <label className="mt-6 flex items-center gap-2 text-sm" title={t("Oyuncu perklerini bir kez yeniden seçebilir")}>
             <input type="checkbox" checked={v.perkEditAllowed} onChange={(e) => setV({ ...v, perkEditAllowed: e.target.checked })} className="h-4 w-4 accent-[rgb(186,168,240)]" />
-            Oyuncu perklerini düzenleyebilir
+            {t("Oyuncu perklerini düzenleyebilir")}
           </label>
         </div>
         <div>
-          <span className="label">Ham statlar (perk, augment ve corruption hariç; eksi değer girilebilir)</span>
+          <span className="label">{t("Ham statlar (perk, augment ve corruption hariç; eksi değer girilebilir)")}</span>
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
             {STAT_KEYS.map((k) => (
               <label key={k} className="block">
@@ -658,11 +779,11 @@ function GMEditor({ open, onClose, c, data, act }: { open: boolean; onClose: () 
             ))}
           </div>
         </div>
-        <Field label="Gerekçe (kayda yazılır)">
-          <input className="input" maxLength={200} value={v.reason} onChange={(e) => setV({ ...v, reason: e.target.value })} placeholder="ör. Pervitin kullanımı, oturum ödülü" />
+        <Field label={t("Gerekçe (kayda yazılır)")}>
+          <input className="input" maxLength={200} value={v.reason} onChange={(e) => setV({ ...v, reason: e.target.value })} placeholder={t("ör. Pervitin kullanımı, oturum ödülü")} />
         </Field>
         <div className="flex justify-end gap-2">
-          <Button onClick={onClose}>Vazgeç</Button>
+          <Button onClick={onClose}>{t("Vazgeç")}</Button>
           <Button
             variant="primary"
             onClick={async () => {
@@ -683,23 +804,23 @@ function GMEditor({ open, onClose, c, data, act }: { open: boolean; onClose: () 
                       reason: v.reason || undefined,
                     },
                   }),
-                "Karakter güncellendi.",
+                t("Karakter güncellendi."),
               );
               onClose();
             }}
           >
-            Kaydet
+            {t("Kaydet")}
           </Button>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-warn/40 bg-warn/[0.07] p-3 text-sm">
-          <span>Tüm stat ve yetenek puanlarını oyuncuya iade et; oyuncu yeniden dağıtsın.</span>
+          <span>{t("Tüm stat ve yetenek puanlarını oyuncuya iade et; oyuncu yeniden dağıtsın.")}</span>
           <Button size="sm" variant="outline" onClick={() => setRefund(true)}>
-            Puanları iade et…
+            {t("Puanları iade et…")}
           </Button>
         </div>
         <RefundModal open={refund} onClose={() => setRefund(false)} c={c} data={data} act={act} />
         <details className="rounded-lg border border-line p-3 text-sm">
-          <summary className="cursor-pointer text-muted">Yetenek / ağaç / perk düzeltmesi</summary>
+          <summary className="cursor-pointer text-muted">{t("Yetenek / ağaç / perk düzeltmesi")}</summary>
           <GMLists c={c} data={data} act={act} />
         </details>
       </div>
@@ -708,31 +829,32 @@ function GMEditor({ open, onClose, c, data, act }: { open: boolean; onClose: () 
 }
 
 function GMLists({ c, data, act }: { c: Ch; data: RulesData; act: (fn: () => Promise<unknown>, ok?: string) => Promise<void> }) {
+  const t = useT();
   const [trees, setTrees] = useState<string[]>(c.trees);
   const [abilities, setAbilities] = useState<Record<string, number>>(c.abilities);
   const [perks, setPerks] = useState<string[]>(c.perks);
   return (
     <div className="mt-3 space-y-4">
       <div>
-        <span className="label">Ağaçlar (en fazla 2, ilki başlangıç)</span>
+        <span className="label">{t("Ağaçlar (en fazla 2, ilki başlangıç)")}</span>
         <div className="flex flex-wrap gap-2">
-          {data.trees.map((t) => (
-            <label key={t.key} className="chip cursor-pointer">
+          {data.trees.map((tree) => (
+            <label key={tree.key} className="chip cursor-pointer">
               <input
                 type="checkbox"
-                checked={trees.includes(t.key)}
-                onChange={(e) => setTrees(e.target.checked ? [...trees, t.key].slice(0, 2) : trees.filter((x) => x !== t.key))}
+                checked={trees.includes(tree.key)}
+                onChange={(e) => setTrees(e.target.checked ? [...trees, tree.key].slice(0, 2) : trees.filter((x) => x !== tree.key))}
               />
-              {t.name}
+              {tree.name}
             </label>
           ))}
         </div>
       </div>
       <div>
-        <span className="label">Yetenek seviyeleri</span>
+        <span className="label">{t("Yetenek seviyeleri")}</span>
         <div className="grid max-h-64 gap-1 overflow-y-auto sm:grid-cols-2">
           {trees.flatMap((tk) =>
-            (data.trees.find((t) => t.key === tk)?.abilities ?? []).map((k) => {
+            (data.trees.find((x) => x.key === tk)?.abilities ?? []).map((k) => {
               const a = data.abilities[k];
               return (
                 <label key={k} className="flex items-center justify-between gap-2 rounded px-2 py-1 hover:bg-surface2">
@@ -751,7 +873,7 @@ function GMLists({ c, data, act }: { c: Ch; data: RulesData; act: (fn: () => Pro
         </div>
       </div>
       <div>
-        <span className="label">Perkler</span>
+        <span className="label">{t("Perkler")}</span>
         <div className="flex max-h-40 flex-wrap gap-1.5 overflow-y-auto">
           {data.perks.map((p) => (
             <label key={p.key} className={cx("chip cursor-pointer", perks.includes(p.key) && "border-accent text-accent")}>
@@ -762,50 +884,51 @@ function GMLists({ c, data, act }: { c: Ch; data: RulesData; act: (fn: () => Pro
           ))}
         </div>
       </div>
-      <Button size="sm" variant="outline" onClick={() => act(() => api(`/api/characters/${c.id}/gm`, { method: "PATCH", body: { trees, abilities, perks } }), "Listeler güncellendi.")}>
-        Listeleri kaydet
+      <Button size="sm" variant="outline" onClick={() => act(() => api(`/api/characters/${c.id}/gm`, { method: "PATCH", body: { trees, abilities, perks } }), t("Listeler güncellendi."))}>
+        {t("Listeleri kaydet")}
       </Button>
     </div>
   );
 }
 
 function RefundModal({ open, onClose, c, data, act }: { open: boolean; onClose: () => void; c: Ch; data: RulesData; act: (fn: () => Promise<unknown>, ok?: string) => Promise<void> }) {
+  const t = useT();
   const plan = refundPlan(c, data);
   const [stats, setStats] = useState(true);
   const [abilities, setAbilities] = useState(true);
   return (
-    <Modal open={open} onClose={onClose} title="Puanları iade et">
+    <Modal open={open} onClose={onClose} title={t("Puanları iade et")}>
       <div className="space-y-4 text-sm">
-        <p className="text-muted">Seviye değişmez. Başlangıç değerleri (Klang {2}, ağaç stat&apos;ı ve seviye artışları, ağaç bonusu) korunur; geri kalan her şey puana döner.</p>
+        <p className="text-muted">{t("Seviye değişmez. Başlangıç değerleri (Klang {n}, ağaç stat'ı ve seviye artışları, ağaç bonusu) korunur; geri kalan her şey puana döner.", { n: 2 })}</p>
         <label className="flex items-start gap-3 rounded-lg border border-line p-3">
           <input type="checkbox" checked={stats} onChange={(e) => setStats(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[rgb(186,168,240)]" />
           <span>
-            <strong className="text-ink">{plan.statPoints} stat puanı</strong> serbest puana dönsün
+            <strong className="text-ink">{plan.statPoints}</strong> {t("stat puanı serbest puana dönsün")}
             <span className="mt-1 block text-xs text-muted">
               {STAT_KEYS.filter((k) => c.stats[k] !== plan.stats[k])
                 .map((k) => `${STAT_LABELS[k]} ${c.stats[k]} → ${plan.stats[k]}`)
-                .join(" · ") || "Dağıtılmış puan yok."}
+                .join(" · ") || t("Dağıtılmış puan yok.")}
             </span>
           </span>
         </label>
         <label className="flex items-start gap-3 rounded-lg border border-line p-3">
           <input type="checkbox" checked={abilities} onChange={(e) => setAbilities(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[rgb(186,168,240)]" />
           <span>
-            <strong className="text-ink">{plan.abilityPoints} yetenek puanı</strong> geri dönsün
-            <span className="mt-1 block text-xs text-muted">Tüm yetenekler sıfırlanır{c.trees.length > 1 ? ", ikinci ağaç kapanır" : ""}. Başlangıç ağacı kalır.</span>
+            <strong className="text-ink">{plan.abilityPoints}</strong> {t("yetenek puanı geri dönsün")}
+            <span className="mt-1 block text-xs text-muted">{c.trees.length > 1 ? t("Tüm yetenekler sıfırlanır, ikinci ağaç kapanır. Başlangıç ağacı kalır.") : t("Tüm yetenekler sıfırlanır. Başlangıç ağacı kalır.")}</span>
           </span>
         </label>
         <div className="flex justify-end gap-2">
-          <Button onClick={onClose}>Vazgeç</Button>
+          <Button onClick={onClose}>{t("Vazgeç")}</Button>
           <Button
             variant="danger"
             disabled={(!stats || !plan.statPoints) && (!abilities || !plan.abilityPoints)}
             onClick={async () => {
-              await act(() => api(`/api/characters/${c.id}/gm`, { method: "PATCH", body: { refund: { stats, abilities } } }), "Puanlar iade edildi.");
+              await act(() => api(`/api/characters/${c.id}/gm`, { method: "PATCH", body: { refund: { stats, abilities } } }), t("Puanlar iade edildi."));
               onClose();
             }}
           >
-            İade et
+            {t("İade et")}
           </Button>
         </div>
       </div>
@@ -814,6 +937,7 @@ function RefundModal({ open, onClose, c, data, act }: { open: boolean; onClose: 
 }
 
 function PerkEditor({ open, onClose, c, data, start, isGM, act }: { open: boolean; onClose: () => void; c: Ch; data: RulesData; start: number; isGM: boolean; act: (fn: () => Promise<unknown>, ok?: string) => Promise<void> }) {
+  const t = useT();
   const [perks, setPerks] = useState<string[]>(c.perks);
   const opts = { limbs: kriegsversehrtLimbs(c.body) };
   const before = perkBudget(c.perks, start, data, opts);
@@ -821,25 +945,31 @@ function PerkEditor({ open, onClose, c, data, start, isGM, act }: { open: boolea
   const delta = budget.convertible - before.convertible;
   const changed = JSON.stringify([...perks].sort()) !== JSON.stringify([...c.perks].sort());
   return (
-    <Modal open={open} onClose={onClose} title="Perkleri düzenle" wide>
+    <Modal open={open} onClose={onClose} title={t("Perkleri düzenle")} wide>
       <div className="space-y-4">
-        {!isGM && <p className="text-sm text-muted">GM izni tek seferliktir: kaydedince izin kapanır.</p>}
+        {!isGM && <p className="text-sm text-muted">{t("GM izni tek seferliktir: kaydedince izin kapanır.")}</p>}
         <PerkPicker perks={data.perks} selected={perks} onToggle={(k) => setPerks((p) => (p.includes(k) ? p.filter((x) => x !== k) : [...p, k]))} budget={budget} />
         <div className="sticky bottom-0 flex flex-wrap items-center justify-between gap-3 border-t border-line bg-surface pt-3 text-sm">
           <span className={cx(delta < 0 ? "text-danger" : delta > 0 ? "text-ok" : "text-muted")}>
-            {delta > 0 ? `+${delta} serbest stat puanı kazanırsın.` : delta < 0 ? `Bu seçim ${-delta} stat puanını geri alır${isGM ? " (GM olarak kaydedebilirsin)." : "; kaydedilemez."}` : "Stat puanı değişmez."}
+            {delta > 0
+              ? t("+{n} serbest stat puanı kazanırsın.", { n: delta })
+              : delta < 0
+                ? isGM
+                  ? t("Bu seçim {n} stat puanını geri alır (GM olarak kaydedebilirsin).", { n: -delta })
+                  : t("Bu seçim {n} stat puanını geri alır; kaydedilemez.", { n: -delta })
+                : t("Stat puanı değişmez.")}
           </span>
           <span className="flex gap-2">
-            <Button onClick={onClose}>Vazgeç</Button>
+            <Button onClick={onClose}>{t("Vazgeç")}</Button>
             <Button
               variant="primary"
               disabled={!changed || budget.problems.length > 0 || (delta < 0 && !isGM)}
               onClick={async () => {
-                await act(() => api(`/api/characters/${c.id}/perks`, { body: { perks } }), "Perkler güncellendi.");
+                await act(() => api(`/api/characters/${c.id}/perks`, { body: { perks } }), t("Perkler güncellendi."));
                 onClose();
               }}
             >
-              Kaydet
+              {t("Kaydet")}
             </Button>
           </span>
         </div>
@@ -850,12 +980,13 @@ function PerkEditor({ open, onClose, c, data, start, isGM, act }: { open: boolea
 
 // ------------------------------------------------------------------ augmentler (genel)
 function AugmentsCard({ c, data }: { c: Ch; data: RulesData }) {
+  const t = useT();
   const augs = installedAugments(c.body, data);
   return (
     <Card className="p-5">
-      <h2 className="mb-3 font-serif text-lg">Takılı augmentler</h2>
+      <h2 className="mb-3 font-serif text-lg">{t("Takılı augmentler")}</h2>
       {augs.length === 0 ? (
-        <p className="text-sm text-muted">Takılı augment yok.</p>
+        <p className="text-sm text-muted">{t("Takılı augment yok.")}</p>
       ) : (
         <div className="space-y-3">
           {augs.map(({ part, augment: a }) => (
@@ -863,7 +994,7 @@ function AugmentsCard({ c, data }: { c: Ch; data: RulesData }) {
               <div className="flex flex-wrap items-center gap-2">
                 <span className="font-serif text-base text-ink">{a.name}</span>
                 {a.tier && <Badge tone={a.tier === "T3" ? "danger" : a.tier === "T2" ? "warn" : "accent"}>{a.tier}</Badge>}
-                <span className="text-xs text-muted">{bodyPartLabel(part)}</span>
+                <span className="text-xs text-muted">{t(bodyPartLabel(part))}</span>
               </div>
               <div className="mt-1.5 flex flex-wrap gap-1.5">
                 {a.mods.map((m) => (

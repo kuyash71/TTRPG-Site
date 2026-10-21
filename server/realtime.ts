@@ -14,6 +14,7 @@ import { BODY_PART_KEYS, CORRUPTION_PERVITIN_IMMUNE, STAT_KEYS, STAT_LABELS, thr
 import { rulesData } from "../src/lib/shz/content";
 import { checkModifiers, clampCorruption, effectiveStats, outcomeFor, outcomeLabel, type CharLike } from "../src/lib/shz/rules";
 import { UC_STAT_KEYS, UC_STAT_LABELS, type UcStatKey } from "../src/lib/uc/constants";
+import { fmt, isLocale, localeFromHeaders, translate, type Locale, type TVars } from "../src/i18n/core";
 import { UC_DECAY_MODES, ucCheckParts, ucDecayOutcome, ucDecayParts, ucNormalizeStats, type UcCharLike, type UcDecayMode } from "../src/lib/uc/rules";
 
 type Ack = (r: { ok: true; data?: unknown } | { ok: false; error: string }) => void;
@@ -22,6 +23,8 @@ interface Data {
   token: string;
   checkedAt: number;
   campaigns: Map<string, boolean>; // campaignId -> isGM
+  /** Bu bağlantının arayüz dili (el sıkışmadaki çerez / Accept-Language). Ack ve hata mesajları buna çevrilir. */
+  loc: Locale;
 }
 type S = Socket<Record<string, never>, Record<string, never>, Record<string, never>, Data>;
 
@@ -162,7 +165,7 @@ const publicRequest = (r: PendingRequest) => {
 
 /** Hazır eşik kademesi ya da (yalnızca GM için) elle girilen eşik. */
 function resolveThreshold(key: string | null | undefined, manual: number | null | undefined, allowManual: boolean) {
-  if (allowManual && manual != null) return { value: manual, label: `Eşik ${manual}` };
+  if (allowManual && manual != null) return { value: manual, label: fmt("Eşik {n}", { n: manual }) };
   const t = key ? thresholdByKey(key) : null;
   return t ? { value: t.value, label: t.label } : null;
 }
@@ -243,17 +246,26 @@ function diceValue(camp: { physicalDice: boolean }, isGM: boolean, physical: num
   return { value: randomInt(1, sides + 1), physical: false };
 }
 
-class UserError extends Error {}
-const fail = (m: string) => {
-  throw new UserError(m);
+/** Kullanıcıya dönen hata. Mesaj Türkçe şablondur; ack gönderilirken soketin diline çevrilir. */
+class UserError extends Error {
+  constructor(
+    public template: string,
+    public vars?: TVars,
+  ) {
+    super(fmt(template, vars));
+  }
+}
+const fail = (m: string, vars?: TVars) => {
+  throw new UserError(m, vars);
 };
 
 function guard<T>(schema: z.ZodType<T>, fn: (s: S, input: T) => Promise<unknown>, limit = { max: 20, ms: 10_000 }) {
   return (s: S, raw: unknown, ack?: Ack) => {
     const cb: Ack = typeof ack === "function" ? ack : () => {};
-    if (!allow(`${s.data.user.id}:${fn.name}`, limit.max, limit.ms)) return cb({ ok: false, error: "Çok hızlı. Biraz bekle." });
+    const loc = s.data.loc;
+    if (!allow(`${s.data.user.id}:${fn.name}`, limit.max, limit.ms)) return cb({ ok: false, error: translate(loc, "Çok hızlı. Biraz bekle.") });
     const r = schema.safeParse(raw);
-    if (!r.success) return cb({ ok: false, error: "Geçersiz istek." });
+    if (!r.success) return cb({ ok: false, error: translate(loc, "Geçersiz istek.") });
     revalidate(s)
       .then((alive) => {
         if (!alive) throw new UserError("Oturum sona erdi.");
@@ -261,10 +273,10 @@ function guard<T>(schema: z.ZodType<T>, fn: (s: S, input: T) => Promise<unknown>
       })
       .then((data) => cb({ ok: true, data }))
       .catch((e) => {
-        if (e instanceof UserError) cb({ ok: false, error: e.message });
+        if (e instanceof UserError) cb({ ok: false, error: translate(loc, e.template, e.vars) });
         else {
           console.error("[socket]", fn.name, e);
-          cb({ ok: false, error: "Sunucu hatası." });
+          cb({ ok: false, error: translate(loc, "Sunucu hatası.") });
         }
       });
   };
@@ -406,6 +418,8 @@ export function attachRealtime(io: Server) {
         token: token!,
         checkedAt: Date.now(),
         campaigns: new Map(),
+        // İstemcinin gösterdiği dil (sayfanın dili) önceliklidir; WebSocket el sıkışmasında tarayıcı dil başlığı güvenilmez.
+        loc: isLocale(socket.handshake.auth?.loc) ? socket.handshake.auth.loc : localeFromHeaders(socket.handshake.headers.cookie, socket.handshake.headers["accept-language"]),
       };
       next();
     } catch (e) {
@@ -598,8 +612,13 @@ export function attachRealtime(io: Server) {
                   : and(eq(messages.channel, "WHISPER"), p.peerId ? or(eq(messages.userId, p.peerId), eq(messages.recipientId, p.peerId)) : undefined);
           await db.delete(messages).where(and(eq(messages.campaignId, p.campaignId), scope));
           io.to(room(p.campaignId)).emit("messages:cleared", { scope: p.scope, peerId: p.peerId ?? null });
-          const label = { IC: "sahne", OOC: "masa", WHISPER: "fısıltı", ALL: "tüm sohbet" }[p.scope];
-          if (p.scope !== "WHISPER") await systemMessage(io, p.campaignId, s.data.user, `GM ${label} geçmişini temizledi.`);
+          const text = {
+            IC: fmt("GM sahne geçmişini temizledi."),
+            OOC: fmt("GM masa geçmişini temizledi."),
+            WHISPER: fmt("GM fısıltı geçmişini temizledi."),
+            ALL: fmt("GM tüm sohbet geçmişini temizledi."),
+          }[p.scope];
+          if (p.scope !== "WHISPER") await systemMessage(io, p.campaignId, s.data.user, text);
         },
         { max: 5, ms: 10_000 },
       ),
@@ -626,14 +645,14 @@ export function attachRealtime(io: Server) {
             ? req.thresholdValue != null
               ? {
                   value: req.thresholdValue,
-                  label: req.thresholdLabel ?? `Eşik ${req.thresholdValue}`,
+                  label: req.thresholdLabel ?? fmt("Eşik {n}", { n: req.thresholdValue }),
                 }
               : uc
                 ? null
                 : resolveThreshold(req.threshold, null, false)
             : uc
               ? isGM && p.thresholdValue != null
-                ? { value: p.thresholdValue, label: `Eşik ${p.thresholdValue}` }
+                ? { value: p.thresholdValue, label: fmt("Eşik {n}", { n: p.thresholdValue }) }
                 : null
               : resolveThreshold(p.threshold, p.thresholdValue, isGM);
           const modifier = req ? req.modifier : p.modifier;
@@ -651,18 +670,18 @@ export function attachRealtime(io: Server) {
             if (uc) {
               const r = ucCheckParts(asUcChar(c), { stat: isUcStat(stat) ? stat : null, part: part as never, modifier, magic, decay });
               parts = r.parts;
-              if (r.overflow) extra.push(`Taşan bonus +${r.overflow}: anlatıma dahil (GM karar verir).`);
+              if (r.overflow) extra.push(fmt("Taşan bonus +{n}: anlatıma dahil (GM karar verir).", { n: r.overflow }));
             } else parts = checkModifiers(asCharLike(c), { stat: isShzStat(stat) ? stat : null, part: part as never, modifier, blackMagic }, rulesData());
             charName = c.name;
           } else {
             if (!isGM) fail("Bir karakter seçmelisin.");
-            if (modifier) parts.push({ label: "Düzenleyici", value: modifier });
+            if (modifier) parts.push({ label: fmt("Düzenleyici"), value: modifier });
           }
-          if (magic && d20 === 1) extra.push("Büyü zarında Nat1: mana geri tepti. GM, Sebahat ile mana geri tepmesi zarı ister; başarısızlıkta +1 Yozlaşma.");
+          if (magic && d20 === 1) extra.push(fmt("Büyü zarında Nat1: mana geri tepti. GM, Sebahat ile mana geri tepmesi zarı ister; başarısızlıkta +1 Yozlaşma."));
           const total = d20 + parts.reduce((a, b) => a + b.value, 0);
           const outcome = outcomeFor(d20, total, th?.value ?? null);
           const sl = statLabel(camp.system, stat);
-          const label = (req ? req.label : p.label) || (sl ? `${sl} zarı` : "d20");
+          const label = (req ? req.label : p.label) || (sl ? fmt("{stat} zarı", { stat: sl }) : "d20");
           const detail: RollDetail = {
             parts: [{ label: "d20", value: d20 }, ...parts],
             total,
@@ -698,7 +717,7 @@ export function attachRealtime(io: Server) {
             .returning();
           await emitRoll(io, p.campaignId, r, s.data.user, charName);
           if (req) settleRequest(p.campaignId, req);
-          return { id: r.id, total, outcome: outcomeLabel(outcome) };
+          return { id: r.id, total, outcome: translate(s.data.loc, outcomeLabel(outcome)) };
         } catch (e) {
           release();
           throw e;
@@ -719,7 +738,7 @@ export function attachRealtime(io: Server) {
         const pointName = uc ? "Esin" : "Inspiration";
         const c = await loadChar(p.campaignId, orig!.characterId!);
         if (!isGM && (c.userId !== s.data.user.id || c.status !== "ACTIVE")) fail("Bu zar senin değil.");
-        if (c.inspiration < 1) fail(`${pointName} puanın yok.`);
+        if (c.inspiration < 1) fail("{point} puanın yok.", { point: pointName });
         const prm = JSON.parse(orig!.detail.note ?? "{}");
         const upd = await db
           .update(characters)
@@ -774,7 +793,7 @@ export function attachRealtime(io: Server) {
           characterId: c.id,
           actorId: s.data.user.id,
           kind: "inspiration",
-          text: `${pointName} harcandı: "${orig!.label}" yeniden atıldı.`,
+          text: fmt('{point} harcandı: "{label}" yeniden atıldı.', { point: pointName, label: orig!.label }),
         });
         io.to(room(p.campaignId)).emit("roll:rerolled", { id: orig!.id });
         await emitRoll(io, p.campaignId, r, s.data.user, c.name);
@@ -804,7 +823,7 @@ export function attachRealtime(io: Server) {
           if (!joined(s, p.campaignId)) fail("Zar geçmişini yalnızca GM temizleyebilir.");
           await db.delete(rolls).where(eq(rolls.campaignId, p.campaignId));
           io.to(room(p.campaignId)).emit("rolls:cleared", {});
-          await systemMessage(io, p.campaignId, s.data.user, "GM zar geçmişini temizledi.");
+          await systemMessage(io, p.campaignId, s.data.user, fmt("GM zar geçmişini temizledi."));
         },
         { max: 3, ms: 10_000 },
       ),
@@ -822,7 +841,7 @@ export function attachRealtime(io: Server) {
             ? null
             : uc
               ? p.thresholdValue != null
-                ? { value: p.thresholdValue, label: `Eşik ${p.thresholdValue}` }
+                ? { value: p.thresholdValue, label: fmt("Eşik {n}", { n: p.thresholdValue }) }
                 : null
               : resolveThreshold(p.threshold, p.thresholdValue, true);
         if ((p.kind === "pervitin" || p.kind === "decay") && !th) fail("Bu zar için bir eşik gir.");
@@ -851,7 +870,15 @@ export function attachRealtime(io: Server) {
         const sl = statLabel(camp.system, p.stat);
         const label =
           p.label ||
-          (p.kind === "death" ? "Death Save" : p.kind === "pervitin" ? "Pervitin zarı" : p.kind === "decay" ? UC_DECAY_MODES[p.decayMode!].label : sl ? `${sl} zarı` : "Zar");
+          (p.kind === "death"
+            ? "Death Save"
+            : p.kind === "pervitin"
+              ? fmt("Pervitin zarı")
+              : p.kind === "decay"
+                ? UC_DECAY_MODES[p.decayMode!].label
+                : sl
+                  ? fmt("{stat} zarı", { stat: sl })
+                  : fmt("Zar"));
         const req: PendingRequest = {
           id: randomUUID(),
           campaignId: p.campaignId,
@@ -875,11 +902,17 @@ export function attachRealtime(io: Server) {
         campaignRequests(p.campaignId).set(req.id, req);
         io.to(room(p.campaignId)).emit("roll:request", publicRequest(req));
         const bits = [
-          th ? `${th.label}${p.thresholdValue == null ? "" : ""}` : null,
-          p.modifier ? `durum ${p.modifier > 0 ? "+" : ""}${p.modifier}` : null,
-          p.hidden ? "sonuç gizli" : null,
+          th ? th.label : null,
+          p.modifier ? fmt("durum {mod}", { mod: `${p.modifier > 0 ? "+" : ""}${p.modifier}` }) : null,
+          p.hidden ? fmt("sonuç gizli") : null,
         ].filter(Boolean);
-        await systemMessage(io, p.campaignId, s.data.user, `GM zar istedi: ${label}${bits.length ? ` (${bits.join(", ")})` : ""} → ${chars.map((c) => c.name).join(", ")}`);
+        const names = chars.map((c) => c.name).join(", ");
+        await systemMessage(
+          io,
+          p.campaignId,
+          s.data.user,
+          bits.length ? fmt("GM zar istedi: {label} ({details}) → {names}", { label, details: bits.join(", "), names }) : fmt("GM zar istedi: {label} → {names}", { label, names }),
+        );
         return { id: req.id };
       }),
 
@@ -903,7 +936,7 @@ export function attachRealtime(io: Server) {
           if (!isGM && (c.userId !== s.data.user.id || c.status !== "ACTIVE")) fail("Bu karakter senin değil.");
           if (c.status === "DEAD") fail("Karakter zaten ölü.");
           const ds = { ...c.deathSave };
-          if (!ds.available) fail(`Death Save hakkı yok. ${camp.system === "UC" ? "Esin" : "Inspiration"} ile yenilenmeli.`);
+          if (!ds.available) fail("Death Save hakkı yok. {point} ile yenilenmeli.", { point: camp.system === "UC" ? "Esin" : "Inspiration" });
           const d6 = die.value;
           const isDeath = d6 <= 3;
           if (isDeath) ds.deaths++;
@@ -913,10 +946,12 @@ export function attachRealtime(io: Server) {
             saves: ds.saves,
             final: null as "death" | "save" | null,
           };
-          let note = isDeath ? `Ölüme bir adım daha yaklaştı. Ölüm ${ds.deaths}/3 · Kurtuluş ${ds.saves}/3` : `Hayata tutundu. Ölüm ${ds.deaths}/3 · Kurtuluş ${ds.saves}/3`;
+          let note = isDeath
+            ? fmt("Ölüme bir adım daha yaklaştı. Ölüm {deaths}/3 · Kurtuluş {saves}/3", { deaths: ds.deaths, saves: ds.saves })
+            : fmt("Hayata tutundu. Ölüm {deaths}/3 · Kurtuluş {saves}/3", { deaths: ds.deaths, saves: ds.saves });
           if (ds.deaths >= 3 || ds.saves >= 3) {
             track.final = ds.deaths >= 3 ? "death" : "save";
-            note = track.final === "death" ? `${c.name} öldü.` : `${c.name} kritik yaralı olarak hayatta kaldı.`;
+            note = track.final === "death" ? fmt("{name} öldü.", { name: c.name }) : fmt("{name} kritik yaralı olarak hayatta kaldı.", { name: c.name });
             ds.available = false;
             ds.deaths = 0;
             ds.saves = 0;
@@ -934,7 +969,7 @@ export function attachRealtime(io: Server) {
             parts: [{ label: "d6", value: d6 }],
             total: d6,
             threshold: 4,
-            thresholdLabel: "1–3 ölüm · 4–6 kurtuluş",
+            thresholdLabel: fmt("1–3 ölüm · 4–6 kurtuluş"),
             outcome: isDeath ? "death" : "save",
             note,
             deathTrack: track,
@@ -959,11 +994,11 @@ export function attachRealtime(io: Server) {
               characterId: c.id,
               actorId: s.data.user.id,
               kind: "death-save",
-              text: `Death Save sonucu: ${note}`,
+              text: fmt("Death Save sonucu: {note}", { note }),
             });
           await emitRoll(io, p.campaignId, r, s.data.user, c.name);
           if (req) settleRequest(p.campaignId, req);
-          if (track.final === "death") await systemMessage(io, p.campaignId, s.data.user, `☠ ${c.name} Death Save'i kaybetti ve öldü.`);
+          if (track.final === "death") await systemMessage(io, p.campaignId, s.data.user, fmt("☠ {name} Death Save'i kaybetti ve öldü.", { name: c.name }));
           io.to(room(p.campaignId)).emit("character:changed", {
             characterId: c.id,
           });
@@ -987,7 +1022,7 @@ export function attachRealtime(io: Server) {
             ? req.thresholdValue != null
               ? {
                   value: req.thresholdValue,
-                  label: req.thresholdLabel ?? `Eşik ${req.thresholdValue}`,
+                  label: req.thresholdLabel ?? fmt("Eşik {n}", { n: req.thresholdValue }),
                 }
               : resolveThreshold(req.threshold, null, false)
             : resolveThreshold(p.threshold ?? null, p.thresholdValue, isGM);
@@ -1000,16 +1035,16 @@ export function attachRealtime(io: Server) {
             { label: "d20", value: d20 },
             { label: "Sanita", value: eff.sanita.value },
             { label: "Corruption / 3", value: -Math.floor(c.corruption / 3) },
-            ...(modifier ? [{ label: "GM durum", value: modifier }] : []),
+            ...(modifier ? [{ label: fmt("GM durum"), value: modifier }] : []),
           ];
           const total = parts.reduce((a, b) => a + b.value, 0);
           let note: string;
           let outcome: RollDetail["outcome"];
           if (c.corruption >= CORRUPTION_PERVITIN_IMMUNE) {
-            note = "Corruption 10+: Pervitin artık Corruption'ı etkilemez.";
+            note = fmt("Corruption 10+: Pervitin artık Corruption'ı etkilemez.");
             outcome = "info";
           } else if (total >= th!.value) {
-            note = "Corruption artmadı.";
+            note = fmt("Corruption artmadı.");
             outcome = "success";
           } else {
             const next = clampCorruption(c.corruption + 1, c.corruptionLocked);
@@ -1101,7 +1136,7 @@ export function attachRealtime(io: Server) {
             parts,
             total,
             threshold: thValue!,
-            thresholdLabel: req?.thresholdLabel ?? `Eşik ${thValue}`,
+            thresholdLabel: req?.thresholdLabel ?? fmt("Eşik {n}", { n: thValue }),
             outcome,
             note: res.note,
             ...(req ? { requestId: req.id, requested: true } : {}),

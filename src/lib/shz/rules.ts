@@ -25,6 +25,7 @@ import {
   type WoundKey,
 } from "./constants";
 import type { Ability, Augment, Perk, Requirement, Tree } from "./content-types";
+import { fmt } from "../../i18n/core";
 
 export type Stats = Record<StatKey, number>;
 export interface PartState {
@@ -150,11 +151,11 @@ export function checkRequirements(c: CharLike, ab: Ability, data: RulesInput): R
       case "stat":
         return { req: r, ok: eff[r.stat].value >= r.min, text: `${STAT_LABELS[r.stat]} ${r.min}` };
       case "level":
-        return { req: r, ok: c.level >= r.min, text: `Seviye ${r.min}` };
+        return { req: r, ok: c.level >= r.min, text: fmt("Seviye {n}", { n: r.min }) };
       case "corruption":
-        return { req: r, ok: c.corruption >= r.min, text: `Corruption en az ${r.min}` };
+        return { req: r, ok: c.corruption >= r.min, text: fmt("Corruption en az {n}", { n: r.min }) };
       case "augments":
-        return { req: r, ok: installedAugments(c.body, data).length >= r.min, text: `En az ${r.min} augment` };
+        return { req: r, ok: installedAugments(c.body, data).length >= r.min, text: fmt("En az {n} augment", { n: r.min }) };
       default:
         // Metin gereksinimleri otomatik doğrulanamaz; GM'e bırakılır.
         return { req: r, ok: true, text: r.text };
@@ -177,10 +178,10 @@ export function learnState(c: CharLike, abilityKey: string, data: RulesInput): L
   if (!c.trees.includes(ab.tree)) problems.push("Ağaç açık değil");
   if (cur === 0) {
     if (ab.prerequisite && !(c.abilities[ab.prerequisite] > 0))
-      problems.push(`Öncül: ${data.abilities[ab.prerequisite]?.name ?? ab.prerequisite}`);
+      problems.push(fmt("Öncül: {name}", { name: data.abilities[ab.prerequisite]?.name ?? ab.prerequisite }));
     for (const r of checkRequirements(c, ab, data)) if (!r.ok) problems.push(r.text);
   }
-  if (next >= 3 && c.level < ABILITY_LEVEL3_MIN_CHAR_LEVEL) problems.push(`3. seviye için karakter seviyesi ${ABILITY_LEVEL3_MIN_CHAR_LEVEL}`);
+  if (next >= 3 && c.level < ABILITY_LEVEL3_MIN_CHAR_LEVEL) problems.push(fmt("3. seviye için karakter seviyesi {n}", { n: ABILITY_LEVEL3_MIN_CHAR_LEVEL }));
   if (c.abilityPoints < 1) problems.push("Yetenek puanı yok");
   return problems.length ? { state: "locked", nextLevel: next, problems } : { state: "available", nextLevel: next, problems: [] };
 }
@@ -189,7 +190,7 @@ export function canOpenTree(c: CharLike, treeKey: string, data: RulesInput): str
   const problems: string[] = [];
   if (!data.trees.some((t) => t.key === treeKey)) problems.push("Bilinmeyen ağaç");
   if (c.trees.includes(treeKey)) problems.push("Ağaç zaten açık");
-  if (c.trees.length >= MAX_TREES) problems.push(`En fazla ${MAX_TREES} ağaç açılabilir`);
+  if (c.trees.length >= MAX_TREES) problems.push(fmt("En fazla {n} ağaç açılabilir", { n: MAX_TREES }));
   if (c.abilityPoints < 1) problems.push("Yetenek puanı yok");
   return problems;
 }
@@ -214,11 +215,11 @@ export function amputationPlan(roots: string[]) {
   const problems: string[] = [];
   const uniq = [...new Set(roots)] as BodyPartKey[];
   if (!uniq.length) problems.push("Kriegsversehrt için kopuk uzuv seçilmeli");
-  if (uniq.length > KRIEGSVERSEHRT.maxLimbs) problems.push(`En fazla ${KRIEGSVERSEHRT.maxLimbs} uzuv seçilebilir`);
-  for (const r of uniq) if (!AMPUTABLE_PARTS.includes(r)) problems.push(`${bodyPartLabel(r)} kopuk seçilemez`);
+  if (uniq.length > KRIEGSVERSEHRT.maxLimbs) problems.push(fmt("En fazla {n} uzuv seçilebilir", { n: KRIEGSVERSEHRT.maxLimbs }));
+  for (const r of uniq) if (!AMPUTABLE_PARTS.includes(r)) problems.push(fmt("{part} kopuk seçilemez", { part: bodyPartLabel(r) }));
   for (const r of uniq) {
     const parent = LIMB_PARENT[r];
-    if (parent && uniq.includes(parent)) problems.push(`${bodyPartLabel(parent)} seçilince ${bodyPartLabel(r)} zaten kopuk`);
+    if (parent && uniq.includes(parent)) problems.push(fmt("{parent} seçilince {part} zaten kopuk", { parent: bodyPartLabel(parent), part: bodyPartLabel(r) }));
   }
   const parts = new Set<BodyPartKey>();
   for (const r of uniq) {
@@ -253,7 +254,7 @@ export function perkBudget(keys: string[], start: number, data: Pick<RulesInput,
   for (const k of new Set(keys)) {
     const p = data.perks.find((x) => x.key === k);
     if (!p) {
-      problems.push(`Bilinmeyen perk: ${k}`);
+      problems.push(fmt("Bilinmeyen perk: {key}", { key: k }));
       continue;
     }
     picked.push(p);
@@ -263,7 +264,7 @@ export function perkBudget(keys: string[], start: number, data: Pick<RulesInput,
   for (const p of picked)
     for (const ex of p.exclusive)
       if (picked.some((q) => q.key === ex) && p.key < ex)
-        problems.push(`${p.name} ile ${data.perks.find((q) => q.key === ex)?.name ?? ex} birlikte alınamaz`);
+        problems.push(fmt("{a} ile {b} birlikte alınamaz", { a: p.name, b: data.perks.find((q) => q.key === ex)?.name ?? ex }));
   const left = start + gained - spent;
   if (left < 0) problems.push("Perk puanı negatife düşemez");
   return { start, spent, gained, left, convertible: left > 0 ? Math.floor((left + 1) / 2) : 0, problems };
@@ -328,10 +329,10 @@ export function buildCreation(input: CreationInput, startPerkPoints: number, dat
     const aug = a ? data.augments.find((x) => x.key === a.key) : undefined;
     const part = a?.part as BodyPartKey;
     const parent = part ? LIMB_PARENT[part] : undefined;
-    if (!a || !aug) problems.push(`${tree.name} için başlangıç ${b.tier} augment'i seçilmeli`);
-    else if (aug.tier !== b.tier) problems.push(`Başlangıç augment'i ${b.tier} olmalı`);
-    else if (!aug.slots.includes(part)) problems.push(`${aug.name} bu uzva takılamaz`);
-    else if (parent && body[parent].wound === "kopuk") problems.push(`${bodyPartLabel(parent)} kopuk olduğu için ${bodyPartLabel(part)} uzvuna augment takılamaz`);
+    if (!a || !aug) problems.push(fmt("{tree} için başlangıç {tier} augment'i seçilmeli", { tree: tree.name, tier: b.tier }));
+    else if (aug.tier !== b.tier) problems.push(fmt("Başlangıç augment'i {tier} olmalı", { tier: b.tier }));
+    else if (!aug.slots.includes(part)) problems.push(fmt("{augment} bu uzva takılamaz", { augment: aug.name }));
+    else if (parent && body[parent].wound === "kopuk") problems.push(fmt("{parent} kopuk olduğu için {part} uzvuna augment takılamaz", { parent: bodyPartLabel(parent), part: bodyPartLabel(part) }));
     else {
       // Kopuk uzvun yerine takılan augment protez olarak çalışır.
       body[part] = { ...body[part], augment: aug.key, ...(body[part].wound === "kopuk" ? { wound: "saglam" as const } : {}) };
@@ -348,15 +349,15 @@ export function buildCreation(input: CreationInput, startPerkPoints: number, dat
     stats[k as StatKey] += v ?? 0;
   }
   const total = START_FREE_STATS + budget.convertible;
-  if (sumPoints(input.points) !== total) problems.push(`Tam olarak ${total} stat puanı dağıtılmalı (${START_FREE_STATS} serbest + ${budget.convertible} perklerden)`);
+  if (sumPoints(input.points) !== total) problems.push(fmt("Tam olarak {total} stat puanı dağıtılmalı ({free} serbest + {perk} perklerden)", { total, free: START_FREE_STATS, perk: budget.convertible }));
   if (tree && (input.points[tree.stat] ?? 0) > budget.convertible)
     problems.push(
       budget.convertible
-        ? `Ağaç stat'ına (${STAT_LABELS[tree.stat]}) en fazla ${budget.convertible} puan verilebilir (yalnızca perklerden gelen puanlar)`
-        : `Serbest puanlar ağaç stat'ına (${STAT_LABELS[tree.stat]}) verilemez`,
+        ? fmt("Ağaç stat'ına ({stat}) en fazla {n} puan verilebilir (yalnızca perklerden gelen puanlar)", { stat: STAT_LABELS[tree.stat], n: budget.convertible })
+        : fmt("Serbest puanlar ağaç stat'ına ({stat}) verilemez", { stat: STAT_LABELS[tree.stat] }),
     );
 
-  for (const k of STAT_KEYS) if (stats[k] > STAT_MAX) problems.push(`${STAT_LABELS[k]} ${STAT_MAX}'u geçemez`);
+  for (const k of STAT_KEYS) if (stats[k] > STAT_MAX) problems.push(fmt("{stat} {max}'u geçemez", { stat: STAT_LABELS[k], max: STAT_MAX }));
 
   const abilities: Record<string, number> = {};
   let abilityPoints = 1;
@@ -373,7 +374,7 @@ export function buildCreation(input: CreationInput, startPerkPoints: number, dat
       abilityPoints: 1,
     };
     const st = learnState(c, input.firstAbility, data);
-    if (st.state !== "available") problems.push(`İlk yetenek alınamıyor: ${st.state === "locked" ? st.problems.join(", ") : "zaten alınmış"}`);
+    if (st.state !== "available") problems.push(fmt("İlk yetenek alınamıyor: {reason}", { reason: st.state === "locked" ? st.problems.join(", ") : "zaten alınmış" }));
     else {
       abilities[input.firstAbility] = 1;
       abilityPoints = 0;
@@ -392,7 +393,7 @@ export function clampCorruption(next: number, locked: boolean) {
 export function blackMagicBonus(corruption: number) {
   const parts: { label: string; value: number }[] = [];
   if (corruption >= 1) parts.push({ label: "Corruption 1+ (kara büyü)", value: 2 });
-  if (corruption >= 4) parts.push({ label: `Corruption ${corruption} (kara büyü)`, value: corruption - 3 });
+  if (corruption >= 4) parts.push({ label: fmt("Corruption {n} (kara büyü)", { n: corruption }), value: corruption - 3 });
   return parts;
 }
 
@@ -412,7 +413,7 @@ export function checkModifiers(c: CharLike, p: CheckParams, data: Pick<RulesInpu
   if (p.part) {
     const st = normalizeBody(c.body)[p.part];
     const pen = woundPenalty(st);
-    if (pen) parts.push({ label: `${bodyPartLabel(p.part)} yarası`, value: -pen });
+    if (pen) parts.push({ label: fmt("{part} yarası", { part: bodyPartLabel(p.part) }), value: -pen });
   }
   if (eff.klang.value < 0 && p.stat !== "klang") parts.push({ label: "Negatif Klang", value: eff.klang.value });
   if (c.inspiration < 0) parts.push({ label: "Inspiration borcu", value: c.inspiration * INSPIRATION_DEBT_PENALTY });

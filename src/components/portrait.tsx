@@ -3,18 +3,21 @@ import { ImagePlus, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { portraitUrl } from "@/lib/base";
 import { api } from "@/lib/client";
+import { useT } from "@/i18n/client";
+import type { TFn } from "@/i18n/core";
 import { useToast } from "./interactive";
 import { SunLogo } from "./logo";
 import { MoonLogo } from "./uc/logo";
 import { cx } from "./ui";
 
 export function Portrait({ id, version, name, className }: { id: string; version: number | null | undefined; name: string; className?: string }) {
+  const t = useT();
   const url = portraitUrl(id, version);
   return (
     <div className={cx("relative shrink-0 overflow-hidden rounded-xl border border-line bg-surface2", className ?? "h-16 w-[52px]")}>
       {url ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={url} alt={`${name} portresi`} className="h-full w-full object-cover" loading="lazy" />
+        <img src={url} alt={t("{name} portresi", { name })} className="h-full w-full object-cover" loading="lazy" />
       ) : (
         <div className="grid h-full w-full place-items-center text-accent/50">
           {/* Umbra Caelis sayfalarında (.uc-theme) hilal, diğerlerinde güneş amblemi */}
@@ -31,9 +34,9 @@ const H = 500;
 const MAX_B64 = 230_000;
 
 /** Seçilen görseli tarayıcıda 400×500 kırpar ve sıkıştırır; sunucu ayrıca yeniden kodlar. */
-async function prepare(file: File): Promise<string> {
-  if (!/^image\/(png|jpeg|webp)$/.test(file.type)) throw new Error("PNG, JPEG veya WebP bir görsel seç.");
-  if (file.size > 15 * 1024 * 1024) throw new Error("Görsel 15 MB'tan büyük olamaz.");
+async function prepare(file: File, t: TFn): Promise<string> {
+  if (!/^image\/(png|jpeg|webp)$/.test(file.type)) throw new Error(t("PNG, JPEG veya WebP bir görsel seç."));
+  if (file.size > 15 * 1024 * 1024) throw new Error(t("Görsel 15 MB'tan büyük olamaz."));
   const bmp = await createImageBitmap(file);
   const scale = Math.max(W / bmp.width, H / bmp.height);
   const sw = W / scale;
@@ -44,13 +47,13 @@ async function prepare(file: File): Promise<string> {
   canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Tarayıcı görseli işleyemedi.");
+  if (!ctx) throw new Error(t("Tarayıcı görseli işleyemedi."));
   ctx.drawImage(bmp, sx, sy, sw, sh, 0, 0, W, H);
   for (const q of [0.88, 0.8, 0.7, 0.6, 0.5]) {
     const url = canvas.toDataURL("image/jpeg", q);
     if (url.length < MAX_B64) return url;
   }
-  throw new Error("Görsel sıkıştırılamadı.");
+  throw new Error(t("Görsel sıkıştırılamadı."));
 }
 
 export function PortraitEditor({
@@ -64,6 +67,7 @@ export function PortraitEditor({
   name: string;
   onChange: () => void;
 }) {
+  const t = useT();
   const toast = useToast();
   const input = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -76,9 +80,9 @@ export function PortraitEditor({
           disabled={busy}
           onClick={() => input.current?.click()}
           className="flex items-center gap-1 rounded px-2 py-1 text-[11px] text-white hover:bg-white/15"
-          title="Portre yükle"
+          title={t("Portre yükle")}
         >
-          <ImagePlus className="h-3.5 w-3.5" /> {version ? "Değiştir" : "Ekle"}
+          <ImagePlus className="h-3.5 w-3.5" /> {version ? t("Değiştir") : t("Ekle")}
         </button>
         {version > 0 && (
           <button
@@ -96,8 +100,8 @@ export function PortraitEditor({
               }
             }}
             className="rounded px-2 py-1 text-white hover:bg-white/15"
-            title="Portreyi kaldır"
-            aria-label="Portreyi kaldır"
+            title={t("Portreyi kaldır")}
+            aria-label={t("Portreyi kaldır")}
           >
             <Trash2 className="h-3.5 w-3.5" />
           </button>
@@ -114,9 +118,9 @@ export function PortraitEditor({
           if (!f) return;
           setBusy(true);
           try {
-            const image = await prepare(f);
+            const image = await prepare(f, t);
             await api(`/api/characters/${id}/portrait`, { method: "PUT", body: { image } });
-            toast("Portre güncellendi.", "ok");
+            toast(t("Portre güncellendi."), "ok");
             onChange();
           } catch (err) {
             toast((err as Error).message, "error");

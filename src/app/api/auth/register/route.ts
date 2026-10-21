@@ -7,6 +7,7 @@ import { sha256 } from "@/lib/auth/core";
 import { hashPassword, passwordProblem } from "@/lib/auth/password";
 import { recordAttempt, tooManyAttempts } from "@/lib/auth/ratelimit";
 import { startSession } from "@/lib/auth/session";
+import { badLoose } from "@/lib/api-loose";
 import { normalizeCode } from "@/lib/codes";
 
 export const POST = route(
@@ -23,12 +24,12 @@ export const POST = route(
       password: z.string().max(200),
     }),
   },
-  async ({ body, ip }) => {
+  async ({ req, body, ip }) => {
     if (await tooManyAttempts(`reg:${ip}`, 10, 60 * 60_000)) throw new ApiError(429, "Çok fazla deneme. Bir saat sonra tekrar dene.");
     await recordAttempt(`reg:${ip}`);
 
     const pw = passwordProblem(body.password, body.username);
-    if (pw) throw bad(pw);
+    if (pw) throw badLoose(req, pw);
 
     const codeHash = sha256(normalizeCode(body.code));
     const invite = await db.query.invites.findFirst({

@@ -1,31 +1,37 @@
 import fs from "node:fs";
 import path from "node:path";
+import type { Locale } from "../../i18n/core";
 import type { UcAbility, UcClass, UcContent, UcDal } from "./content-types";
 import type { UcRules } from "./rules";
 
-// content/uc.json dosyasını okur ve önbelleğe alır (dosya değişirse yeniden okunur).
-let cache: { mtime: number; data: UcContent; cls: Map<string, UcClass> } | null = null;
+// content/uc.json (Türkçe) ya da content/uc.en.json (İngilizce) dosyasını okur ve önbelleğe alır
+// (dosya değişirse yeniden okunur). İngilizce dosya `npx tsx scripts/i18n-content.ts build` ile üretilir.
+type Entry = { mtime: number; data: UcContent; cls: Map<string, UcClass> };
+const caches = new Map<string, Entry>();
 
-function load() {
-  const f = path.join(process.cwd(), "content", "uc.json");
+function load(loc: Locale = "tr"): Entry {
+  let f = path.join(process.cwd(), "content", loc === "en" ? "uc.en.json" : "uc.json");
+  if (!fs.existsSync(f)) f = path.join(process.cwd(), "content", "uc.json");
   const mtime = fs.statSync(f).mtimeMs;
-  if (cache && cache.mtime === mtime) return cache;
+  const hit = caches.get(f);
+  if (hit && hit.mtime === mtime) return hit;
   const data = JSON.parse(fs.readFileSync(f, "utf8")) as UcContent;
-  cache = { mtime, data, cls: new Map(data.classes.map((c) => [c.key, c])) };
-  return cache;
+  const e = { mtime, data, cls: new Map(data.classes.map((c) => [c.key, c])) };
+  caches.set(f, e);
+  return e;
 }
 
-export function ucContent(): UcContent {
-  return load().data;
+export function ucContent(loc: Locale = "tr"): UcContent {
+  return load(loc).data;
 }
-export function ucClass(key: string): UcClass | undefined {
-  return load().cls.get(key);
+export function ucClass(key: string, loc: Locale = "tr"): UcClass | undefined {
+  return load(loc).cls.get(key);
 }
-export function ucDal(key: string): UcDal | undefined {
-  return load().data.dals[key];
+export function ucDal(key: string, loc: Locale = "tr"): UcDal | undefined {
+  return load(loc).data.dals[key];
 }
-export function ucAbility(key: string): UcAbility | undefined {
-  return load().data.abilities[key];
+export function ucAbility(key: string, loc: Locale = "tr"): UcAbility | undefined {
+  return load(loc).data.abilities[key];
 }
 /** Bir yeteneğin sayfadaki adresi. */
 export function ucAbilityHref(a: Pick<UcAbility, "classKey" | "dalKey" | "key">) {
@@ -33,8 +39,8 @@ export function ucAbilityHref(a: Pick<UcAbility, "classKey" | "dalKey" | "key">)
 }
 
 /** Kural motoru ve istemci bileşenleri için sade veri (HTML metinleri olmadan). */
-export function ucRulesData(): UcRules {
-  const c = load().data;
+export function ucRulesData(loc: Locale = "tr"): UcRules {
+  const c = load(loc).data;
   return {
     classes: c.classes.map((x) => ({ key: x.key, name: x.name, dals: x.dals })),
     dals: Object.fromEntries(

@@ -1,5 +1,6 @@
 "use client";
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { useT } from "@/i18n/client";
 import { cx } from "./ui";
 
 // ---------------------------------------------------------------- bildirimler
@@ -39,6 +40,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 /** Bir API çağrısını yükleniyor durumu ve hata bildirimiyle sarmalar. */
 export function useAction() {
   const toast = useToast();
+  const t = useT();
   const [busy, setBusy] = useState(false);
   const run = useCallback(
     async <T,>(fn: () => Promise<T>, okText?: string): Promise<T | undefined> => {
@@ -48,13 +50,13 @@ export function useAction() {
         if (okText) toast(okText, "ok");
         return r;
       } catch (e) {
-        toast(e instanceof Error ? e.message : "Bir hata oluştu.", "error");
+        toast(e instanceof Error ? e.message : t("Bir hata oluştu."), "error");
         return undefined;
       } finally {
         setBusy(false);
       }
     },
-    [toast],
+    [toast, t],
   );
   return { busy, run };
 }
@@ -62,6 +64,7 @@ export function useAction() {
 // ---------------------------------------------------------------- pencere
 export function Modal({ open, onClose, title, children, wide }: { open: boolean; onClose: () => void; title: ReactNode; children: ReactNode; wide?: boolean }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const t = useT();
   useEffect(() => {
     const d = ref.current;
     if (!d) return;
@@ -82,7 +85,7 @@ export function Modal({ open, onClose, title, children, wide }: { open: boolean;
         <div className="flex max-h-[85vh] flex-col">
           <div className="flex items-center justify-between gap-4 border-b border-line px-5 py-3.5">
             <h2 className="font-serif text-lg">{title}</h2>
-            <button type="button" onClick={onClose} className="rounded-md px-2 py-1 text-muted hover:bg-surface2 hover:text-ink" aria-label="Kapat">
+            <button type="button" onClick={onClose} className="rounded-md px-2 py-1 text-muted hover:bg-surface2 hover:text-ink" aria-label={t("Kapat")}>
               ✕
             </button>
           </div>
@@ -140,7 +143,8 @@ export function useHashTab<K extends string>(keys: readonly K[], def: K) {
   return [tab, change] as const;
 }
 
-export function CopyButton({ text, label = "Kopyala" }: { text: string; label?: string }) {
+export function CopyButton({ text, label }: { text: string; label?: string }) {
+  const t = useT();
   const [done, setDone] = useState(false);
   return (
     <button
@@ -156,7 +160,29 @@ export function CopyButton({ text, label = "Kopyala" }: { text: string; label?: 
       }}
       className="rounded-md border border-line px-2 py-1 text-xs text-muted hover:text-ink"
     >
-      {done ? "Kopyalandı" : label}
+      {done ? t("Kopyalandı") : (label ?? t("Kopyala"))}
     </button>
+  );
+}
+
+/** Sekme içi alt sekmeler (yuvarlak düğme grubu). */
+export function SubTabs<K extends string>({ tabs, value, onChange, className }: { tabs: { key: K; label: ReactNode; badge?: ReactNode }[]; value: K; onChange: (k: K) => void; className?: string }) {
+  return (
+    <div role="tablist" className={cx("inline-flex flex-wrap gap-1 rounded-xl border border-line bg-surface p-1", className)}>
+      {tabs.map((t) => (
+        <button
+          key={t.key}
+          role="tab"
+          type="button"
+          aria-selected={value === t.key}
+          data-testid={`subtab-${t.key}`}
+          onClick={() => onChange(t.key)}
+          className={cx("flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-sm transition", value === t.key ? "bg-accent/15 text-ink" : "text-muted hover:text-ink")}
+        >
+          {t.label}
+          {t.badge}
+        </button>
+      ))}
+    </div>
   );
 }

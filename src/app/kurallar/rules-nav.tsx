@@ -4,8 +4,10 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { PageGlyph, TreeIcon } from "@/components/content/icons";
 import { cx } from "@/components/ui";
+import { useT } from "@/i18n/client";
 
 export function RulesNav({ groups }: { groups: { title: string; items: { href: string; label: string; icon?: string; tree?: string }[] }[] }) {
+  const t = useT();
   const path = usePathname();
   const router = useRouter();
   const [q, setQ] = useState("");
@@ -18,10 +20,10 @@ export function RulesNav({ groups }: { groups: { title: string; items: { href: s
           if (q.trim()) router.push(`/kurallar/ara?q=${encodeURIComponent(q.trim())}`);
         }}
       >
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Kurallarda ara…" className="input" maxLength={60} />
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("Kurallarda ara…")} className="input" maxLength={60} />
       </form>
       <button type="button" className="mt-3 w-full rounded-md border border-line px-3 py-2 text-left text-sm text-muted lg:hidden" onClick={() => setOpen(!open)}>
-        {open ? "İçindekileri gizle" : "İçindekiler"}
+        {open ? t("İçindekileri gizle") : t("İçindekiler")}
       </button>
       <nav className={cx("mt-4 space-y-5 lg:block", open ? "block" : "hidden")}>
         {groups.map((g) => (

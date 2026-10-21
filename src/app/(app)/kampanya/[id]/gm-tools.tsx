@@ -4,33 +4,35 @@ import { useState } from "react";
 import { useGo } from "@/components/app-link";
 import { CopyButton, Modal, useAction } from "@/components/interactive";
 import { Button, Card, Empty, Field, cx } from "@/components/ui";
+import { useT } from "@/i18n/client";
 import { api } from "@/lib/client";
 import { STAT_KEYS, STAT_LABELS, STAT_MAX, type StatKey } from "@/lib/shz/constants";
 
 export function ApprovalActions({ characterId }: { characterId: string }) {
   const router = useRouter();
+  const t = useT();
   const { busy, run } = useAction();
   const [rejecting, setRejecting] = useState(false);
   const [note, setNote] = useState("");
   const send = async (approve: boolean) => {
-    const ok = await run(() => api(`/api/characters/${characterId}/review`, { body: { approve, note: note || undefined } }), approve ? "Karakter onaylandı." : "Karakter reddedildi.");
+    const ok = await run(() => api(`/api/characters/${characterId}/review`, { body: { approve, note: note || undefined } }), approve ? t("Karakter onaylandı.") : t("Karakter reddedildi."));
     if (ok) router.refresh();
   };
   return (
     <div className="flex gap-2">
       <Button variant="primary" size="sm" disabled={busy} onClick={() => send(true)}>
-        Onayla
+        {t("Onayla")}
       </Button>
       <Button variant="danger" size="sm" disabled={busy} onClick={() => setRejecting(true)}>
-        Reddet
+        {t("Reddet")}
       </Button>
-      <Modal open={rejecting} onClose={() => setRejecting(false)} title="Karakteri reddet">
-        <p className="mb-3 text-sm text-muted">Oyuncu nedenini karakter sayfasında görür ve yeni bir karakter oluşturabilir.</p>
-        <textarea value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} rows={3} className="input" placeholder="Neden?" />
+      <Modal open={rejecting} onClose={() => setRejecting(false)} title={t("Karakteri reddet")}>
+        <p className="mb-3 text-sm text-muted">{t("Oyuncu nedenini karakter sayfasında görür ve yeni bir karakter oluşturabilir.")}</p>
+        <textarea value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} rows={3} className="input" placeholder={t("Neden?")} />
         <div className="mt-4 flex justify-end gap-2">
-          <Button onClick={() => setRejecting(false)}>Vazgeç</Button>
+          <Button onClick={() => setRejecting(false)}>{t("Vazgeç")}</Button>
           <Button variant="danger" disabled={busy} onClick={() => send(false).then(() => setRejecting(false))}>
-            Reddet
+            {t("Reddet")}
           </Button>
         </div>
       </Modal>
@@ -40,26 +42,27 @@ export function ApprovalActions({ characterId }: { characterId: string }) {
 
 export function RemoveMember({ campaignId, userId, name }: { campaignId: string; userId: string; name: string }) {
   const router = useRouter();
+  const t = useT();
   const { run } = useAction();
   const [open, setOpen] = useState(false);
   return (
     <>
       <button type="button" className="text-xs text-muted hover:text-danger" onClick={() => setOpen(true)}>
-        Çıkar
+        {t("Çıkar")}
       </button>
-      <Modal open={open} onClose={() => setOpen(false)} title="Oyuncuyu çıkar">
-        <p className="text-sm text-muted">{name} kampanyadan çıkarılacak. Karakterleri silinmez ama oyuncu artık kampanyayı göremez.</p>
+      <Modal open={open} onClose={() => setOpen(false)} title={t("Oyuncuyu çıkar")}>
+        <p className="text-sm text-muted">{t("{name} kampanyadan çıkarılacak. Karakterleri silinmez ama oyuncu artık kampanyayı göremez.", { name })}</p>
         <div className="mt-4 flex justify-end gap-2">
-          <Button onClick={() => setOpen(false)}>Vazgeç</Button>
+          <Button onClick={() => setOpen(false)}>{t("Vazgeç")}</Button>
           <Button
             variant="danger"
             onClick={async () => {
-              await run(() => api(`/api/campaigns/${campaignId}/members/${userId}`, { method: "DELETE" }), "Oyuncu çıkarıldı.");
+              await run(() => api(`/api/campaigns/${campaignId}/members/${userId}`, { method: "DELETE" }), t("Oyuncu çıkarıldı."));
               setOpen(false);
               router.refresh();
             }}
           >
-            Çıkar
+            {t("Çıkar")}
           </Button>
         </div>
       </Modal>
@@ -69,13 +72,14 @@ export function RemoveMember({ campaignId, userId, name }: { campaignId: string;
 
 export function JoinCodeBox({ campaignId, code, spectatorCode }: { campaignId: string; code: string; spectatorCode: string | null }) {
   const router = useRouter();
+  const t = useT();
   const { busy, run } = useAction();
   return (
     <Card className="space-y-5 p-5">
       <div>
-        <p className="kicker mb-2">Oyuncu katılma kodu</p>
+        <p className="kicker mb-2">{t("Oyuncu katılma kodu")}</p>
         <p className="font-mono text-2xl tracking-widest text-ink">{code}</p>
-        <p className="mt-2 text-xs text-muted">Hesabı olan oyuncular bu kodla katılır. Yeni oyuncular için Yönetim sayfasından bu kampanyaya bağlı davet kodu üret.</p>
+        <p className="mt-2 text-xs text-muted">{t("Hesabı olan oyuncular bu kodla katılır. Yeni oyuncular için Yönetim sayfasından bu kampanyaya bağlı davet kodu üret.")}</p>
         <div className="mt-3 flex gap-2">
           <CopyButton text={code} />
           <button
@@ -83,22 +87,22 @@ export function JoinCodeBox({ campaignId, code, spectatorCode }: { campaignId: s
             disabled={busy}
             className="rounded-md border border-line px-2 py-1 text-xs text-muted hover:text-ink"
             onClick={async () => {
-              await run(() => api(`/api/campaigns/${campaignId}/join-code`, { body: {} }), "Yeni kod üretildi. Eski kod artık çalışmaz.");
+              await run(() => api(`/api/campaigns/${campaignId}/join-code`, { body: {} }), t("Yeni kod üretildi. Eski kod artık çalışmaz."));
               router.refresh();
             }}
           >
-            Kodu yenile
+            {t("Kodu yenile")}
           </button>
         </div>
       </div>
       <div className="border-t border-line pt-4">
-        <p className="kicker mb-2">İzleyici kodu</p>
+        <p className="kicker mb-2">{t("İzleyici kodu")}</p>
         {spectatorCode ? (
           <p className="font-mono text-2xl tracking-widest text-ink">{spectatorCode}</p>
         ) : (
-          <p className="text-sm text-muted">Kapalı</p>
+          <p className="text-sm text-muted">{t("Kapalı")}</p>
         )}
-        <p className="mt-2 text-xs text-muted">Bu kodla katılanlar masayı izler: karakter oluşturamaz, sahneye yazamaz, zar atamaz. Masa sohbetine ve sana fısıltıyla yazabilirler.</p>
+        <p className="mt-2 text-xs text-muted">{t("Bu kodla katılanlar masayı izler: karakter oluşturamaz, sahneye yazamaz, zar atamaz. Masa sohbetine ve sana fısıltıyla yazabilirler.")}</p>
         <div className="mt-3 flex flex-wrap gap-2">
           {spectatorCode && <CopyButton text={spectatorCode} />}
           <button
@@ -106,11 +110,11 @@ export function JoinCodeBox({ campaignId, code, spectatorCode }: { campaignId: s
             disabled={busy}
             className="rounded-md border border-line px-2 py-1 text-xs text-muted hover:text-ink"
             onClick={async () => {
-              await run(() => api(`/api/campaigns/${campaignId}/spectator-code`, { body: {} }), spectatorCode ? "Yeni izleyici kodu üretildi." : "İzleyici kodu açıldı.");
+              await run(() => api(`/api/campaigns/${campaignId}/spectator-code`, { body: {} }), spectatorCode ? t("Yeni izleyici kodu üretildi.") : t("İzleyici kodu açıldı."));
               router.refresh();
             }}
           >
-            {spectatorCode ? "Kodu yenile" : "İzleyici kodu üret"}
+            {spectatorCode ? t("Kodu yenile") : t("İzleyici kodu üret")}
           </button>
           {spectatorCode && (
             <button
@@ -118,11 +122,11 @@ export function JoinCodeBox({ campaignId, code, spectatorCode }: { campaignId: s
               disabled={busy}
               className="rounded-md border border-line px-2 py-1 text-xs text-muted hover:text-danger"
               onClick={async () => {
-                await run(() => api(`/api/campaigns/${campaignId}/spectator-code`, { method: "DELETE" }), "İzleyici kodu kapatıldı.");
+                await run(() => api(`/api/campaigns/${campaignId}/spectator-code`, { method: "DELETE" }), t("İzleyici kodu kapatıldı."));
                 router.refresh();
               }}
             >
-              Kapat
+              {t("Kapat")}
             </button>
           )}
         </div>
@@ -133,19 +137,20 @@ export function JoinCodeBox({ campaignId, code, spectatorCode }: { campaignId: s
 
 export function MemberRoleToggle({ campaignId, userId, role }: { campaignId: string; userId: string; role: "PLAYER" | "SPECTATOR" }) {
   const router = useRouter();
+  const t = useT();
   const { busy, run } = useAction();
   return (
     <button
       type="button"
       disabled={busy}
       className="text-xs text-muted hover:text-ink"
-      title={role === "SPECTATOR" ? "Oyuncu yap" : "İzleyici yap"}
+      title={role === "SPECTATOR" ? t("Oyuncu yap") : t("İzleyici yap")}
       onClick={async () => {
         await run(() => api(`/api/campaigns/${campaignId}/members/${userId}`, { method: "PATCH", body: { role: role === "SPECTATOR" ? "PLAYER" : "SPECTATOR" } }));
         router.refresh();
       }}
     >
-      {role === "SPECTATOR" ? "Oyuncu yap" : "İzleyici yap"}
+      {role === "SPECTATOR" ? t("Oyuncu yap") : t("İzleyici yap")}
     </button>
   );
 }
@@ -161,10 +166,11 @@ interface LvChar {
 
 export function LevelUpPanel({ campaignId, characters, levelCap }: { campaignId: string; characters: LvChar[]; levelCap: number }) {
   const router = useRouter();
+  const t = useT();
   const { busy, run } = useAction();
   const [sel, setSel] = useState<Record<string, StatKey | "">>({});
   const [mvp, setMvp] = useState<{ id: string; stat: StatKey | "" }>({ id: "", stat: "" });
-  if (!characters.length) return <Empty title="Aktif karakter yok">Onaylanmış karakterler burada görünür.</Empty>;
+  if (!characters.length) return <Empty title={t("Aktif karakter yok")}>{t("Onaylanmış karakterler burada görünür.")}</Empty>;
   const chosen = Object.keys(sel);
   const maxLv = Math.max(0, ...characters.filter((c) => chosen.includes(c.id)).map((c) => c.level + 1));
   const ready = chosen.length > 0 && chosen.every((id) => sel[id]) && (!mvp.id || mvp.stat);
@@ -172,8 +178,8 @@ export function LevelUpPanel({ campaignId, characters, levelCap }: { campaignId:
   return (
     <Card className="p-5">
       <p className="mb-4 text-sm text-muted">
-        Seçilen her karakter: <strong className="text-ink">+1 seviye</strong>, <strong className="text-ink">+1 yetenek puanı</strong>, ağaç stat'ına +1 ve seçtiğin aksiyon
-        stat'ına +1 alır. MVP'ye ayrıca +1. MVP hesabında, seviye atlanan seviyenin 3 veya daha fazla gerisindeki oyuncular sayılmaz.
+        {t("Seçilen her karakter:")} <strong className="text-ink">{t("+1 seviye")}</strong>, <strong className="text-ink">{t("+1 yetenek puanı")}</strong>
+        {t(", ağaç stat'ına +1 ve seçtiğin aksiyon stat'ına +1 alır. MVP'ye ayrıca +1. MVP hesabında, seviye atlanan seviyenin 3 veya daha fazla gerisindeki oyuncular sayılmaz.")}
       </p>
       <div className="space-y-2">
         {characters.map((c) => {
@@ -199,15 +205,15 @@ export function LevelUpPanel({ campaignId, characters, levelCap }: { campaignId:
                 <span>
                   <span className="text-ink">{c.name}</span>
                   <span className="ml-2 text-xs text-muted">
-                    {c.owner} · Sv {c.level}
-                    {c.level >= levelCap && " (sınırda)"}
-                    {c.treeStat && ` · ağaç: ${STAT_LABELS[c.treeStat]} ${c.stats[c.treeStat]}`}
+                    {c.owner} · {t("Sv {n}", { n: c.level })}
+                    {c.level >= levelCap && ` ${t("(sınırda)")}`}
+                    {c.treeStat && ` · ${t("ağaç: {stat} {n}", { stat: STAT_LABELS[c.treeStat], n: c.stats[c.treeStat] })}`}
                   </span>
                 </span>
               </label>
               {on && (
                 <select value={sel[c.id]} onChange={(e) => setSel((s) => ({ ...s, [c.id]: e.target.value as StatKey }))} className="input h-9 w-44 py-1 text-sm">
-                  <option value="">Aksiyon stat'ı…</option>
+                  <option value="">{t("Aksiyon stat'ı…")}</option>
                   {STAT_KEYS.map((k) => (
                     <option key={k} value={k} disabled={c.stats[k] >= STAT_MAX}>
                       {STAT_LABELS[k]} ({c.stats[k]})
@@ -215,7 +221,7 @@ export function LevelUpPanel({ campaignId, characters, levelCap }: { campaignId:
                   ))}
                 </select>
               )}
-              {behind && <span className="text-xs text-warn">MVP hesabı dışında</span>}
+              {behind && <span className="text-xs text-warn">{t("MVP hesabı dışında")}</span>}
             </div>
           );
         })}
@@ -224,7 +230,7 @@ export function LevelUpPanel({ campaignId, characters, levelCap }: { campaignId:
         <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg border border-line bg-surface2/50 px-3 py-3">
           <span className="text-sm text-ink">MVP</span>
           <select value={mvp.id} onChange={(e) => setMvp({ id: e.target.value, stat: "" })} className="input h-9 w-48 py-1 text-sm">
-            <option value="">Yok</option>
+            <option value="">{t("Yok")}</option>
             {characters
               .filter((c) => chosen.includes(c.id) && maxLv - (c.level + 1) < 3)
               .map((c) => (
@@ -235,7 +241,7 @@ export function LevelUpPanel({ campaignId, characters, levelCap }: { campaignId:
           </select>
           {mvp.id && (
             <select value={mvp.stat} onChange={(e) => setMvp((m) => ({ ...m, stat: e.target.value as StatKey }))} className="input h-9 w-44 py-1 text-sm">
-              <option value="">MVP stat'ı…</option>
+              <option value="">{t("MVP stat'ı…")}</option>
               {STAT_KEYS.map((k) => (
                 <option key={k} value={k}>
                   {STAT_LABELS[k]}
@@ -258,7 +264,7 @@ export function LevelUpPanel({ campaignId, characters, levelCap }: { campaignId:
                     mvp: mvp.id && mvp.stat ? { characterId: mvp.id, stat: mvp.stat } : null,
                   },
                 }),
-              "Seviye atlatıldı.",
+              t("Seviye atlatıldı."),
             );
             if (ok) {
               setSel({});
@@ -267,7 +273,7 @@ export function LevelUpPanel({ campaignId, characters, levelCap }: { campaignId:
             }
           }}
         >
-          {chosen.length ? `${chosen.length} karakteri seviye atlat` : "Karakter seç"}
+          {chosen.length ? t("{n} karakteri seviye atlat", { n: chosen.length }) : t("Karakter seç")}
         </Button>
       </div>
     </Card>
@@ -294,49 +300,50 @@ export function CloseRoom({
   afterHref?: string;
 }) {
   const router = useRouter();
+  const t = useT();
   const go = useGo();
   const { busy, run } = useAction();
   const [open, setOpen] = useState(false);
   const [confirm, setConfirm] = useState("");
   const left = players + spectators;
-  const who = [players > 0 && `${players} oyuncu`, spectators > 0 && `${spectators} izleyici`].filter(Boolean).join(" ve ");
+  const who = [players > 0 && t("{n} oyuncu", { n: players }), spectators > 0 && t("{n} izleyici", { n: spectators })].filter(Boolean).join(t(" ve "));
   return (
     <Card className="border-danger/40 p-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="max-w-xl space-y-2 text-sm">
           <p className="text-ink/90">
-            Kampanya; karakterleri, sohbet ve zar geçmişiyle birlikte kalıcı olarak silinir. Katılma kodları geçersiz olur, kullanılmamış davetler iptal edilir. Yalnızca
-            dondurmak istiyorsan ayarlardan durumu &quot;Arşiv&quot; yap.
+            {t("Kampanya; karakterleri, sohbet ve zar geçmişiyle birlikte kalıcı olarak silinir. Katılma kodları geçersiz olur, kullanılmamış davetler iptal edilir. Yalnızca dondurmak istiyorsan ayarlardan durumu \"Arşiv\" yap.")}
           </p>
           {left > 0 ? (
             <p className="text-warn" data-testid="close-room-blocked">
-              Kapatmak için önce tüm oyuncuları çıkar: {who} kaldı. &quot;Oyuncular ve izleyiciler&quot; listesindeki &quot;Çıkar&quot; ile çıkarabilirsin.
+              {t("Kapatmak için önce tüm oyuncuları çıkar: {who} kaldı. \"Oyuncular ve izleyiciler\" listesindeki \"Çıkar\" ile çıkarabilirsin.", { who })}
             </p>
           ) : (
-            <p className="text-muted">Odada kimse kalmadı; oda kapatılabilir.</p>
+            <p className="text-muted">{t("Odada kimse kalmadı; oda kapatılabilir.")}</p>
           )}
         </div>
         <Button variant="danger" disabled={left > 0 || busy} onClick={() => setOpen(true)}>
-          Odayı kapat
+          {t("Odayı kapat")}
         </Button>
       </div>
-      <Modal open={open} onClose={() => setOpen(false)} title="Odayı kapat">
+      <Modal open={open} onClose={() => setOpen(false)} title={t("Odayı kapat")}>
         <div className="space-y-4">
           <p className="text-sm text-ink/90">
-            <strong>{name}</strong> kalıcı olarak kapatılacak.{" "}
-            {characters > 0 ? `${characters} karakter (portre ve kayıtlarıyla), sahne mesajları` : "Sahne mesajları"}, masa sohbeti, fısıltılar ve zar geçmişi silinir. Bu işlem geri
-            alınamaz.
+            <strong>{name}</strong> {t("kalıcı olarak kapatılacak.")}{" "}
+            {characters > 0
+              ? t("{n} karakter (portre ve kayıtlarıyla), sahne mesajları, masa sohbeti, fısıltılar ve zar geçmişi silinir. Bu işlem geri alınamaz.", { n: characters })
+              : t("Sahne mesajları, masa sohbeti, fısıltılar ve zar geçmişi silinir. Bu işlem geri alınamaz.")}
           </p>
-          <Field label="Onaylamak için kampanyanın adını yaz">
+          <Field label={t("Onaylamak için kampanyanın adını yaz")}>
             <input className="input" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder={name} autoComplete="off" />
           </Field>
           <div className="flex justify-end gap-2">
-            <Button onClick={() => setOpen(false)}>Vazgeç</Button>
+            <Button onClick={() => setOpen(false)}>{t("Vazgeç")}</Button>
             <Button
               variant="danger"
               disabled={busy || confirm.trim() !== name.trim()}
               onClick={async () => {
-                const ok = await run(() => api(`/api/campaigns/${campaignId}`, { method: "DELETE", body: { confirmName: confirm.trim() } }), "Oda kapatıldı.");
+                const ok = await run(() => api(`/api/campaigns/${campaignId}`, { method: "DELETE", body: { confirmName: confirm.trim() } }), t("Oda kapatıldı."));
                 if (!ok) {
                   // Bu arada biri katıldıysa sayfadaki listeyi tazele.
                   setOpen(false);
@@ -352,7 +359,7 @@ export function CloseRoom({
                 go(afterHref, { replace: true });
               }}
             >
-              Kalıcı olarak kapat
+              {t("Kalıcı olarak kapat")}
             </Button>
           </div>
         </div>
@@ -374,23 +381,24 @@ export function TransferOwner({
   options: { id: string; name: string }[];
 }) {
   const router = useRouter();
+  const t = useT();
   const { busy, run } = useAction();
   const [open, setOpen] = useState(false);
   const [to, setTo] = useState<string>(ownerId ?? "");
   return (
     <>
       <button type="button" className="text-xs text-muted hover:text-ink" onClick={() => (setTo(ownerId ?? ""), setOpen(true))} data-testid="transfer-owner">
-        Sahibini değiştir
+        {t("Sahibini değiştir")}
       </button>
-      <Modal open={open} onClose={() => setOpen(false)} title="Karakteri devret">
+      <Modal open={open} onClose={() => setOpen(false)} title={t("Karakteri devret")}>
         <div className="space-y-4">
           <p className="text-sm text-muted">
-            <strong className="text-ink">{characterName}</strong> başka bir oyuncuya ya da sana devredilebilir veya sahipsiz bırakılabilir. Sahipsiz karakter partide kalır; zarlarını GM
-            atar. Oyuncular kampanya başına tek aktif karaktere sahip olabilir.
+            <strong className="text-ink">{characterName}</strong>{" "}
+            {t("başka bir oyuncuya ya da sana devredilebilir veya sahipsiz bırakılabilir. Sahipsiz karakter partide kalır; zarlarını GM atar. Oyuncular kampanya başına tek aktif karaktere sahip olabilir.")}
           </p>
-          <Field label="Yeni sahibi">
+          <Field label={t("Yeni sahibi")}>
             <select className="input" value={to} onChange={(e) => setTo(e.target.value)}>
-              <option value="">Sahipsiz</option>
+              <option value="">{t("Sahipsiz")}</option>
               {options.map((o) => (
                 <option key={o.id} value={o.id}>
                   {o.name}
@@ -399,19 +407,19 @@ export function TransferOwner({
             </select>
           </Field>
           <div className="flex justify-end gap-2">
-            <Button onClick={() => setOpen(false)}>Vazgeç</Button>
+            <Button onClick={() => setOpen(false)}>{t("Vazgeç")}</Button>
             <Button
               variant="primary"
               disabled={busy || to === (ownerId ?? "")}
               onClick={async () => {
-                const ok = await run(() => api(`/api/characters/${characterId}/owner`, { method: "PATCH", body: { userId: to || null } }), to ? "Karakter devredildi." : "Karakter sahipsiz bırakıldı.");
+                const ok = await run(() => api(`/api/characters/${characterId}/owner`, { method: "PATCH", body: { userId: to || null } }), to ? t("Karakter devredildi.") : t("Karakter sahipsiz bırakıldı."));
                 if (ok !== undefined) {
                   setOpen(false);
                   router.refresh();
                 }
               }}
             >
-              Kaydet
+              {t("Kaydet")}
             </Button>
           </div>
         </div>

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { characters, portraits } from "@/db/schema";
 import { bad, forbidden, notFound, route } from "@/lib/api";
+import { fmt } from "@/i18n/core";
 import { addLog, characterAccess } from "@/lib/access";
 import { characterChanged } from "@/lib/realtime-bus";
 
@@ -64,7 +65,7 @@ export const PUT = route(
       .update(characters)
       .set({ portraitVersion: sql`${characters.portraitVersion} + 1` })
       .where(eq(characters.id, a.character.id));
-    await addLog(a.character.id, user.id, "portrait", "Portre güncellendi.");
+    await addLog(a.character.id, user.id, "portrait", fmt("Portre güncellendi."));
     characterChanged(a.campaign.id, a.character.id);
     return { ok: true };
   },

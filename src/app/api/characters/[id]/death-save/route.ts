@@ -2,6 +2,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { characters } from "@/db/schema";
 import { bad, conflict, route } from "@/lib/api";
+import { fmt } from "@/i18n/core";
 import { addLog, characterEditor } from "@/lib/access";
 import { characterChanged } from "@/lib/realtime-bus";
 
@@ -13,14 +14,14 @@ export const POST = route({ limit: 10 }, async ({ params, user }) => {
   if (ds.available) throw bad("Death Save hakkın zaten var.");
   const cost = ds.resets + 1;
   const pn = campaign.system === "UC" ? "Esin" : "Inspiration";
-  if (c.inspiration < cost) throw bad(`Yenilemek için ${cost} ${pn} gerekiyor.`);
+  if (c.inspiration < cost) throw bad("Yenilemek için {cost} {point} gerekiyor.", { cost, point: pn });
   const upd = await db
     .update(characters)
     .set({ inspiration: c.inspiration - cost, deathSave: { ...ds, available: true, resets: ds.resets + 1, deaths: 0, saves: 0 } })
     .where(and(eq(characters.id, c.id), eq(characters.inspiration, c.inspiration)))
     .returning({ id: characters.id });
   if (!upd.length) throw conflict("Karakter bu sırada değişti, tekrar dene.");
-  await addLog(c.id, user.id, "death-save", `Death Save ${cost} ${pn} ile yenilendi.`);
+  await addLog(c.id, user.id, "death-save", fmt("Death Save {cost} {point} ile yenilendi.", { cost, point: pn }));
   characterChanged(campaign.id, c.id);
   return { ok: true };
 });

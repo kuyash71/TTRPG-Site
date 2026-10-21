@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
+import { getT } from "@/i18n/server";
 
-export const metadata: Metadata = {
-  title: { default: "Umbra Caelis", template: "%s · Umbra Caelis" },
-  description: "Umbra Caelis TTRPG: kural kitabı, kampanyalar, karakterler ve oyun odası.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return {
+    title: { default: "Umbra Caelis", template: "%s · Umbra Caelis" },
+    description: t("Umbra Caelis TTRPG: kural kitabı, kampanyalar, karakterler ve oyun odası."),
+  };
+}
 
 /** umbracaelis.com/umbracaelis: Umbra Caelis bölümü (yumuşak altın + lavanta tema). */
 export default function UmbraCaelisLayout({ children }: { children: React.ReactNode }) {

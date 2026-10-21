@@ -1,23 +1,25 @@
+"use client";
 import type { ReactNode } from "react";
+import { useLocale, useT } from "@/i18n/client";
 import { enrichContent } from "@/lib/base";
 import { KRIEGSVERSEHRT, STAT_LABELS, bodyPartLabel } from "@/lib/shz/constants";
 import type { Ability, Augment, Perk } from "@/lib/shz/content-types";
 import { Badge, cx } from "../ui";
 import { branchMeaning } from "@/lib/shz/tips";
+import { branchLabel } from "@/lib/shz/labels";
 import { AbilityIcon, AugmentIcon, PerkIcon } from "./icons";
 import { Meaning, TipButton } from "./tip";
 
 export function Html({ html, className }: { html: string; className?: string }) {
+  const loc = useLocale();
   if (!html) return null;
-  return <div className={cx("prose-shz", className)} dangerouslySetInnerHTML={{ __html: enrichContent(html) }} />;
+  return <div className={cx("prose-shz", className)} dangerouslySetInnerHTML={{ __html: enrichContent(html, loc) }} />;
 }
 
 const TYPE_TONE: Record<string, "accent" | "neutral" | "warn"> = { Aktif: "accent", Pasif: "neutral", Tepki: "warn" };
 
-export function branchLabel(a: Pick<Ability, "branch" | "branchName">) {
-  if (a.branch === "Kök") return "Kök";
-  return `${a.branch}${a.branchName ? ` · ${a.branchName}` : ""}`;
-}
+// İstemci bileşenleri (karakter oluşturma) için; sunucu sayfaları "@/lib/shz/labels" kullanır.
+export { branchLabel };
 
 export function AbilityCard({
   ability: a,
@@ -37,7 +39,10 @@ export function AbilityCard({
   /** Öncül henüz alınmadıysa kırmızı gösterilir. */
   prereqMissing?: boolean;
 }) {
-  const req = !a.requirementText || /^yok$/i.test(a.requirementText) ? null : a.requirementText;
+  const loc = useLocale();
+  const t = useT();
+  const req = !a.requirementText || /^(yok|none)$/i.test(a.requirementText) ? null : a.requirementText;
+  const bm = branchMeaning(a.branchName, loc);
   return (
     <article
       id={a.key}
@@ -50,8 +55,8 @@ export function AbilityCard({
     >
       {prereqName && (
         <p className={cx("-mt-1 mb-2 flex items-center gap-1.5 text-[11px] font-medium", prereqMissing ? "text-danger" : "text-warn")}>
-          <span aria-hidden>↳</span> Öncül: <span className="font-semibold">{prereqName}</span>
-          {prereqMissing && <span className="text-danger/80">(önce bunu al)</span>}
+          <span aria-hidden>↳</span> {t("Öncül:")} <span className="font-semibold">{prereqName}</span>
+          {prereqMissing && <span className="text-danger/80">{t("(önce bunu al)")}</span>}
         </p>
       )}
       <div className="flex items-start justify-between gap-3">
@@ -67,25 +72,25 @@ export function AbilityCard({
         </div>
         {level ? (
           <span className="shrink-0 rounded-md bg-accent px-2 py-0.5 font-mono text-xs font-semibold text-onAccent">
-            Sv {level}/{a.maxLevel}
+            {t("Sv {level}/{max}", { level, max: a.maxLevel })}
           </span>
         ) : a.maxLevel > 1 ? (
-          <span className="shrink-0 rounded-md border border-line px-2 py-0.5 font-mono text-[11px] text-muted">{a.maxLevel} sv</span>
+          <span className="shrink-0 rounded-md border border-line px-2 py-0.5 font-mono text-[11px] text-muted">{t("{n} sv", { n: a.maxLevel })}</span>
         ) : null}
       </div>
       <div className="mt-2 flex flex-wrap gap-1.5">
-        <Badge tone={TYPE_TONE[a.type] ?? "neutral"}>{a.type}</Badge>
+        <Badge tone={TYPE_TONE[a.type] ?? "neutral"}>{t(a.type)}</Badge>
         <Badge>
-          {branchLabel(a)}
-          {branchMeaning(a.branchName) && <span className="font-normal text-muted">({branchMeaning(a.branchName)})</span>}
+          {branchLabel(a, t)}
+          {bm && <span className="font-normal text-muted">({bm})</span>}
         </Badge>
       </div>
       <p className="mt-2 text-xs text-muted">
-        <span className="font-semibold uppercase tracking-wider">Gereksinim:</span>{" "}
-        {req ? <span className="prose-shz inline text-ink/90" dangerouslySetInnerHTML={{ __html: enrichContent(req) }} /> : <span className="text-ink/80">yok</span>}
+        <span className="font-semibold uppercase tracking-wider">{t("Gereksinim:")}</span>{" "}
+        {req ? <span className="prose-shz inline text-ink/90" dangerouslySetInnerHTML={{ __html: enrichContent(req, loc) }} /> : <span className="text-ink/80">{t("yok")}</span>}
       </p>
       {compact && a.levelEffects[0] && (
-        <div className="prose-shz mt-2 line-clamp-2 text-sm text-ink/80" dangerouslySetInnerHTML={{ __html: enrichContent(a.levelEffects[0].html) }} />
+        <div className="prose-shz mt-2 line-clamp-2 text-sm text-ink/80" dangerouslySetInnerHTML={{ __html: enrichContent(a.levelEffects[0].html, loc) }} />
       )}
       {!compact && (
         <div className="mt-3 space-y-3 text-[15px] leading-relaxed">
@@ -95,8 +100,8 @@ export function AbilityCard({
                 const on = !!level && l.level <= level;
                 return (
                   <li key={l.level} className={cx("grid grid-cols-[52px_1fr] gap-3 rounded-lg border px-3 py-2.5", on ? "border-accent/40 bg-accent/10" : "border-line bg-surface2/50")}>
-                    <span className={cx("grid h-7 place-items-center rounded-md font-mono text-xs font-semibold", on ? "bg-accent text-onAccent" : "bg-surface text-accent")}>Sv {l.level}</span>
-                    <span className="prose-shz" dangerouslySetInnerHTML={{ __html: enrichContent(l.html) }} />
+                    <span className={cx("grid h-7 place-items-center rounded-md font-mono text-xs font-semibold", on ? "bg-accent text-onAccent" : "bg-surface text-accent")}>{t("Sv {n}", { n: l.level })}</span>
+                    <span className="prose-shz" dangerouslySetInnerHTML={{ __html: enrichContent(l.html, loc) }} />
                   </li>
                 );
               })}
@@ -110,7 +115,7 @@ export function AbilityCard({
                 s.key === "BEDEL" ? "border-danger/70 bg-danger/[0.07]" : s.key === "SİNERJİ" ? "border-accent/70 bg-accent/[0.07]" : "border-line bg-surface2/50",
               )}
             >
-              <p className={cx("mb-1 text-[11px] font-semibold uppercase tracking-widest", s.key === "BEDEL" ? "text-danger" : s.key === "SİNERJİ" ? "text-accent" : "text-muted")}>{s.label}</p>
+              <p className={cx("mb-1 text-[11px] font-semibold uppercase tracking-widest", s.key === "BEDEL" ? "text-danger" : s.key === "SİNERJİ" ? "text-accent" : "text-muted")}>{loc === "en" ? t(s.key) : s.label}</p>
               <Html html={s.html} />
             </div>
           ))}
@@ -140,6 +145,7 @@ export function PerkCard({
   exclusiveNames?: string[];
   blockedBy?: string | null;
 }) {
+  const t = useT();
   const pos = p.kind === "positive";
   return (
     <article id={p.key} className={cx("card scroll-mt-24 p-4 transition", selected && "border-accent/70 bg-accent/[0.07]", disabled && "opacity-55")}>
@@ -151,7 +157,7 @@ export function PerkCard({
             <TipButton kind="perks" id={p.key} title={p.name} />
             <span
               className={cx("rounded px-1.5 py-0.5 font-mono text-[11px] font-semibold", pos ? "bg-ok/15 text-ok" : "bg-danger/15 text-danger")}
-              title={pos ? "Perk puanı harcar" : "Perk puanı kazandırır"}
+              title={pos ? t("Perk puanı harcar") : t("Perk puanı kazandırır")}
             >
               {pos ? "−" : "+"}
               {pointsLabel ?? (p.key === KRIEGSVERSEHRT.perk ? Object.values(KRIEGSVERSEHRT.points).join("/") : p.points)}
@@ -161,7 +167,7 @@ export function PerkCard({
           <Html html={p.html} className="mt-1 text-sm text-ink/80" />
           {exclusiveNames && exclusiveNames.length > 0 && (
             <p className={cx("mt-2 flex flex-wrap items-center gap-1.5 text-[11px]", blockedBy ? "text-danger" : "text-warn")}>
-              <span className="font-semibold uppercase tracking-wider">Birlikte alınamaz:</span>
+              <span className="font-semibold uppercase tracking-wider">{t("Birlikte alınamaz:")}</span>
               {exclusiveNames.map((n) => (
                 <span key={n} className={cx("rounded border px-1.5 py-0.5", n === blockedBy ? "border-danger/60 bg-danger/10" : "border-warn/40")}>
                   {n}
@@ -177,6 +183,7 @@ export function PerkCard({
 }
 
 export function AugmentCard({ augment: a, action }: { augment: Augment; action?: ReactNode }) {
+  const t = useT();
   return (
     <article id={a.key} className="card flex scroll-mt-24 flex-col p-4">
       <div className="flex items-start justify-between gap-3">
@@ -195,7 +202,7 @@ export function AugmentCard({ augment: a, action }: { augment: Augment; action?:
       <div className="mt-2 flex flex-wrap gap-1.5">
         {a.slots.map((s) => (
           <span key={s} className="chip">
-            {bodyPartLabel(s)}
+            {t(bodyPartLabel(s))}
           </span>
         ))}
       </div>
@@ -209,13 +216,13 @@ export function AugmentCard({ augment: a, action }: { augment: Augment; action?:
       </div>
       {a.usageHtml && (
         <div className="mt-3 rounded-md border-l-2 border-line bg-surface2/50 px-3 py-2">
-          <p className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-muted">Kullanım</p>
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-muted">{t("Kullanım")}</p>
           <Html html={a.usageHtml} className="text-sm" />
         </div>
       )}
       {a.extra.map((x) => (
         <div key={x.label} className="mt-2 rounded-md border-l-2 border-line bg-surface2/50 px-3 py-2">
-          <p className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-muted">{x.label}</p>
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-muted">{t(x.label)}</p>
           <Html html={x.html} className="text-sm" />
         </div>
       ))}

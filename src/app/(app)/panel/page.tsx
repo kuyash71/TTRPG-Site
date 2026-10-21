@@ -1,3 +1,4 @@
+import { SystemSwitchRow } from "@/components/system-switch";
 import { and, count, desc, eq, inArray, max, or } from "drizzle-orm";
 import { BookOpen, Cpu, Dices, GitBranch, HelpCircle, ScrollText, Skull, Sparkles, Users } from "lucide-react";
 import type { Metadata } from "next";
@@ -15,23 +16,31 @@ import { outcomeLabel } from "@/lib/shz/rules";
 import { JoinCampaign } from "./join-campaign";
 import { ResetRequests } from "@/components/reset-requests";
 import { visibleResets } from "@/lib/password-resets";
+import { intlLocale, type Locale, type TFn } from "@/i18n/core";
+import { getLocale, getT, getTLoose } from "@/i18n/server";
 
-export const metadata: Metadata = { title: "Panel" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t("Panel") };
+}
 
-function ago(d: Date | null) {
-  if (!d) return "henüz hareket yok";
+function ago(d: Date | null, t: TFn, loc: Locale) {
+  if (!d) return t("henüz hareket yok");
   const s = Math.max(1, Math.round((Date.now() - d.getTime()) / 1000));
-  if (s < 60) return "az önce";
+  if (s < 60) return t("az önce");
   const m = Math.round(s / 60);
-  if (m < 60) return `${m} dk önce`;
+  if (m < 60) return t("{n} dk önce", { n: m });
   const h = Math.round(m / 60);
-  if (h < 24) return `${h} sa önce`;
+  if (h < 24) return t("{n} sa önce", { n: h });
   const g = Math.round(h / 24);
-  return g < 30 ? `${g} gün önce` : d.toLocaleDateString("tr-TR");
+  return g < 30 ? t("{n} gün önce", { n: g }) : d.toLocaleDateString(intlLocale(loc));
 }
 
 export default async function Panel() {
   const user = await pageUser();
+  const t = await getT();
+  const tLoose = await getTLoose();
+  const loc = await getLocale();
   const memberOf = db.select({ id: campaignMembers.campaignId }).from(campaignMembers).where(eq(campaignMembers.userId, user.id));
   const camps = await db
     .select()
@@ -75,10 +84,10 @@ export default async function Panel() {
     const b = lastRoll.find((r) => r.id === id)?.at ?? null;
     return a && b ? (a > b ? a : b) : (a ?? b);
   };
-  const info = new Map(content().campaigns.map((c) => [c.key, c]));
+  const info = new Map(content(loc).campaigns.map((c) => [c.key, c]));
   const activeChars = chars.filter(({ c }) => c.status === "ACTIVE");
   const hour = Number(new Date().toLocaleString("en-US", { hour: "numeric", hour12: false, timeZone: "Europe/Istanbul" }));
-  const greet = hour < 6 ? "İyi geceler" : hour < 12 ? "Günaydın" : hour < 18 ? "İyi günler" : "İyi akşamlar";
+  const greet = hour < 6 ? t("İyi geceler") : hour < 12 ? t("Günaydın") : hour < 18 ? t("İyi günler") : t("İyi akşamlar");
   const unspent = chars.filter(({ c }) => c.status === "ACTIVE" && (c.abilityPoints > 0 || c.freeStatPoints > 0));
 
   return (
@@ -88,25 +97,27 @@ export default async function Panel() {
         <SunLogo className="pointer-events-none absolute -right-16 -top-20 h-72 w-72 text-accent/[0.07]" />
         <div className="relative flex flex-wrap items-end justify-between gap-6 p-6 sm:p-8">
           <div>
-            <p className="kicker mb-2">Panel</p>
+            <p className="kicker mb-2">{t("Panel")}</p>
             <h1 className="font-serif text-3xl sm:text-4xl">
-              {greet}, {user.displayName}
+              {t("{greet}, {name}", { greet, name: user.displayName })}
             </h1>
-            <p className="mt-2 max-w-xl text-muted">Kampanyalarına gir, karakterlerini yönet ya da kural kitabına göz at.</p>
+            <p className="mt-2 max-w-xl text-muted">{t("Kampanyalarına gir, karakterlerini yönet ya da kural kitabına göz at.")}</p>
           </div>
           {user.role === "GM" && (
             <LinkButton href="/kampanya/yeni" variant="primary">
-              Yeni kampanya
+              {t("Yeni kampanya")}
             </LinkButton>
           )}
         </div>
         <div className="relative grid grid-cols-2 border-t border-line sm:grid-cols-4">
-          <Stat icon={<ScrollText className="h-4 w-4" />} label="Kampanya" value={camps.length} />
-          <Stat icon={<Users className="h-4 w-4" />} label={user.role === "GM" ? "Masadaki karakter" : "Aktif karakter"} value={user.role === "GM" ? charCounts.reduce((x, r) => x + r.n, 0) : activeChars.length} />
-          <Stat icon={<Sparkles className="h-4 w-4" />} label="Harcanmamış puan" value={unspent.reduce((a, { c }) => a + c.abilityPoints + c.freeStatPoints, 0)} tone={unspent.length ? "accent" : undefined} />
-          <Stat icon={<Skull className="h-4 w-4" />} label={user.role === "GM" ? "Onay bekleyen" : "Ölü karakter"} value={user.role === "GM" ? pending.length : chars.filter(({ c }) => c.status === "DEAD").length} tone={user.role === "GM" && pending.length ? "warn" : undefined} />
+          <Stat icon={<ScrollText className="h-4 w-4" />} label={t("Kampanya")} value={camps.length} />
+          <Stat icon={<Users className="h-4 w-4" />} label={user.role === "GM" ? t("Masadaki karakter") : t("Aktif karakter")} value={user.role === "GM" ? charCounts.reduce((x, r) => x + r.n, 0) : activeChars.length} />
+          <Stat icon={<Sparkles className="h-4 w-4" />} label={t("Harcanmamış puan")} value={unspent.reduce((a, { c }) => a + c.abilityPoints + c.freeStatPoints, 0)} tone={unspent.length ? "accent" : undefined} />
+          <Stat icon={<Skull className="h-4 w-4" />} label={user.role === "GM" ? t("Onay bekleyen") : t("Ölü karakter")} value={user.role === "GM" ? pending.length : chars.filter(({ c }) => c.status === "DEAD").length} tone={user.role === "GM" && pending.length ? "warn" : undefined} />
         </div>
       </section>
+
+      <SystemSwitchRow to="UC" />
 
       <ResetRequests items={resets} />
 
@@ -114,10 +125,10 @@ export default async function Panel() {
         <div className="flex flex-wrap items-center gap-3 rounded-xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm">
           <Sparkles className="h-4 w-4 text-accent" />
           <span className="flex-1">
-            {unspent.map(({ c }) => c.name).join(", ")} için harcanmamış puan var.
+            {t("{names} için harcanmamış puan var.", { names: unspent.map(({ c }) => c.name).join(", ") })}
           </span>
           <LinkButton href={`/karakter/${unspent[0].c.id}#yetenekler`} size="sm" variant="outline">
-            Karaktere git
+            {t("Karaktere git")}
           </LinkButton>
         </div>
       )}
@@ -125,9 +136,9 @@ export default async function Panel() {
       <div className="grid gap-10 lg:grid-cols-[1fr_340px]">
         <div className="min-w-0 space-y-10">
           <section>
-            <SectionHead title="Kampanyalar" />
+            <SectionHead title={t("Kampanyalar")} />
             {camps.length === 0 ? (
-              <Empty title="Henüz bir kampanyada değilsin">GM&apos;inden kampanya katılma kodunu iste ve sağdaki kutuya yaz.</Empty>
+              <Empty title={t("Henüz bir kampanyada değilsin")}>{t("GM'inden kampanya katılma kodunu iste ve sağdaki kutuya yaz.")}</Empty>
             ) : (
               <div className="grid gap-4 xl:grid-cols-2">
                 {camps.map((c) => {
@@ -155,29 +166,29 @@ export default async function Panel() {
                           <div className="mt-2 flex flex-wrap gap-1.5">
                             {c.gmId === user.id && <Badge tone="accent">GM</Badge>}
                             {ci && <Badge>{ci.difficulty}</Badge>}
-                            {c.status !== "ACTIVE" && <Badge tone="warn">{c.status === "PAUSED" ? "Duraklatıldı" : "Arşiv"}</Badge>}
-                            {waiting > 0 && <Badge tone="warn">{waiting} onay bekliyor</Badge>}
+                            {c.status !== "ACTIVE" && <Badge tone="warn">{c.status === "PAUSED" ? t("Duraklatıldı") : t("Arşiv")}</Badge>}
+                            {waiting > 0 && <Badge tone="warn">{t("{n} onay bekliyor", { n: waiting })}</Badge>}
                           </div>
                         </div>
                       </div>
                       {c.description && <p className="-mt-2 line-clamp-2 px-5 text-sm text-muted">{c.description}</p>}
                       <div className="mt-4 grid grid-cols-3 border-y border-line text-center text-xs">
-                        <Mini label="Oyuncu" value={num(memberCounts, c.id)} />
-                        <Mini label="Karakter" value={num(charCounts, c.id)} />
+                        <Mini label={t("Oyuncu")} value={num(memberCounts, c.id)} />
+                        <Mini label={t("Karakter")} value={num(charCounts, c.id)} />
                         <div className="px-2 py-2">
                           <p className={cx("flex items-center justify-center gap-1.5 font-medium", live ? "text-ok" : "text-ink/80")}>
                             {live && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-ok" />}
-                            {live ? "Masa canlı" : ago(last)}
+                            {live ? t("Masa canlı") : ago(last, t, loc)}
                           </p>
-                          <p className="text-muted">son hareket</p>
+                          <p className="text-muted">{t("son hareket")}</p>
                         </div>
                       </div>
                       <div className="mt-auto flex flex-wrap items-center gap-2 p-4">
                         <LinkButton href={`/kampanya/${c.id}/oda`} variant="primary" size="sm">
-                          <Dices className="h-4 w-4" /> Oyun odası
+                          <Dices className="h-4 w-4" /> {t("Oyun odası")}
                         </LinkButton>
                         <LinkButton href={`/kampanya/${c.id}`} size="sm">
-                          Kampanya
+                          {t("Kampanya")}
                         </LinkButton>
                         {c.gmId !== user.id &&
                           (mine ? (
@@ -187,7 +198,7 @@ export default async function Panel() {
                             </Link>
                           ) : (
                             <Link href={`/kampanya/${c.id}/karakter-olustur`} className="ml-auto text-xs text-accent hover:underline">
-                              + Karakter oluştur
+                              + {t("Karakter oluştur")}
                             </Link>
                           ))}
                       </div>
@@ -199,9 +210,9 @@ export default async function Panel() {
           </section>
 
           <section>
-            <SectionHead title="Karakterlerin" />
+            <SectionHead title={t("Karakterlerin")} />
             {chars.length === 0 ? (
-              <Empty title="Henüz karakterin yok">Bir kampanyaya katıldıktan sonra kampanya sayfasından karakter oluşturabilirsin.</Empty>
+              <Empty title={t("Henüz karakterin yok")}>{t("Bir kampanyaya katıldıktan sonra kampanya sayfasından karakter oluşturabilirsin.")}</Empty>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2">
                 {chars.map(({ c, campaignName }) => (
@@ -213,13 +224,13 @@ export default async function Panel() {
                         <StatusBadge status={c.status} />
                       </div>
                       <p className="truncate text-xs text-muted">
-                        Seviye {c.level} · {campaignName}
+                        {t("Seviye {n}", { n: c.level })} · {campaignName}
                       </p>
                       <div className="mt-2 flex flex-wrap gap-1.5">
-                        {c.trees.map((t) => (
-                          <span key={t} className="flex items-center gap-1 rounded-full border border-accent/30 bg-accent/10 py-0.5 pl-0.5 pr-2 text-[11px] text-accent">
-                            <TreeIcon treeKey={t} className="h-5 w-5 rounded-full" />
-                            {getTree(t)?.name ?? t}
+                        {c.trees.map((tk) => (
+                          <span key={tk} className="flex items-center gap-1 rounded-full border border-accent/30 bg-accent/10 py-0.5 pl-0.5 pr-2 text-[11px] text-accent">
+                            <TreeIcon treeKey={tk} className="h-5 w-5 rounded-full" />
+                            {getTree(tk, loc)?.name ?? tk}
                           </span>
                         ))}
                       </div>
@@ -240,9 +251,12 @@ export default async function Panel() {
                           <span lang="en">Inspiration</span> <span className={cx("font-mono", c.inspiration < 0 ? "text-danger" : "text-ink")}>{c.inspiration}</span>
                           {(c.abilityPoints > 0 || c.freeStatPoints > 0) && (
                             <span className="ml-2 text-accent">
-                              · {c.abilityPoints > 0 && `${c.abilityPoints} yetenek`}
-                              {c.abilityPoints > 0 && c.freeStatPoints > 0 && ", "}
-                              {c.freeStatPoints > 0 && `${c.freeStatPoints} stat`} puanı
+                              ·{" "}
+                              {c.abilityPoints > 0 && c.freeStatPoints > 0
+                                ? t("{a} yetenek, {s} stat puanı", { a: c.abilityPoints, s: c.freeStatPoints })
+                                : c.abilityPoints > 0
+                                  ? t("{n} yetenek puanı", { n: c.abilityPoints })
+                                  : t("{n} stat puanı", { n: c.freeStatPoints })}
                             </span>
                           )}
                         </p>
@@ -258,9 +272,9 @@ export default async function Panel() {
         <aside className="space-y-4">
           <JoinCampaign />
           <Card className="p-5">
-            <p className="kicker mb-3">Son zarlar</p>
+            <p className="kicker mb-3">{t("Son zarlar")}</p>
             {recent.length === 0 ? (
-              <p className="text-sm text-muted">Henüz zar atılmadı.</p>
+              <p className="text-sm text-muted">{t("Henüz zar atılmadı.")}</p>
             ) : (
               <ul className="space-y-2.5">
                 {recent.map(({ r, charName, campaignName }) => {
@@ -272,10 +286,10 @@ export default async function Panel() {
                       <span className={cx("grid h-9 w-9 shrink-0 place-items-center rounded-lg font-mono text-sm font-semibold", good ? "bg-ok/15 text-ok" : bad ? "bg-danger/15 text-danger" : "bg-surface2 text-ink")}>{d.total}</span>
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-sm text-ink">
-                          {charName ?? "GM"} · {r.label}
+                          {charName ?? "GM"} · {tLoose(r.label)}
                         </span>
                         <span className="block truncate text-[11px] text-muted">
-                          {outcomeLabel(d.outcome) || "Sonuç"} · {campaignName} · {ago(r.createdAt)}
+                          {t(outcomeLabel(d.outcome) || "Sonuç")} · {campaignName} · {ago(r.createdAt, t, loc)}
                         </span>
                       </span>
                     </li>
@@ -285,14 +299,14 @@ export default async function Panel() {
             )}
           </Card>
           <Card className="p-5">
-            <p className="kicker mb-3">Kural kitabı</p>
+            <p className="kicker mb-3">{t("Kural kitabı")}</p>
             <div className="grid grid-cols-2 gap-2">
-              <QuickLink href="/kurallar" icon={<BookOpen className="h-4 w-4" />} label="Temel kurallar" />
-              <QuickLink href="/kurallar/yetenekler" icon={<GitBranch className="h-4 w-4" />} label="Yetenek ağaçları" />
-              <QuickLink href="/kurallar/perkler" icon={<Sparkles className="h-4 w-4" />} label="Perkler" />
-              <QuickLink href="/kurallar/augmentler" icon={<Cpu className="h-4 w-4" />} label="Augmentler" />
-              <QuickLink href="/kurallar/kampanyalar" icon={<ScrollText className="h-4 w-4" />} label="Kampanyalar" />
-              <QuickLink href="/yardim" icon={<HelpCircle className="h-4 w-4" />} label="Yardım" />
+              <QuickLink href="/kurallar" icon={<BookOpen className="h-4 w-4" />} label={t("Temel kurallar")} />
+              <QuickLink href="/kurallar/yetenekler" icon={<GitBranch className="h-4 w-4" />} label={t("Yetenek ağaçları")} />
+              <QuickLink href="/kurallar/perkler" icon={<Sparkles className="h-4 w-4" />} label={t("Perkler")} />
+              <QuickLink href="/kurallar/augmentler" icon={<Cpu className="h-4 w-4" />} label={t("Augmentler")} />
+              <QuickLink href="/kurallar/kampanyalar" icon={<ScrollText className="h-4 w-4" />} label={t("Kampanyalar")} />
+              <QuickLink href="/yardim" icon={<HelpCircle className="h-4 w-4" />} label={t("Yardım")} />
             </div>
           </Card>
         </aside>

@@ -2,6 +2,7 @@
 // Başlangıç kuralı: 2 dil (ana dil + 1). Monolingual 1, Trilingual (SHZ) / Polyglot (UC) 3.
 // GM sonradan karakter ayrıntılarından dil ekleyip değiştirebilir (listede olmayan dil de yazabilir).
 import type { GameSystem } from "../db/schema";
+import { fmt } from "../i18n/core";
 
 /** Schwarzesonne: günümüzün en çok konuşulan 50 dili (toplam konuşur sayısına göre, yaklaşık sıra). */
 export const SHZ_LANGUAGES = [
@@ -82,7 +83,7 @@ export function languageProblems(system: GameSystem, perks: readonly string[], p
   const need = languageSlots(system, perks);
   if (new Set(picked).size !== picked.length) out.push("Aynı dil iki kez seçilmiş");
   if (picked.some((l) => !list.includes(l))) out.push("Listede olmayan dil");
-  if (picked.length !== need) out.push(`Tam olarak ${need} dil seçilmeli (ilki ana dil)`);
+  if (picked.length !== need) out.push(fmt("Tam olarak {n} dil seçilmeli (ilki ana dil)", { n: need }));
   return out;
 }
 

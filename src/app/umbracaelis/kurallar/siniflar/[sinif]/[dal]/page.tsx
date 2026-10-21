@@ -1,25 +1,31 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { StatBadge, TIER_LABEL, UcAbilityCard, UcHtml, UcMeaning, UcTipButton } from "@/components/uc/cards";
+import { StatBadge, UcAbilityCard, UcHtml, UcMeaning, UcTipButton } from "@/components/uc/cards";
+import { TIER_LABEL } from "@/lib/uc/labels";
 import { UcDalIcon } from "@/components/uc/icons";
 import { Badge, PageHeader } from "@/components/ui";
 import { UC_BASE, UC_TIER_OPEN } from "@/lib/uc/constants";
 import { ucClass, ucContent, ucDal } from "@/lib/uc/content";
 import { splitLead } from "@/lib/uc/html";
+import { getLocale, getT } from "@/i18n/server";
 
 export async function generateMetadata({ params }: { params: Promise<{ sinif: string; dal: string }> }): Promise<Metadata> {
   const { sinif, dal } = await params;
-  const d = ucDal(dal);
-  const cl = ucClass(sinif);
-  return { title: d && cl ? `${d.name} · ${cl.name}` : "Sınıflar" };
+  const t = await getT();
+  const loc = await getLocale();
+  const d = ucDal(dal, loc);
+  const cl = ucClass(sinif, loc);
+  return { title: d && cl ? `${d.name} · ${cl.name}` : t("Sınıflar") };
 }
 
 export default async function UcDalPage({ params }: { params: Promise<{ sinif: string; dal: string }> }) {
   const { sinif, dal } = await params;
-  const cl = ucClass(sinif);
-  const d = ucDal(dal);
+  const t = await getT();
+  const loc = await getLocale();
+  const cl = ucClass(sinif, loc);
+  const d = ucDal(dal, loc);
   if (!cl || !d || d.classKey !== cl.key) notFound();
-  const c = ucContent();
+  const c = ucContent(loc);
   const sibling = cl.dals.map((k) => c.dals[k]).find((x) => x.tier === d.tier && x.key !== d.key);
   const idx = cl.dals.indexOf(d.key);
   const prev = idx > 0 ? c.dals[cl.dals[idx - 1]] : null;
@@ -31,7 +37,7 @@ export default async function UcDalPage({ params }: { params: Promise<{ sinif: s
     <div>
       <p className="mb-3 text-sm text-muted">
         <a href={`${UC_BASE}/siniflar`} className="hover:text-ink">
-          Sınıflar
+          {t("Sınıflar")}
         </a>{" "}
         /{" "}
         <a href={`${UC_BASE}/siniflar/${cl.key}`} className="hover:text-ink">
@@ -39,7 +45,7 @@ export default async function UcDalPage({ params }: { params: Promise<{ sinif: s
         </a>
       </p>
       <PageHeader
-        kicker={`${cl.name} · ${TIER_LABEL[d.tier]}`}
+        kicker={`${cl.name} · ${t(TIER_LABEL[d.tier])}`}
         title={
           <span className="flex flex-wrap items-center gap-3">
             <UcDalIcon dalKey={d.key} tier={d.tier} className="h-12 w-12" />
@@ -53,17 +59,17 @@ export default async function UcDalPage({ params }: { params: Promise<{ sinif: s
         <UcHtml html={lead} />
         {d.startBonusText && (
           <p className="mt-3 rounded-lg border border-accent/35 bg-accent/[0.07] px-3 py-2 text-sm text-ink/90">
-            <span className="mr-1 text-[11px] font-semibold uppercase tracking-widest text-accent">Başlangıç bonusu</span> {d.startBonusText}
+            <span className="mr-1 text-[11px] font-semibold uppercase tracking-widest text-accent">{t("Başlangıç bonusu")}</span> {d.startBonusText}
           </p>
         )}
       </PageHeader>
       <div className="mb-6 flex flex-wrap gap-2 text-xs">
-        <Badge>Seviye {UC_TIER_OPEN[d.tier]}&apos;da açılır</Badge>
-        <Badge>Açmak 1 puan · her seviye 1 puan</Badge>
-        <Badge>3. seviye en erken Sv {lock}</Badge>
+        <Badge>{t("Seviye {n}'da açılır", { n: UC_TIER_OPEN[d.tier] })}</Badge>
+        <Badge>{t("Açmak 1 puan · her seviye 1 puan")}</Badge>
+        <Badge>{t("3. seviye en erken Sv {n}", { n: lock })}</Badge>
         {sibling && (
           <a href={`${UC_BASE}/siniflar/${cl.key}/${sibling.key}`} className="inline-flex items-center gap-1 rounded-full border border-lav/40 bg-lav/10 px-2 py-0.5 text-[11px] font-medium text-lav hover:bg-lav/20">
-            Bu katmandaki diğer dal: {sibling.name} →
+            {t("Bu katmandaki diğer dal: {name} →", { name: sibling.name })}
           </a>
         )}
       </div>
@@ -71,17 +77,31 @@ export default async function UcDalPage({ params }: { params: Promise<{ sinif: s
         <details className="card group mb-6 p-0" open={restHeads.length <= 1}>
           <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4">
             <span>
-              <span className="block text-[11px] font-semibold uppercase tracking-widest text-lav">Dalın ek kuralları</span>
-              <span className="font-serif text-base text-ink">{restHeads.join(" · ") || "Ayrıntılar"}</span>
+              <span className="block text-[11px] font-semibold uppercase tracking-widest text-lav">{t("Ek kurallar")}</span>
+              <span className="font-serif text-base text-ink">{restHeads.join(" · ") || t("Ayrıntılar")}</span>
             </span>
-            <span className="text-sm text-muted group-open:hidden">Göster</span>
-            <span className="hidden text-sm text-muted group-open:inline">Gizle</span>
+            <span className="text-sm text-muted group-open:hidden">{t("Göster")}</span>
+            <span className="hidden text-sm text-muted group-open:inline">{t("Gizle")}</span>
           </summary>
           <div className="border-t border-line px-5 py-4">
             <UcHtml html={rest} />
           </div>
         </details>
       )}
+      {d.mechanic && (
+        <section id="dal-mekanigi" className="card mb-6 scroll-mt-24 border-lav/45 bg-gradient-to-b from-lav/[0.07] to-transparent p-5">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-lav">{t("Dal mekaniği")}</p>
+          <h2 className="mb-3 font-serif text-2xl text-ink">{d.mechanic.title}</h2>
+          <UcHtml html={d.mechanic.html} />
+          <p className="mt-4 text-xs text-muted">{t("Karakter kâğıdında bu dalı seçtiğinde mekaniğin sayaçları Genel sekmesinde görünür.")}</p>
+        </section>
+      )}
+      <h2 className="mb-3 font-serif text-xl text-ink">
+        {t("Yetenekler")}{" "}
+        <span className="text-sm text-muted">
+          · {t("{n} yetenek, {v} Vertex", { n: d.abilities.length, v: d.abilities.filter((k) => c.abilities[k]?.signature).length })}
+        </span>
+      </h2>
       <div className="grid gap-4 xl:grid-cols-2">
         {d.abilities.map((k) => (
           <UcAbilityCard key={k} ability={c.abilities[k]} />
@@ -90,14 +110,14 @@ export default async function UcDalPage({ params }: { params: Promise<{ sinif: s
       <nav className="mt-10 flex flex-wrap justify-between gap-3 border-t border-line pt-5 text-sm">
         {prev ? (
           <a href={`${UC_BASE}/siniflar/${cl.key}/${prev.key}`} className="text-muted hover:text-ink">
-            ← K{prev.tier} · {prev.name}
+            ← {t("K{n}", { n: prev.tier })} · {prev.name}
           </a>
         ) : (
           <span />
         )}
         {next && (
           <a href={`${UC_BASE}/siniflar/${cl.key}/${next.key}`} className="text-muted hover:text-ink">
-            K{next.tier} · {next.name} →
+            {t("K{n}", { n: next.tier })} · {next.name} →
           </a>
         )}
       </nav>

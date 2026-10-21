@@ -1,3 +1,4 @@
+import { SystemSwitchRow } from "@/components/system-switch";
 import { and, count, desc, eq, inArray, max, or } from "drizzle-orm";
 import { BookOpen, Dices, Layers, MoonStar, ScrollText, Skull, Sparkles, Star, Users } from "lucide-react";
 import type { Metadata } from "next";
@@ -12,24 +13,31 @@ import { visibleResets } from "@/lib/password-resets";
 import { ucRulesData } from "@/lib/uc/content";
 import { UC_DECAY_MAX } from "@/lib/uc/rules";
 import { JoinCampaign } from "@/app/(app)/panel/join-campaign";
+import { intlLocale, type Locale, type TFn } from "@/i18n/core";
+import { getLocale, getT } from "@/i18n/server";
 
-export const metadata: Metadata = { title: "Oyun masası" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t("Oyun masası") };
+}
 
-function ago(d: Date | null) {
-  if (!d) return "henüz hareket yok";
+function ago(d: Date | null, t: TFn, loc: Locale) {
+  if (!d) return t("henüz hareket yok");
   const s = Math.max(1, Math.round((Date.now() - d.getTime()) / 1000));
-  if (s < 60) return "az önce";
+  if (s < 60) return t("az önce");
   const m = Math.round(s / 60);
-  if (m < 60) return `${m} dk önce`;
+  if (m < 60) return t("{n} dk önce", { n: m });
   const h = Math.round(m / 60);
-  if (h < 24) return `${h} sa önce`;
+  if (h < 24) return t("{n} sa önce", { n: h });
   const g = Math.round(h / 24);
-  return g < 30 ? `${g} gün önce` : d.toLocaleDateString("tr-TR");
+  return g < 30 ? t("{n} gün önce", { n: g }) : d.toLocaleDateString(intlLocale(loc));
 }
 
 export default async function UcPanel() {
   const user = await pageUser({ next: "/umbracaelis/panel" });
-  const data = ucRulesData();
+  const t = await getT();
+  const loc = await getLocale();
+  const data = ucRulesData(loc);
   const memberOf = db.select({ id: campaignMembers.campaignId }).from(campaignMembers).where(eq(campaignMembers.userId, user.id));
   const camps = await db
     .select()
@@ -74,32 +82,34 @@ export default async function UcPanel() {
         <MoonLogo className="pointer-events-none absolute -right-14 -top-16 h-72 w-72 text-accent/[0.07]" />
         <div className="relative flex flex-wrap items-end justify-between gap-6 p-6 sm:p-8">
           <div>
-            <p className="kicker mb-2">Umbra Caelis · Oyun masası</p>
-            <h1 className="font-serif text-3xl sm:text-4xl">Hoş geldin, {user.displayName}</h1>
-            <p className="mt-2 max-w-xl text-muted">Kampanyalarına gir, karakterlerini yönet ya da kural kitabına göz at. Hesabın Schwarzesonne ile ortaktır.</p>
+            <p className="kicker mb-2">Umbra Caelis · {t("Oyun masası")}</p>
+            <h1 className="font-serif text-3xl sm:text-4xl">{t("Hoş geldin, {name}", { name: user.displayName })}</h1>
+            <p className="mt-2 max-w-xl text-muted">{t("Kampanyalarına gir, karakterlerini yönet ya da kural kitabına göz at. Hesabın Schwarzesonne ile ortaktır.")}</p>
           </div>
           {user.role === "GM" && (
             <LinkButton href="/umbracaelis/kampanya/yeni" variant="primary">
-              Yeni kampanya
+              {t("Yeni kampanya")}
             </LinkButton>
           )}
         </div>
         <div className="relative grid grid-cols-2 border-t border-line sm:grid-cols-4">
-          <Stat icon={<ScrollText className="h-4 w-4" />} label="Kampanya" value={camps.length} />
-          <Stat icon={<Users className="h-4 w-4" />} label={user.role === "GM" ? "Masadaki karakter" : "Aktif karakter"} value={user.role === "GM" ? charCounts.reduce((x, r) => x + r.n, 0) : activeChars.length} />
-          <Stat icon={<Sparkles className="h-4 w-4" />} label="Harcanmamış puan" value={unspent.reduce((a, { c }) => a + c.abilityPoints + c.freeStatPoints, 0)} tone={unspent.length ? "accent" : undefined} />
-          <Stat icon={<Skull className="h-4 w-4" />} label={user.role === "GM" ? "Onay bekleyen" : "Ölü karakter"} value={user.role === "GM" ? pending.length : chars.filter(({ c }) => c.status === "DEAD").length} tone={user.role === "GM" && pending.length ? "warn" : undefined} />
+          <Stat icon={<ScrollText className="h-4 w-4" />} label={t("Kampanya")} value={camps.length} />
+          <Stat icon={<Users className="h-4 w-4" />} label={user.role === "GM" ? t("Masadaki karakter") : t("Aktif karakter")} value={user.role === "GM" ? charCounts.reduce((x, r) => x + r.n, 0) : activeChars.length} />
+          <Stat icon={<Sparkles className="h-4 w-4" />} label={t("Harcanmamış puan")} value={unspent.reduce((a, { c }) => a + c.abilityPoints + c.freeStatPoints, 0)} tone={unspent.length ? "accent" : undefined} />
+          <Stat icon={<Skull className="h-4 w-4" />} label={user.role === "GM" ? t("Onay bekleyen") : t("Ölü karakter")} value={user.role === "GM" ? pending.length : chars.filter(({ c }) => c.status === "DEAD").length} tone={user.role === "GM" && pending.length ? "warn" : undefined} />
         </div>
       </section>
+
+      <SystemSwitchRow to="SHZ" />
 
       <ResetRequests items={resets} />
 
       <div className="grid gap-10 lg:grid-cols-[1fr_340px]">
         <div className="min-w-0 space-y-10">
           <section>
-            <SectionHead title="Kampanyalar" />
+            <SectionHead title={t("Kampanyalar")} />
             {camps.length === 0 ? (
-              <Empty title="Henüz bir Umbra Caelis kampanyasında değilsin">GM&apos;inden kampanya katılma kodunu iste ve sağdaki kutuya yaz.</Empty>
+              <Empty title={t("Henüz bir Umbra Caelis kampanyasında değilsin")}>{t("GM'inden kampanya katılma kodunu iste ve sağdaki kutuya yaz.")}</Empty>
             ) : (
               <div className="grid gap-4 xl:grid-cols-2">
                 {camps.map((c) => {
@@ -120,30 +130,30 @@ export default async function UcPanel() {
                           <p className="mt-1 text-xs text-muted">GM: {gms.find((g) => g.id === c.gmId)?.name ?? "—"}</p>
                           <div className="mt-2 flex flex-wrap gap-1.5">
                             {c.gmId === user.id && <Badge tone="accent">GM</Badge>}
-                            {c.physicalDice && <Badge>Fiziksel zar</Badge>}
-                            {c.status !== "ACTIVE" && <Badge tone="warn">{c.status === "PAUSED" ? "Duraklatıldı" : "Arşiv"}</Badge>}
-                            {waiting > 0 && <Badge tone="warn">{waiting} onay bekliyor</Badge>}
+                            {c.physicalDice && <Badge>{t("Fiziksel zar")}</Badge>}
+                            {c.status !== "ACTIVE" && <Badge tone="warn">{c.status === "PAUSED" ? t("Duraklatıldı") : t("Arşiv")}</Badge>}
+                            {waiting > 0 && <Badge tone="warn">{t("{n} onay bekliyor", { n: waiting })}</Badge>}
                           </div>
                         </div>
                       </div>
                       {c.description && <p className="-mt-2 line-clamp-2 px-5 text-sm text-muted">{c.description}</p>}
                       <div className="mt-4 grid grid-cols-3 border-y border-line text-center text-xs">
-                        <Mini label="Oyuncu" value={num(memberCounts, c.id)} />
-                        <Mini label="Karakter" value={num(charCounts, c.id)} />
+                        <Mini label={t("Oyuncu")} value={num(memberCounts, c.id)} />
+                        <Mini label={t("Karakter")} value={num(charCounts, c.id)} />
                         <div className="px-2 py-2">
                           <p className={cx("flex items-center justify-center gap-1.5 font-medium", live ? "text-ok" : "text-ink/80")}>
                             {live && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-ok" />}
-                            {live ? "Masa canlı" : ago(last)}
+                            {live ? t("Masa canlı") : ago(last, t, loc)}
                           </p>
-                          <p className="text-muted">son hareket</p>
+                          <p className="text-muted">{t("son hareket")}</p>
                         </div>
                       </div>
                       <div className="mt-auto flex flex-wrap items-center gap-2 p-4">
                         <LinkButton href={`/umbracaelis/kampanya/${c.id}/oda`} variant="primary" size="sm">
-                          <Dices className="h-4 w-4" /> Oyun odası
+                          <Dices className="h-4 w-4" /> {t("Oyun odası")}
                         </LinkButton>
                         <LinkButton href={`/umbracaelis/kampanya/${c.id}`} size="sm">
-                          Kampanya
+                          {t("Kampanya")}
                         </LinkButton>
                         {c.gmId !== user.id &&
                           (mine ? (
@@ -153,7 +163,7 @@ export default async function UcPanel() {
                             </a>
                           ) : (
                             <a href={`/umbracaelis/kampanya/${c.id}/karakter-olustur`} className="ml-auto text-xs text-accent hover:underline">
-                              + Karakter oluştur
+                              + {t("Karakter oluştur")}
                             </a>
                           ))}
                       </div>
@@ -165,9 +175,9 @@ export default async function UcPanel() {
           </section>
 
           <section>
-            <SectionHead title="Karakterlerin" />
+            <SectionHead title={t("Karakterlerin")} />
             {chars.length === 0 ? (
-              <Empty title="Henüz karakterin yok">Bir kampanyaya katıldıktan sonra kampanya sayfasından karakter oluşturabilirsin.</Empty>
+              <Empty title={t("Henüz karakterin yok")}>{t("Bir kampanyaya katıldıktan sonra kampanya sayfasından karakter oluşturabilirsin.")}</Empty>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2">
                 {chars.map(({ c, campaignName }) => (
@@ -179,18 +189,18 @@ export default async function UcPanel() {
                         <StatusBadge status={c.status} />
                       </div>
                       <p className="truncate text-xs text-muted">
-                        Seviye {c.level} · {campaignName}
+                        {t("Seviye {n}", { n: c.level })} · {campaignName}
                       </p>
                       <div className="mt-2 flex flex-wrap gap-1.5">
-                        {c.trees.map((t) => (
-                          <span key={t} className="rounded-full border border-accent/30 bg-accent/10 px-2 py-0.5 text-[11px] text-accent">
-                            K{data.dals[t]?.tier} · {data.dals[t]?.name ?? t}
+                        {c.trees.map((tk) => (
+                          <span key={tk} className="rounded-full border border-accent/30 bg-accent/10 px-2 py-0.5 text-[11px] text-accent">
+                            {t("K{n}", { n: data.dals[tk]?.tier })} · {data.dals[tk]?.name ?? tk}
                           </span>
                         ))}
                       </div>
                       <div className="mt-2.5 space-y-1">
                         <div className="flex items-center gap-2 text-[11px] text-muted">
-                          <span className="w-16">Yozlaşma</span>
+                          <span className="w-16">{t("Yozlaşma")}</span>
                           <span className="flex h-1.5 flex-1 overflow-hidden rounded-full bg-surface2">
                             <span
                               className={cx("h-full", c.corruption === 0 ? "bg-ok/60" : c.corruption >= 10 ? "bg-danger" : c.corruption >= 4 ? "bg-lav" : "bg-accent")}
@@ -200,12 +210,15 @@ export default async function UcPanel() {
                           <span className={cx("w-5 text-right font-mono", c.corruption === 0 && "text-ok")}>{c.corruption}</span>
                         </div>
                         <p className="text-[11px] text-muted">
-                          Esin <span className={cx("font-mono", c.inspiration < 0 ? "text-danger" : "text-ink")}>{c.inspiration}</span>
+                          {t("Esin")} <span className={cx("font-mono", c.inspiration < 0 ? "text-danger" : "text-ink")}>{c.inspiration}</span>
                           {(c.abilityPoints > 0 || c.freeStatPoints > 0) && (
                             <span className="ml-2 text-accent">
-                              · {c.abilityPoints > 0 && `${c.abilityPoints} yetenek`}
-                              {c.abilityPoints > 0 && c.freeStatPoints > 0 && ", "}
-                              {c.freeStatPoints > 0 && `${c.freeStatPoints} stat`} puanı
+                              ·{" "}
+                              {c.abilityPoints > 0 && c.freeStatPoints > 0
+                                ? t("{a} yetenek, {s} stat puanı", { a: c.abilityPoints, s: c.freeStatPoints })
+                                : c.abilityPoints > 0
+                                  ? t("{n} yetenek puanı", { n: c.abilityPoints })
+                                  : t("{n} stat puanı", { n: c.freeStatPoints })}
                             </span>
                           )}
                         </p>
@@ -221,12 +234,12 @@ export default async function UcPanel() {
         <aside className="space-y-4">
           <JoinCampaign />
           <Card className="p-5">
-            <p className="kicker mb-3">Kural kitabı</p>
+            <p className="kicker mb-3">{t("Kural kitabı")}</p>
             <div className="grid grid-cols-2 gap-2">
-              <QuickLink href="/umbracaelis/kurallar" icon={<BookOpen className="h-4 w-4" />} label="Temel kurallar" />
-              <QuickLink href="/umbracaelis/kurallar/siniflar" icon={<Layers className="h-4 w-4" />} label="Sınıflar" />
-              <QuickLink href="/umbracaelis/kurallar/perkler" icon={<Star className="h-4 w-4" />} label="Perkler" />
-              <QuickLink href="/umbracaelis/kurallar/yozlasma" icon={<MoonStar className="h-4 w-4" />} label="Yozlaşma" />
+              <QuickLink href="/umbracaelis/kurallar" icon={<BookOpen className="h-4 w-4" />} label={t("Temel kurallar")} />
+              <QuickLink href="/umbracaelis/kurallar/siniflar" icon={<Layers className="h-4 w-4" />} label={t("Sınıflar")} />
+              <QuickLink href="/umbracaelis/kurallar/perkler" icon={<Star className="h-4 w-4" />} label={t("Perkler")} />
+              <QuickLink href="/umbracaelis/kurallar/yozlasma" icon={<MoonStar className="h-4 w-4" />} label={t("Yozlaşma")} />
             </div>
           </Card>
         </aside>

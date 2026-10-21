@@ -1,29 +1,31 @@
 import { TopNav } from "@/components/nav";
 import { RoomReturn } from "@/components/room-return";
+import { getLocale, getT } from "@/i18n/server";
 import { currentUser } from "@/lib/auth/session";
 import { content } from "@/lib/shz/content";
 import { RulesNav } from "./rules-nav";
 
 export default async function RulesLayout({ children }: { children: React.ReactNode }) {
   const user = await currentUser();
-  const c = content();
+  const t = await getT();
+  const c = content(await getLocale());
   const groups = [
     {
-      title: "Kurallar",
-      items: [...c.docs.map((d) => ({ href: `/kurallar/${d.key}`, label: d.title, icon: d.key })), { href: "/kurallar/sozluk", label: "Sözlük", icon: "sozluk" }],
+      title: t("Kurallar"),
+      items: [...c.docs.map((d) => ({ href: `/kurallar/${d.key}`, label: d.title, icon: d.key })), { href: "/kurallar/sozluk", label: t("Sözlük"), icon: "sozluk" }],
     },
     {
-      title: "Karakter",
+      title: t("Karakter"),
       items: [
-        { href: "/kurallar/perkler", label: "Perkler", icon: "perkler" },
-        { href: "/kurallar/augmentler", label: "Augmentasyonlar", icon: "augmentler" },
+        { href: "/kurallar/perkler", label: t("Perkler"), icon: "perkler" },
+        { href: "/kurallar/augmentler", label: t("Augmentasyonlar"), icon: "augmentler" },
       ],
     },
     {
-      title: "Yetenek ağaçları",
-      items: [{ href: "/kurallar/yetenekler", label: "Tüm ağaçlar", icon: "yetenekler" }, ...c.trees.map((t) => ({ href: `/kurallar/yetenekler/${t.key}`, label: t.name, tree: t.key }))],
+      title: t("Yetenek ağaçları"),
+      items: [{ href: "/kurallar/yetenekler", label: t("Tüm ağaçlar"), icon: "yetenekler" }, ...c.trees.map((x) => ({ href: `/kurallar/yetenekler/${x.key}`, label: x.name, tree: x.key }))],
     },
-    { title: "Dünya", items: [{ href: "/kurallar/kampanyalar", label: "Kampanyalar", icon: "kampanyalar" }] },
+    { title: t("Dünya"), items: [{ href: "/kurallar/kampanyalar", label: t("Kampanyalar"), icon: "kampanyalar" }] },
   ];
   return (
     <>

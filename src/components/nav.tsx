@@ -2,6 +2,8 @@ import { KeyRound, MoonStar } from "lucide-react";
 import Link from "next/link";
 import { SunLogo } from "./logo";
 import type { SessionUser } from "@/lib/auth/session";
+import { getT } from "@/i18n/server";
+import { LangSwitch } from "./lang-switch";
 import { LogoutButton, MobileMenu } from "./nav-client";
 
 export function Brand() {
@@ -16,22 +18,23 @@ export function Brand() {
   );
 }
 
-export function TopNav({ user, resets = 0 }: { user: SessionUser | null; resets?: number }) {
+export async function TopNav({ user, resets = 0 }: { user: SessionUser | null; resets?: number }) {
+  const t = await getT();
   const links = user
     ? [
-        { href: "/panel", label: "Panel" },
-        { href: "/kurallar", label: "Kurallar" },
-        { href: "/yardim", label: "Yardım" },
-        ...(user.role === "GM" ? [{ href: "/yonetim", label: "Yönetim" }] : []),
-        { href: "/hesap", label: "Hesap" },
+        { href: "/panel", label: t("Panel") },
+        { href: "/kurallar", label: t("Kurallar") },
+        { href: "/yardim", label: t("Yardım") },
+        ...(user.role === "GM" ? [{ href: "/yonetim", label: t("Yönetim") }] : []),
+        { href: "/hesap", label: t("Hesap") },
       ]
     : [
-        { href: "/kurallar", label: "Kurallar" },
-        { href: "/yardim", label: "Yardım" },
-        { href: "/giris", label: "Giriş" },
+        { href: "/kurallar", label: t("Kurallar") },
+        { href: "/yardim", label: t("Yardım") },
+        { href: "/giris", label: t("Giriş") },
       ];
   // Hesapsız ziyaretçi için Umbra Caelis kuralları (uygulama alt yolunun dışında: düz bağlantı).
-  const outside = user ? [{ href: "/umbracaelis/panel", label: "Umbra Caelis'e geç" }] : [{ href: "/umbracaelis/kurallar", label: "Umbra Caelis kuralları" }];
+  const outside = user ? [] : [{ href: "/umbracaelis/kurallar", label: t("Umbra Caelis kuralları") }];
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-bg/85 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
@@ -44,24 +47,16 @@ export function TopNav({ user, resets = 0 }: { user: SessionUser | null; resets?
           ))}
           {!user && (
             <a href="/umbracaelis/kurallar" className="ml-1 inline-flex items-center gap-1.5 rounded-md border border-line px-2.5 py-1.5 text-xs text-muted transition hover:border-accent/50 hover:text-ink">
-              <MoonStar className="h-3.5 w-3.5" /> Umbra Caelis kuralları
+              <MoonStar className="h-3.5 w-3.5" /> {t("Umbra Caelis kuralları")}
             </a>
           )}
           {user && (
             <>
-              {/* Sistem geçişi: aynı hesapla Umbra Caelis paneline (düz bağlantı: /umbracaelis uygulama alt yolunun dışında). */}
-              <a
-                href="/umbracaelis/panel"
-                className="ml-1 inline-flex items-center gap-1.5 rounded-md border border-line px-2.5 py-1.5 text-xs text-muted transition hover:border-accent/50 hover:text-ink"
-                title="Umbra Caelis paneline geç"
-              >
-                <MoonStar className="h-3.5 w-3.5" /> Umbra Caelis
-              </a>
               {resets > 0 && (
                 <Link
                   href="/panel#sifre-istekleri"
                   className="ml-1 inline-flex items-center gap-1 rounded-md border border-warn/50 bg-warn/10 px-2 py-1.5 text-xs text-warn"
-                  title="Şifre sıfırlama istekleri"
+                  title={t("Şifre sıfırlama istekleri")}
                 >
                   <KeyRound className="h-3.5 w-3.5" /> {resets}
                 </Link>
@@ -74,9 +69,11 @@ export function TopNav({ user, resets = 0 }: { user: SessionUser | null; resets?
               <LogoutButton />
             </>
           )}
+          <LangSwitch className="ml-2" />
         </nav>
+        <LangSwitch className="ml-auto md:hidden" />
         <MobileMenu
-          links={user ? [...links, ...(resets > 0 ? [{ href: "/panel#sifre-istekleri", label: `Şifre istekleri (${resets})` }] : [])] : links}
+          links={user ? [...links, ...(resets > 0 ? [{ href: "/panel#sifre-istekleri", label: t("Şifre istekleri ({n})", { n: resets }) }] : [])] : links}
           extra={outside}
           loggedIn={!!user}
           name={user?.displayName ?? null}

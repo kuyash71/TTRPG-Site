@@ -7,9 +7,13 @@ import { campaignAccess, ownerCharacter, publicCharacter } from "@/lib/access";
 import { absoluteRedirect, pageUser } from "@/lib/auth/session";
 import { roomHref } from "@/lib/links";
 import { rulesData } from "@/lib/shz/content";
+import { getLocale, getT } from "@/i18n/server";
 import { Room } from "./room";
 
-export const metadata: Metadata = { title: "Oyun odası" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t("Oyun odası") };
+}
 
 export default async function RoomPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -28,7 +32,7 @@ export default async function RoomPage({ params }: { params: Promise<{ id: strin
     .innerJoin(users, eq(users.id, campaignMembers.userId))
     .where(eq(campaignMembers.campaignId, id));
   const gm = await db.query.users.findFirst({ where: eq(users.id, campaign.gmId), columns: { id: true, displayName: true } });
-  const data = rulesData();
+  const data = rulesData(await getLocale());
   return (
     <Room
       campaign={{ id: campaign.id, name: campaign.name, deathSaveEnabled: campaign.deathSaveEnabled, physicalDice: campaign.physicalDice, system: campaign.system }}

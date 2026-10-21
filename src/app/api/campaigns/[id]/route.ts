@@ -52,8 +52,10 @@ export const DELETE = route({ body: z.object({ confirmName: z.string().max(120) 
     const players = left.find((r) => r.role === "PLAYER")?.n ?? 0;
     const spectators = left.find((r) => r.role === "SPECTATOR")?.n ?? 0;
     if (players + spectators > 0) {
-      const who = [players && `${players} oyuncu`, spectators && `${spectators} izleyici`].filter(Boolean).join(" ve ");
-      throw conflict(`Odayı kapatmak için önce tüm oyuncuları çıkarmalısın (${who} kaldı).`);
+      if (players && spectators)
+        throw conflict("Odayı kapatmak için önce tüm oyuncuları çıkarmalısın ({players} oyuncu ve {spectators} izleyici kaldı).", { players, spectators });
+      if (players) throw conflict("Odayı kapatmak için önce tüm oyuncuları çıkarmalısın ({players} oyuncu kaldı).", { players });
+      throw conflict("Odayı kapatmak için önce tüm oyuncuları çıkarmalısın ({spectators} izleyici kaldı).", { spectators });
     }
     await tx
       .update(invites)

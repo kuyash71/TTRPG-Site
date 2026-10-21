@@ -1,28 +1,28 @@
 import fs from "node:fs";
 import path from "node:path";
+import type { Locale } from "../../i18n/core";
 import type { Ability, Augment, Content, Perk, Tree } from "./content-types";
 
 // content/shz.json dosyasını okur ve önbelleğe alır. Dosya değişirse
 // (geliştirme sırasında npm run sync) bir sonraki çağrıda yeniden okunur.
-
-let cache: { mtime: number; data: Content; idx: Index } | null = null;
 
 interface Index {
   tree: Map<string, Tree>;
   perk: Map<string, Perk>;
   augment: Map<string, Augment>;
 }
+type Entry = { mtime: number; data: Content; idx: Index };
+const caches = new Map<string, Entry>();
 
-function file() {
-  return path.join(process.cwd(), "content", "shz.json");
-}
-
-function load() {
-  const f = file();
+/** content/shz.json (Türkçe) ya da content/shz.en.json (İngilizce). */
+function load(loc: Locale = "tr"): Entry {
+  let f = path.join(process.cwd(), "content", loc === "en" ? "shz.en.json" : "shz.json");
+  if (!fs.existsSync(f)) f = path.join(process.cwd(), "content", "shz.json");
   const mtime = fs.statSync(f).mtimeMs;
-  if (cache && cache.mtime === mtime) return cache;
+  const hit = caches.get(f);
+  if (hit && hit.mtime === mtime) return hit;
   const data = JSON.parse(fs.readFileSync(f, "utf8")) as Content;
-  cache = {
+  const e: Entry = {
     mtime,
     data,
     idx: {
@@ -31,23 +31,24 @@ function load() {
       augment: new Map(data.augments.map((a) => [a.key, a])),
     },
   };
-  return cache;
+  caches.set(f, e);
+  return e;
 }
 
-export function content(): Content {
-  return load().data;
+export function content(loc: Locale = "tr"): Content {
+  return load(loc).data;
 }
-export function getTree(key: string): Tree | undefined {
-  return load().idx.tree.get(key);
+export function getTree(key: string, loc: Locale = "tr"): Tree | undefined {
+  return load(loc).idx.tree.get(key);
 }
-export function getAbility(key: string): Ability | undefined {
-  return load().data.abilities[key];
+export function getAbility(key: string, loc: Locale = "tr"): Ability | undefined {
+  return load(loc).data.abilities[key];
 }
-export function getPerk(key: string): Perk | undefined {
-  return load().idx.perk.get(key);
+export function getPerk(key: string, loc: Locale = "tr"): Perk | undefined {
+  return load(loc).idx.perk.get(key);
 }
-export function getAugment(key: string): Augment | undefined {
-  return load().idx.augment.get(key);
+export function getAugment(key: string, loc: Locale = "tr"): Augment | undefined {
+  return load(loc).idx.augment.get(key);
 }
 
 /** Kural motorunun ihtiyaç duyduğu içerik alt kümesi (istemciye de gönderilebilir). */
@@ -57,7 +58,7 @@ export interface RulesData {
   perks: Perk[];
   augments: Augment[];
 }
-export function rulesData(): RulesData {
-  const c = content();
+export function rulesData(loc: Locale = "tr"): RulesData {
+  const c = content(loc);
   return { trees: c.trees, abilities: c.abilities, perks: c.perks, augments: c.augments };
 }

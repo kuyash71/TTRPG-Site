@@ -5,14 +5,17 @@ import { LanguagePicker } from "@/components/character/languages";
 import { useAction } from "@/components/interactive";
 import { Badge, Button, Card, Field, cx } from "@/components/ui";
 import { StatBadge, UcAbilityCard, UcHtml, UcPerkCard } from "@/components/uc/cards";
+import { UcFaithPicker } from "@/components/uc/faith-picker";
 import { UcClassIcon, UcDalIcon } from "@/components/uc/icons";
 import { api } from "@/lib/client";
 import { UC_LANGUAGES, languageProblems, languageSlots } from "@/lib/languages";
 import { AGE_MAX, AGE_MIN } from "@/lib/shz/constants";
 import { UC_STAT_KEYS, UC_STAT_LABELS } from "@/lib/uc/constants";
-import type { UcAbility, UcPerk } from "@/lib/uc/content-types";
+import type { UcAbility, UcFaith, UcPerk } from "@/lib/uc/content-types";
+import { ucResolveFaith } from "@/lib/uc/faith";
 import { UC_START_FREE, UC_START_SYMBOL, UC_STAT_MAX, ucBuildCreation, ucDalStartBonus, ucLearnState, type UcRules } from "@/lib/uc/rules";
-import { ucTipFor } from "@/lib/uc/tips";
+import type { UcTip } from "@/lib/uc/tips";
+import { useT, useTLoose } from "@/i18n/client";
 
 const STEP_LABELS = { kimlik: "Kozmetik", sinif: "Ana sınıf", dal: "K1 dalı", perkler: "Perkler", diller: "Diller", statlar: "Statlar", yetenek: "İlk yetenek", ozet: "Özet" } as const;
 type StepKey = keyof typeof STEP_LABELS;
@@ -38,14 +41,20 @@ export function UcWizard({
   classes,
   perks: perkList,
   abilities: abilityList,
+  tips,
 }: {
   campaignId: string;
   startPerkPoints: number;
   data: UcRules;
-  classes: { key: string; name: string; introHtml: string }[];
+  classes: { key: string; name: string; introHtml: string; faiths?: UcFaith[]; faithIntroHtml?: string }[];
   perks: UcPerk[];
   abilities: UcAbility[];
+  /** Dile göre seçilmiş ipuçları (sınıf/dal anlamı, stat özeti). */
+  tips: Record<"classes" | "dals" | "stats", Record<string, UcTip>>;
 }) {
+  const t = useT();
+  const tLoose = useTLoose();
+  const ucTipFor = (kind: "classes" | "dals" | "stats", key: string): UcTip | undefined => tips[kind]?.[key];
   const { busy, run } = useAction();
   const [cur, setCur] = useState<StepKey>("kimlik");
   const [id, setId] = useState<Identity>({ name: "", age: 25, race: "İnsan", house: "", faith: "", food: "", background: "", appearance: "", secretNotes: "" });
@@ -57,6 +66,8 @@ export function UcWizard({
   const [first, setFirst] = useState<string | null>(null);
   const [perkTab, setPerkTab] = useState<"positive" | "negative" | "selected">("positive");
   const [perkFilter, setPerkFilter] = useState("");
+  const [faithKey, setFaithKey] = useState<string | null>(null);
+  const [faithDetail, setFaithDetail] = useState("");
 
   const result = useMemo(() => ucBuildCreation({ classKey: cls, dal, points, perks, firstAbility: first }, startPerkPoints, data), [cls, dal, points, perks, first, startPerkPoints, data]);
   const budget = result.budget;
@@ -68,7 +79,10 @@ export function UcWizard({
   const perkName = useMemo(() => new Map(perkList.map((p) => [p.key, p.name])), [perkList]);
 
   const idOk = id.name.trim().length >= 2 && id.race.trim().length >= 2 && id.house.trim().length >= 2 && id.age >= AGE_MIN && id.age <= AGE_MAX;
-  const faithOk = cls !== "priest" || id.faith.trim().length >= 2;
+  const clsFaiths = classes.find((c) => c.key === cls)?.faiths;
+  const faithPick = clsFaiths?.length ? ucResolveFaith(clsFaiths, faithKey, faithDetail) : null;
+  const faithOk = !clsFaiths?.length || !!faithPick;
+  const faithLabel = faithPick ? faithPick.label : clsFaiths?.length ? "" : id.faith.trim();
   const okMap: Record<StepKey, boolean> = {
     kimlik: idOk,
     sinif: !!cls && faithOk,
@@ -108,7 +122,7 @@ export function UcWizard({
                   i === step ? "border-accent bg-accent/15 text-ink" : stepOk[i] && i < step ? "border-ok/40 text-ok" : "border-line text-muted",
                 )}
               >
-                <span className="font-mono">{i + 1}</span> {STEP_LABELS[s]}
+                <span className="font-mono">{i + 1}</span> {t(STEP_LABELS[s])}
               </button>
             </li>
           ))}
@@ -117,48 +131,48 @@ export function UcWizard({
         {cur === "kimlik" && (
           <Card className="space-y-4 p-6">
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Karakter adı" hint="Hanesine ve bölgesine uygun bir isim (Leit'ateirr, Xitochi, Realm of Sand gelenekleri)">
+              <Field label={t("Karakter adı")} hint={t("Hanesine ve bölgesine uygun bir isim (Leit'ateirr, Xitochi, Realm of Sand gelenekleri)")}>
                 <input className="input" name="name" value={id.name} maxLength={60} onChange={(e) => setId({ ...id, name: e.target.value })} />
               </Field>
-              <Field label="Yaş" hint={`${AGE_MIN}–${AGE_MAX} arası; elf ve cüceler için GM ile belirlenir`}>
+              <Field label={t("Yaş")} hint={t("{min}–{max} arası; elf ve cüceler için GM ile belirlenir", { min: AGE_MIN, max: AGE_MAX })}>
                 <input type="number" min={AGE_MIN} max={AGE_MAX} className="input" value={id.age} onChange={(e) => setId({ ...id, age: Number(e.target.value) })} />
               </Field>
-              <Field label="Irk" hint="Mekanik etkisi yok; dünyanın sana nasıl davrandığını belirler">
+              <Field label={t("Irk")} hint={t("Mekanik etkisi yok; dünyanın sana nasıl davrandığını belirler")}>
                 <input className="input" name="race" list="uc-races" value={id.race} maxLength={60} onChange={(e) => setId({ ...id, race: e.target.value })} />
                 <datalist id="uc-races">
                   {RACES.map((r) => (
-                    <option key={r} value={r} />
+                    <option key={r} value={r} label={t(r)} />
                   ))}
                 </datalist>
               </Field>
-              <Field label="Hane ve ünvan" hint="Bağlı olduğun hane, ordu birliği ya da kurum">
-                <input className="input" name="house" value={id.house} maxLength={80} placeholder="ör. Sanders'a bağlı Velites şövalyesi" onChange={(e) => setId({ ...id, house: e.target.value })} />
+              <Field label={t("Hane ve unvan")} hint={t("Bağlı olduğun hane, ordu birliği ya da kurum")}>
+                <input className="input" name="house" value={id.house} maxLength={80} placeholder={t("ör. Sanders'a bağlı Velites şövalyesi")} onChange={(e) => setId({ ...id, house: e.target.value })} />
               </Field>
-              <Field label="İnanç" hint="Priest için zorunlu ve mekanik etkili; diğerleri için RP">
+              <Field label={t("İnanç")} hint={t("İsteğe bağlı, RP için. Priest seçersen inancını sınıf adımında listeden seçersin.")}>
                 <input className="input" name="faith" value={id.faith} maxLength={80} onChange={(e) => setId({ ...id, faith: e.target.value })} />
               </Field>
-              <Field label="Yiyecek" hint="Yanında taşıdığın erzak">
+              <Field label={t("Yiyecek")} hint={t("Yanında taşıdığın erzak")}>
                 <input className="input" name="food" value={id.food} maxLength={120} onChange={(e) => setId({ ...id, food: e.target.value })} />
               </Field>
             </div>
-            <Field label="Geçmiş" hint="Partideki herkesin bilebileceği hikâye">
+            <Field label={t("Geçmiş")} hint={t("Partideki herkesin bilebileceği hikâye")}>
               <textarea className="input" rows={5} maxLength={4000} value={id.background} onChange={(e) => setId({ ...id, background: e.target.value })} />
             </Field>
-            <Field label="Görünüş">
+            <Field label={t("Görünüş")}>
               <textarea className="input" rows={2} maxLength={1000} value={id.appearance} onChange={(e) => setId({ ...id, appearance: e.target.value })} />
             </Field>
             <div className="rounded-xl border border-lav/30 bg-lav/[0.05] p-4">
-              <Field label="GM'e özel notlar ve gizli geçmiş" hint="Yalnızca sen ve GM görürsünüz.">
+              <Field label={t("GM'e özel notlar ve gizli geçmiş")} hint={t("Yalnızca sen ve GM görürsünüz.")}>
                 <textarea className="input" rows={3} maxLength={6000} value={id.secretNotes} onChange={(e) => setId({ ...id, secretNotes: e.target.value })} />
               </Field>
             </div>
-            <p className="text-xs text-muted">Lumre (para) ve envanteri karakter kağıdından girersin; portreyi de oradan eklersin.</p>
+            <p className="text-xs text-muted">{t("Lumre (para) ve envanteri karakter kağıdından girersin; portreyi de oradan eklersin.")}</p>
           </Card>
         )}
 
         {cur === "sinif" && (
           <div className="space-y-4">
-            <p className="text-sm text-muted">Ana sınıf oyun boyunca değişmez. Her sınıfta 3 katman, her katmanda 2 dal vardır; her katmanda yalnızca birini seçersin.</p>
+            <p className="text-sm text-muted">{t("Ana sınıf oyun boyunca değişmez. Her sınıfta 3 katman, her katmanda 2 dal vardır; her katmanda yalnızca birini seçersin.")}</p>
             <div className="grid gap-3 md:grid-cols-2">
               {classes.map((c) => {
                 const on = cls === c.key;
@@ -170,6 +184,10 @@ export function UcWizard({
                     aria-pressed={on}
                     onClick={() => {
                       setCls(c.key);
+                      if (c.key !== cls) {
+                        setFaithKey(null);
+                        setFaithDetail("");
+                      }
                       if (data.dals[dal]?.classKey !== c.key) setDal("");
                       setPoints({});
                       setFirst(null);
@@ -191,7 +209,7 @@ export function UcWizard({
                     <div className="flex flex-wrap gap-1.5">
                       {dals.map((k) => (
                         <span key={k} className="chip">
-                          K{data.dals[k].tier} · {data.dals[k].name}
+                          {t("K{n}", { n: data.dals[k].tier })} · {data.dals[k].name}
                         </span>
                       ))}
                     </div>
@@ -199,21 +217,31 @@ export function UcWizard({
                 );
               })}
             </div>
-            {cls === "priest" && (
-              <Card className="border-lav/40 p-4">
-                <Field label="İnanç (Priest için zorunlu)" hint="Priest'in inancı mekanik etki taşır; ayrıntılar sınıf sayfasında.">
-                  <input className="input" value={id.faith} maxLength={80} onChange={(e) => setId({ ...id, faith: e.target.value })} />
-                </Field>
-              </Card>
-            )}
+            {clsFaiths?.length ? (
+              <section className="space-y-3 border-t border-line pt-5">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <h2 className="font-serif text-2xl">{t("İnanç")}</h2>
+                  <span className={cx("text-sm", faithOk ? "text-ok" : "text-warn")}>{faithOk ? t("Seçildi: {faith}", { faith: faithLabel }) : t("Bir inanç seç (zorunlu)")}</span>
+                </div>
+                <UcFaithPicker
+                  faiths={clsFaiths}
+                  introHtml={classes.find((c) => c.key === cls)?.faithIntroHtml}
+                  value={faithKey}
+                  detail={faithDetail}
+                  onChange={(k, d) => {
+                    setFaithKey(k);
+                    setFaithDetail(d);
+                  }}
+                />
+              </section>
+            ) : null}
           </div>
         )}
 
         {cur === "dal" && (
           <div className="space-y-4">
             <p className="text-sm text-muted">
-              K1 dalın, sembol stat&apos;ına <strong className="text-ink">+{UC_START_SYMBOL}</strong> verir ve dalın başlangıç bonusunu kazandırır. K2 dalını Sv 5&apos;te, K3 dalını Sv 10&apos;da
-              seçeceksin.
+              {t("K1 dalın, sembol stat'ına +{n} verir ve dalın başlangıç bonusunu kazandırır. K2 dalını Sv 5'te, K3 dalını Sv 10'da seçeceksin.", { n: UC_START_SYMBOL })}
             </p>
             <div className="grid gap-3 md:grid-cols-2">
               {(data.classes.find((x) => x.key === cls)?.dals ?? [])
@@ -251,7 +279,7 @@ export function UcWizard({
                       </div>
                       {d.identity && <p className="text-sm text-ink/85">{d.identity}</p>}
                       <p className="rounded-lg bg-surface2/60 px-3 py-2 text-sm text-ink/90">
-                        <span className="mr-1 text-[10px] font-semibold uppercase tracking-widest text-muted">Başlangıç</span>
+                        <span className="mr-1 text-[10px] font-semibold uppercase tracking-widest text-muted">{t("Başlangıç")}</span>
                         {UC_STAT_LABELS[d.stat]} +{UC_START_SYMBOL}
                         {b && ` · ${UC_STAT_LABELS[b.stat]} +${b.amount}`}
                       </p>
@@ -266,7 +294,7 @@ export function UcWizard({
                   );
                 })}
             </div>
-            {!cls && <p className="text-sm text-warn">Önce ana sınıfı seç.</p>}
+            {!cls && <p className="text-sm text-warn">{t("Önce ana sınıfı seç.")}</p>}
           </div>
         )}
 
@@ -274,21 +302,21 @@ export function UcWizard({
           <div className="space-y-4">
             <Card className="flex flex-wrap items-center gap-x-6 gap-y-2 p-4 text-sm">
               <span>
-                Başlangıç <strong className="font-mono">+{budget.start}</strong>
+                {t("Başlangıç")} <strong className="font-mono">+{budget.start}</strong>
               </span>
               <span>
-                Negatiflerden <strong className="font-mono text-ok">+{budget.gained}</strong>
+                {t("Negatiflerden")} <strong className="font-mono text-ok">+{budget.gained}</strong>
               </span>
               <span>
-                Pozitiflere <strong className="font-mono text-danger">−{budget.spent}</strong>
+                {t("Pozitiflere")} <strong className="font-mono text-danger">−{budget.spent}</strong>
               </span>
-              <span className={cx("ml-auto rounded-md px-2 py-1 font-mono", budget.left < 0 ? "bg-danger/15 text-danger" : "bg-accent/15 text-accent")}>Kalan {budget.left}</span>
+              <span className={cx("ml-auto rounded-md px-2 py-1 font-mono", budget.left < 0 ? "bg-danger/15 text-danger" : "bg-accent/15 text-accent")}>{t("Kalan {n}", { n: budget.left })}</span>
               <span className="w-full text-xs text-muted">
-                Kalan puan (Puan + 1) / 2 olarak stat puanına dönüşür: şu an <strong className="text-ink">{budget.convertible}</strong> stat puanı. Öneri: bir Köken, bir Bağ ve bir zaaf seç.
+                {t("Kalan puan (Puan + 1) / 2 olarak stat puanına dönüşür: şu an {n} stat puanı. Öneri: bir Köken, bir Bağ ve bir zaaf seç.", { n: budget.convertible })}
               </span>
               {result.warnings.map((w) => (
                 <span key={w} className="w-full rounded-md bg-warn/10 px-2 py-1 text-xs text-warn">
-                  {w}
+                  {tLoose(w)}
                 </span>
               ))}
             </Card>
@@ -296,9 +324,9 @@ export function UcWizard({
               <div role="tablist" className="inline-flex rounded-lg border border-line bg-surface p-1">
                 {(
                   [
-                    ["positive", `Pozitif (${perkList.filter((p) => p.kind === "positive").length})`],
-                    ["negative", `Negatif (${perkList.filter((p) => p.kind === "negative").length})`],
-                    ["selected", `Seçilenler (${perks.length})`],
+                    ["positive", t("Pozitif ({n})", { n: perkList.filter((p) => p.kind === "positive").length })],
+                    ["negative", t("Negatif ({n})", { n: perkList.filter((p) => p.kind === "negative").length })],
+                    ["selected", t("Seçilenler ({n})", { n: perks.length })],
                   ] as const
                 ).map(([k, label]) => (
                   <button
@@ -313,7 +341,7 @@ export function UcWizard({
                   </button>
                 ))}
               </div>
-              <input className="input max-w-xs flex-1" placeholder="Perk ara…" value={perkFilter} onChange={(e) => setPerkFilter(e.target.value)} />
+              <input className="input max-w-xs flex-1" placeholder={t("Perk ara…")} value={perkFilter} onChange={(e) => setPerkFilter(e.target.value)} />
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               {visiblePerks.map((p) => {
@@ -331,16 +359,16 @@ export function UcWizard({
                         variant={on ? "primary" : "secondary"}
                         disabled={!!blockedBy && !on}
                         onClick={() => togglePerk(p.key)}
-                        title={blockedBy ? `${perkName.get(blockedBy)} ile birlikte alınamaz` : undefined}
+                        title={blockedBy ? t("{name} ile birlikte alınamaz", { name: perkName.get(blockedBy) }) : undefined}
                         data-testid={`perk-${p.key}`}
                       >
-                        {on ? "Seçildi" : blockedBy ? <Lock className="h-3.5 w-3.5" /> : "Seç"}
+                        {on ? t("Seçildi") : blockedBy ? <Lock className="h-3.5 w-3.5" /> : t("Seç")}
                       </Button>
                     }
                   />
                 );
               })}
-              {!visiblePerks.length && <p className="text-sm text-muted">Gösterilecek perk yok.</p>}
+              {!visiblePerks.length && <p className="text-sm text-muted">{t("Gösterilecek perk yok.")}</p>}
             </div>
           </div>
         )}
@@ -351,14 +379,12 @@ export function UcWizard({
           ) : (
             <div data-testid="uc-lang-wip">
             <Card className="space-y-2 p-6 text-sm">
-              <p className="font-serif text-lg text-ink">Umbra Caelis dilleri yakında</p>
+              <p className="font-serif text-lg text-ink">{t("Umbra Caelis dilleri yakında")}</p>
               <p className="text-ink/85">
-                Dünyanın dilleri (Leit&apos;ateirr dili, Xitochi dili, Çöl dili, Elf ve Cüce dilleri, eski rün dili…) hâlâ yazılıyor. Liste eklendiğinde karakter oluştururken buradan
-                seçeceksin.
+                {t("Dünyanın dilleri (Leit'ateirr dili, Xitochi dili, Çöl dili, Elf ve Cüce dilleri, eski rün dili…) hâlâ yazılıyor. Liste eklendiğinde karakter oluştururken buradan seçeceksin.")}
               </p>
               <p className="text-muted">
-                Şimdilik bu adımı geç: GM karakterinin bildiği dilleri karakter ayrıntılarından ekler. Perklerine göre başlangıç hakkın <strong className="text-ink">{langSlots} dil</strong>{" "}
-                (Monolingual 1, Polyglot 3).
+                {t("Şimdilik bu adımı geç: GM karakterinin bildiği dilleri karakter ayrıntılarından ekler. Perklerine göre başlangıç hakkın {n} dil (Monolingual 1, Polyglot 3).", { n: langSlots })}
               </p>
             </Card>
             </div>
@@ -368,23 +394,25 @@ export function UcWizard({
           <Card className="p-5">
             <div className="mb-4 grid gap-3 sm:grid-cols-3">
               <div className="rounded-lg border border-line bg-surface2/50 px-3 py-2">
-                <p className="text-[10px] uppercase tracking-wider text-muted">Serbest</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted">{t("Serbest")}</p>
                 <p className="font-mono text-xl">{UC_START_FREE}</p>
               </div>
               <div className="rounded-lg border border-line bg-surface2/50 px-3 py-2">
-                <p className="text-[10px] uppercase tracking-wider text-muted">Perklerden</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted">{t("Perklerden")}</p>
                 <p className="font-mono text-xl">{budget.convertible}</p>
               </div>
               <div className={cx("rounded-lg border px-3 py-2", used === totalPoints ? "border-ok/50 bg-ok/10" : "border-accent/50 bg-accent/10")}>
-                <p className="text-[10px] uppercase tracking-wider text-muted">Kalan</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted">{t("Kalan")}</p>
                 <p className="font-mono text-xl">
                   {totalPoints - used} / {totalPoints}
                 </p>
               </div>
             </div>
             <p className="mb-4 text-sm text-muted">
-              Sembol stat&apos;ın ({D ? UC_STAT_LABELS[D.stat] : "—"}) zaten +{UC_START_SYMBOL} aldı; 2 serbest puan sembol stat dışındaki statlara gider. Sembol stat&apos;a yalnızca
-              perklerden dönen puanlar ({budget.convertible}) eklenebilir. Statlar 0–{UC_STAT_MAX} arasındadır.
+              {t(
+                "Sembol stat'ın ({stat}) zaten +{sym} aldı; 2 serbest puan sembol stat dışındaki statlara gider. Sembol stat'a yalnızca perklerden dönen puanlar ({conv}) eklenebilir. Statlar 0–{max} arasındadır.",
+                { stat: D ? UC_STAT_LABELS[D.stat] : "—", sym: UC_START_SYMBOL, conv: budget.convertible, max: UC_STAT_MAX },
+              )}
             </p>
             <div className="divide-y divide-line">
               {UC_STAT_KEYS.map((k) => {
@@ -397,17 +425,17 @@ export function UcWizard({
                       <span className="text-ink">{UC_STAT_LABELS[k]}</span>
                       {isSym && (
                         <Badge tone="accent" className="ml-2">
-                          Sembol
+                          {t("Sembol")}
                         </Badge>
                       )}
                       <span className="block text-xs text-muted">{ucTipFor("stats", k)?.summary ?? ucTipFor("stats", k)?.meaning}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <button type="button" className="h-8 w-8 rounded-md border border-line text-muted hover:text-ink disabled:opacity-30" disabled={v <= 0} onClick={() => setPoints((f) => ({ ...f, [k]: v - 1 }))} aria-label={`${UC_STAT_LABELS[k]} azalt`}>
+                      <button type="button" className="h-8 w-8 rounded-md border border-line text-muted hover:text-ink disabled:opacity-30" disabled={v <= 0} onClick={() => setPoints((f) => ({ ...f, [k]: v - 1 }))} aria-label={t("{stat} azalt", { stat: UC_STAT_LABELS[k] })}>
                         −
                       </button>
                       <span className={cx("w-7 text-center font-mono text-sm", v > 0 ? "text-accent" : "text-muted")}>{v > 0 ? `+${v}` : 0}</span>
-                      <button type="button" className="h-8 w-8 rounded-md border border-line text-muted hover:text-ink disabled:opacity-30" disabled={!canInc} onClick={() => setPoints((f) => ({ ...f, [k]: v + 1 }))} aria-label={`${UC_STAT_LABELS[k]} artır`}>
+                      <button type="button" className="h-8 w-8 rounded-md border border-line text-muted hover:text-ink disabled:opacity-30" disabled={!canInc} onClick={() => setPoints((f) => ({ ...f, [k]: v + 1 }))} aria-label={t("{stat} artır", { stat: UC_STAT_LABELS[k] })}>
                         +
                       </button>
                     </div>
@@ -421,9 +449,9 @@ export function UcWizard({
 
         {cur === "yetenek" && (
           <div className="space-y-4">
-            <p className="text-sm text-muted">Seviye 0&apos;da K1 dalında 1 yetenek puanın var. Şartlarını karşıladığın bir yeteneği şimdi alabilir ya da puanı saklayıp oyunda harcayabilirsin.</p>
+            <p className="text-sm text-muted">{t("Seviye 0'da K1 dalında 1 yetenek puanın var. Şartlarını karşıladığın bir yeteneği şimdi alabilir ya da puanı saklayıp oyunda harcayabilirsin.")}</p>
             <Button variant={first === null ? "primary" : "secondary"} onClick={() => setFirst(null)}>
-              Şimdi seçme, puanı sakla
+              {t("Şimdi seçme, puanı sakla")}
             </Button>
             <div className="grid gap-3 md:grid-cols-2">
               {abilityList
@@ -439,10 +467,10 @@ export function UcWizard({
                       footer={
                         ok ? (
                           <Button size="sm" variant={first === a.key ? "primary" : "outline"} onClick={() => setFirst(a.key)}>
-                            {first === a.key ? "Seçildi" : "Bunu al"}
+                            {first === a.key ? t("Seçildi") : t("Bunu al")}
                           </Button>
                         ) : (
-                          <p className="text-xs text-muted">Kilitli: {st.problems.join(" · ")}</p>
+                          <p className="text-xs text-muted">{t("Kilitli:")} {st.problems.map(tLoose).join(" · ")}</p>
                         )
                       }
                     />
@@ -455,17 +483,18 @@ export function UcWizard({
         {cur === "ozet" && (
           <Card className="space-y-5 p-6">
             <div>
-              <p className="kicker mb-1">Kimlik</p>
+              <p className="kicker mb-1">{t("Kimlik")}</p>
               <p className="font-serif text-2xl">{id.name || "—"}</p>
               <p className="text-sm text-muted">
-                {id.age} yaş · {id.race} · {id.house || "—"}
-                {id.faith && ` · ${id.faith}`}
+                {t("{n} yaş", { n: id.age })} · {t(id.race)} · {id.house || "—"}
+                {faithLabel && ` · ${faithLabel}`}
               </p>
+              {faithPick && faithPick.startCorruption > 0 && <p className="mt-1 text-sm text-lav">{t("Gizli inanç: oyuna +{n} Yozlaşma ile başlarsın.", { n: faithPick.startCorruption })}</p>}
             </div>
             <div className="flex items-start gap-3">
               {D && <UcDalIcon dalKey={D.key} tier={1} />}
               <div>
-                <p className="kicker mb-1">Sınıf ve dal</p>
+                <p className="kicker mb-1">{t("Sınıf ve dal")}</p>
                 <p>
                   {classes.find((c) => c.key === cls)?.name} · {D?.name} <span className="text-muted">({D && UC_STAT_LABELS[D.stat]})</span>
                 </p>
@@ -473,22 +502,22 @@ export function UcWizard({
               </div>
             </div>
             <div>
-              <p className="kicker mb-1">Perkler</p>
-              <p className="text-sm">{perks.map((k) => perkName.get(k)).join(", ") || "Yok"}</p>
+              <p className="kicker mb-1">{t("Perkler")}</p>
+              <p className="text-sm">{perks.map((k) => perkName.get(k)).join(", ") || t("Yok")}</p>
             </div>
             <div>
-              <p className="kicker mb-1">Diller</p>
-              <p className="text-sm">{langs.length ? langs.join(", ") : UC_LANGUAGES.length ? "Seçilmedi" : "GM ekleyecek (liste yazım aşamasında)"}</p>
+              <p className="kicker mb-1">{t("Diller")}</p>
+              <p className="text-sm">{langs.length ? langs.join(", ") : UC_LANGUAGES.length ? t("Seçilmedi") : t("GM ekleyecek (liste yazım aşamasında)")}</p>
             </div>
             <div>
-              <p className="kicker mb-1">İlk yetenek</p>
-              <p className="text-sm">{first ? data.abilities[first]?.name : "Seçilmedi (1 yetenek puanı saklanacak)"}</p>
+              <p className="kicker mb-1">{t("İlk yetenek")}</p>
+              <p className="text-sm">{first ? data.abilities[first]?.name : t("Seçilmedi (1 yetenek puanı saklanacak)")}</p>
             </div>
             {(!result.ok || !faithOk) && (
               <ul className="list-disc space-y-1 rounded-lg border border-danger/40 bg-danger/10 py-3 pl-8 pr-4 text-sm text-danger">
-                {!faithOk && <li>Priest için inanç zorunlu</li>}
+                {!faithOk && <li>{t("Priest için inanç seçimi zorunlu (Ana sınıf adımı)")}</li>}
                 {result.problems.map((p) => (
-                  <li key={p}>{p}</li>
+                  <li key={p}>{tLoose(p)}</li>
                 ))}
               </ul>
             )}
@@ -506,7 +535,9 @@ export function UcWizard({
                       age: id.age,
                       race: id.race,
                       house: id.house,
-                      faith: id.faith,
+                      faith: faithLabel,
+                      faithKey: faithPick ? faithKey : null,
+                      faithDetail: faithPick ? faithDetail : "",
                       food: id.food,
                       background: id.background,
                       appearance: id.appearance,
@@ -519,18 +550,18 @@ export function UcWizard({
                 if (r) window.location.assign(`/umbracaelis/karakter/${r.id}`);
               }}
             >
-              Karakteri onaya gönder
+              {t("Karakteri onaya gönder")}
             </Button>
           </Card>
         )}
 
         <div className="mt-6 flex justify-between">
           <Button disabled={step === 0} onClick={() => setStep(step - 1)}>
-            ← Geri
+            ← {t("Geri")}
           </Button>
           {step < STEPS.length - 1 && (
             <Button variant="primary" disabled={!stepOk[step]} onClick={() => setStep(step + 1)}>
-              İleri →
+              {t("İleri")} →
             </Button>
           )}
         </div>
@@ -538,15 +569,16 @@ export function UcWizard({
 
       <aside className="lg:sticky lg:top-24 lg:self-start">
         <Card className="p-5">
-          <p className="kicker mb-3">Özet</p>
+          <p className="kicker mb-3">{t("Özet")}</p>
           <div className="flex items-center gap-3">
             {cls && <UcClassIcon classKey={cls} className="h-10 w-10" />}
             <div className="min-w-0">
-              <p className="truncate font-serif text-lg">{id.name || "İsimsiz"}</p>
+              <p className="truncate font-serif text-lg">{id.name || t("İsimsiz")}</p>
               <p className="text-xs text-muted">
-                Seviye 0 · {classes.find((c) => c.key === cls)?.name ?? "sınıf seçilmedi"}
+                {t("Seviye 0")} · {classes.find((c) => c.key === cls)?.name ?? t("sınıf seçilmedi")}
                 {D && ` · ${D.name}`}
               </p>
+              {faithLabel && <p className="truncate text-xs text-lav">{faithLabel}</p>}
             </div>
           </div>
           <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
@@ -558,17 +590,17 @@ export function UcWizard({
             ))}
           </div>
           <div className="mt-4 text-sm">
-            <span className="text-muted">Perk puanı: </span>
+            <span className="text-muted">{t("Perk puanı:")} </span>
             <span className={cx("font-mono", budget.left < 0 && "text-danger")}>{budget.left}</span>
             <span className="text-muted"> → stat: </span>
             <span className="font-mono">{budget.convertible}</span>
-            <span className="text-muted"> · Bonus tavanı </span>
+            <span className="text-muted"> · {t("Bonus tavanı")} </span>
             <span className="font-mono">+4</span>
           </div>
           {result.problems.length > 0 && step > 0 && (
             <ul className="mt-4 space-y-1 text-xs text-warn">
               {result.problems.slice(0, 5).map((p) => (
-                <li key={p}>• {p}</li>
+                <li key={p}>• {tLoose(p)}</li>
               ))}
             </ul>
           )}

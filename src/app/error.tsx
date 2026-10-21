@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SunLogo } from "@/components/logo";
+import { useT } from "@/i18n/client";
 
 const KEY = "shz:autoReload";
 
@@ -11,6 +12,7 @@ const KEY = "shz:autoReload";
  * ile düzelir. Bu yüzden aynı adres için 20 saniyede bir kez otomatik olarak yeniler.
  */
 export default function ErrorPage({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  const t = useT();
   const [reloading, setReloading] = useState(false);
   useEffect(() => {
     console.error(error);
@@ -31,21 +33,21 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
       <div>
         <SunLogo className="mx-auto h-12 w-12 animate-pulse text-accent" />
         {reloading ? (
-          <p className="mt-4 text-muted">Sayfa yeniden yükleniyor…</p>
+          <p className="mt-4 text-muted">{t("Sayfa yeniden yükleniyor…")}</p>
         ) : (
           <>
-            <h1 className="mt-4 text-2xl">Bir şeyler ters gitti</h1>
-            <p className="mt-2 text-muted">Sayfa yüklenirken bir hata oluştu. Sayfayı yenilemek çoğu zaman yeter.</p>
-            {error.digest && <p className="mt-1 font-mono text-xs text-muted">Kod: {error.digest}</p>}
+            <h1 className="mt-4 text-2xl">{t("Bir şeyler ters gitti")}</h1>
+            <p className="mt-2 text-muted">{t("Sayfa yüklenirken bir hata oluştu. Sayfayı yenilemek çoğu zaman yeter.")}</p>
+            {error.digest && <p className="mt-1 font-mono text-xs text-muted">{t("Kod: {code}", { code: error.digest })}</p>}
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <button type="button" onClick={() => window.location.reload()} className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-onAccent">
-                Sayfayı yenile
+                {t("Sayfayı yenile")}
               </button>
               <button type="button" onClick={reset} className="rounded-lg border border-line px-4 py-2 text-sm">
-                Tekrar dene
+                {t("Tekrar dene")}
               </button>
               <Link href="/panel" className="rounded-lg border border-line px-4 py-2 text-sm">
-                Panele dön
+                {t("Panele dön")}
               </Link>
             </div>
           </>

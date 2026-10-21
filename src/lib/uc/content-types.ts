@@ -26,7 +26,7 @@ export interface UcAbility {
   requirementText: string;
   requirements: UcRequirement[];
   maxLevel: number;
-  /** Dalın imzası: tek seviyeli, ağır gereksinimli yetenek */
+  /** Vertex: dalın tek seviyeli, ağır gereksinimli yeteneği (eski adı İmza) */
   signature: boolean;
   levelEffects: { level: number; html: string }[];
   sections: UcSection[];
@@ -44,6 +44,8 @@ export interface UcDal {
   /** a.CLASS tablosundaki kısa kimlik */
   identity: string;
   introHtml: string;
+  /** a.DAL'daki "---" sonrası dalın kendi mekaniği (AKIŞ, DÜELLO, LÜTUF...) */
+  mechanic: { title: string; html: string } | null;
   startBonusText: string | null;
   abilities: string[];
   searchText: string;
@@ -56,7 +58,30 @@ export interface UcClass {
   /** Katman tablosu dışındaki bölümler (örnek yollar, inanç, notlar) */
   sections: UcSection[];
   dals: string[]; // K1, K1, K2, K2, K3, K3
+  /** Yalnızca inanç seçen sınıflarda (Priest) */
+  faiths?: UcFaith[];
+  faithIntroHtml?: string;
   searchText: string;
+}
+
+export interface UcFaithOption {
+  key: string;
+  name: string;
+  html: string;
+}
+
+export interface UcFaith {
+  key: string;
+  name: string;
+  /** Kısa ad: "Trifarium", "Ezoterik" */
+  short: string;
+  html: string;
+  /** Tanrı, yol ya da tarikat seçimi (yoksa boş) */
+  options: UcFaithOption[];
+  /** Seçenek yerine oyuncunun yazacağı ayrıntı */
+  detailHint: string | null;
+  startCorruption: number;
+  esoteric: boolean;
 }
 
 export interface UcPerk {

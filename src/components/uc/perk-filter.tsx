@@ -2,12 +2,14 @@
 import { useEffect, useState } from "react";
 import { cx } from "@/components/ui";
 import { UcCategoryGlyph } from "./icons";
+import { useT } from "@/i18n/client";
 
 /**
  * Perk listesinin üstündeki kategori süzgeci. Kartlar sunucuda çizilir; süzgeç yalnızca
  * data-perk-cat özniteliğine göre gizler/gösterir (JS yoksa hepsi görünür).
  */
 export function UcPerkFilter({ categories, counts }: { categories: string[]; counts: Record<string, number> }) {
+  const t = useT();
   const [cat, setCat] = useState<string | null>(null);
   useEffect(() => {
     document.querySelectorAll<HTMLElement>("[data-perk-cat]").forEach((el) => {
@@ -33,14 +35,14 @@ export function UcPerkFilter({ categories, counts }: { categories: string[]; cou
     </button>
   );
   return (
-    <div className="mb-6 flex flex-wrap gap-2" role="toolbar" aria-label="Kategoriye göre süz">
-      {btn(null, "Hepsi", Object.values(counts).reduce((a, b) => a + b, 0))}
+    <div className="mb-6 flex flex-wrap gap-2" role="toolbar" aria-label={t("Kategoriye göre süz")}>
+      {btn(null, t("Hepsi"), Object.values(counts).reduce((a, b) => a + b, 0))}
       {categories.map((c) =>
         btn(
           c,
           <>
             <UcCategoryGlyph category={c} className="h-3.5 w-3.5" />
-            {c}
+            {t(c)}
           </>,
           counts[c] ?? 0,
         ),

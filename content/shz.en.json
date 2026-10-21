@@ -1,0 +1,3677 @@
+{
+ "generatedAt": "2026-10-05T16:39:52.365Z",
+ "hash": "b380b5719701-en",
+ "docs": [
+  {
+   "key": "temel-kurallar",
+   "title": "Core Rules",
+   "html": "<p>The SHZ-TTRPG is traditionally designed to be played with a d20. The GM may use different dice to add color to various actions, but the system is built on the d20.</p>\n<h4>DEATH</h4>\n<p>In the game, death occurs when the player dies as a result of RP. In this regard, the GM may, at their initiative, end with the player's death based on the status of the limbs and the rolls made in the last action.</p>\n<h4>DEATH SAVE THROW</h4>\n<p>When the character faces death, it serves as a last resort for the player, if available. GMs are advised to turn this system off entirely for players seeking a challenge.</p>\n<p>Each player has the right to make 1 death save throw, which can be reset only by spending inspiration points  (after each reset, the inspiration points required increase by 1).</p>\n<p>The death save throw works similarly to DnD. The player rolls a d6. On a 1-2-3, one mark goes in the death box; on a 4-5-6, one mark goes in the save box. Whichever reaches 3 first happens. Death: the character dies. Save: the character survives as critically wounded.</p>\n<h4>LEVELING</h4>\n<p>After each level gained in the game, you earn an Ability Point that can be used to open an ability tree, unlock an ability or raise an ability's level. The player starts the game at level 0 with 1 ability point and 1 open expertise tree</p>\n<p>The level cap per campaign is 10; in long or connected campaigns the GM can raise this cap up to 15. To take the 3rd level of an ability, the character's level must be at least 4. When a tree's stat reaches 10, the guaranteed point that would go to that stat on leveling up is given to another stat of the player's choice.</p>\n<h4>ABILITY TREES</h4>\n<p>Each expertise tree has 8 abilities: 1 root ability, branches A and B (3 abilities each), each ending with its own finisher ability, and 1 sub-branch ability that splits off from the first ability of a branch. The BRANCH field in the ability files shows the ability's position (Root, A, A′, B, B′).</p>\n<ul><li><strong>First ability of a branch:</strong> Requires at most 3 in the main stat.</li><li><strong>Middle ability:</strong> Requires 4–5 in the main stat and one secondary stat; its predecessor is the branch's first ability.</li><li><strong>Sub-branch:</strong> Requires 5 in the main stat and one secondary stat; its predecessor is the ability it splits off from.</li><li><strong>Finisher:</strong> Requires 7 in the main stat, 4–5 in a secondary stat and a character level of at least 6–7; its predecessor is the branch's middle ability.</li><li><strong>Synergy (Chemistry):</strong> Some abilities gain an extra effect when taken together with a specific ability from another branch or tree. These effects are written under the SYNERGY heading in the ability files.</li></ul>\n<h4>STATS</h4>\n<p>Stats directly affect the action rolls you make. GMs who want to make the game harder are advised to manipulate the success thresholds through the story rather than changing the players' bonuses.</p>\n<p>Formula: d20 + stat ≥ threshold.<br>Reference Threshold Table: { Very Easy 7 / Easy 9 / Medium 13 / Hard 15 / Very Hard 19 / Uber 22}<br>Nat20 and Nat1 are evaluated outside the table. They represent the best/worst possible outcome, respectively.</p>\n<p>There is a minimum-0 rule for stats (except Klang). The maximum is 10.</p>\n<p>To raise stats in the game, you must gain a &quot;Level&quot;. On each level-up, 2+1 of the character's stats each get a 1 bonus (ability-based boosts are outside this rule): 1 stat is awarded based on the character's actions during the level, while the other 1 goes to the symbol stat of the player's expertise tree. The extra 1 stat goes to the MVP among all players leveling up. Since not every player has to level up at the same time within a session, these points can be distributed later. However, so that this point is not distributed too late, if a lagging player is 3 or more levels behind the level at which the MVP is awarded, they are excluded from the MVP calculation. Example: (Player A: lv3, B: lv6, C:lv7 the lv6 MVP is decided between B and C)</p>\n<p>Leveling up is traditionally used at 1/2 per session, but this decision is ultimately left to the GM. The game has no built-in EXP system.</p>\n<p>At the start of the game, players are given 2+2 stats (excluding the +2 Klang stat; everyone gets +2 Klang at the start). 2 points go to the attribute of the chosen starting expertise tree, while the other 2 stat points are left to the player to distribute among the stats other than the chosen expertise tree's attribute.</p>",
+   "searchText": "core rules the shz-ttrpg is traditionally designed to be played with a d20. the gm may use different dice to add color to various actions, but the system is built on the d20. death in the game, death occurs when the player dies as a result of rp. in this regard, the gm may, at their initiative, end with the player's death based on the status of the limbs and the rolls made in the last action. death save throw when the character faces death, it serves as a last resort for the player, if available. gms are advised to turn this system off entirely for players seeking a challenge. each player has the right to make 1 death save throw, which can be reset only by spending inspiration points (after each reset, the inspiration points required increase by 1). the death save throw works similarly to dnd. the player rolls a d6. on a 1-2-3, one mark goes in the death box; on a 4-5-6, one mark goes in the save box. whichever reaches 3 first happens. death: the character dies. save: the character survives as critically wounded. leveling after each level gained in the game, you earn an ability point that can be used to open an ability tree, unlock an ability or raise an ability's level. the player starts the game at level 0 with 1 ability point and 1 open expertise tree the level cap per campaign is 10; in long or connected campaigns the gm can raise this cap up to 15. to take the 3rd level of an ability, the character's level must be at least 4. when a tree's stat reaches 10, the guaranteed point that would go to that stat on leveling up is given to another stat of the player's choice. ability trees each expertise tree has 8 abilities: 1 root ability, branches a and b (3 abilities each), each ending with its own finisher ability, and 1 sub-branch ability that splits off from the first ability of a branch. the branch field in the ability files shows the ability's position (root, a, a′, b, b′). first ability of a branch: requires at most 3 in the main stat. middle ability: requires 4–5 in the main stat and one secondary stat; its predecessor is the branch's first ability. sub-branch: requires 5 in the main stat and one secondary stat; its predecessor is the ability it splits off from. finisher: requires 7 in the main stat, 4–5 in a secondary stat and a character level of at least 6–7; its predecessor is the branch's middle ability. synergy (chemistry): some abilities gain an extra effect when taken together with a specific ability from another branch or tree. these effects are written under the synergy heading in the ability files. stats stats directly affect the action rolls you make. gms who want to make the game harder are advised to manipulate the success thresholds through the story rather than changing the players' bonuses. formula: d20 + stat ≥ threshold. reference threshold table: { very easy 7 / easy 9 / medium 13 / hard 15 / very hard 19 / uber 22} nat20 and nat1 are evaluated outside the table. they represent the best/worst possible outcome, respectively. there is a minimum-0 rule for stats (except klang). the maximum is 10. to raise stats in the game, you must gain a level . on each level-up, 2+1 of the character's stats each get a 1 bonus (ability-based boosts are outside this rule): 1 stat is awarded based on the character's actions during the level, while the other 1 goes to the symbol stat of the player's expertise tree. the extra 1 stat goes to the mvp among all players leveling up. since not every player has to level up at the same time within a session, these points can be distributed later. however, so that this point is not distributed too late, if a lagging player is 3 or more levels behind the level at which the mvp is awarded, they are excluded from the mvp calculation. example: (player a: lv3, b: lv6, c:lv7 the lv6 mvp is decided between b and c) leveling up is traditionally used at 1/2 per session, but this decision is ultimately left to the gm. the game has no built-in exp system. at the start of the game, players are given 2+2 stats (excluding the +2 klang stat; everyone gets +2 klang at the start). 2 points go to the attribute of the chosen starting expertise tree, while the other 2 stat points are left to the player to distribute among the stats other than the chosen expertise tree's attribute."
+  },
+  {
+   "key": "karakter",
+   "title": "Character",
+   "html": "<h3>COSMETIC</h3>\n<h4 class=\"label\">1- Character Name</h4>\n<p>The name the character will use throughout the story. It does not directly affect RP, but it is best to choose a name that fits the chosen nationality.</p>\n<h4 class=\"label\">2- Character Age</h4>\n<p>The character's age must be between 18 and 60. Old or Young characters are not suitable for the story (there may be exceptions for 60+.)</p>\n<h4 class=\"label\">3- Character Alignment</h4>\n<p>Determines the character's general faction. Alignment is not decisive within RP, but setting it is necessary for the overall portrait.</p>\n<h4 class=\"label\">4- Character Nationality</h4>\n<p>Due to the nature of the universe, the concepts of &quot;Race&quot; and &quot;Nationality&quot; can affect communication within RP.</p>\n<h4 class=\"label\">5- Character's Money</h4>\n<p>Although it is generally not recommended to put it at the center of the story, &quot;Reichsmark&quot; can be used in the story.</p>\n<h4 class=\"label\">6- Character Corruption Level</h4>\n<p>Every character has a Corruption level between 0 and 13. Corruption represents mental health. Corruption increases especially with the use of substances such as Amphetamine and Pervitin, which contains methamphetamine, used to relieve stress in combat.</p>\n<h4 class=\"label\">7- Character Body Chart</h4>\n<p>The game has a body chart showing the health and mechanization status of all of a character's limbs. Wounds taken, applied bandages and installed attachments are tracked here.</p>\n<h4 class=\"label\">8- Player's Inspiration Points</h4>\n<p>Given to players directly by the GM for good RP or as compensation for a GM error. One inspiration can be spent for a re-roll. More than one inspiration point can also be used for decisions that could be considered meta. If Inspiration drops below 0 (it can mostly be used by the GM as a penalty, or by GM-player agreement the player can even take Inspiration on credit. The final decision rests with the GM.), the player takes −2 on every roll for each point below zero.</p>\n<h3>FEATURES</h3>\n<p><strong>HEALTH AND BODY</strong> : A character's health is not expressed as a number. The character's state of health is shown through the image in the game that represents the character's body. Augmentation is also managed in this area. Each character has 1 augment per limb slot.</p>\n<p>In the game, every character has 4 separate features:</p>\n<h4 class=\"label\">STATS</h4>\n<p>Stats are the attribute points used in in-game rolls and needed to unlock Abilities. Stat points are affected by Perks and in-game level-ups.</p>\n<h4 class=\"label\">PERKS</h4>\n<p>Perks are chosen at the start of the game and affect the player's RP throughout the game. On the perk selection screen the player starts with + selection points and can take as many perks as they like as long as the total does not go negative. Any + selection points left over after perk selection are converted into stats.  The system is as follows:</p>\n<div class=\"formula\"><div style=\"padding-left:0em\">(Perk Points to Convert + 1) / 2, rounded down.</div></div>\n<p>The starting Perk points are set by the GM; giving more can be used to make the game easier. The base recommended to GMs is +0 or +2.</p>\n<h4 class=\"label\">ABILITIES</h4>\n<p>The game has abilities that can be used actively/passively. Abilities are gained at the start of the game and during play. Gaining abilities requires character level, and new abilities unlock at each level. Some abilities require a stat minimum.</p>\n<p>In the game, every ability belongs to an expertise tree. Each character can have 2 expertise trees. You start the game with 1 expertise tree, and new trees are opened with ability points.</p>\n<h4 class=\"label\">AUGMENTATION</h4>\n<p>Players may start the game with an augment. (This must be agreed with the GM. It is not integrated into the system, and starting the game with an augment is not recommended.) Augments can be fitted to any player entirely as a result of RP through the right systems. Augments may have their own abilities or stat modifiers.</p>",
+   "searchText": "character cosmetic 1- character name the name the character will use throughout the story. it does not directly affect rp, but it is best to choose a name that fits the chosen nationality. 2- character age the character's age must be between 18 and 60. old or young characters are not suitable for the story (there may be exceptions for 60+.) 3- character alignment determines the character's general faction. alignment is not decisive within rp, but setting it is necessary for the overall portrait. 4- character nationality due to the nature of the universe, the concepts of race and nationality can affect communication within rp. 5- character's money although it is generally not recommended to put it at the center of the story, reichsmark can be used in the story. 6- character corruption level every character has a corruption level between 0 and 13. corruption represents mental health. corruption increases especially with the use of substances such as amphetamine and pervitin, which contains methamphetamine, used to relieve stress in combat. 7- character body chart the game has a body chart showing the health and mechanization status of all of a character's limbs. wounds taken, applied bandages and installed attachments are tracked here. 8- player's inspiration points given to players directly by the gm for good rp or as compensation for a gm error. one inspiration can be spent for a re-roll. more than one inspiration point can also be used for decisions that could be considered meta. if inspiration drops below 0 (it can mostly be used by the gm as a penalty, or by gm-player agreement the player can even take inspiration on credit. the final decision rests with the gm.), the player takes −2 on every roll for each point below zero. features health and body : a character's health is not expressed as a number. the character's state of health is shown through the image in the game that represents the character's body. augmentation is also managed in this area. each character has 1 augment per limb slot. in the game, every character has 4 separate features: stats stats are the attribute points used in in-game rolls and needed to unlock abilities. stat points are affected by perks and in-game level-ups. perks perks are chosen at the start of the game and affect the player's rp throughout the game. on the perk selection screen the player starts with + selection points and can take as many perks as they like as long as the total does not go negative. any + selection points left over after perk selection are converted into stats. the system is as follows: (perk points to convert + 1) / 2, rounded down. the starting perk points are set by the gm; giving more can be used to make the game easier. the base recommended to gms is +0 or +2. abilities the game has abilities that can be used actively/passively. abilities are gained at the start of the game and during play. gaining abilities requires character level, and new abilities unlock at each level. some abilities require a stat minimum. in the game, every ability belongs to an expertise tree. each character can have 2 expertise trees. you start the game with 1 expertise tree, and new trees are opened with ability points. augmentation players may start the game with an augment. (this must be agreed with the gm. it is not integrated into the system, and starting the game with an augment is not recommended.) augments can be fitted to any player entirely as a result of rp through the right systems. augments may have their own abilities or stat modifiers."
+  },
+  {
+   "key": "statlar",
+   "title": "Stats",
+   "html": "<p><strong>Korp</strong>: The player's physical resilience. <em>(UBERMANN)</em><br><strong>Krach</strong>: The player's capacity to deal/apply physical damage.<br><strong>Klang</strong>: Augmentation compatibility skill. <em>( METALLKORP )</em><br><strong>Sanita</strong>: The player's mental resilience.<br><strong>Rede</strong>: The player's communication capacity. <em>( DIPLOMAT )</em><br><strong>Wissen</strong>: The player's accumulated knowledge. <em>( SHZ )</em><br><strong>Sicht</strong>: The player's perception.<br><strong>Agil</strong>: The player's agility.<br><strong>Werk</strong>: The player's engineering handiwork. <em>( WUNDERWAFFE )</em><br><strong>Leis</strong>: The player's stealth skill. <em>( SPIONAGE )</em><br><strong>Aim</strong>: The player's aiming skill. <em>( STAHLKRIEG )</em></p>\n<p><strong>Corruption</strong>: The player's level of mental corruption. It is measured on a 0-13 scale</p>\n<p><em>NOTE:</em> Although Sicht and Aim are close to each other, they are kept separate. AIM can change dynamically and constantly during combat, while Sicht is a skill used for actions such as catching details.</p>",
+   "searchText": "stats korp : the player's physical resilience. (ubermann) krach : the player's capacity to deal/apply physical damage. klang : augmentation compatibility skill. ( metallkorp ) sanita : the player's mental resilience. rede : the player's communication capacity. ( diplomat ) wissen : the player's accumulated knowledge. ( shz ) sicht : the player's perception. agil : the player's agility. werk : the player's engineering handiwork. ( wunderwaffe ) leis : the player's stealth skill. ( spionage ) aim : the player's aiming skill. ( stahlkrieg ) corruption : the player's level of mental corruption. it is measured on a 0-13 scale note: although sicht and aim are close to each other, they are kept separate. aim can change dynamically and constantly during combat, while sicht is a skill used for actions such as catching details."
+  },
+  {
+   "key": "beden-ve-yaralar",
+   "title": "Body and Wounds",
+   "html": "<p>On the game sheet, each part is shown separately on a drawing of body anatomy. Table 2 serves this purpose. The first shows the health/bandage/equipment status of the player's body parts, the other shows the Augmentation fitted to that area.</p>\n<h3>LIMB DAMAGE STATES</h3>\n<p>Intact → Scratched → Lightly Wounded → Badly Wounded → Unusable → Severed</p>\n<p>If a bandage gets dirty, it loses its effect, the wound applies a negative effect (formula below) and it moves to the Bandaged (Dirty) state.</p>\n<p><strong>EFFECTS:</strong></p>\n<p>APPLIES TO ACTION ROLLS IN WHICH THE LIMB IS USED:</p>\n<table class=\"kv\"><tr><th>INTACT</th><td>No Effect</td></tr><tr><th>BANDAGED (CLEAN)</th><td>-Previous/2 → Round Down</td></tr><tr><th>BANDAGED (DIRTY)</th><td>-Previous*3/4</td></tr><tr><th>SCRATCHED</th><td>-1</td></tr><tr><th>LIGHTLY WOUNDED</th><td>-2</td></tr><tr><th>BADLY WOUNDED</th><td>-5</td></tr><tr><th>UNUSABLE</th><td>-15</td></tr><tr><th>SEVERED</th><td>-20</td></tr></table>\n<p>Rather than being systematized, the progression of wounds is left to the RP run by the GM. Wounds and their progression are deliberately not systematized, to leave room for creativity.</p>\n<h3>AUGMENTATION</h3>\n<p>The forms of Augmentation are generally left to the GM's imagination, but the core purpose of Augmentation is to offer players a second way out of the game's difficulty besides stats/abilities, and to diversify gameplay. GMs are especially advised to create Augment types that have their own unique features but cost stat points. Example Augmentations are in the &quot;Augmentations&quot; subfolder.</p>\n<p>A player's ability to use Augmentation is measured by &quot;Klang&quot;. Every player starts the game with +2 Klang. If Klang drops below zero, all rolls the player makes are penalized by that negative amount, and the augmented limb may break apart or malfunction during an action.</p>\n<h3>BODY PARTS</h3>\n<p>The human body consists of various parts, and the character's body is divided into parts with a right/left distinction.</p>\n<p>The action effects of limb wounds are left to the GM's discretion. A scratch on the hand does not have to apply to every action that uses the hand, but the wound may open further (for example, catching something falling from above with the back of your hand).</p>\n<div class=\"chips\"><span class=\"chip\">HEAD &amp; NECK</span><span class=\"chip\">L-HAND</span><span class=\"chip\">R-HAND</span><span class=\"chip\">L-ARM</span><span class=\"chip\">R-ARM</span><span class=\"chip\">UPPER TORSO</span><span class=\"chip\">LOWER TORSO</span><span class=\"chip\">L-LEG</span><span class=\"chip\">R-LEG</span><span class=\"chip\">L-FOOT</span><span class=\"chip\">R-FOOT</span></div>",
+   "searchText": "body and wounds on the game sheet, each part is shown separately on a drawing of body anatomy. table 2 serves this purpose. the first shows the health/bandage/equipment status of the player's body parts, the other shows the augmentation fitted to that area. limb damage states intact → scratched → lightly wounded → badly wounded → unusable → severed if a bandage gets dirty, it loses its effect, the wound applies a negative effect (formula below) and it moves to the bandaged (dirty) state. effects: applies to action rolls in which the limb is used: intact no effect bandaged (clean) -previous/2 → round down bandaged (dirty) -previous*3/4 scratched -1 lightly wounded -2 badly wounded -5 unusable -15 severed -20 rather than being systematized, the progression of wounds is left to the rp run by the gm. wounds and their progression are deliberately not systematized, to leave room for creativity. augmentation the forms of augmentation are generally left to the gm's imagination, but the core purpose of augmentation is to offer players a second way out of the game's difficulty besides stats/abilities, and to diversify gameplay. gms are especially advised to create augment types that have their own unique features but cost stat points. example augmentations are in the augmentations subfolder. a player's ability to use augmentation is measured by klang . every player starts the game with +2 klang. if klang drops below zero, all rolls the player makes are penalized by that negative amount, and the augmented limb may break apart or malfunction during an action. body parts the human body consists of various parts, and the character's body is divided into parts with a right/left distinction. the action effects of limb wounds are left to the gm's discretion. a scratch on the hand does not have to apply to every action that uses the hand, but the wound may open further (for example, catching something falling from above with the back of your hand). head neck l-hand r-hand l-arm r-arm upper torso lower torso l-leg r-leg l-foot r-foot"
+  },
+  {
+   "key": "corruption",
+   "title": "Corruption",
+   "html": "<p>Indicates how &quot;Corrupted&quot; the character is. It is shown on a 0-13 scale. It can be raised and lowered in various ways in the game (Addictions, Pervitin). The starting value is Corruption 0.</p>\n<h4>CORRUPTION STATUS TABLE</h4>\n<ol class=\"corr\"><li data-level=\"0\"><span class=\"lvl\">0</span><span>No effect at all</span></li><li data-level=\"1\"><span class=\"lvl\">1</span><span>A ( + 2 ) roll effect applies to every black magic roll the player makes.</span></li><li data-level=\"2\"><span class=\"lvl\">2</span><span>No negative effect</span></li><li data-level=\"3\"><span class=\"lvl\">3</span><span>From this level on, the player gains +1 Klang for each point of Corruption.</span></li><li data-level=\"4\"><span class=\"lvl\">4</span><span>From this level on, the player gains +1 to black magic actions (esoteric abilities such as SHZ sigils) for each point of Corruption. (+2 at Corruption 5, +3 at 6, and so on)</span></li><li data-level=\"5\"><span class=\"lvl\">5</span><span>The &quot;Cower&quot; state unlocks. A trigger roll for Cower is made when you take damage from an enemy. If the player is in the &quot;Cower&quot; state, they cannot take actions until the state passes. To escape the Cower state, a &quot;Sanita&quot; roll must be made</span></li><li data-level=\"6\"><span class=\"lvl\">6</span><span>The &quot;attack&quot; actions of characters at this level become savage. They spill more blood and spend more resources.</span></li><li data-level=\"7\"><span class=\"lvl\">7</span><span>Corruption that reaches this level cannot be reduced below 7.</span></li><li data-level=\"8\"><span class=\"lvl\">8</span><span>The character's actions start to become unstable. Mechanics such as higher rolls to complete actions or nerve-control rolls may be imposed by the DM depending on the player's role.</span></li><li data-level=\"9\"><span class=\"lvl\">9</span><span>The &quot;Frenzy&quot; state unlocks. A trigger roll for Frenzy is made when you kill an enemy. If the player enters the &quot;Frenzy&quot; state, they attack another target in their line of sight. Frenzy can chain. (Frenzy attacks are strengthened at close range and weakened at long range.)</span></li><li data-level=\"10\"><span class=\"lvl\">10</span><span>From this level on, Pervitin / Methamphetamine no longer affects the player's Corruption level</span></li><li data-level=\"11\"><span class=\"lvl\">11</span><span>The character's actions become seriously unstable</span></li><li data-level=\"12\"><span class=\"lvl\">12</span><span>The character's actions become completely unstable.</span></li><li data-level=\"13\"><span class=\"lvl\">13</span><span>The character's mental health collapses. Death occurs.</span></li></ol>\n<h4>PERVITIN / METHAMPHETAMINE</h4>\n<p>In the game, players can use Pervitin or similar products to escape situations such as acute stress. (Methamphetamine/amphetamine-based drug substances do not have to be presented to players by the GM only as Pervitin) When the substance is used, the character calms down and is freed from negative stress state effects, but must make a Corruption effect roll:</p>\n<p>If Corruption Level &lt; 10:</p>\n<div class=\"formula\"><div style=\"padding-left:0em\">If d20 + Sanita − Corruption/3 ≥ threshold, Corruption does not increase</div></div>",
+   "searchText": "corruption indicates how corrupted the character is. it is shown on a 0-13 scale. it can be raised and lowered in various ways in the game (addictions, pervitin). the starting value is corruption 0. corruption status table 0 no effect at all 1 a ( + 2 ) roll effect applies to every black magic roll the player makes. 2 no negative effect 3 from this level on, the player gains +1 klang for each point of corruption. 4 from this level on, the player gains +1 to black magic actions (esoteric abilities such as shz sigils) for each point of corruption. (+2 at corruption 5, +3 at 6, and so on) 5 the cower state unlocks. a trigger roll for cower is made when you take damage from an enemy. if the player is in the cower state, they cannot take actions until the state passes. to escape the cower state, a sanita roll must be made 6 the attack actions of characters at this level become savage. they spill more blood and spend more resources. 7 corruption that reaches this level cannot be reduced below 7. 8 the character's actions start to become unstable. mechanics such as higher rolls to complete actions or nerve-control rolls may be imposed by the dm depending on the player's role. 9 the frenzy state unlocks. a trigger roll for frenzy is made when you kill an enemy. if the player enters the frenzy state, they attack another target in their line of sight. frenzy can chain. (frenzy attacks are strengthened at close range and weakened at long range.) 10 from this level on, pervitin / methamphetamine no longer affects the player's corruption level 11 the character's actions become seriously unstable 12 the character's actions become completely unstable. 13 the character's mental health collapses. death occurs. pervitin / methamphetamine in the game, players can use pervitin or similar products to escape situations such as acute stress. (methamphetamine/amphetamine-based drug substances do not have to be presented to players by the gm only as pervitin) when the substance is used, the character calms down and is freed from negative stress state effects, but must make a corruption effect roll: if corruption level 10: if d20 + sanita − corruption/3 ≥ threshold, corruption does not increase"
+  }
+ ],
+ "trees": [
+  {
+   "key": "ubermann",
+   "name": "Ubermann",
+   "stat": "korp",
+   "introHtml": "<p>If Ubermann is opened by the player as their first expertise, the player starts the game with +1 Krach.</p>",
+   "startBonus": {
+    "kind": "stat",
+    "stat": "krach",
+    "amount": 1
+   },
+   "startBonusText": "If Ubermann is opened by the player as their first expertise, the player starts the game with +1 Krach.",
+   "abilities": [
+    "kampfmedizin",
+    "grosse-macht",
+    "sturmbrecher",
+    "titan",
+    "wurgegriff",
+    "herr-der-toten",
+    "mein-liebe",
+    "endsieg-der-mann"
+   ]
+  },
+  {
+   "key": "stahlkrieg",
+   "name": "Stahlkrieg",
+   "stat": "aim",
+   "introHtml": "<p>If Stahlkrieg is opened by the player as their first expertise, the player starts the game with +1 Sicht.</p>",
+   "startBonus": {
+    "kind": "stat",
+    "stat": "sicht",
+    "amount": 1
+   },
+   "startBonusText": "If Stahlkrieg is opened by the player as their first expertise, the player starts the game with +1 Sicht.",
+   "abilities": [
+    "kampfveteran",
+    "snipe",
+    "lauerstellung",
+    "ein-schuss",
+    "feuerleitung",
+    "zweihandler",
+    "panzerknacker",
+    "engel-des-todes"
+   ]
+  },
+  {
+   "key": "spionage",
+   "name": "Spionage",
+   "stat": "leis",
+   "introHtml": "<p>If Spionage is opened by the player as their first expertise, the player starts the game with +1 Agil.</p>",
+   "startBonus": {
+    "kind": "stat",
+    "stat": "agil",
+    "amount": 1
+   },
+   "startBonusText": "If Spionage is opened by the player as their first expertise, the player starts the game with +1 Agil.",
+   "abilities": [
+    "silent-step-low-profile",
+    "throwing-expertise",
+    "giftmischer",
+    "silent-takedown",
+    "dunkelhand",
+    "the-great-pretender",
+    "der-maulwurf",
+    "saboteur"
+   ]
+  },
+  {
+   "key": "diplomat",
+   "name": "Diplomat",
+   "stat": "rede",
+   "introHtml": "<p>If Diplomat is opened by the player as their first expertise, the player starts the game with +1 Wissen.</p>",
+   "startBonus": {
+    "kind": "stat",
+    "stat": "wissen",
+    "amount": 1
+   },
+   "startBonusText": "If Diplomat is opened by the player as their first expertise, the player starts the game with +1 Wissen.",
+   "abilities": [
+    "geist-la-resistance",
+    "authority-like-herr-a",
+    "volksredner",
+    "fahnentrager",
+    "ihr-preis",
+    "see-through-em",
+    "schlangenzunge",
+    "verhormeister"
+   ]
+  },
+  {
+   "key": "wunderwaffe",
+   "name": "Wunderwaffe",
+   "stat": "werk",
+   "introHtml": "<p>If Wunderwaffe is opened by the player as their first expertise, the player starts the game with +1 Wissen.</p>",
+   "startBonus": {
+    "kind": "stat",
+    "stat": "wissen",
+    "amount": 1
+   },
+   "startBonusText": "If Wunderwaffe is opened by the player as their first expertise, the player starts the game with +1 Wissen.",
+   "abilities": [
+    "kriegsengineer",
+    "maschinengehirn",
+    "sprengmeister",
+    "eiserner-kamerad",
+    "panzerschrauber",
+    "knowledge-of-future",
+    "kriegssheilung",
+    "aryan-cryptology"
+   ]
+  },
+  {
+   "key": "schwarzesonne",
+   "name": "Schwarzesonne",
+   "stat": "wissen",
+   "introHtml": "<p>If Schwarzesonne is opened by the player as their first expertise, the player starts the game with +1 Corruption.</p>",
+   "startBonus": {
+    "kind": "corruption",
+    "amount": 1
+   },
+   "startBonusText": "If Schwarzesonne is opened by the player as their first expertise, the player starts the game with +1 Corruption.",
+   "abilities": [
+    "kluger-kopf",
+    "siegel-der-leere",
+    "siegel-der-verdamm",
+    "grosses-siegel",
+    "extracio-aus-ss",
+    "totenruf",
+    "toter-soldaten",
+    "blutopfer"
+   ]
+  },
+  {
+   "key": "metallkorp",
+   "name": "Metallkorp",
+   "stat": "klang",
+   "introHtml": "<p>If Metallkorp is opened by the player as their first expertise, the player starts the game with a T1 augment.</p>",
+   "startBonus": {
+    "kind": "augment",
+    "tier": "T1"
+   },
+   "startBonusText": "If Metallkorp is opened by the player as their first expertise, the player starts the game with a T1 augment.",
+   "abilities": [
+    "stahlnerv",
+    "zweite-haut",
+    "kalte-seele",
+    "neuer-mensch",
+    "ersatzteil",
+    "uberladung",
+    "schnittstelle",
+    "kriegsmaschine"
+   ]
+  }
+ ],
+ "abilities": {
+  "endsieg-der-mann": {
+   "key": "endsieg-der-mann",
+   "name": "Endsieg der Mann",
+   "tree": "ubermann",
+   "type": "Tepki",
+   "requirementText": "Korp 7, Sanita 4, Lv 6",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "korp",
+     "min": 7
+    },
+    {
+     "kind": "stat",
+     "stat": "sanita",
+     "min": 4
+    },
+    {
+     "kind": "level",
+     "min": 6
+    }
+   ],
+   "maxLevel": 1,
+   "prerequisite": "mein-liebe",
+   "branch": "B",
+   "branchName": "Unkaputtbar",
+   "levelEffects": [],
+   "sections": [
+    {
+     "key": "ETKİ",
+     "label": "Effect",
+     "html": "<p>The moment you die in combat (before the Death Save), you enter &quot;Endsieg&quot; mode. For 2 turns you take actions ignoring all wound penalties. If you kill the target that killed you within this time, you survive as critically wounded. If you fail, you die; if you have one, you can still use your Death Save.</p>"
+    },
+    {
+     "key": "BEDEL",
+     "label": "Cost",
+     "html": "<p>+2 Corruption each time it triggers. Once per session.</p>"
+    },
+    {
+     "key": "NOT",
+     "label": "Note",
+     "html": "<p>Endsieg is not a Death Save; it can be used together with <a href=\"@/kurallar/yetenekler/ubermann#mein-liebe\">Mein Liebe</a>.</p>"
+    },
+    {
+     "key": "SİNERJİ",
+     "label": "Synergy",
+     "html": "<p>With <strong><a href=\"@/kurallar/yetenekler/ubermann#titan\">Titan</a></strong>: While in Endsieg mode, Titan can be used one more time.</p>"
+    }
+   ],
+   "synergies": [
+    "titan"
+   ],
+   "flavorHtml": "<p>Final victory or nothing. You will not die before you see the one who killed you die.</p>",
+   "searchText": "endsieg der mann korp 7, sanita 4, lv 6 effect the moment you die in combat (before the death save), you enter endsieg mode. for 2 turns you take actions ignoring all wound penalties. if you kill the target that killed you within this time, you survive as critically wounded. if you fail, you die; if you have one, you can still use your death save. cost +2 corruption each time it triggers. once per session. note endsieg is not a death save; it can be used together with mein liebe . synergy with titan : while in endsieg mode, titan can be used one more time. titan final victory or nothing. you will not die before you see the one who killed you die."
+  },
+  "grosse-macht": {
+   "key": "grosse-macht",
+   "name": "Große Macht",
+   "tree": "ubermann",
+   "type": "Pasif",
+   "requirementText": "Korp 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "korp",
+     "min": 3
+    }
+   ],
+   "maxLevel": 3,
+   "prerequisite": null,
+   "branch": "A",
+   "branchName": "Koloss",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "+1 to Krach rolls on actions that require brute force (breaking doors, lifting, grappling)."
+    },
+    {
+     "level": 2,
+     "html": "+2 to these rolls."
+    },
+    {
+     "level": 3,
+     "html": "+3 to these rolls. Superhuman feats that would normally be considered impossible (overturning a vehicle, knocking down a wall) can be attempted at the Uber threshold with GM approval."
+    }
+   ],
+   "sections": [],
+   "synergies": [],
+   "flavorHtml": "<p>Your body has been pushed beyond human limits. No one knows how much of it is training and how much is Pervitin.</p>",
+   "searchText": "große macht korp 3 +1 to krach rolls on actions that require brute force (breaking doors, lifting, grappling). +2 to these rolls. +3 to these rolls. superhuman feats that would normally be considered impossible (overturning a vehicle, knocking down a wall) can be attempted at the uber threshold with gm approval. your body has been pushed beyond human limits. no one knows how much of it is training and how much is pervitin."
+  },
+  "herr-der-toten": {
+   "key": "herr-der-toten",
+   "name": "Herr der Toten",
+   "tree": "ubermann",
+   "type": "Pasif",
+   "requirementText": "Korp 4",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "korp",
+     "min": 4
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": null,
+   "branch": "B",
+   "branchName": "Unkaputtbar",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "You gain 1 Death Burden for each target you kill in combat (max 2). When an attack hits you, you can spend 1 burden to reduce the wound's progression by 1 stage. Burdens reset at the end of combat."
+    },
+    {
+     "level": 2,
+     "html": "Max 3 burdens. By spending 1 burden, you can automatically pass a Cower trigger roll."
+    }
+   ],
+   "sections": [],
+   "synergies": [],
+   "flavorHtml": "<p>The more corpses pile up around you, the less you fear and the less pain you feel.</p>",
+   "searchText": "herr der toten korp 4 you gain 1 death burden for each target you kill in combat (max 2). when an attack hits you, you can spend 1 burden to reduce the wound's progression by 1 stage. burdens reset at the end of combat. max 3 burdens. by spending 1 burden, you can automatically pass a cower trigger roll. the more corpses pile up around you, the less you fear and the less pain you feel."
+  },
+  "kampfmedizin": {
+   "key": "kampfmedizin",
+   "name": "Kampfmedizin",
+   "tree": "ubermann",
+   "type": "Aktif",
+   "requirementText": "None",
+   "requirements": [],
+   "maxLevel": 3,
+   "prerequisite": null,
+   "branch": "Kök",
+   "branchName": "Kök",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "By spending a turn, you bandage one of your own limbs without rolling (Bandaged (Clean)). Requires bandaging material."
+    },
+    {
+     "level": 2,
+     "html": "Bandaging does not cost a turn. Once per combat."
+    },
+    {
+     "level": 3,
+     "html": "If you roll d20 + Korp ≥ Hard while bandaging, the wound drops 1 stage (e.g. Badly Wounded → Lightly Wounded). Once per session. Has no effect on Unusable and Severed limbs."
+    }
+   ],
+   "sections": [],
+   "synergies": [],
+   "flavorHtml": "<p>On the front, you don't wait for a doctor. You close your own wound and keep fighting.</p>",
+   "searchText": "kampfmedizin none by spending a turn, you bandage one of your own limbs without rolling (bandaged (clean)). requires bandaging material. bandaging does not cost a turn. once per combat. if you roll d20 + korp ≥ hard while bandaging, the wound drops 1 stage (e.g. badly wounded → lightly wounded). once per session. has no effect on unusable and severed limbs. on the front, you don't wait for a doctor. you close your own wound and keep fighting."
+  },
+  "mein-liebe": {
+   "key": "mein-liebe",
+   "name": "Mein Liebe",
+   "tree": "ubermann",
+   "type": "Pasif",
+   "requirementText": "Korp 5, Sanita 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "korp",
+     "min": 5
+    },
+    {
+     "kind": "stat",
+     "stat": "sanita",
+     "min": 3
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": "herr-der-toten",
+   "branch": "B",
+   "branchName": "Unkaputtbar",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "You ignore the penalties of Scratched and Lightly Wounded limbs."
+    },
+    {
+     "level": 2,
+     "html": "The Badly Wounded penalty is -2 instead of -5."
+    }
+   ],
+   "sections": [
+    {
+     "key": "BEDEL",
+     "label": "Cost",
+     "html": "<p>The moment this ability is unlocked, you permanently lose your Death Save Throw. It cannot be restored with Inspiration.</p>"
+    },
+    {
+     "key": "SİNERJİ",
+     "label": "Synergy",
+     "html": "<p>With <strong><a href=\"@/kurallar/yetenekler/schwarzesonne#blutopfer\">Blutopfer</a></strong>: The penalty of the wound Blutopfer inflicts on your own limb is ignored.</p>"
+    }
+   ],
+   "synergies": [
+    "blutopfer"
+   ],
+   "flavorHtml": "<p>Pain is now your only lover. Your body has become a tool; you are not the one who decides when to let it go.</p>",
+   "searchText": "mein liebe korp 5, sanita 3 you ignore the penalties of scratched and lightly wounded limbs. the badly wounded penalty is -2 instead of -5. cost the moment this ability is unlocked, you permanently lose your death save throw. it cannot be restored with inspiration. synergy with blutopfer : the penalty of the wound blutopfer inflicts on your own limb is ignored. blutopfer pain is now your only lover. your body has become a tool; you are not the one who decides when to let it go."
+  },
+  "sturmbrecher": {
+   "key": "sturmbrecher",
+   "name": "Sturmbrecher",
+   "tree": "ubermann",
+   "type": "Aktif",
+   "requirementText": "Korp 5, Krach 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "korp",
+     "min": 5
+    },
+    {
+     "kind": "stat",
+     "stat": "krach",
+     "min": 3
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": "grosse-macht",
+   "branch": "A",
+   "branchName": "Koloss",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "You charge at a target and make a melee attack: d20 + Krach ≥ threshold (civilian Easy, soldier Medium, armored target Hard). On a success, the target is knocked down and can only stand up on its next turn. Light cover such as crates or wooden doors does not stop the charge."
+    },
+    {
+     "level": 2,
+     "html": "On a success, the wound on the target's hit limb advances 1 stage. You can also try to knock down a second target in the charge's path (separate roll)."
+    }
+   ],
+   "sections": [],
+   "synergies": [],
+   "flavorHtml": "<p>Whatever stands in front of you either falls or gets crushed.</p>",
+   "searchText": "sturmbrecher korp 5, krach 3 you charge at a target and make a melee attack: d20 + krach ≥ threshold (civilian easy, soldier medium, armored target hard). on a success, the target is knocked down and can only stand up on its next turn. light cover such as crates or wooden doors does not stop the charge. on a success, the wound on the target's hit limb advances 1 stage. you can also try to knock down a second target in the charge's path (separate roll). whatever stands in front of you either falls or gets crushed."
+  },
+  "titan": {
+   "key": "titan",
+   "name": "Titan",
+   "tree": "ubermann",
+   "type": "Aktif",
+   "requirementText": "Korp 7, Krach 5, Lv 6",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "korp",
+     "min": 7
+    },
+    {
+     "kind": "stat",
+     "stat": "krach",
+     "min": 5
+    },
+    {
+     "kind": "level",
+     "min": 6
+    }
+   ],
+   "maxLevel": 1,
+   "prerequisite": "sturmbrecher",
+   "branch": "A",
+   "branchName": "Koloss",
+   "levelEffects": [],
+   "sections": [
+    {
+     "key": "ETKİ",
+     "label": "Effect",
+     "html": "<p>Once per combat, your melee attack hits without a roll and the wound on the target's limb of your choice advances 2 stages. Augmented limbs and armor provide no protection against this blow.</p>"
+    },
+    {
+     "key": "BEDEL",
+     "label": "Cost",
+     "html": "<p>You cannot take actions on the turn after the blow.</p>"
+    },
+    {
+     "key": "SİNERJİ",
+     "label": "Synergy",
+     "html": "<p>With <strong><a href=\"@/kurallar/yetenekler/ubermann#endsieg-der-mann\">Endsieg der Mann</a></strong>: While in Endsieg mode, Titan can be used one more time.</p>"
+    }
+   ],
+   "synergies": [
+    "endsieg-der-mann"
+   ],
+   "flavorHtml": "<p>More than a human could ever strike. The price is paid by your body.</p>",
+   "searchText": "titan korp 7, krach 5, lv 6 effect once per combat, your melee attack hits without a roll and the wound on the target's limb of your choice advances 2 stages. augmented limbs and armor provide no protection against this blow. cost you cannot take actions on the turn after the blow. synergy with endsieg der mann : while in endsieg mode, titan can be used one more time. endsieg-der-mann more than a human could ever strike. the price is paid by your body."
+  },
+  "wurgegriff": {
+   "key": "wurgegriff",
+   "name": "Würgegriff",
+   "tree": "ubermann",
+   "type": "Aktif",
+   "requirementText": "Korp 5, Agil 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "korp",
+     "min": 5
+    },
+    {
+     "kind": "stat",
+     "stat": "agil",
+     "min": 3
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": "grosse-macht",
+   "branch": "A′",
+   "branchName": "Ringer",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "You lock down a nearby target: d20 + Krach ≥ Medium (the target can make an opposed d20 + Agil roll). While locked, the target cannot attack; to break free, it makes a Hard Agil roll each turn. Meanwhile, you can only hold or release the target."
+    },
+    {
+     "level": 2,
+     "html": "If you keep the target locked for 2 turns in a row, it quietly passes out."
+    }
+   ],
+   "sections": [
+    {
+     "key": "SİNERJİ",
+     "label": "Synergy",
+     "html": "<p>With <strong><a href=\"@/kurallar/yetenekler/schwarzesonne#siegel-der-verdamm\">Siegel Der Verdamm</a></strong>: Drawing a rune on a target you have locked down does not require an additional Krach or Agil roll.</p>"
+    }
+   ],
+   "synergies": [
+    "siegel-der-verdamm"
+   ],
+   "flavorHtml": "<p>There is no escape. Only waiting for the breath to run out.</p>",
+   "searchText": "würgegriff korp 5, agil 3 you lock down a nearby target: d20 + krach ≥ medium (the target can make an opposed d20 + agil roll). while locked, the target cannot attack; to break free, it makes a hard agil roll each turn. meanwhile, you can only hold or release the target. if you keep the target locked for 2 turns in a row, it quietly passes out. synergy with siegel der verdamm : drawing a rune on a target you have locked down does not require an additional krach or agil roll. siegel-der-verdamm there is no escape. only waiting for the breath to run out."
+  },
+  "ein-schuss": {
+   "key": "ein-schuss",
+   "name": "Ein Schuss",
+   "tree": "stahlkrieg",
+   "type": "Pasif",
+   "requirementText": "Aim 7, Sicht 5, Lv 6",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "aim",
+     "min": 7
+    },
+    {
+     "kind": "stat",
+     "stat": "sicht",
+     "min": 5
+    },
+    {
+     "kind": "level",
+     "min": 6
+    }
+   ],
+   "maxLevel": 1,
+   "prerequisite": "lauerstellung",
+   "branch": "A",
+   "branchName": "Scharfschütze",
+   "levelEffects": [],
+   "sections": [
+    {
+     "key": "ETKİ",
+     "label": "Effect",
+     "html": "<p>On a shot made with Snipe that counts as a Nat20 (18–20 with Snipe Level 3), a civilian or soldier target is instantly neutralized. Against elite and augmented targets, the wound advances 3 stages.</p>"
+    },
+    {
+     "key": "BEDEL",
+     "label": "Cost",
+     "html": "<p>For each target you kill this way, a Sanita roll (Easy) at the end of combat; on a failure, +1 Corruption.</p>"
+    },
+    {
+     "key": "SİNERJİ",
+     "label": "Synergy",
+     "html": "<p>With <strong><a href=\"@/kurallar/yetenekler/stahlkrieg#engel-des-todes\">Engel des Todes</a></strong>: A kill made with Ein Schuss counts as +2 toward the Engel des Todes stack.</p>"
+    }
+   ],
+   "synergies": [
+    "engel-des-todes"
+   ],
+   "flavorHtml": "<p>One bullet. One name. One end.</p>",
+   "searchText": "ein schuss aim 7, sicht 5, lv 6 effect on a shot made with snipe that counts as a nat20 (18–20 with snipe level 3), a civilian or soldier target is instantly neutralized. against elite and augmented targets, the wound advances 3 stages. cost for each target you kill this way, a sanita roll (easy) at the end of combat; on a failure, +1 corruption. synergy with engel des todes : a kill made with ein schuss counts as +2 toward the engel des todes stack. engel-des-todes one bullet. one name. one end."
+  },
+  "engel-des-todes": {
+   "key": "engel-des-todes",
+   "name": "Engel des Todes",
+   "tree": "stahlkrieg",
+   "type": "Pasif",
+   "requirementText": "Aim 7, Korp 4, Lv 6",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "aim",
+     "min": 7
+    },
+    {
+     "kind": "stat",
+     "stat": "korp",
+     "min": 4
+    },
+    {
+     "kind": "level",
+     "min": 6
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": "panzerknacker",
+   "branch": "B",
+   "branchName": "Sturmtruppe",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "For each kill you make in combat, you gain +1 to Aim rolls (max +3). The bonus resets at the end of combat."
+    },
+    {
+     "level": 2,
+     "html": "Max +5."
+    }
+   ],
+   "sections": [
+    {
+     "key": "BEDEL",
+     "label": "Cost",
+     "html": "<p>If you end combat with a stack of +3 or more, +1 Corruption.</p>"
+    },
+    {
+     "key": "SİNERJİ",
+     "label": "Synergy",
+     "html": "<p>With <strong><a href=\"@/kurallar/yetenekler/stahlkrieg#ein-schuss\">Ein Schuss</a></strong>: A kill made with Ein Schuss counts as +2 toward the Engel des Todes stack.</p>"
+    }
+   ],
+   "synergies": [
+    "ein-schuss"
+   ],
+   "flavorHtml": "<p>Each one who falls makes the next one easier. At some point, even you realize you are the angel of death.</p>",
+   "searchText": "engel des todes aim 7, korp 4, lv 6 for each kill you make in combat, you gain +1 to aim rolls (max +3). the bonus resets at the end of combat. max +5. cost if you end combat with a stack of +3 or more, +1 corruption. synergy with ein schuss : a kill made with ein schuss counts as +2 toward the engel des todes stack. ein-schuss each one who falls makes the next one easier. at some point, even you realize you are the angel of death."
+  },
+  "feuerleitung": {
+   "key": "feuerleitung",
+   "name": "Feuerleitung",
+   "tree": "stahlkrieg",
+   "type": "Aktif",
+   "requirementText": "Aim 5, Sicht 4",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "aim",
+     "min": 5
+    },
+    {
+     "kind": "stat",
+     "stat": "sicht",
+     "min": 4
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": "snipe",
+   "branch": "A′",
+   "branchName": "Spotter",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "By spending an action, you mark a target in your line of sight. Until the end of your next turn, your allies get +2 on shots at that target."
+    },
+    {
+     "level": 2,
+     "html": "+3. The marked target cannot benefit from cover."
+    }
+   ],
+   "sections": [
+    {
+     "key": "SİNERJİ",
+     "label": "Synergy",
+     "html": "<p>With <strong><a href=\"@/kurallar/yetenekler/diplomat#volksredner\">Volksredner</a></strong>: The Cower state of allies who attack the marked target ends.</p>"
+    }
+   ],
+   "synergies": [
+    "volksredner"
+   ],
+   "flavorHtml": "<p>The scope is yours, the trigger is theirs.</p>",
+   "searchText": "feuerleitung aim 5, sicht 4 by spending an action, you mark a target in your line of sight. until the end of your next turn, your allies get +2 on shots at that target. +3. the marked target cannot benefit from cover. synergy with volksredner : the cower state of allies who attack the marked target ends. volksredner the scope is yours, the trigger is theirs."
+  },
+  "kampfveteran": {
+   "key": "kampfveteran",
+   "name": "Kampfveteran",
+   "tree": "stahlkrieg",
+   "type": "Pasif",
+   "requirementText": "None",
+   "requirements": [],
+   "maxLevel": 3,
+   "prerequisite": null,
+   "branch": "Kök",
+   "branchName": "Kök",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "The total penalty your wounds apply to Aim rolls is reduced by 1."
+    },
+    {
+     "level": 2,
+     "html": "The penalty is reduced by 2. +2 to Cower trigger rolls."
+    },
+    {
+     "level": 3,
+     "html": "The penalty is reduced by 3. +3 to Cower trigger rolls."
+    }
+   ],
+   "sections": [],
+   "synergies": [],
+   "flavorHtml": "<p>Hands that don't tremble under fire. You no longer count how many fronts you have seen.</p>",
+   "searchText": "kampfveteran none the total penalty your wounds apply to aim rolls is reduced by 1. the penalty is reduced by 2. +2 to cower trigger rolls. the penalty is reduced by 3. +3 to cower trigger rolls. hands that don't tremble under fire. you no longer count how many fronts you have seen."
+  },
+  "lauerstellung": {
+   "key": "lauerstellung",
+   "name": "Lauerstellung",
+   "tree": "stahlkrieg",
+   "type": "Pasif",
+   "requirementText": "Aim 5, Leis 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "aim",
+     "min": 5
+    },
+    {
+     "kind": "stat",
+     "stat": "leis",
+     "min": 3
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": "snipe",
+   "branch": "A",
+   "branchName": "Scharfschütze",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "When you shoot from a hidden position, enemies must make a Hard Sicht roll instead of an Easy one to find your location."
+    },
+    {
+     "level": 2,
+     "html": "Very Hard. This protection also holds for a second shot from the same position."
+    }
+   ],
+   "sections": [
+    {
+     "key": "SİNERJİ",
+     "label": "Synergy",
+     "html": "<p>With <strong><a href=\"@/kurallar/yetenekler/spionage#silent-step-low-profile\">Silent Step, Low Profile</a></strong>: After a shot, you can reposition unnoticed within the same turn.</p>"
+    }
+   ],
+   "synergies": [
+    "silent-step-low-profile"
+   ],
+   "flavorHtml": "<p>A shot was fired. No one knows where it came from.</p>",
+   "searchText": "lauerstellung aim 5, leis 3 when you shoot from a hidden position, enemies must make a hard sicht roll instead of an easy one to find your location. very hard. this protection also holds for a second shot from the same position. synergy with silent step, low profile : after a shot, you can reposition unnoticed within the same turn. silent-step-low-profile a shot was fired. no one knows where it came from."
+  },
+  "panzerknacker": {
+   "key": "panzerknacker",
+   "name": "Panzerknacker",
+   "tree": "stahlkrieg",
+   "type": "Pasif",
+   "requirementText": "Aim 4, Krach 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "aim",
+     "min": 4
+    },
+    {
+     "kind": "stat",
+     "stat": "krach",
+     "min": 3
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": "zweihandler",
+   "branch": "B",
+   "branchName": "Sturmtruppe",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "On your shots that hit armored targets (vehicles, those wearing armor, augmented limbs), the wound advances 1 extra stage."
+    },
+    {
+     "level": 2,
+     "html": "In addition, the threshold drops one step on shots against armored targets."
+    }
+   ],
+   "sections": [],
+   "synergies": [],
+   "flavorHtml": "<p>Steel is no different from flesh, if you know where to hit.</p>",
+   "searchText": "panzerknacker aim 4, krach 3 on your shots that hit armored targets (vehicles, those wearing armor, augmented limbs), the wound advances 1 extra stage. in addition, the threshold drops one step on shots against armored targets. steel is no different from flesh, if you know where to hit."
+  },
+  "snipe": {
+   "key": "snipe",
+   "name": "Snipe",
+   "tree": "stahlkrieg",
+   "type": "Aktif",
+   "requirementText": "Aim 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "aim",
+     "min": 3
+    }
+   ],
+   "maxLevel": 3,
+   "prerequisite": null,
+   "branch": "A",
+   "branchName": "Scharfschütze",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "You spend a turn aiming. Your next shot gets +2 Aim, and if it hits, you choose the limb you hit."
+    },
+    {
+     "level": 2,
+     "html": "+3 Aim. On a hit, the wound advances 1 extra stage."
+    },
+    {
+     "level": 3,
+     "html": "+4 Aim. On this shot, natural results of 18 and 19 also count as Nat20."
+    }
+   ],
+   "sections": [
+    {
+     "key": "NOT",
+     "label": "Note",
+     "html": "<p>If you take damage while aiming, the bonus is lost.</p>"
+    }
+   ],
+   "synergies": [],
+   "flavorHtml": "<p>One breath, one trigger, one corpse.</p>",
+   "searchText": "snipe aim 3 you spend a turn aiming. your next shot gets +2 aim, and if it hits, you choose the limb you hit. +3 aim. on a hit, the wound advances 1 extra stage. +4 aim. on this shot, natural results of 18 and 19 also count as nat20. note if you take damage while aiming, the bonus is lost. one breath, one trigger, one corpse."
+  },
+  "zweihandler": {
+   "key": "zweihandler",
+   "name": "Zweihandler",
+   "tree": "stahlkrieg",
+   "type": "Aktif",
+   "requirementText": "Aim 3, Agil 2",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "aim",
+     "min": 3
+    },
+    {
+     "kind": "stat",
+     "stat": "agil",
+     "min": 2
+    }
+   ],
+   "maxLevel": 3,
+   "prerequisite": null,
+   "branch": "B",
+   "branchName": "Sturmtruppe",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "You make two shots in the same turn with two one-handed weapons; a separate hit roll is made for each weapon. -4 to both rolls."
+    },
+    {
+     "level": 2,
+     "html": "Penalty -2."
+    },
+    {
+     "level": 3,
+     "html": "No penalty."
+    }
+   ],
+   "sections": [
+    {
+     "key": "NOT",
+     "label": "Note",
+     "html": "<p>Neither of your hands may be Unusable. Hand and arm wound penalties apply to the roll of the corresponding weapon.</p>"
+    }
+   ],
+   "synergies": [],
+   "flavorHtml": "<p>A Luger in one hand, whatever you found in the other.</p>",
+   "searchText": "zweihandler aim 3, agil 2 you make two shots in the same turn with two one-handed weapons; a separate hit roll is made for each weapon. -4 to both rolls. penalty -2. no penalty. note neither of your hands may be unusable. hand and arm wound penalties apply to the roll of the corresponding weapon. a luger in one hand, whatever you found in the other."
+  },
+  "der-maulwurf": {
+   "key": "der-maulwurf",
+   "name": "Der Maulwurf",
+   "tree": "spionage",
+   "type": "Pasif",
+   "requirementText": "Leis 7, Rede 5, Lv 7",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "leis",
+     "min": 7
+    },
+    {
+     "kind": "stat",
+     "stat": "rede",
+     "min": 5
+    },
+    {
+     "kind": "level",
+     "min": 7
+    }
+   ],
+   "maxLevel": 1,
+   "prerequisite": "the-great-pretender",
+   "branch": "B",
+   "branchName": "Maske",
+   "levelEffects": [],
+   "sections": [
+    {
+     "key": "ETKİ",
+     "label": "Effect",
+     "html": "<p>Together with the GM, you establish a permanent false identity within a faction (name, rank, background). With this identity, once per session you pass an identity check or interrogation without rolling, and at the GM's discretion you gain access to that faction's inside information (orders, patrol schedules).</p>"
+    },
+    {
+     "key": "BEDEL",
+     "label": "Cost",
+     "html": "<p>If your identity is exposed, you permanently suffer the effect of the Gesucht perk against that faction.</p>"
+    }
+   ],
+   "synergies": [],
+   "flavorHtml": "<p>One of them for years. No one asks; no one knows.</p>",
+   "searchText": "der maulwurf leis 7, rede 5, lv 7 effect together with the gm, you establish a permanent false identity within a faction (name, rank, background). with this identity, once per session you pass an identity check or interrogation without rolling, and at the gm's discretion you gain access to that faction's inside information (orders, patrol schedules). cost if your identity is exposed, you permanently suffer the effect of the gesucht perk against that faction. one of them for years. no one asks; no one knows."
+  },
+  "dunkelhand": {
+   "key": "dunkelhand",
+   "name": "Dunkelhand",
+   "tree": "spionage",
+   "type": "Aktif",
+   "requirementText": "None",
+   "requirements": [],
+   "maxLevel": 2,
+   "prerequisite": null,
+   "branch": "B",
+   "branchName": "Maske",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "On Leis rolls for pickpocketing and stealing, the threshold drops one step."
+    },
+    {
+     "level": 2,
+     "html": "With the same action, you can also plant a small object on the target. Even if you fail, the target must make a Hard Sicht roll to figure out who tried."
+    }
+   ],
+   "sections": [],
+   "synergies": [],
+   "flavorHtml": "<p>A wallet, a key, a seal. Or incriminating evidence slipped into a pocket.</p>",
+   "searchText": "dunkelhand none on leis rolls for pickpocketing and stealing, the threshold drops one step. with the same action, you can also plant a small object on the target. even if you fail, the target must make a hard sicht roll to figure out who tried. a wallet, a key, a seal. or incriminating evidence slipped into a pocket."
+  },
+  "giftmischer": {
+   "key": "giftmischer",
+   "name": "Giftmischer",
+   "tree": "spionage",
+   "type": "Aktif",
+   "requirementText": "Leis 5, Wissen 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "leis",
+     "min": 5
+    },
+    {
+     "kind": "stat",
+     "stat": "wissen",
+     "min": 3
+    }
+   ],
+   "maxLevel": 3,
+   "prerequisite": "throwing-expertise",
+   "branch": "A",
+   "branchName": "Schatten",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "During a long rest, you spend materials to prepare 1 dose of poison (d20 + Wissen ≥ Medium). The wound of a target hit with a poisoned weapon advances 1 stage at the end of each turn for 2 turns."
+    },
+    {
+     "level": 2,
+     "html": "You prepare 2 doses or make a knockout poison: if the target fails d20 + Korp ≥ Hard, it stays unconscious for 1 scene."
+    },
+    {
+     "level": 3,
+     "html": "You can mix the poison into food or drink; noticing it requires a Very Hard Sicht roll."
+    }
+   ],
+   "sections": [
+    {
+     "key": "SİNERJİ",
+     "label": "Synergy",
+     "html": "<p>With <strong><a href=\"@/kurallar/yetenekler/wunderwaffe#kriegssheilung\">Kriegssheilung</a></strong>: You can produce antidotes; poisoned wounds advance 1 stage less.</p>"
+    }
+   ],
+   "synergies": [
+    "kriegssheilung"
+   ],
+   "flavorHtml": "<p>A blade cuts once. Poison does its work slowly.</p>",
+   "searchText": "giftmischer leis 5, wissen 3 during a long rest, you spend materials to prepare 1 dose of poison (d20 + wissen ≥ medium). the wound of a target hit with a poisoned weapon advances 1 stage at the end of each turn for 2 turns. you prepare 2 doses or make a knockout poison: if the target fails d20 + korp ≥ hard, it stays unconscious for 1 scene. you can mix the poison into food or drink; noticing it requires a very hard sicht roll. synergy with kriegssheilung : you can produce antidotes; poisoned wounds advance 1 stage less. kriegssheilung a blade cuts once. poison does its work slowly."
+  },
+  "saboteur": {
+   "key": "saboteur",
+   "name": "Saboteur",
+   "tree": "spionage",
+   "type": "Aktif",
+   "requirementText": "Leis 5, Werk 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "leis",
+     "min": 5
+    },
+    {
+     "kind": "stat",
+     "stat": "werk",
+     "min": 3
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": "dunkelhand",
+   "branch": "B′",
+   "branchName": "Sabotage",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "You sabotage a vehicle, weapon or machine without being noticed: d20 + Leis ≥ Medium (Hard if there is a guard or alarm). The malfunction shows up at a suitable moment set by the GM (the engine stalls, the weapon jams)."
+    },
+    {
+     "level": 2,
+     "html": "You choose the moment of the malfunction (e.g. on the first shot, in the middle of the bridge). Noticing the sabotage requires a Very Hard Werk roll."
+    }
+   ],
+   "sections": [
+    {
+     "key": "SİNERJİ",
+     "label": "Synergy",
+     "html": "<p>With <strong><a href=\"@/kurallar/yetenekler/wunderwaffe#maschinengehirn\">Maschinengehirn</a></strong>: The threshold drops one step on sabotage rolls.</p>"
+    }
+   ],
+   "synergies": [
+    "maschinengehirn"
+   ],
+   "flavorHtml": "<p>A missing nut, a loose cable. Fate takes care of the rest.</p>",
+   "searchText": "saboteur leis 5, werk 3 you sabotage a vehicle, weapon or machine without being noticed: d20 + leis ≥ medium (hard if there is a guard or alarm). the malfunction shows up at a suitable moment set by the gm (the engine stalls, the weapon jams). you choose the moment of the malfunction (e.g. on the first shot, in the middle of the bridge). noticing the sabotage requires a very hard werk roll. synergy with maschinengehirn : the threshold drops one step on sabotage rolls. maschinengehirn a missing nut, a loose cable. fate takes care of the rest."
+  },
+  "silent-step-low-profile": {
+   "key": "silent-step-low-profile",
+   "name": "Silent Step, Low Profile",
+   "tree": "spionage",
+   "type": "Pasif",
+   "requirementText": "None",
+   "requirements": [],
+   "maxLevel": 3,
+   "prerequisite": null,
+   "branch": "Kök",
+   "branchName": "Kök",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "+1 to Leis rolls for moving stealthily."
+    },
+    {
+     "level": 2,
+     "html": "+2."
+    },
+    {
+     "level": 3,
+     "html": "+3. When you are noticed, you can reroll the stealth roll once per scene."
+    }
+   ],
+   "sections": [
+    {
+     "key": "SİNERJİ",
+     "label": "Synergy",
+     "html": "<p>With <strong><a href=\"@/kurallar/yetenekler/stahlkrieg#lauerstellung\">Lauerstellung</a></strong>: After a shot, you can reposition unnoticed within the same turn.</p>"
+    }
+   ],
+   "synergies": [
+    "lauerstellung"
+   ],
+   "flavorHtml": "<p>From shadow to shadow. No one saw you, no one will remember you.</p>",
+   "searchText": "silent step, low profile none +1 to leis rolls for moving stealthily. +2. +3. when you are noticed, you can reroll the stealth roll once per scene. synergy with lauerstellung : after a shot, you can reposition unnoticed within the same turn. lauerstellung from shadow to shadow. no one saw you, no one will remember you."
+  },
+  "silent-takedown": {
+   "key": "silent-takedown",
+   "name": "Silent Takedown",
+   "tree": "spionage",
+   "type": "Aktif",
+   "requirementText": "Leis 7, Agil 4, Lv 6",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "leis",
+     "min": 7
+    },
+    {
+     "kind": "stat",
+     "stat": "agil",
+     "min": 4
+    },
+    {
+     "kind": "level",
+     "min": 6
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": "giftmischer",
+   "branch": "A",
+   "branchName": "Schatten",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "While unnoticed, you silently neutralize a target at close range with a single action. d20 + Leis ≥ threshold: Civilian Easy / Soldier Medium / Elite Hard / Augmented Very Hard. On a failure, the target becomes Lightly Wounded and may raise the alarm."
+    },
+    {
+     "level": 2,
+     "html": "The threshold drops one step. On a failure, the target cannot shout for one turn."
+    }
+   ],
+   "sections": [],
+   "synergies": [],
+   "flavorHtml": "<p>Not a scream, not a bullet. Only a body laid down on the ground.</p>",
+   "searchText": "silent takedown leis 7, agil 4, lv 6 while unnoticed, you silently neutralize a target at close range with a single action. d20 + leis ≥ threshold: civilian easy / soldier medium / elite hard / augmented very hard. on a failure, the target becomes lightly wounded and may raise the alarm. the threshold drops one step. on a failure, the target cannot shout for one turn. not a scream, not a bullet. only a body laid down on the ground."
+  },
+  "the-great-pretender": {
+   "key": "the-great-pretender",
+   "name": "The Great Pretender",
+   "tree": "spionage",
+   "type": "Aktif",
+   "requirementText": "Leis 4, Rede 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "leis",
+     "min": 4
+    },
+    {
+     "kind": "stat",
+     "stat": "rede",
+     "min": 3
+    }
+   ],
+   "maxLevel": 3,
+   "prerequisite": "dunkelhand",
+   "branch": "B",
+   "branchName": "Maske",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "You can impersonate someone else. The impersonation roll is d20 + Leis; anyone questioning you can make an opposed Sicht roll. Requires clothing, documents and preparation."
+    },
+    {
+     "level": 2,
+     "html": "Clothing alone is enough."
+    },
+    {
+     "level": 3,
+     "html": "You can improvise without preparation. The threshold rises one step on the Sicht rolls of those questioning you."
+    }
+   ],
+   "sections": [],
+   "synergies": [],
+   "flavorHtml": "<p>The right uniform, the right salute, the right accent. The rest is confidence.</p>",
+   "searchText": "the great pretender leis 4, rede 3 you can impersonate someone else. the impersonation roll is d20 + leis; anyone questioning you can make an opposed sicht roll. requires clothing, documents and preparation. clothing alone is enough. you can improvise without preparation. the threshold rises one step on the sicht rolls of those questioning you. the right uniform, the right salute, the right accent. the rest is confidence."
+  },
+  "throwing-expertise": {
+   "key": "throwing-expertise",
+   "name": "Throwing Expertise",
+   "tree": "spionage",
+   "type": "Aktif",
+   "requirementText": "Leis 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "leis",
+     "min": 3
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": null,
+   "branch": "A",
+   "branchName": "Schatten",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "You can make your attacks with sharp, throwable weapons using Leis instead of Aim. If you hit while unnoticed, the wound advances 1 extra stage."
+    },
+    {
+     "level": 2,
+     "html": "The throw is silent; those nearby must make a Hard Sicht roll to notice it."
+    }
+   ],
+   "sections": [
+    {
+     "key": "NOT",
+     "label": "Note",
+     "html": "<p>A thrown weapon must be retrieved.</p>"
+    }
+   ],
+   "synergies": [],
+   "flavorHtml": "<p>A knife makes no sound. A gunshot wakes everyone.</p>",
+   "searchText": "throwing expertise leis 3 you can make your attacks with sharp, throwable weapons using leis instead of aim. if you hit while unnoticed, the wound advances 1 extra stage. the throw is silent; those nearby must make a hard sicht roll to notice it. note a thrown weapon must be retrieved. a knife makes no sound. a gunshot wakes everyone."
+  },
+  "authority-like-herr-a": {
+   "key": "authority-like-herr-a",
+   "name": "Authority like Herr A",
+   "tree": "diplomat",
+   "type": "Pasif",
+   "requirementText": "None",
+   "requirements": [],
+   "maxLevel": 1,
+   "prerequisite": null,
+   "branch": "A",
+   "branchName": "Demagog",
+   "levelEffects": [],
+   "sections": [],
+   "synergies": [],
+   "flavorHtml": "<p>Makes it easier for you to overpower and crush the person in front of you with your words. (An extra +1 d20 roll bonus on Verbal Pressure rolls)</p>",
+   "searchText": "authority like herr a none makes it easier for you to overpower and crush the person in front of you with your words. (an extra +1 d20 roll bonus on verbal pressure rolls)"
+  },
+  "fahnentrager": {
+   "key": "fahnentrager",
+   "name": "Fahnenträger",
+   "tree": "diplomat",
+   "type": "Aktif",
+   "requirementText": "Rede 7, Sanita 5, Lv 7",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "rede",
+     "min": 7
+    },
+    {
+     "kind": "stat",
+     "stat": "sanita",
+     "min": 5
+    },
+    {
+     "kind": "level",
+     "min": 7
+    }
+   ],
+   "maxLevel": 1,
+   "prerequisite": "volksredner",
+   "branch": "A",
+   "branchName": "Demagog",
+   "levelEffects": [],
+   "sections": [
+    {
+     "key": "ETKİ",
+     "label": "Effect",
+     "html": "<p>Once per session, you rally a crowd, villagers or a small unit (up to about 30 people) for a cause: an uprising, a barricade, an escape, joining an attack. d20 + Rede ≥ Hard (Very Hard if the crowd is hostile to you). The GM plays the crowd as a single allied unit.</p>"
+    },
+    {
+     "key": "BEDEL",
+     "label": "Cost",
+     "html": "<p>+1 Corruption for every 5 casualties among the crowd.</p>"
+    },
+    {
+     "key": "SİNERJİ",
+     "label": "Synergy",
+     "html": "<p>With <strong><a href=\"@/kurallar/yetenekler/diplomat#schlangenzunge\">Schlangenzunge</a></strong>: A big lie told to the crowd goes unquestioned for the rest of the scene.</p>"
+    }
+   ],
+   "synergies": [
+    "schlangenzunge"
+   ],
+   "flavorHtml": "<p>You are the one who raises the flag. The blood of those who follow you is yours too.</p>",
+   "searchText": "fahnenträger rede 7, sanita 5, lv 7 effect once per session, you rally a crowd, villagers or a small unit (up to about 30 people) for a cause: an uprising, a barricade, an escape, joining an attack. d20 + rede ≥ hard (very hard if the crowd is hostile to you). the gm plays the crowd as a single allied unit. cost +1 corruption for every 5 casualties among the crowd. synergy with schlangenzunge : a big lie told to the crowd goes unquestioned for the rest of the scene. schlangenzunge you are the one who raises the flag. the blood of those who follow you is yours too."
+  },
+  "geist-la-resistance": {
+   "key": "geist-la-resistance",
+   "name": "Geist la Resistance",
+   "tree": "diplomat",
+   "type": "Pasif",
+   "requirementText": "None",
+   "requirements": [],
+   "maxLevel": 1,
+   "prerequisite": null,
+   "branch": "Kök",
+   "branchName": "Kök",
+   "levelEffects": [],
+   "sections": [],
+   "synergies": [],
+   "flavorHtml": "<p>The spirit of the resistance has seeped into you. Throughout the game, whenever you fail a “Sanita” roll, you have the right to roll “Sanita” again until the end of the action.</p>",
+   "searchText": "geist la resistance none the spirit of the resistance has seeped into you. throughout the game, whenever you fail a “sanita” roll, you have the right to roll “sanita” again until the end of the action."
+  },
+  "ihr-preis": {
+   "key": "ihr-preis",
+   "name": "Ihr Preis",
+   "tree": "diplomat",
+   "type": "Pasif",
+   "requirementText": "None",
+   "requirements": [],
+   "maxLevel": 3,
+   "prerequisite": null,
+   "branch": "B",
+   "branchName": "Unterhändler",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "Bribe Cost: 100%, the cost is set by the GM to fit the role."
+    },
+    {
+     "level": 2,
+     "html": "Bribe Cost: 70%"
+    },
+    {
+     "level": 3,
+     "html": "Bribe Cost: 40%"
+    }
+   ],
+   "sections": [
+    {
+     "key": "HESAP",
+     "label": "Calculation",
+     "html": "<p><strong>Bribe Cost calculation: tens-d10+50</strong></p>"
+    }
+   ],
+   "synergies": [],
+   "flavorHtml": "<p>Everyone has a price. Offering a bribe to the person in front of you becomes easier. When this ability is at its final level, a bribe offer can be used as an automatic success in exchange for a high price.</p>",
+   "searchText": "ihr preis none bribe cost: 100%, the cost is set by the gm to fit the role. bribe cost: 70% bribe cost: 40% calculation bribe cost calculation: tens-d10+50 everyone has a price. offering a bribe to the person in front of you becomes easier. when this ability is at its final level, a bribe offer can be used as an automatic success in exchange for a high price."
+  },
+  "schlangenzunge": {
+   "key": "schlangenzunge",
+   "name": "Schlangenzunge",
+   "tree": "diplomat",
+   "type": "Aktif",
+   "requirementText": "Rede 7, Sicht 4, Lv 6",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "rede",
+     "min": 7
+    },
+    {
+     "kind": "stat",
+     "stat": "sicht",
+     "min": 4
+    },
+    {
+     "kind": "level",
+     "min": 6
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": "see-through-em",
+   "branch": "B",
+   "branchName": "Unterhändler",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "When lying, you roll d20 + Rede; the other side makes an opposed Sicht roll. The threshold on your roll drops one step. A successful big lie (GM approved) is not questioned on its own until the target is confronted with clear evidence."
+    },
+    {
+     "level": 2,
+     "html": "When one of your lies comes out, once per scene, you can save the situation with a new lie by rolling d20 + Rede ≥ Hard."
+    }
+   ],
+   "sections": [
+    {
+     "key": "BEDEL",
+     "label": "Cost",
+     "html": "<p>If the recovery roll fails, the target no longer trusts you: -3 to all Rede rolls against that target until the end of the scene.</p>"
+    },
+    {
+     "key": "SİNERJİ",
+     "label": "Synergy",
+     "html": "<p>With <strong><a href=\"@/kurallar/yetenekler/diplomat#fahnentrager\">Fahnenträger</a></strong>: A big lie told to the crowd goes unquestioned for the rest of the scene.</p>"
+    }
+   ],
+   "synergies": [
+    "fahnentrager"
+   ],
+   "flavorHtml": "<p>You lie like a snake. The right word, at the right time, in the right tone. The truth comes out only when it is far too late.</p>",
+   "searchText": "schlangenzunge rede 7, sicht 4, lv 6 when lying, you roll d20 + rede; the other side makes an opposed sicht roll. the threshold on your roll drops one step. a successful big lie (gm approved) is not questioned on its own until the target is confronted with clear evidence. when one of your lies comes out, once per scene, you can save the situation with a new lie by rolling d20 + rede ≥ hard. cost if the recovery roll fails, the target no longer trusts you: -3 to all rede rolls against that target until the end of the scene. synergy with fahnenträger : a big lie told to the crowd goes unquestioned for the rest of the scene. fahnentrager you lie like a snake. the right word, at the right time, in the right tone. the truth comes out only when it is far too late."
+  },
+  "see-through-em": {
+   "key": "see-through-em",
+   "name": "See Through'em",
+   "tree": "diplomat",
+   "type": "Aktif",
+   "requirementText": "Rede 3, Sicht 2",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "rede",
+     "min": 3
+    },
+    {
+     "kind": "stat",
+     "stat": "sicht",
+     "min": 2
+    }
+   ],
+   "maxLevel": 3,
+   "prerequisite": "ihr-preis",
+   "branch": "B",
+   "branchName": "Unterhändler",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "You try to read a person you are talking to: d20 + Rede or Sicht (whichever is higher) ≥ Medium. On a success, the GM gives you 1 true piece of information about the target's current emotion or intention."
+    },
+    {
+     "level": 2,
+     "html": "On a success, you get 2 pieces of information. If the target is lying to you, you notice it (if the target rolled for the lie, the results are compared)."
+    },
+    {
+     "level": 3,
+     "html": "The threshold drops one step. On a success, you also learn one of the target's weaknesses (fear, money, loyalty, pride…); +2 to your next Rede roll against this target."
+    }
+   ],
+   "sections": [],
+   "synergies": [],
+   "flavorHtml": "<p>A twitching eyelid, a silence that lasts too long, a glance that slips to the wrong place. People have already said everything before they speak.</p>",
+   "searchText": "see through'em rede 3, sicht 2 you try to read a person you are talking to: d20 + rede or sicht (whichever is higher) ≥ medium. on a success, the gm gives you 1 true piece of information about the target's current emotion or intention. on a success, you get 2 pieces of information. if the target is lying to you, you notice it (if the target rolled for the lie, the results are compared). the threshold drops one step. on a success, you also learn one of the target's weaknesses (fear, money, loyalty, pride…); +2 to your next rede roll against this target. a twitching eyelid, a silence that lasts too long, a glance that slips to the wrong place. people have already said everything before they speak."
+  },
+  "verhormeister": {
+   "key": "verhormeister",
+   "name": "Verhörmeister",
+   "tree": "diplomat",
+   "type": "Aktif",
+   "requirementText": "Rede 5, Wissen 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "rede",
+     "min": 5
+    },
+    {
+     "kind": "stat",
+     "stat": "wissen",
+     "min": 3
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": "ihr-preis",
+   "branch": "B′",
+   "branchName": "Verhör",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "You interrogate a neutralized person: d20 + Rede ≥ threshold (civilian Easy, soldier Medium, officer or elite Hard). On a success, the GM gives a true answer to one question; on a failure, the target says nothing for the rest of the scene."
+    },
+    {
+     "level": 2,
+     "html": "On a success, you ask 2 questions; if the target lies, you notice it."
+    }
+   ],
+   "sections": [
+    {
+     "key": "NOT",
+     "label": "Note",
+     "html": "<p>This ability works through pressure, bargaining and psychology; it does not involve physical torture.</p>"
+    },
+    {
+     "key": "SİNERJİ",
+     "label": "Synergy",
+     "html": "<p>With <strong><a href=\"@/kurallar/yetenekler/schwarzesonne#extracio-aus-ss\">Extracio Aus SS</a></strong>: -2 to the rolls of a person interrogated using information learned from the dead.</p>"
+    }
+   ],
+   "synergies": [
+    "extracio-aus-ss"
+   ],
+   "flavorHtml": "<p>Everyone talks. The question is what they say, and when.</p>",
+   "searchText": "verhörmeister rede 5, wissen 3 you interrogate a neutralized person: d20 + rede ≥ threshold (civilian easy, soldier medium, officer or elite hard). on a success, the gm gives a true answer to one question; on a failure, the target says nothing for the rest of the scene. on a success, you ask 2 questions; if the target lies, you notice it. note this ability works through pressure, bargaining and psychology; it does not involve physical torture. synergy with extracio aus ss : -2 to the rolls of a person interrogated using information learned from the dead. extracio-aus-ss everyone talks. the question is what they say, and when."
+  },
+  "volksredner": {
+   "key": "volksredner",
+   "name": "Volksredner",
+   "tree": "diplomat",
+   "type": "Aktif",
+   "requirementText": "Rede 5, Sanita 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "rede",
+     "min": 5
+    },
+    {
+     "kind": "stat",
+     "stat": "sanita",
+     "min": 3
+    }
+   ],
+   "maxLevel": 3,
+   "prerequisite": "authority-like-herr-a",
+   "branch": "A",
+   "branchName": "Demagog",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "By spending a turn, you call out to your allies: d20 + Rede ≥ Medium. On a success, the Cower state of allies who hear you ends."
+    },
+    {
+     "level": 2,
+     "html": "In addition, +1 to your allies' next roll."
+    },
+    {
+     "level": 3,
+     "html": "+2. Once per scene, it does not cost a turn."
+    }
+   ],
+   "sections": [
+    {
+     "key": "SİNERJİ",
+     "label": "Synergy",
+     "html": "<p>With <strong><a href=\"@/kurallar/yetenekler/stahlkrieg#feuerleitung\">Feuerleitung</a></strong>: The Cower state of allies who attack the marked target ends.</p>"
+    }
+   ],
+   "synergies": [
+    "feuerleitung"
+   ],
+   "flavorHtml": "<p>The right words, at the right moment. Fear scatters.</p>",
+   "searchText": "volksredner rede 5, sanita 3 by spending a turn, you call out to your allies: d20 + rede ≥ medium. on a success, the cower state of allies who hear you ends. in addition, +1 to your allies' next roll. +2. once per scene, it does not cost a turn. synergy with feuerleitung : the cower state of allies who attack the marked target ends. feuerleitung the right words, at the right moment. fear scatters."
+  },
+  "aryan-cryptology": {
+   "key": "aryan-cryptology",
+   "name": "Aryan Cryptology",
+   "tree": "wunderwaffe",
+   "type": "Aktif",
+   "requirementText": "Werk 7, Wissen 4, Lv 6",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "werk",
+     "min": 7
+    },
+    {
+     "kind": "stat",
+     "stat": "wissen",
+     "min": 4
+    },
+    {
+     "kind": "level",
+     "min": 6
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": "kriegssheilung",
+   "branch": "B",
+   "branchName": "Labor",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "You can decipher encrypted SS scientific texts (d20 + Werk ≥ Hard). A success yields a secret, plan or technical data determined by the GM."
+    },
+    {
+     "level": 2,
+     "html": "From a plan you have deciphered, if you have <a href=\"@/kurallar/yetenekler/wunderwaffe#kriegsengineer\">Kriegsengineer</a> Level 3, you can produce a prototype augment or Wunderwaffe with GM approval."
+    }
+   ],
+   "sections": [
+    {
+     "key": "BEDEL",
+     "label": "Cost",
+     "html": "<p>Deciphering Uber-threshold texts gnaws at the mind: +1 Corruption on each successful decipherment.</p>"
+    }
+   ],
+   "synergies": [],
+   "flavorHtml": "<p>Runes, formulas and notes written on the edge of madness. They all lead somewhere.</p>",
+   "searchText": "aryan cryptology werk 7, wissen 4, lv 6 you can decipher encrypted ss scientific texts (d20 + werk ≥ hard). a success yields a secret, plan or technical data determined by the gm. from a plan you have deciphered, if you have kriegsengineer level 3, you can produce a prototype augment or wunderwaffe with gm approval. cost deciphering uber-threshold texts gnaws at the mind: +1 corruption on each successful decipherment. runes, formulas and notes written on the edge of madness. they all lead somewhere."
+  },
+  "eiserner-kamerad": {
+   "key": "eiserner-kamerad",
+   "name": "Eiserner Kamerad",
+   "tree": "wunderwaffe",
+   "type": "Aktif",
+   "requirementText": "Werk 7, Wissen 4, Lv 7",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "werk",
+     "min": 7
+    },
+    {
+     "kind": "stat",
+     "stat": "wissen",
+     "min": 4
+    },
+    {
+     "kind": "level",
+     "min": 7
+    }
+   ],
+   "maxLevel": 1,
+   "prerequisite": "sprengmeister",
+   "branch": "A",
+   "branchName": "Maschinen",
+   "levelEffects": [],
+   "sections": [
+    {
+     "key": "ETKİ",
+     "label": "Effect",
+     "html": "<p>Once per campaign, with materials and a workshop, you build a small war automaton. The automaton is an ally with all stats at 3 and Aim and Korp at 5; it cannot speak and follows simple commands. Giving a command costs your action. When damaged, it can be repaired with Kriegsengineer.</p>"
+    },
+    {
+     "key": "BEDEL",
+     "label": "Cost",
+     "html": "<p>The automaton runs on an Akku: it stays active for 3 scenes per session and recharges only somewhere with mains electricity.</p>"
+    },
+    {
+     "key": "SİNERJİ",
+     "label": "Synergy",
+     "html": "<p>With <strong><a href=\"@/kurallar/yetenekler/metallkorp#schnittstelle\">Schnittstelle</a></strong>: You control the automaton with your augment; giving commands does not cost an action.</p>"
+    }
+   ],
+   "synergies": [
+    "schnittstelle"
+   ],
+   "flavorHtml": "<p>A piece that came out of Speer's cells. Now it obeys your voice.</p>",
+   "searchText": "eiserner kamerad werk 7, wissen 4, lv 7 effect once per campaign, with materials and a workshop, you build a small war automaton. the automaton is an ally with all stats at 3 and aim and korp at 5; it cannot speak and follows simple commands. giving a command costs your action. when damaged, it can be repaired with kriegsengineer. cost the automaton runs on an akku: it stays active for 3 scenes per session and recharges only somewhere with mains electricity. synergy with schnittstelle : you control the automaton with your augment; giving commands does not cost an action. schnittstelle a piece that came out of speer's cells. now it obeys your voice."
+  },
+  "knowledge-of-future": {
+   "key": "knowledge-of-future",
+   "name": "Knowledge of Future",
+   "tree": "wunderwaffe",
+   "type": "Pasif",
+   "requirementText": "None",
+   "requirements": [],
+   "maxLevel": 2,
+   "prerequisite": null,
+   "branch": "B",
+   "branchName": "Labor",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "When identifying unknown or experimental (Wunderwaffe) devices, you use the higher of Werk and Wissen."
+    },
+    {
+     "level": 2,
+     "html": "The threshold drops one step on identification and first-use rolls for these devices."
+    }
+   ],
+   "sections": [],
+   "synergies": [],
+   "flavorHtml": "<p>Some of these machines should not have been invented yet. Still, you understand how they work.</p>",
+   "searchText": "knowledge of future none when identifying unknown or experimental (wunderwaffe) devices, you use the higher of werk and wissen. the threshold drops one step on identification and first-use rolls for these devices. some of these machines should not have been invented yet. still, you understand how they work."
+  },
+  "kriegsengineer": {
+   "key": "kriegsengineer",
+   "name": "Kriegsengineer",
+   "tree": "wunderwaffe",
+   "type": "Aktif",
+   "requirementText": "None",
+   "requirements": [],
+   "maxLevel": 3,
+   "prerequisite": null,
+   "branch": "Kök",
+   "branchName": "Kök",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "Outside of combat, you can repair broken or Unusable equipment (d20 + Werk, the threshold is set by the GM based on the damage)."
+    },
+    {
+     "level": 2,
+     "html": "You can make repairs during combat by spending 1 turn."
+    },
+    {
+     "level": 3,
+     "html": "You can also repair augments. +2 to all repair rolls."
+    }
+   ],
+   "sections": [
+    {
+     "key": "NOT",
+     "label": "Note",
+     "html": "<p>Without this ability, the threshold rises two steps for repairs made during combat.</p>"
+    },
+    {
+     "key": "SİNERJİ",
+     "label": "Synergy",
+     "html": "<p>With <strong><a href=\"@/kurallar/yetenekler/metallkorp#ersatzteil\">Ersatzteil</a></strong>: You can also remove and refit a teammate's augment in the field.</p>"
+    }
+   ],
+   "synergies": [
+    "ersatzteil"
+   ],
+   "flavorHtml": "<p>You know how to tighten a nut even while bullets fly over your head.</p>",
+   "searchText": "kriegsengineer none outside of combat, you can repair broken or unusable equipment (d20 + werk, the threshold is set by the gm based on the damage). you can make repairs during combat by spending 1 turn. you can also repair augments. +2 to all repair rolls. note without this ability, the threshold rises two steps for repairs made during combat. synergy with ersatzteil : you can also remove and refit a teammate's augment in the field. ersatzteil you know how to tighten a nut even while bullets fly over your head."
+  },
+  "kriegssheilung": {
+   "key": "kriegssheilung",
+   "name": "Kriegssheilung",
+   "tree": "wunderwaffe",
+   "type": "Pasif",
+   "requirementText": "Werk 3, Wissen 2",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "werk",
+     "min": 3
+    },
+    {
+     "kind": "stat",
+     "stat": "wissen",
+     "min": 2
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": "knowledge-of-future",
+   "branch": "B",
+   "branchName": "Labor",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "On bandages you apply to others, the Bandaged (Clean) penalty becomes Previous/3 instead of Previous/2 (round down)."
+    },
+    {
+     "level": 2,
+     "html": "Outside of combat, if you spend materials and roll d20 + Werk ≥ Hard, you lower a limb's wound by 1 stage. Once per patient per session."
+    }
+   ],
+   "sections": [
+    {
+     "key": "SİNERJİ",
+     "label": "Synergy",
+     "html": "<p>With <strong><a href=\"@/kurallar/yetenekler/spionage#giftmischer\">Giftmischer</a></strong>: You can produce antidotes; poisoned wounds advance 1 stage less.</p>"
+    }
+   ],
+   "synergies": [
+    "giftmischer"
+   ],
+   "flavorHtml": "<p>No field hospital, just a bag and your two hands. That's enough.</p>",
+   "searchText": "kriegssheilung werk 3, wissen 2 on bandages you apply to others, the bandaged (clean) penalty becomes previous/3 instead of previous/2 (round down). outside of combat, if you spend materials and roll d20 + werk ≥ hard, you lower a limb's wound by 1 stage. once per patient per session. synergy with giftmischer : you can produce antidotes; poisoned wounds advance 1 stage less. giftmischer no field hospital, just a bag and your two hands. that's enough."
+  },
+  "maschinengehirn": {
+   "key": "maschinengehirn",
+   "name": "Maschinengehirn",
+   "tree": "wunderwaffe",
+   "type": "Pasif",
+   "requirementText": "Werk 4",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "werk",
+     "min": 4
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": null,
+   "branch": "A",
+   "branchName": "Maschinen",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "You use Werk instead of Sicht to spot the weak points of machines, robots and augmented targets. On your first hit against a target you have spotted, the wound advances 1 extra stage."
+    },
+    {
+     "level": 2,
+     "html": "+1 to all rolls made with the weapons and devices you use."
+    }
+   ],
+   "sections": [
+    {
+     "key": "SİNERJİ",
+     "label": "Synergy",
+     "html": "<p>With <strong><a href=\"@/kurallar/yetenekler/spionage#saboteur\">Saboteur</a></strong>: The threshold drops one step on sabotage rolls.</p>"
+    }
+   ],
+   "synergies": [
+    "saboteur"
+   ],
+   "flavorHtml": "<p>You speak the language of machines. The weapons you use move as if they were your own limbs.</p>",
+   "searchText": "maschinengehirn werk 4 you use werk instead of sicht to spot the weak points of machines, robots and augmented targets. on your first hit against a target you have spotted, the wound advances 1 extra stage. +1 to all rolls made with the weapons and devices you use. synergy with saboteur : the threshold drops one step on sabotage rolls. saboteur you speak the language of machines. the weapons you use move as if they were your own limbs."
+  },
+  "panzerschrauber": {
+   "key": "panzerschrauber",
+   "name": "Panzerschrauber",
+   "tree": "wunderwaffe",
+   "type": "Pasif",
+   "requirementText": "Werk 5, Agil 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "werk",
+     "min": 5
+    },
+    {
+     "kind": "stat",
+     "stat": "agil",
+     "min": 3
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": "maschinengehirn",
+   "branch": "A′",
+   "branchName": "Fahrzeug",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "When operating a military vehicle (truck, armored car, tank), the threshold drops one step on driving rolls. During combat, by spending 1 turn you temporarily fix a malfunction in the vehicle."
+    },
+    {
+     "level": 2,
+     "html": "You can use Werk instead of Aim on shots made with vehicle weapons. Damage the vehicle takes advances 1 stage less."
+    }
+   ],
+   "sections": [],
+   "synergies": [],
+   "flavorHtml": "<p>Oil, sweat and Gletschmetall. You know what's broken from the sound of the engine.</p>",
+   "searchText": "panzerschrauber werk 5, agil 3 when operating a military vehicle (truck, armored car, tank), the threshold drops one step on driving rolls. during combat, by spending 1 turn you temporarily fix a malfunction in the vehicle. you can use werk instead of aim on shots made with vehicle weapons. damage the vehicle takes advances 1 stage less. oil, sweat and gletschmetall. you know what's broken from the sound of the engine."
+  },
+  "sprengmeister": {
+   "key": "sprengmeister",
+   "name": "Sprengmeister",
+   "tree": "wunderwaffe",
+   "type": "Aktif",
+   "requirementText": "Werk 5, Agil 2",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "werk",
+     "min": 5
+    },
+    {
+     "kind": "stat",
+     "stat": "agil",
+     "min": 2
+    }
+   ],
+   "maxLevel": 3,
+   "prerequisite": "maschinengehirn",
+   "branch": "A",
+   "branchName": "Maschinen",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "You prepare and place explosives from materials (d20 + Werk ≥ Medium). The wounds on the limbs of targets in the blast area advance 1 stage; structures and vehicles take serious damage."
+    },
+    {
+     "level": 2,
+     "html": "You can set up a timer or a tripwire. The threshold drops one step on explosive disarming rolls."
+    },
+    {
+     "level": 3,
+     "html": "Directed explosive: only targets in the direction you choose are affected, and the wound advances 2 stages."
+    }
+   ],
+   "sections": [],
+   "synergies": [],
+   "flavorHtml": "<p>Bridges, rails, gates. All of them just a fuse's length away.</p>",
+   "searchText": "sprengmeister werk 5, agil 2 you prepare and place explosives from materials (d20 + werk ≥ medium). the wounds on the limbs of targets in the blast area advance 1 stage; structures and vehicles take serious damage. you can set up a timer or a tripwire. the threshold drops one step on explosive disarming rolls. directed explosive: only targets in the direction you choose are affected, and the wound advances 2 stages. bridges, rails, gates. all of them just a fuse's length away."
+  },
+  "blutopfer": {
+   "key": "blutopfer",
+   "name": "Blutopfer",
+   "tree": "schwarzesonne",
+   "type": "Tepki",
+   "requirementText": "Wissen 5, Korp 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "wissen",
+     "min": 5
+    },
+    {
+     "kind": "stat",
+     "stat": "korp",
+     "min": 3
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": "extracio-aus-ss",
+   "branch": "B′",
+   "branchName": "Blut",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "Before making a black magic roll, you inflict a 1-stage wound on one of your own limbs; +3 to that roll."
+    },
+    {
+     "level": 2,
+     "html": "+6 by inflicting a 2-stage wound."
+    }
+   ],
+   "sections": [
+    {
+     "key": "BEDEL",
+     "label": "Cost",
+     "html": "<p>A Sanita roll (Easy) on each use; on a failure, +1 Corruption.</p>"
+    },
+    {
+     "key": "NOT",
+     "label": "Note",
+     "html": "<p>This ability's rolls are black magic rolls; Corruption-based black magic effects apply.</p>"
+    },
+    {
+     "key": "SİNERJİ",
+     "label": "Synergy",
+     "html": "<p>With <strong><a href=\"@/kurallar/yetenekler/ubermann#mein-liebe\">Mein Liebe</a></strong>: The penalty of the wound Blutopfer inflicts on your own limb is ignored.</p>"
+    }
+   ],
+   "synergies": [
+    "mein-liebe"
+   ],
+   "flavorHtml": "<p>Runes hold better with blood than with ink.</p>",
+   "searchText": "blutopfer wissen 5, korp 3 before making a black magic roll, you inflict a 1-stage wound on one of your own limbs; +3 to that roll. +6 by inflicting a 2-stage wound. cost a sanita roll (easy) on each use; on a failure, +1 corruption. note this ability's rolls are black magic rolls; corruption-based black magic effects apply. synergy with mein liebe : the penalty of the wound blutopfer inflicts on your own limb is ignored. mein-liebe runes hold better with blood than with ink."
+  },
+  "extracio-aus-ss": {
+   "key": "extracio-aus-ss",
+   "name": "Extracio Aus SS",
+   "tree": "schwarzesonne",
+   "type": "Aktif",
+   "requirementText": "None",
+   "requirements": [],
+   "maxLevel": 2,
+   "prerequisite": null,
+   "branch": "B",
+   "branchName": "Totenkult",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "You roll d20 + Wissen over a corpse. <strong>Easy</strong>: you learn the cause of death. <strong>Medium</strong>: you see an image from its last moments. <strong>Hard</strong>: you ask one question that the GM answers with yes/no."
+    },
+    {
+     "level": 2,
+     "html": "On a Hard result, you can ask 2 questions."
+    }
+   ],
+   "sections": [
+    {
+     "key": "BEDEL",
+     "label": "Cost",
+     "html": "<p>+1 Corruption on attempts at a Hard or higher threshold.</p>"
+    },
+    {
+     "key": "NOT",
+     "label": "Note",
+     "html": "<p>This ability's rolls are black magic rolls; Corruption-based black magic effects apply.</p>"
+    },
+    {
+     "key": "SİNERJİ",
+     "label": "Synergy",
+     "html": "<p>With <strong><a href=\"@/kurallar/yetenekler/diplomat#verhormeister\">Verhörmeister</a></strong>: -2 to the rolls of a person interrogated using information learned from the dead.</p>"
+    }
+   ],
+   "synergies": [
+    "verhormeister"
+   ],
+   "flavorHtml": "<p>The dead do not speak. But they remember.</p>",
+   "searchText": "extracio aus ss none you roll d20 + wissen over a corpse. easy : you learn the cause of death. medium : you see an image from its last moments. hard : you ask one question that the gm answers with yes/no. on a hard result, you can ask 2 questions. cost +1 corruption on attempts at a hard or higher threshold. note this ability's rolls are black magic rolls; corruption-based black magic effects apply. synergy with verhörmeister : -2 to the rolls of a person interrogated using information learned from the dead. verhormeister the dead do not speak. but they remember."
+  },
+  "kluger-kopf": {
+   "key": "kluger-kopf",
+   "name": "Kluger Kopf",
+   "tree": "schwarzesonne",
+   "type": "Pasif",
+   "requirementText": "None",
+   "requirements": [],
+   "maxLevel": 2,
+   "prerequisite": null,
+   "branch": "Kök",
+   "branchName": "Kök",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "During a long rest, if you roll d20 + Wissen ≥ Hard, your Corruption decreases by 1. Once per session."
+    },
+    {
+     "level": 2,
+     "html": "The threshold becomes Medium."
+    }
+   ],
+   "sections": [
+    {
+     "key": "NOT",
+     "label": "Note",
+     "html": "<p>The Corruption 7 rule applies; Corruption at 7 or above cannot be lowered below 7.</p>"
+    }
+   ],
+   "synergies": [],
+   "flavorHtml": "<p>Everyone who touches the occult pays a price. A clever mind knows how to weigh that price.</p>",
+   "searchText": "kluger kopf none during a long rest, if you roll d20 + wissen ≥ hard, your corruption decreases by 1. once per session. the threshold becomes medium. note the corruption 7 rule applies; corruption at 7 or above cannot be lowered below 7. everyone who touches the occult pays a price. a clever mind knows how to weigh that price."
+  },
+  "grosses-siegel": {
+   "key": "grosses-siegel",
+   "name": "Großes Siegel",
+   "tree": "schwarzesonne",
+   "type": "Aktif",
+   "requirementText": "Wissen 7, Sanita 4, Corruption at least 3, Lv 7",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "wissen",
+     "min": 7
+    },
+    {
+     "kind": "stat",
+     "stat": "sanita",
+     "min": 4
+    },
+    {
+     "kind": "corruption",
+     "min": 3
+    },
+    {
+     "kind": "level",
+     "min": 7
+    }
+   ],
+   "maxLevel": 1,
+   "prerequisite": "siegel-der-verdamm",
+   "branch": "A",
+   "branchName": "Runen",
+   "levelEffects": [],
+   "sections": [
+    {
+     "key": "ETKİ",
+     "label": "Effect",
+     "html": "<p>By spending a turn, you draw a large rune on the ground: d20 + Wissen ≥ Hard. On a success, you choose one of two effects for an area of about 10 meters. Protection: allies in the area take no wounds for 2 turns. Curse: the wounds of enemies in the area advance 1 stage at the end of each turn for 2 turns.</p>"
+    },
+    {
+     "key": "BEDEL",
+     "label": "Cost",
+     "html": "<p>+3 Corruption. Once per session.</p>"
+    },
+    {
+     "key": "NOT",
+     "label": "Note",
+     "html": "<p>This ability's rolls are black magic rolls; Corruption-based black magic effects apply.</p>"
+    }
+   ],
+   "synergies": [],
+   "flavorHtml": "<p>The oldest of the runes. Where it is drawn, the world grows a little thinner.</p>",
+   "searchText": "großes siegel wissen 7, sanita 4, corruption at least 3, lv 7 effect by spending a turn, you draw a large rune on the ground: d20 + wissen ≥ hard. on a success, you choose one of two effects for an area of about 10 meters. protection: allies in the area take no wounds for 2 turns. curse: the wounds of enemies in the area advance 1 stage at the end of each turn for 2 turns. cost +3 corruption. once per session. note this ability's rolls are black magic rolls; corruption-based black magic effects apply. the oldest of the runes. where it is drawn, the world grows a little thinner."
+  },
+  "siegel-der-leere": {
+   "key": "siegel-der-leere",
+   "name": "Siegel Der Leere",
+   "tree": "schwarzesonne",
+   "type": "Aktif",
+   "requirementText": "Wissen 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "wissen",
+     "min": 3
+    }
+   ],
+   "maxLevel": 3,
+   "prerequisite": null,
+   "branch": "A",
+   "branchName": "Runen",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "You mark a target in your line of sight (including yourself) with the rune of the void: d20 + Wissen ≥ Medium. On a success, the target takes no wounds for 1 turn."
+    },
+    {
+     "level": 2,
+     "html": "2 turns."
+    },
+    {
+     "level": 3,
+     "html": "3 turns."
+    }
+   ],
+   "sections": [
+    {
+     "key": "BEDEL",
+     "label": "Cost",
+     "html": "<p>+1 Corruption on each use. Once per combat.</p>"
+    },
+    {
+     "key": "NOT",
+     "label": "Note",
+     "html": "<p>This ability's rolls are black magic rolls; Corruption-based black magic effects apply.</p>"
+    }
+   ],
+   "synergies": [],
+   "flavorHtml": "<p>The rune art that came with the New Order. Nothing can touch the one who bears the mark of the void.</p>",
+   "searchText": "siegel der leere wissen 3 you mark a target in your line of sight (including yourself) with the rune of the void: d20 + wissen ≥ medium. on a success, the target takes no wounds for 1 turn. 2 turns. 3 turns. cost +1 corruption on each use. once per combat. note this ability's rolls are black magic rolls; corruption-based black magic effects apply. the rune art that came with the new order. nothing can touch the one who bears the mark of the void."
+  },
+  "siegel-der-verdamm": {
+   "key": "siegel-der-verdamm",
+   "name": "Siegel Der Verdamm",
+   "tree": "schwarzesonne",
+   "type": "Aktif",
+   "requirementText": "Wissen 4, Sanita 2",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "wissen",
+     "min": 4
+    },
+    {
+     "kind": "stat",
+     "stat": "sanita",
+     "min": 2
+    }
+   ],
+   "maxLevel": 3,
+   "prerequisite": "siegel-der-leere",
+   "branch": "A",
+   "branchName": "Runen",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "You carve the rune of the damned into the flesh of one of a living target's limbs. The target must be neutralized or grappled (if not, first a Krach or Agil roll at the Medium threshold). Then d20 + Wissen ≥ Medium. On a success, the wound on the runed limb advances 1 stage at the end of each turn; it lasts 2 turns."
+    },
+    {
+     "level": 2,
+     "html": "3 turns."
+    },
+    {
+     "level": 3,
+     "html": "4 turns."
+    }
+   ],
+   "sections": [
+    {
+     "key": "BEDEL",
+     "label": "Cost",
+     "html": "<p>+1 Corruption on each use.</p>"
+    },
+    {
+     "key": "NOT",
+     "label": "Note",
+     "html": "<p>At the start of each turn, the target can break the rune by rolling d20 + Sanita ≥ Hard. This ability's rolls are black magic rolls; Corruption-based black magic effects apply.</p>"
+    },
+    {
+     "key": "SİNERJİ",
+     "label": "Synergy",
+     "html": "<p>With <strong><a href=\"@/kurallar/yetenekler/ubermann#wurgegriff\">Würgegriff</a></strong>: Drawing a rune on a target you have locked down does not require an additional Krach or Agil roll.</p>"
+    }
+   ],
+   "synergies": [
+    "wurgegriff"
+   ],
+   "flavorHtml": "<p>A rune cannot be wiped from flesh. It slowly devours its bearer from within.</p>",
+   "searchText": "siegel der verdamm wissen 4, sanita 2 you carve the rune of the damned into the flesh of one of a living target's limbs. the target must be neutralized or grappled (if not, first a krach or agil roll at the medium threshold). then d20 + wissen ≥ medium. on a success, the wound on the runed limb advances 1 stage at the end of each turn; it lasts 2 turns. 3 turns. 4 turns. cost +1 corruption on each use. note at the start of each turn, the target can break the rune by rolling d20 + sanita ≥ hard. this ability's rolls are black magic rolls; corruption-based black magic effects apply. synergy with würgegriff : drawing a rune on a target you have locked down does not require an additional krach or agil roll. wurgegriff a rune cannot be wiped from flesh. it slowly devours its bearer from within."
+  },
+  "totenruf": {
+   "key": "totenruf",
+   "name": "Totenruf",
+   "tree": "schwarzesonne",
+   "type": "Aktif",
+   "requirementText": "Wissen 5, Sanita 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "wissen",
+     "min": 5
+    },
+    {
+     "kind": "stat",
+     "stat": "sanita",
+     "min": 3
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": "extracio-aus-ss",
+   "branch": "B",
+   "branchName": "Totenkult",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "You summon the spirit of someone who died within the last hour: d20 + Wissen ≥ Medium. For 3 turns, the spirit acts as an invisible scout that can pass through walls and relays what it sees to you."
+    },
+    {
+     "level": 2,
+     "html": "5 turns. The whole group hears what the spirit sees."
+    }
+   ],
+   "sections": [
+    {
+     "key": "BEDEL",
+     "label": "Cost",
+     "html": "<p>+1 Corruption on each use.</p>"
+    },
+    {
+     "key": "NOT",
+     "label": "Note",
+     "html": "<p>This ability's rolls are black magic rolls; Corruption-based black magic effects apply.</p>"
+    }
+   ],
+   "synergies": [],
+   "flavorHtml": "<p>The dead cannot leave. You give them one more job.</p>",
+   "searchText": "totenruf wissen 5, sanita 3 you summon the spirit of someone who died within the last hour: d20 + wissen ≥ medium. for 3 turns, the spirit acts as an invisible scout that can pass through walls and relays what it sees to you. 5 turns. the whole group hears what the spirit sees. cost +1 corruption on each use. note this ability's rolls are black magic rolls; corruption-based black magic effects apply. the dead cannot leave. you give them one more job."
+  },
+  "toter-soldaten": {
+   "key": "toter-soldaten",
+   "name": "Toter Soldaten",
+   "tree": "schwarzesonne",
+   "type": "Aktif",
+   "requirementText": "Wissen 7, Corruption at least 4, Lv 6",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "wissen",
+     "min": 7
+    },
+    {
+     "kind": "corruption",
+     "min": 4
+    },
+    {
+     "kind": "level",
+     "min": 6
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": "totenruf",
+   "branch": "B",
+   "branchName": "Totenkult",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "You raise a corpse as a servant: d20 + Wissen ≥ Hard. All of the raised dead's stats are half of what they were in life (round down); it cannot speak and follows only simple orders. 1 dead, until the end of the scene."
+    },
+    {
+     "level": 2,
+     "html": "2 dead until the end of the scene, or 1 dead until the end of the session."
+    }
+   ],
+   "sections": [
+    {
+     "key": "BEDEL",
+     "label": "Cost",
+     "html": "<p>+2 Corruption on each raising.</p>"
+    },
+    {
+     "key": "NOT",
+     "label": "Note",
+     "html": "<p>This ability's rolls are black magic rolls; Corruption-based black magic effects apply.</p>"
+    }
+   ],
+   "synergies": [],
+   "flavorHtml": "<p>The Reich's soldiers are not discharged from duty, even in death.</p>",
+   "searchText": "toter soldaten wissen 7, corruption at least 4, lv 6 you raise a corpse as a servant: d20 + wissen ≥ hard. all of the raised dead's stats are half of what they were in life (round down); it cannot speak and follows only simple orders. 1 dead, until the end of the scene. 2 dead until the end of the scene, or 1 dead until the end of the session. cost +2 corruption on each raising. note this ability's rolls are black magic rolls; corruption-based black magic effects apply. the reich's soldiers are not discharged from duty, even in death."
+  },
+  "ersatzteil": {
+   "key": "ersatzteil",
+   "name": "Ersatzteil",
+   "tree": "metallkorp",
+   "type": "Aktif",
+   "requirementText": "Klang 5, Werk 2",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "klang",
+     "min": 5
+    },
+    {
+     "kind": "stat",
+     "stat": "werk",
+     "min": 2
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": "zweite-haut",
+   "branch": "A′",
+   "branchName": "Feldumbau",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "You can remove and refit your own augment in the field, or repair a broken or Unusable augment within 1 scene (d20 + Werk ≥ Medium)."
+    },
+    {
+     "level": 2,
+     "html": "You can remove an augment and fit it to another suitable limb within 1 turn; the fitted augment's Klang penalty is ignored for that scene."
+    }
+   ],
+   "sections": [
+    {
+     "key": "SİNERJİ",
+     "label": "Synergy",
+     "html": "<p>With <strong><a href=\"@/kurallar/yetenekler/wunderwaffe#kriegsengineer\">Kriegsengineer</a></strong>: You can also remove and refit a teammate's augment in the field.</p>"
+    }
+   ],
+   "synergies": [
+    "kriegsengineer"
+   ],
+   "flavorHtml": "<p>A screw, a wrench and a little patience. The body is a machine too.</p>",
+   "searchText": "ersatzteil klang 5, werk 2 you can remove and refit your own augment in the field, or repair a broken or unusable augment within 1 scene (d20 + werk ≥ medium). you can remove an augment and fit it to another suitable limb within 1 turn; the fitted augment's klang penalty is ignored for that scene. synergy with kriegsengineer : you can also remove and refit a teammate's augment in the field. kriegsengineer a screw, a wrench and a little patience. the body is a machine too."
+  },
+  "kalte-seele": {
+   "key": "kalte-seele",
+   "name": "Kalte Seele",
+   "tree": "metallkorp",
+   "type": "Pasif",
+   "requirementText": "Klang 4, Sanita 2",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "klang",
+     "min": 4
+    },
+    {
+     "kind": "stat",
+     "stat": "sanita",
+     "min": 2
+    }
+   ],
+   "maxLevel": 1,
+   "prerequisite": "zweite-haut",
+   "branch": "A",
+   "branchName": "Panzerung",
+   "levelEffects": [],
+   "sections": [
+    {
+     "key": "ETKİ",
+     "label": "Effect",
+     "html": "<p>The Klang bonus from Corruption starts at Corruption 2 instead of 3. You can use Klang instead of Sanita on Cower and Frenzy trigger rolls.</p>"
+    },
+    {
+     "key": "BEDEL",
+     "label": "Cost",
+     "html": "<p>-1 to Rede rolls for every 2 augments fitted.</p>"
+    }
+   ],
+   "synergies": [],
+   "flavorHtml": "<p>The closer you get to the machine, the further you drift from people. Fear and rage alike are cold now.</p>",
+   "searchText": "kalte seele klang 4, sanita 2 effect the klang bonus from corruption starts at corruption 2 instead of 3. you can use klang instead of sanita on cower and frenzy trigger rolls. cost -1 to rede rolls for every 2 augments fitted. the closer you get to the machine, the further you drift from people. fear and rage alike are cold now."
+  },
+  "kriegsmaschine": {
+   "key": "kriegsmaschine",
+   "name": "Kriegsmaschine",
+   "tree": "metallkorp",
+   "type": "Aktif",
+   "requirementText": "Klang 7, Werk 4, Lv 7",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "klang",
+     "min": 7
+    },
+    {
+     "kind": "stat",
+     "stat": "werk",
+     "min": 4
+    },
+    {
+     "kind": "level",
+     "min": 7
+    }
+   ],
+   "maxLevel": 1,
+   "prerequisite": "schnittstelle",
+   "branch": "B",
+   "branchName": "Waffenarm",
+   "levelEffects": [],
+   "sections": [
+    {
+     "key": "ETKİ",
+     "label": "Effect",
+     "html": "<p>Once per combat, for 2 turns, you overload all your augments without a control roll: Überladung bonuses apply without a control roll, and each turn you can take one extra augment action.</p>"
+    },
+    {
+     "key": "BEDEL",
+     "label": "Cost",
+     "html": "<p>When the duration ends, all your augmented limbs take a 1-stage wound and +1 Corruption.</p>"
+    }
+   ],
+   "synergies": [],
+   "flavorHtml": "<p>For two turns, you are not human. Afterwards, you are more human than you have ever been.</p>",
+   "searchText": "kriegsmaschine klang 7, werk 4, lv 7 effect once per combat, for 2 turns, you overload all your augments without a control roll: überladung bonuses apply without a control roll, and each turn you can take one extra augment action. cost when the duration ends, all your augmented limbs take a 1-stage wound and +1 corruption. for two turns, you are not human. afterwards, you are more human than you have ever been."
+  },
+  "neuer-mensch": {
+   "key": "neuer-mensch",
+   "name": "Neuer Mensch",
+   "tree": "metallkorp",
+   "type": "Pasif",
+   "requirementText": "Klang 7, Korp 4, at least 2 augments, Lv 6",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "klang",
+     "min": 7
+    },
+    {
+     "kind": "stat",
+     "stat": "korp",
+     "min": 4
+    },
+    {
+     "kind": "augments",
+     "min": 2
+    },
+    {
+     "kind": "level",
+     "min": 6
+    }
+   ],
+   "maxLevel": 1,
+   "prerequisite": "kalte-seele",
+   "branch": "A",
+   "branchName": "Panzerung",
+   "levelEffects": [],
+   "sections": [
+    {
+     "key": "ETKİ",
+     "label": "Effect",
+     "html": "<p>A second augment slot opens on one of your limbs (only one limb, with GM approval).<br>While 3 or more augments are fitted, on a Death Save Throw 1-2 counts as Death and 3-6 as Save.</p>"
+    },
+    {
+     "key": "BEDEL",
+     "label": "Cost",
+     "html": "<p>After this ability is unlocked, each new augment fitted gives +1 Corruption.</p>"
+    }
+   ],
+   "synergies": [],
+   "flavorHtml": "<p>The new human. No one is left to ask how much of it is still you.</p>",
+   "searchText": "neuer mensch klang 7, korp 4, at least 2 augments, lv 6 effect a second augment slot opens on one of your limbs (only one limb, with gm approval). while 3 or more augments are fitted, on a death save throw 1-2 counts as death and 3-6 as save. cost after this ability is unlocked, each new augment fitted gives +1 corruption. the new human. no one is left to ask how much of it is still you."
+  },
+  "schnittstelle": {
+   "key": "schnittstelle",
+   "name": "Schnittstelle",
+   "tree": "metallkorp",
+   "type": "Pasif",
+   "requirementText": "Klang 5, Werk 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "klang",
+     "min": 5
+    },
+    {
+     "kind": "stat",
+     "stat": "werk",
+     "min": 3
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": "uberladung",
+   "branch": "B",
+   "branchName": "Waffenarm",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "You connect your augmented hand or arm to a vehicle, turret or machine and control it directly. +2 to shots made with the machine's weapons."
+    },
+    {
+     "level": 2,
+     "html": "+3. While connected, you feel the machine's malfunctions: the threshold drops one step on Werk rolls related to that machine."
+    }
+   ],
+   "sections": [
+    {
+     "key": "BEDEL",
+     "label": "Cost",
+     "html": "<p>If the machine takes damage while you are connected, you make a Sanita roll (Easy); on a failure, 1 turn of Cower.</p>"
+    },
+    {
+     "key": "SİNERJİ",
+     "label": "Synergy",
+     "html": "<p>With <strong><a href=\"@/kurallar/yetenekler/wunderwaffe#eiserner-kamerad\">Eiserner Kamerad</a></strong>: You control the automaton with your augment; giving commands does not cost an action.</p>"
+    }
+   ],
+   "synergies": [
+    "eiserner-kamerad"
+   ],
+   "flavorHtml": "<p>The difference between cable and nerve is slowly fading.</p>",
+   "searchText": "schnittstelle klang 5, werk 3 you connect your augmented hand or arm to a vehicle, turret or machine and control it directly. +2 to shots made with the machine's weapons. +3. while connected, you feel the machine's malfunctions: the threshold drops one step on werk rolls related to that machine. cost if the machine takes damage while you are connected, you make a sanita roll (easy); on a failure, 1 turn of cower. synergy with eiserner kamerad : you control the automaton with your augment; giving commands does not cost an action. eiserner-kamerad the difference between cable and nerve is slowly fading."
+  },
+  "stahlnerv": {
+   "key": "stahlnerv",
+   "name": "Stahlnerv",
+   "tree": "metallkorp",
+   "type": "Pasif",
+   "requirementText": "None",
+   "requirements": [],
+   "maxLevel": 3,
+   "prerequisite": null,
+   "branch": "Kök",
+   "branchName": "Kök",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "You ignore 1 point of the negative stat effects of each fitted augment (per augment)."
+    },
+    {
+     "level": 2,
+     "html": "2 points."
+    },
+    {
+     "level": 3,
+     "html": "3 points."
+    }
+   ],
+   "sections": [
+    {
+     "key": "NOT",
+     "label": "Note",
+     "html": "<p>Example: the -5 Werk effect of <a href=\"@/kurallar/augmentler#gletschkanon\">Gletschkanon</a> drops to -2 at Level 3.</p>"
+    }
+   ],
+   "synergies": [],
+   "flavorHtml": "<p>Your nerves have grown used to steel. The machine is no longer foreign to your body.</p>",
+   "searchText": "stahlnerv none you ignore 1 point of the negative stat effects of each fitted augment (per augment). 2 points. 3 points. note example: the -5 werk effect of gletschkanon drops to -2 at level 3. your nerves have grown used to steel. the machine is no longer foreign to your body."
+  },
+  "zweite-haut": {
+   "key": "zweite-haut",
+   "name": "Zweite Haut",
+   "tree": "metallkorp",
+   "type": "Pasif",
+   "requirementText": "Klang 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "klang",
+     "min": 3
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": null,
+   "branch": "A",
+   "branchName": "Panzerung",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "The wound penalties of augmented limbs are halved (round down). An augmented limb is never Severed; it stays Unusable and can be repaired."
+    },
+    {
+     "level": 2,
+     "html": "Wounds that hit an augmented limb advance 1 stage less."
+    }
+   ],
+   "sections": [],
+   "synergies": [],
+   "flavorHtml": "<p>Flesh bleeds, metal only gets scratched.</p>",
+   "searchText": "zweite haut klang 3 the wound penalties of augmented limbs are halved (round down). an augmented limb is never severed; it stays unusable and can be repaired. wounds that hit an augmented limb advance 1 stage less. flesh bleeds, metal only gets scratched."
+  },
+  "uberladung": {
+   "key": "uberladung",
+   "name": "Überladung",
+   "tree": "metallkorp",
+   "type": "Aktif",
+   "requirementText": "Klang 4",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "klang",
+     "min": 4
+    }
+   ],
+   "maxLevel": 3,
+   "prerequisite": null,
+   "branch": "B",
+   "branchName": "Waffenarm",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "You overload your augment: your next augment action's roll gets a +Klang/2 (round down) bonus, and on a hit the wound advances 1 extra stage. Then d20 + Klang ≥ Hard is rolled; on a failure, the augmented limb takes 1 stage of damage."
+    },
+    {
+     "level": 2,
+     "html": "The control roll is made at the Medium threshold."
+    },
+    {
+     "level": 3,
+     "html": "The control roll is made at the Easy threshold."
+    }
+   ],
+   "sections": [],
+   "synergies": [],
+   "flavorHtml": "<p>Until the fuses blow. Maybe a little longer.</p>",
+   "searchText": "überladung klang 4 you overload your augment: your next augment action's roll gets a +klang/2 (round down) bonus, and on a hit the wound advances 1 extra stage. then d20 + klang ≥ hard is rolled; on a failure, the augmented limb takes 1 stage of damage. the control roll is made at the medium threshold. the control roll is made at the easy threshold. until the fuses blow. maybe a little longer."
+  }
+ },
+ "perks": [
+  {
+   "key": "careful-runner",
+   "name": "Careful Runner",
+   "kind": "positive",
+   "points": 1,
+   "exclusive": [],
+   "mods": [],
+   "html": "<p>You fall and bump into things less when moving fast, but you cannot move fast in the dark or in areas you cannot see.</p>",
+   "searchText": "careful runner you fall and bump into things less when moving fast, but you cannot move fast in the dark or in areas you cannot see."
+  },
+  {
+   "key": "one-hander",
+   "name": "One-Hander",
+   "kind": "positive",
+   "points": 1,
+   "exclusive": [
+    "two-hander"
+   ],
+   "mods": [],
+   "html": "<p>Rolls with one-handed melee weapons become easier, while rolls with two-handed melee weapons become harder.</p>",
+   "searchText": "one-hander two-hander rolls with one-handed melee weapons become easier, while rolls with two-handed melee weapons become harder."
+  },
+  {
+   "key": "speed-demon",
+   "name": "Speed Demon",
+   "kind": "positive",
+   "points": 1,
+   "exclusive": [
+    "sunday-driver"
+   ],
+   "mods": [],
+   "html": "<p>You drive very fast</p>",
+   "searchText": "speed demon sunday-driver you drive very fast"
+  },
+  {
+   "key": "two-hander",
+   "name": "Two-Hander",
+   "kind": "positive",
+   "points": 1,
+   "exclusive": [
+    "one-hander"
+   ],
+   "mods": [],
+   "html": "<p>Rolls with two-handed melee weapons become easier, while rolls with one-handed melee weapons become harder.</p>",
+   "searchText": "two-hander one-hander rolls with two-handed melee weapons become easier, while rolls with one-handed melee weapons become harder."
+  },
+  {
+   "key": "kench",
+   "name": "Kench",
+   "kind": "positive",
+   "points": 2,
+   "exclusive": [
+    "empfi"
+   ],
+   "mods": [],
+   "html": "<p>Your stomach is not easily upset. Your chance of food poisoning decreases.</p>",
+   "searchText": "kench empfi your stomach is not easily upset. your chance of food poisoning decreases."
+  },
+  {
+   "key": "bladesmith",
+   "name": "Bladesmith",
+   "kind": "positive",
+   "points": 3,
+   "exclusive": [],
+   "mods": [],
+   "html": "<p>Rolls made when using short blades become easier.</p>",
+   "searchText": "bladesmith rolls made when using short blades become easier."
+  },
+  {
+   "key": "eisblut",
+   "name": "Eisblut",
+   "kind": "positive",
+   "points": 3,
+   "exclusive": [
+    "veteran-of-47"
+   ],
+   "mods": [],
+   "html": "<p>Ice runs in your veins. You automatically pass the Frenzy trigger rolls unlocked at Corruption 9. Cower is not affected.</p>\n<p><em>NOTE:</em> It takes its name from the Council of Iceblooded Veterans that governs the Irkutsk Glacier Bastion.</p>",
+   "searchText": "eisblut veteran-of-47 ice runs in your veins. you automatically pass the frenzy trigger rolls unlocked at corruption 9. cower is not affected. note: it takes its name from the council of iceblooded veterans that governs the irkutsk glacier bastion."
+  },
+  {
+   "key": "falscher",
+   "name": "Fälscher",
+   "kind": "positive",
+   "points": 3,
+   "exclusive": [],
+   "mods": [],
+   "html": "<p>You are a master of forging documents, seals and identities. The threshold drops one step on rolls to prepare forged papers. When your forged document is inspected, the threshold rises one step on the other side's Sicht rolls.</p>",
+   "searchText": "fälscher you are a master of forging documents, seals and identities. the threshold drops one step on rolls to prepare forged papers. when your forged document is inspected, the threshold rises one step on the other side's sicht rolls."
+  },
+  {
+   "key": "feldsanitater",
+   "name": "Feldsanitäter",
+   "kind": "positive",
+   "points": 3,
+   "exclusive": [
+    "blutscheu"
+   ],
+   "mods": [],
+   "html": "<p>You work as cleanly as a field medic. The bandages you apply do not get dirty: the Bandaged (Clean) state does not turn into Bandaged (Dirty) because of mud, blood or dirt (except when fully submerged in water or sewage).</p>",
+   "searchText": "feldsanitäter blutscheu you work as cleanly as a field medic. the bandages you apply do not get dirty: the bandaged (clean) state does not turn into bandaged (dirty) because of mud, blood or dirt (except when fully submerged in water or sewage)."
+  },
+  {
+   "key": "katze",
+   "name": "Katze",
+   "kind": "positive",
+   "points": 3,
+   "exclusive": [],
+   "mods": [],
+   "html": "<p>Improves your ability to see in the dark.</p>",
+   "searchText": "katze improves your ability to see in the dark."
+  },
+  {
+   "key": "ortskundig",
+   "name": "Ortskundig",
+   "kind": "positive",
+   "points": 3,
+   "exclusive": [],
+   "mods": [],
+   "html": "<p>At the start of the game, choose a region (e.g. Siberia, Canada, Northern Germany, Western Australia). In that region, the threshold drops one step on rolls for navigation, finding shortcuts and communicating with the locals.</p>",
+   "searchText": "ortskundig at the start of the game, choose a region (e.g. siberia, canada, northern germany, western australia). in that region, the threshold drops one step on rolls for navigation, finding shortcuts and communicating with the locals."
+  },
+  {
+   "key": "schwarzmarkt",
+   "name": "Schwarzmarkt",
+   "kind": "positive",
+   "points": 3,
+   "exclusive": [],
+   "mods": [],
+   "html": "<p>You have contacts on the black market. The threshold drops one step on Rede rolls to find forbidden or scarce goods (Pervitin, ammunition, augment parts, medicine); prices drop at the GM's discretion.</p>",
+   "searchText": "schwarzmarkt you have contacts on the black market. the threshold drops one step on rede rolls to find forbidden or scarce goods (pervitin, ammunition, augment parts, medicine); prices drop at the gm's discretion."
+  },
+  {
+   "key": "trilingual",
+   "name": "Trilingual",
+   "kind": "positive",
+   "points": 3,
+   "exclusive": [
+    "monolingual"
+   ],
+   "mods": [],
+   "html": "<p>The character starts the game knowing 3 languages.</p>",
+   "searchText": "trilingual monolingual the character starts the game knowing 3 languages."
+  },
+  {
+   "key": "adlerauge",
+   "name": "Adlerauge",
+   "kind": "positive",
+   "points": 4,
+   "exclusive": [
+    "kurzsichtig"
+   ],
+   "mods": [],
+   "html": "<p>ADS time decreases. Critical hit chance increases.</p>",
+   "searchText": "adlerauge kurzsichtig ads time decreases. critical hit chance increases."
+  },
+  {
+   "key": "extrovert",
+   "name": "Extrovert",
+   "kind": "positive",
+   "points": 4,
+   "exclusive": [
+    "introvert"
+   ],
+   "mods": [
+    {
+     "stat": "rede",
+     "value": 2
+    }
+   ],
+   "html": "<p>Your ability to communicate with strangers improves. +2 Rede</p>",
+   "searchText": "extrovert introvert your ability to communicate with strangers improves. +2 rede"
+  },
+  {
+   "key": "gluckspilz",
+   "name": "Glückspilz",
+   "kind": "positive",
+   "points": 4,
+   "exclusive": [],
+   "mods": [],
+   "html": "<p>You are a lucky one. Once per session, you can reroll a Nat1 without spending Inspiration.</p>",
+   "searchText": "glückspilz you are a lucky one. once per session, you can reroll a nat1 without spending inspiration."
+  },
+  {
+   "key": "heimwerker",
+   "name": "Heimwerker",
+   "kind": "positive",
+   "points": 4,
+   "exclusive": [],
+   "mods": [],
+   "html": "<p>Engineering rolls involving machines become easier</p>",
+   "searchText": "heimwerker engineering rolls involving machines become easier"
+  },
+  {
+   "key": "runenkundig",
+   "name": "Runenkundig",
+   "kind": "positive",
+   "points": 4,
+   "exclusive": [
+    "runenblind",
+    "gottesfurchtig"
+   ],
+   "mods": [],
+   "html": "<p>You know the language of the old runes. The threshold drops one step on black magic rolls made for Siegel abilities (Siegel der Leere, Siegel der Verdamm).</p>",
+   "searchText": "runenkundig runenblind gottesfurchtig you know the language of the old runes. the threshold drops one step on black magic rolls made for siegel abilities (siegel der leere, siegel der verdamm)."
+  },
+  {
+   "key": "schnell",
+   "name": "Schnell",
+   "kind": "positive",
+   "points": 4,
+   "exclusive": [],
+   "mods": [],
+   "html": "<p>The player moves faster under stress.</p>",
+   "searchText": "schnell the player moves faster under stress."
+  },
+  {
+   "key": "tesla",
+   "name": "Tesla",
+   "kind": "positive",
+   "points": 4,
+   "exclusive": [],
+   "mods": [],
+   "html": "<p>Engineering rolls involving electronics become easier</p>",
+   "searchText": "tesla engineering rolls involving electronics become easier"
+  },
+  {
+   "key": "cheetah",
+   "name": "Cheetah",
+   "kind": "positive",
+   "points": 5,
+   "exclusive": [],
+   "mods": [
+    {
+     "stat": "agil",
+     "value": 2
+    }
+   ],
+   "html": "<p>You have a natural talent for fast running and parkour.<br>+2 agil</p>",
+   "searchText": "cheetah you have a natural talent for fast running and parkour. +2 agil"
+  },
+  {
+   "key": "follower-of-dreamer",
+   "name": "Follower of Dreamer",
+   "kind": "positive",
+   "points": 5,
+   "exclusive": [],
+   "mods": [],
+   "html": "<p>+1 Inspiration Point</p>\n<p><em>NOTE:</em> This trait is a reference to &quot;Umbra Caelis&quot;, another TTRPG universe made by Kuyash.</p>",
+   "searchText": "follower of dreamer +1 inspiration point note: this trait is a reference to umbra caelis , another ttrpg universe made by kuyash."
+  },
+  {
+   "key": "metallvertraglich",
+   "name": "Metallverträglich",
+   "kind": "positive",
+   "points": 5,
+   "exclusive": [
+    "metallabstossung"
+   ],
+   "mods": [
+    {
+     "stat": "klang",
+     "value": 2
+    }
+   ],
+   "html": "<p>Your body adapts easily to metal. You start the game with +2 Klang (in addition to the starting +2 Klang).</p>",
+   "searchText": "metallverträglich metallabstossung your body adapts easily to metal. you start the game with +2 klang (in addition to the starting +2 klang)."
+  },
+  {
+   "key": "ruthig",
+   "name": "Ruthig",
+   "kind": "positive",
+   "points": 5,
+   "exclusive": [
+    "laut"
+   ],
+   "mods": [],
+   "html": "<p>Moving stealthily becomes easier for you</p>",
+   "searchText": "ruthig laut moving stealthily becomes easier for you"
+  },
+  {
+   "key": "beherzt",
+   "name": "Beherzt",
+   "kind": "positive",
+   "points": 6,
+   "exclusive": [
+    "scheu"
+   ],
+   "mods": [],
+   "html": "<p>Corruption increases with more difficulty</p>",
+   "searchText": "beherzt scheu corruption increases with more difficulty"
+  },
+  {
+   "key": "tdt-teich-der-toten",
+   "name": "TdT - Teich der Toten",
+   "kind": "positive",
+   "points": 7,
+   "exclusive": [
+    "delicate"
+   ],
+   "mods": [],
+   "html": "<p>Your regeneration rate increases greatly</p>",
+   "searchText": "tdt - teich der toten delicate your regeneration rate increases greatly"
+  },
+  {
+   "key": "adaptable",
+   "name": "Adaptable",
+   "kind": "positive",
+   "points": 8,
+   "exclusive": [
+    "unthermo"
+   ],
+   "mods": [],
+   "html": "<p>You can adapt to any situation and condition. You are affected far less by environmental status effects.</p>",
+   "searchText": "adaptable unthermo you can adapt to any situation and condition. you are affected far less by environmental status effects."
+  },
+  {
+   "key": "ubermuscler",
+   "name": "Ubermuscler",
+   "kind": "positive",
+   "points": 8,
+   "exclusive": [
+    "zargana"
+   ],
+   "mods": [],
+   "html": "<p>You can lift extremely heavy things, and you suffer fewer negative effects when using extremely heavy weapons.</p>",
+   "searchText": "ubermuscler zargana you can lift extremely heavy things, and you suffer fewer negative effects when using extremely heavy weapons."
+  },
+  {
+   "key": "ubermensch",
+   "name": "Ubermensch",
+   "kind": "positive",
+   "points": 10,
+   "exclusive": [
+    "zargana",
+    "delicate"
+   ],
+   "mods": [],
+   "html": "<p>You have a superhuman body. Your physical action rolls become easier and you take less damage.</p>",
+   "searchText": "ubermensch zargana delicate you have a superhuman body. your physical action rolls become easier and you take less damage."
+  },
+  {
+   "key": "veteran-of-47",
+   "name": "Veteran of 47'",
+   "kind": "positive",
+   "points": 12,
+   "exclusive": [
+    "kriegszitterer",
+    "eisblut",
+    "okkultphobie"
+   ],
+   "mods": [],
+   "html": "<p>You fought in World War II. You are prepared for every kind of chaos and shock. You are not affected by Psychological Status effects.</p>",
+   "searchText": "veteran of 47' kriegszitterer eisblut okkultphobie you fought in world war ii. you are prepared for every kind of chaos and shock. you are not affected by psychological status effects."
+  },
+  {
+   "key": "sunday-driver",
+   "name": "Sunday Driver",
+   "kind": "negative",
+   "points": 1,
+   "exclusive": [
+    "speed-demon"
+   ],
+   "mods": [],
+   "html": "<p>You drive very slowly</p>",
+   "searchText": "sunday driver speed-demon you drive very slowly"
+  },
+  {
+   "key": "tiryaki",
+   "name": "Tiryaki",
+   "kind": "negative",
+   "points": 1,
+   "exclusive": [
+    "recovered"
+   ],
+   "mods": [],
+   "html": "<p>Smoking addiction. As the addiction rises, you gain +Corruption.</p>",
+   "searchText": "tiryaki recovered smoking addiction. as the addiction rises, you gain +corruption."
+  },
+  {
+   "key": "analphabet",
+   "name": "Analphabet",
+   "kind": "negative",
+   "points": 2,
+   "exclusive": [],
+   "mods": [],
+   "html": "<p>You cannot read or write. You cannot read written documents, map notes or encrypted texts. You cannot take the Aryan Cryptology ability.</p>",
+   "searchText": "analphabet you cannot read or write. you cannot read written documents, map notes or encrypted texts. you cannot take the aryan cryptology ability."
+  },
+  {
+   "key": "ayyas",
+   "name": "Ayyaş",
+   "kind": "negative",
+   "points": 2,
+   "exclusive": [
+    "recovered"
+   ],
+   "mods": [],
+   "html": "<p>Alcohol addiction. As the addiction rises, you gain +Corruption.</p>",
+   "searchText": "ayyaş recovered alcohol addiction. as the addiction rises, you gain +corruption."
+  },
+  {
+   "key": "empfi",
+   "name": "Empfi",
+   "kind": "negative",
+   "points": 2,
+   "exclusive": [
+    "kench"
+   ],
+   "mods": [],
+   "html": "<p>Your stomach is easily upset. Your chance of food poisoning increases.</p>",
+   "searchText": "empfi kench your stomach is easily upset. your chance of food poisoning increases."
+  },
+  {
+   "key": "kurzsichtig",
+   "name": "Kurzsichtig",
+   "kind": "negative",
+   "points": 2,
+   "exclusive": [
+    "adlerauge"
+   ],
+   "mods": [],
+   "html": "<p>You are nearsighted. Without your glasses, or when they break, you take -2 on long-range Sicht and Aim rolls. Your glasses can break from a wound to the head.</p>",
+   "searchText": "kurzsichtig adlerauge you are nearsighted. without your glasses, or when they break, you take -2 on long-range sicht and aim rolls. your glasses can break from a wound to the head."
+  },
+  {
+   "key": "monolingual",
+   "name": "Monolingual",
+   "kind": "negative",
+   "points": 2,
+   "exclusive": [
+    "trilingual"
+   ],
+   "mods": [],
+   "html": "<p>The character starts the game knowing a single language.</p>",
+   "searchText": "monolingual trilingual the character starts the game knowing a single language."
+  },
+  {
+   "key": "verschuldet",
+   "name": "Verschuldet",
+   "kind": "negative",
+   "points": 2,
+   "exclusive": [],
+   "mods": [],
+   "html": "<p>You are in debt. You start the game without any Reichsmark, and a creditor is after you (a story hook for the GM).</p>",
+   "searchText": "verschuldet you are in debt. you start the game without any reichsmark, and a creditor is after you (a story hook for the gm)."
+  },
+  {
+   "key": "blutscheu",
+   "name": "Blutscheu",
+   "kind": "negative",
+   "points": 3,
+   "exclusive": [
+    "feldsanitater"
+   ],
+   "mods": [],
+   "html": "<p>You can't stand the sight of blood. When you see a Badly Wounded or worse wound, you make a Sanita roll (Easy); on a failure, you take -2 on your next action. -2 on first aid and medical treatment rolls.</p>",
+   "searchText": "blutscheu feldsanitater you can't stand the sight of blood. when you see a badly wounded or worse wound, you make a sanita roll (easy); on a failure, you take -2 on your next action. -2 on first aid and medical treatment rolls."
+  },
+  {
+   "key": "ehrenkodex",
+   "name": "Ehrenkodex",
+   "kind": "negative",
+   "points": 3,
+   "exclusive": [
+    "pressured-pacifism"
+   ],
+   "mods": [],
+   "html": "<p>You are bound by a code of honor. You cannot harm someone who has surrendered or is unarmed; if you do, you gain +2 Corruption.</p>",
+   "searchText": "ehrenkodex pressured-pacifism you are bound by a code of honor. you cannot harm someone who has surrendered or is unarmed; if you do, you gain +2 corruption."
+  },
+  {
+   "key": "gesucht",
+   "name": "Gesucht",
+   "kind": "negative",
+   "points": 3,
+   "exclusive": [],
+   "mods": [],
+   "html": "<p>You are wanted. At the start of the game the GM picks a faction; in that faction's territories you risk being recognized, and you take -2 on Rede rolls against its members.</p>",
+   "searchText": "gesucht you are wanted. at the start of the game the gm picks a faction; in that faction's territories you risk being recognized, and you take -2 on rede rolls against its members."
+  },
+  {
+   "key": "klaustrophob",
+   "name": "Klaustrophob",
+   "kind": "negative",
+   "points": 3,
+   "exclusive": [],
+   "mods": [],
+   "html": "<p>You can't stand tight spaces. In enclosed, cramped places such as bunkers, tunnels, submarines or vehicle interiors, you take -1 on all rolls.</p>",
+   "searchText": "klaustrophob you can't stand tight spaces. in enclosed, cramped places such as bunkers, tunnels, submarines or vehicle interiors, you take -1 on all rolls."
+  },
+  {
+   "key": "oaf",
+   "name": "Oaf",
+   "kind": "negative",
+   "points": 3,
+   "exclusive": [],
+   "mods": [],
+   "html": "<p>You become clumsy. You may make faulty movements.</p>",
+   "searchText": "oaf you become clumsy. you may make faulty movements."
+  },
+  {
+   "key": "okkultphobie",
+   "name": "Okkultphobie",
+   "kind": "negative",
+   "points": 3,
+   "exclusive": [
+    "veteran-of-47"
+   ],
+   "mods": [],
+   "html": "<p>The occult terrifies you. When you see a ritual, a raised corpse or a black magic effect, you make a Sanita roll (Medium); on a failure, you enter the Cower state for 1 turn.</p>",
+   "searchText": "okkultphobie veteran-of-47 the occult terrifies you. when you see a ritual, a raised corpse or a black magic effect, you make a sanita roll (medium); on a failure, you enter the cower state for 1 turn."
+  },
+  {
+   "key": "schlaflos",
+   "name": "Schlaflos",
+   "kind": "negative",
+   "points": 3,
+   "exclusive": [],
+   "mods": [],
+   "html": "<p>You can't sleep. After a long rest you make a Sanita roll (Medium); on a failure, you take -1 on all rolls until your next long rest.</p>",
+   "searchText": "schlaflos you can't sleep. after a long rest you make a sanita roll (medium); on a failure, you take -1 on all rolls until your next long rest."
+  },
+  {
+   "key": "gottesfurchtig",
+   "name": "Gottesfürchtig",
+   "kind": "negative",
+   "points": 4,
+   "exclusive": [
+    "runenkundig",
+    "runenblind"
+   ],
+   "mods": [],
+   "html": "<p>You have a deep faith and fear occult powers. -3 on black magic rolls. Each time you use black magic, you gain +1 Corruption in addition to the ability's cost.</p>",
+   "searchText": "gottesfürchtig runenkundig runenblind you have a deep faith and fear occult powers. -3 on black magic rolls. each time you use black magic, you gain +1 corruption in addition to the ability's cost."
+  },
+  {
+   "key": "introvert",
+   "name": "Introvert",
+   "kind": "negative",
+   "points": 4,
+   "exclusive": [
+    "extrovert"
+   ],
+   "mods": [
+    {
+     "stat": "rede",
+     "value": -2
+    }
+   ],
+   "html": "<p>You are poor at communicating with strangers. -2 Rede</p>",
+   "searchText": "introvert extrovert you are poor at communicating with strangers. -2 rede"
+  },
+  {
+   "key": "kriegszitterer",
+   "name": "Kriegszitterer",
+   "kind": "negative",
+   "points": 4,
+   "exclusive": [
+    "veteran-of-47"
+   ],
+   "mods": [],
+   "html": "<p>The trauma of war stayed in your body. When an explosion or artillery fire sounds near you, you make a Sanita roll (Medium); on a failure, you enter the Cower state for 1 turn (regardless of your Corruption level).</p>",
+   "searchText": "kriegszitterer veteran-of-47 the trauma of war stayed in your body. when an explosion or artillery fire sounds near you, you make a sanita roll (medium); on a failure, you enter the cower state for 1 turn (regardless of your corruption level)."
+  },
+  {
+   "key": "laut",
+   "name": "Laut",
+   "kind": "negative",
+   "points": 4,
+   "exclusive": [
+    "ruthig"
+   ],
+   "mods": [],
+   "html": "<p>Moving stealthily becomes much harder for you.</p>",
+   "searchText": "laut ruthig moving stealthily becomes much harder for you."
+  },
+  {
+   "key": "recovered",
+   "name": "Recovered",
+   "kind": "negative",
+   "points": 4,
+   "exclusive": [
+    "tiryaki",
+    "ayyas",
+    "such-tiger"
+   ],
+   "mods": [],
+   "html": "<p>You cannot use amphetamine/methamphetamine-based substances, alcohol or tobacco. If you do, you gain +Corruption directly.</p>",
+   "searchText": "recovered tiryaki ayyas such-tiger you cannot use amphetamine/methamphetamine-based substances, alcohol or tobacco. if you do, you gain +corruption directly."
+  },
+  {
+   "key": "delicate",
+   "name": "Delicate",
+   "kind": "negative",
+   "points": 5,
+   "exclusive": [
+    "tdt-teich-der-toten",
+    "ubermensch"
+   ],
+   "mods": [],
+   "html": "<p>You are fragile. You get wounded more easily and your wounds heal slowly.</p>",
+   "searchText": "delicate tdt-teich-der-toten ubermensch you are fragile. you get wounded more easily and your wounds heal slowly."
+  },
+  {
+   "key": "metallabstossung",
+   "name": "Metallabstoßung",
+   "kind": "negative",
+   "points": 5,
+   "exclusive": [
+    "metallvertraglich"
+   ],
+   "mods": [
+    {
+     "stat": "klang",
+     "value": -2
+    }
+   ],
+   "html": "<p>Your body rejects metal. You start the game with -2 Klang. Each time an augment is fitted, you make a Korp roll (Medium); on a failure, the limb the augment is fitted to takes 1 stage of wound.</p>",
+   "searchText": "metallabstoßung metallvertraglich your body rejects metal. you start the game with -2 klang. each time an augment is fitted, you make a korp roll (medium); on a failure, the limb the augment is fitted to takes 1 stage of wound."
+  },
+  {
+   "key": "runenblind",
+   "name": "Runenblind",
+   "kind": "negative",
+   "points": 5,
+   "exclusive": [
+    "runenkundig",
+    "gottesfurchtig"
+   ],
+   "mods": [],
+   "html": "<p>To you, runes are nothing but meaningless lines. You cannot take Siegel abilities; on other black magic rolls, the threshold rises one step.</p>",
+   "searchText": "runenblind runenkundig gottesfurchtig to you, runes are nothing but meaningless lines. you cannot take siegel abilities; on other black magic rolls, the threshold rises one step."
+  },
+  {
+   "key": "such-tiger",
+   "name": "Süch'tiger'",
+   "kind": "negative",
+   "points": 5,
+   "exclusive": [
+    "recovered"
+   ],
+   "mods": [],
+   "html": "<p>Pervitin/methamphetamine addiction. As the addiction grows, you gain +Corruption.</p>\n<p>While the addiction is not active, your Krach stat increases by Corruption/3 → rounded down.</p>\n<p>While the addiction is active, your Krach stat decreases by Corruption/3 → rounded up.</p>",
+   "searchText": "süch'tiger' recovered pervitin/methamphetamine addiction. as the addiction grows, you gain +corruption. while the addiction is not active, your krach stat increases by corruption/3 → rounded down. while the addiction is active, your krach stat decreases by corruption/3 → rounded up."
+  },
+  {
+   "key": "unthermo",
+   "name": "Unthermo",
+   "kind": "negative",
+   "points": 5,
+   "exclusive": [
+    "adaptable"
+   ],
+   "mods": [],
+   "html": "<p>You are strongly affected by changes in temperature. Heat and cold affect you negatively</p>",
+   "searchText": "unthermo adaptable you are strongly affected by changes in temperature. heat and cold affect you negatively"
+  },
+  {
+   "key": "scheu",
+   "name": "Scheu",
+   "kind": "negative",
+   "points": 6,
+   "exclusive": [
+    "beherzt"
+   ],
+   "mods": [],
+   "html": "<p>Corruption rises more easily</p>",
+   "searchText": "scheu beherzt corruption rises more easily"
+  },
+  {
+   "key": "kriegsversehrt",
+   "name": "Kriegsversehrt",
+   "kind": "negative",
+   "points": 7,
+   "exclusive": [],
+   "mods": [],
+   "html": "<p>You lost limbs in the war. During character creation you choose one or two limbs; the chosen limbs start as Severed on the body chart. If you choose an arm, the hand on that arm is also severed; if you choose a leg, the foot on that leg is too. The head, neck and torso cannot be chosen. One limb grants 4 perk points, two limbs grant 7 (4 + 3). A lost limb can be replaced with an augment.</p>",
+   "searchText": "kriegsversehrt you lost limbs in the war. during character creation you choose one or two limbs; the chosen limbs start as severed on the body chart. if you choose an arm, the hand on that arm is also severed; if you choose a leg, the foot on that leg is too. the head, neck and torso cannot be chosen. one limb grants 4 perk points, two limbs grant 7 (4 + 3). a lost limb can be replaced with an augment."
+  },
+  {
+   "key": "zargana",
+   "name": "Zargana",
+   "kind": "negative",
+   "points": 7,
+   "exclusive": [
+    "ubermensch",
+    "ubermuscler"
+   ],
+   "mods": [],
+   "html": "<p>You have a very weak body. Your physical action rolls get harder and you take more damage.</p>",
+   "searchText": "zargana ubermensch ubermuscler you have a very weak body. your physical action rolls get harder and you take more damage."
+  },
+  {
+   "key": "schizo",
+   "name": "Schizo",
+   "kind": "negative",
+   "points": 13,
+   "exclusive": [],
+   "mods": [
+    {
+     "stat": "rede",
+     "value": -2
+    },
+    {
+     "stat": "leis",
+     "value": -2
+    }
+   ],
+   "html": "<p>You are schizophrenic. You see things that aren't there and try to interact with them.<br>-2 Rede, -2 Leis</p>",
+   "searchText": "schizo you are schizophrenic. you see things that aren't there and try to interact with them. -2 rede, -2 leis"
+  },
+  {
+   "key": "pressured-pacifism",
+   "name": "Pressured Pacifism",
+   "kind": "negative",
+   "points": 15,
+   "exclusive": [
+    "ehrenkodex"
+   ],
+   "mods": [],
+   "html": "<p>Each time you harm someone else, you gain +Corruption. If you kill, you gain +3 Corruption.</p>",
+   "searchText": "pressured pacifism ehrenkodex each time you harm someone else, you gain +corruption. if you kill, you gain +3 corruption."
+  }
+ ],
+ "augments": [
+  {
+   "key": "federfuss",
+   "name": "Federfuß",
+   "tier": "T1",
+   "slots": [
+    "l-foot",
+    "r-foot"
+   ],
+   "mods": [
+    {
+     "stat": "agil",
+     "value": 1
+    },
+    {
+     "stat": "leis",
+     "value": 1
+    },
+    {
+     "stat": "korp",
+     "value": -1
+    },
+    {
+     "stat": "klang",
+     "value": -1
+    }
+   ],
+   "usageHtml": "<p>You take no penalty on stealth (Leis) rolls while running. Wounds from falls advance 1 stage less.</p>",
+   "flavorHtml": "<p>A spring-loaded Gletschmetall foot prosthesis. Thanks to its rubber sole, it steps almost silently despite being metal.</p>",
+   "extra": [],
+   "searchText": "federfuß l-foot r-foot you take no penalty on stealth (leis) rolls while running. wounds from falls advance 1 stage less. a spring-loaded gletschmetall foot prosthesis. thanks to its rubber sole, it steps almost silently despite being metal."
+  },
+  {
+   "key": "funkohr",
+   "name": "Funkohr",
+   "tier": "T1",
+   "slots": [
+    "head"
+   ],
+   "mods": [
+    {
+     "stat": "klang",
+     "value": -1
+    }
+   ],
+   "usageHtml": "<p>You can listen to open radio frequencies at short range. You can communicate with characters who have the same augment without speaking aloud (by whisper). Under electronic jamming or an EMP effect, you take -2 on Sanita rolls for 1 scene.</p>",
+   "flavorHtml": "<p>A miniature radio receiver implanted in the skull. The user hears military frequencies inside their head.</p>",
+   "extra": [],
+   "searchText": "funkohr head you can listen to open radio frequencies at short range. you can communicate with characters who have the same augment without speaking aloud (by whisper). under electronic jamming or an emp effect, you take -2 on sanita rolls for 1 scene. a miniature radio receiver implanted in the skull. the user hears military frequencies inside their head."
+  },
+  {
+   "key": "glasauge",
+   "name": "Glasauge",
+   "tier": "T1",
+   "slots": [
+    "head"
+   ],
+   "mods": [
+    {
+     "stat": "sicht",
+     "value": 2
+    },
+    {
+     "stat": "klang",
+     "value": -1
+    }
+   ],
+   "usageHtml": "<p>On Sicht rolls made to make out details at long range, the threshold drops one step. If you are exposed to a sudden, powerful light (flash, explosion, searchlight), you take -5 on Sicht and Aim rolls for 1 turn.</p>",
+   "flavorHtml": "<p>An optical eye made of glass and copper windings. Its lenses can be turned by hand to focus on distant things.</p>",
+   "extra": [],
+   "searchText": "glasauge head on sicht rolls made to make out details at long range, the threshold drops one step. if you are exposed to a sudden, powerful light (flash, explosion, searchlight), you take -5 on sicht and aim rolls for 1 turn. an optical eye made of glass and copper windings. its lenses can be turned by hand to focus on distant things."
+  },
+  {
+   "key": "laufwerk",
+   "name": "Laufwerk",
+   "tier": "T1",
+   "slots": [
+    "l-leg",
+    "r-leg"
+   ],
+   "mods": [
+    {
+     "stat": "agil",
+     "value": 1
+    },
+    {
+     "stat": "leis",
+     "value": -1
+    },
+    {
+     "stat": "klang",
+     "value": -1
+    }
+   ],
+   "usageHtml": "<p>On Agil rolls for running, jumping and climbing, the threshold drops one step. The Akku holds 3 charges and each scene spends 1 charge. While the Akku is empty, this bonus is lost and you take -2 on Agil rolls. The Akku recharges only during a long rest somewhere with mains electricity.</p>",
+   "flavorHtml": "<p>A mass-produced leg frame from the Speer factories. Motors powered by a small Akku strengthen each step, but it hums faintly with every step.</p>",
+   "extra": [],
+   "searchText": "laufwerk l-leg r-leg on agil rolls for running, jumping and climbing, the threshold drops one step. the akku holds 3 charges and each scene spends 1 charge. while the akku is empty, this bonus is lost and you take -2 on agil rolls. the akku recharges only during a long rest somewhere with mains electricity. a mass-produced leg frame from the speer factories. motors powered by a small akku strengthen each step, but it hums faintly with every step."
+  },
+  {
+   "key": "stahlfinger",
+   "name": "Stahlfinger",
+   "tier": "T1",
+   "slots": [
+    "l-hand",
+    "r-hand"
+   ],
+   "mods": [
+    {
+     "stat": "krach",
+     "value": 1
+    },
+    {
+     "stat": "werk",
+     "value": -1
+    },
+    {
+     "stat": "klang",
+     "value": -1
+    }
+   ],
+   "usageHtml": "<p>An object you hold in this hand cannot be forced out of it. On Krach rolls for gripping, squeezing and tearing with this hand, the threshold drops one step. If this hand is used for actions that require fine handiwork (lockpicking, repair), an extra -1.</p>",
+   "flavorHtml": "<p>One of the Neustahlprogram's first civilian products. Crude but sturdy fingers cast from Gletschmetall for workers who lost their fingers in factory accidents.</p>",
+   "extra": [],
+   "searchText": "stahlfinger l-hand r-hand an object you hold in this hand cannot be forced out of it. on krach rolls for gripping, squeezing and tearing with this hand, the threshold drops one step. if this hand is used for actions that require fine handiwork (lockpicking, repair), an extra -1. one of the neustahlprogram's first civilian products. crude but sturdy fingers cast from gletschmetall for workers who lost their fingers in factory accidents."
+  },
+  {
+   "key": "akkutrager",
+   "name": "Akkuträger",
+   "tier": "T2",
+   "slots": [
+    "lower-torso"
+   ],
+   "mods": [
+    {
+     "stat": "agil",
+     "value": -1
+    },
+    {
+     "stat": "klang",
+     "value": -1
+    }
+   ],
+   "usageHtml": "<p>Adds +3 charges to the total capacity of your other augments that use an Akku. If your lower torso becomes Badly Wounded or worse, roll d20 ≥ 11; on a failure, the battery explodes, the lower torso takes 1 extra stage of wound and all charges are drained.</p>",
+   "flavorHtml": "<p>A Speer-made battery belt worn around the waist. It powers your other Sturm augments.</p>",
+   "extra": [],
+   "searchText": "akkuträger lower-torso adds +3 charges to the total capacity of your other augments that use an akku. if your lower torso becomes badly wounded or worse, roll d20 ≥ 11; on a failure, the battery explodes, the lower torso takes 1 extra stage of wound and all charges are drained. a speer-made battery belt worn around the waist. it powers your other sturm augments."
+  },
+  {
+   "key": "klingenarm",
+   "name": "Klingenarm",
+   "tier": "T2",
+   "slots": [
+    "l-arm",
+    "r-arm"
+   ],
+   "mods": [
+    {
+     "stat": "krach",
+     "value": 1
+    },
+    {
+     "stat": "werk",
+     "value": -1
+    },
+    {
+     "stat": "klang",
+     "value": -1
+    }
+   ],
+   "usageHtml": "<p>While the blade is retracted, finding it when you are searched requires a Very Hard Sicht roll. Melee attacks made with the blade advance the wound 1 extra stage on a hit. If <a href=\"@/kurallar/yetenekler/spionage#silent-takedown\">Silent Takedown</a> is performed with this arm, the threshold drops one step.</p>",
+   "flavorHtml": "<p>A Gletschmetall blade hidden inside the forearm, deployed by flexing the muscle.</p>",
+   "extra": [],
+   "searchText": "klingenarm l-arm r-arm while the blade is retracted, finding it when you are searched requires a very hard sicht roll. melee attacks made with the blade advance the wound 1 extra stage on a hit. if silent takedown is performed with this arm, the threshold drops one step. a gletschmetall blade hidden inside the forearm, deployed by flexing the muscle."
+  },
+  {
+   "key": "panzerhaut",
+   "name": "Panzerhaut",
+   "tier": "T2",
+   "slots": [
+    "upper-torso"
+   ],
+   "mods": [
+    {
+     "stat": "korp",
+     "value": 2
+    },
+    {
+     "stat": "agil",
+     "value": -2
+    },
+    {
+     "stat": "leis",
+     "value": -1
+    },
+    {
+     "stat": "klang",
+     "value": -2
+    }
+   ],
+   "usageHtml": "<p>Wounds to your upper torso advance 1 stage less. You count as an armored target; anti-armor effects such as <a href=\"@/kurallar/yetenekler/stahlkrieg#panzerknacker\">Panzerknacker</a> also apply to you. If you fall into water, swimming rolls are made at the Very Hard threshold.</p>",
+   "flavorHtml": "<p>A Gletschmetall plate riveted over the ribcage. Tank armor adapted for a human.</p>",
+   "extra": [],
+   "searchText": "panzerhaut upper-torso wounds to your upper torso advance 1 stage less. you count as an armored target; anti-armor effects such as panzerknacker also apply to you. if you fall into water, swimming rolls are made at the very hard threshold. a gletschmetall plate riveted over the ribcage. tank armor adapted for a human."
+  },
+  {
+   "key": "sturmarm",
+   "name": "Sturmarm",
+   "tier": "T2",
+   "slots": [
+    "l-arm",
+    "r-arm"
+   ],
+   "mods": [
+    {
+     "stat": "krach",
+     "value": 3
+    },
+    {
+     "stat": "werk",
+     "value": -2
+    },
+    {
+     "stat": "klang",
+     "value": -2
+    }
+   ],
+   "usageHtml": "<p>The Akku holds 3 charges. By spending 1 charge, you can advance the wound 1 extra stage on a melee attack made with this arm, or attempt a brute-force action (breaking a door, lifting a vehicle) at the Very Hard threshold instead of Uber. The Akku recharges only during a long rest somewhere with mains electricity.</p>",
+   "flavorHtml": "<p>The hydraulic arm of the Sturmmaschinen army. Adapted to the human body from parts of Speer's machine soldiers.</p>",
+   "extra": [],
+   "searchText": "sturmarm l-arm r-arm the akku holds 3 charges. by spending 1 charge, you can advance the wound 1 extra stage on a melee attack made with this arm, or attempt a brute-force action (breaking a door, lifting a vehicle) at the very hard threshold instead of uber. the akku recharges only during a long rest somewhere with mains electricity. the hydraulic arm of the sturmmaschinen army. adapted to the human body from parts of speer's machine soldiers."
+  },
+  {
+   "key": "geistauge",
+   "name": "Geistauge",
+   "tier": "T3",
+   "slots": [
+    "head"
+   ],
+   "mods": [
+    {
+     "stat": "wissen",
+     "value": 2
+    },
+    {
+     "stat": "sicht",
+     "value": 1
+    },
+    {
+     "stat": "sanita",
+     "value": -2
+    },
+    {
+     "stat": "klang",
+     "value": -2
+    }
+   ],
+   "usageHtml": "<p>Once per scene, you can see living beings behind nearby walls and obstacles. +2 on black magic (Schwarzesonne) rolls. Each use, roll d20 + Sanita ≥ Medium; on a failure, +1 Corruption.</p>",
+   "flavorHtml": "<p>A crystal engraved with esoteric runes, set into the eye socket. It sees not light, but life energy.</p>",
+   "extra": [],
+   "searchText": "geistauge head once per scene, you can see living beings behind nearby walls and obstacles. +2 on black magic (schwarzesonne) rolls. each use, roll d20 + sanita ≥ medium; on a failure, +1 corruption. a crystal engraved with esoteric runes, set into the eye socket. it sees not light, but life energy."
+  },
+  {
+   "key": "gletschkanon",
+   "name": "Gletschkanon",
+   "tier": "T3",
+   "slots": [
+    "l-arm",
+    "r-arm"
+   ],
+   "mods": [
+    {
+     "stat": "korp",
+     "value": 1
+    },
+    {
+     "stat": "krach",
+     "value": -1
+    },
+    {
+     "stat": "klang",
+     "value": -2
+    },
+    {
+     "stat": "werk",
+     "value": -5
+    },
+    {
+     "stat": "aim",
+     "value": -2
+    }
+   ],
+   "usageHtml": "",
+   "flavorHtml": "<p>Created with Gletschmetall, this hand cannon can fire a very powerful energy ball by spending a Gletsch/Icemetal battery. The energy ball melts through most metal and living things in its path. However, while powerful at short range, an energy ball fired at long range loses its effectiveness.</p>",
+   "extra": [],
+   "searchText": "gletschkanon l-arm r-arm created with gletschmetall, this hand cannon can fire a very powerful energy ball by spending a gletsch/icemetal battery. the energy ball melts through most metal and living things in its path. however, while powerful at short range, an energy ball fired at long range loses its effectiveness."
+  },
+  {
+   "key": "schwarzes-herz",
+   "name": "Schwarzes Herz",
+   "tier": "T3",
+   "slots": [
+    "upper-torso"
+   ],
+   "mods": [
+    {
+     "stat": "korp",
+     "value": 2
+    },
+    {
+     "stat": "krach",
+     "value": 1
+    },
+    {
+     "stat": "sanita",
+     "value": -3
+    },
+    {
+     "stat": "klang",
+     "value": -3
+    }
+   ],
+   "usageHtml": "<p>When you have to make a Death Save Throw, it counts as a Save without rolling. Usable once per session, and each use gives +2 Corruption. During a long rest, one limb's wound heals 1 stage; to do this, you must have witnessed a living being die in the previous scene.</p>",
+   "flavorHtml": "<p>A black metal heart made in the cellars of Wewelsburg, beating with life energy. It needs no electricity; it needs something else.</p>",
+   "extra": [],
+   "searchText": "schwarzes herz upper-torso when you have to make a death save throw, it counts as a save without rolling. usable once per session, and each use gives +2 corruption. during a long rest, one limb's wound heals 1 stage; to do this, you must have witnessed a living being die in the previous scene. a black metal heart made in the cellars of wewelsburg, beating with life energy. it needs no electricity; it needs something else."
+  }
+ ],
+ "campaigns": [
+  {
+   "key": "1173-week-reich",
+   "name": "1173 Week Reich",
+   "storyHtml": "<p>The story tells, through the eyes of the SS, of the beginning of the German civil war and the beginning of 1955.5 - Fall Tod, while fighting Allied remnants in Canada.</p>",
+   "length": "MEDIUM - 4-8 Sessions",
+   "difficulty": "BEGINNER",
+   "emblem": "/emblems/emb-RCH.png"
+  },
+  {
+   "key": "attero-dominatus",
+   "name": "Attero Dominatus",
+   "storyHtml": "<p>A popular uprising against Nazi authority.</p>",
+   "length": "MEDIUM - 3-7 Sessions",
+   "difficulty": "HARSH",
+   "emblem": "/emblems/emb-ADM.png"
+  },
+  {
+   "key": "call-of-kyffhauser",
+   "name": "Call of Kyffhauser",
+   "storyHtml": "<p>A group of Viennese Germans trying to reach Kyffhauser, the center of the Catholic-led German uprising.</p>",
+   "length": "LONG - 5-9 Sessions",
+   "difficulty": "MODERATE",
+   "emblem": "/emblems/emb-CKY.png"
+  },
+  {
+   "key": "glacier-sanctuary",
+   "name": "Glacier Sanctuary",
+   "storyHtml": "<p>The story of a group of far-right mercenary soldiers. A band of warriors who feed on war and feed the war.</p>",
+   "length": "MEDIUM - 4-8 Sessions",
+   "difficulty": "UBER",
+   "emblem": "/emblems/emb-PMC.png"
+  },
+  {
+   "key": "imperial-vanguard",
+   "name": "Imperial Vanguard",
+   "storyHtml": "<p>A freedom group organized in Australia, resisting the German occupation alone</p>",
+   "length": "SHORT - 2-5 Sessions",
+   "difficulty": "BEGINNER",
+   "emblem": "/emblems/emb-ENG.png"
+  },
+  {
+   "key": "legion-of-walaska",
+   "name": "Legion of Walaska",
+   "storyHtml": "<p>The last resistance of American units continues in Western Alaska and Eastern Siberia.</p>",
+   "length": "MEDIUM - 5-9 Sessions",
+   "difficulty": "UBER",
+   "emblem": "/emblems/emb-USF.png"
+  },
+  {
+   "key": "semper-fidelis",
+   "name": "Semper Fidelis",
+   "storyHtml": "<p>The resistance of a group of Loyalist German soldiers with armored units against Nazi authority.</p>",
+   "length": "MEDIUM - 4-8 Sessions",
+   "difficulty": "MODERATE",
+   "emblem": "/emblems/emb-SFD.png"
+  },
+  {
+   "key": "wolfpack",
+   "name": "Wolfpack",
+   "storyHtml": "<p>A campaign about the peace operation carried out under Kriegsmarine command by the Naval Infantry, a third party in the German rebellion.</p>",
+   "length": "MEDIUM - 5-9 Sessions",
+   "difficulty": "HARSH",
+   "emblem": "/emblems/emb-WLF.png"
+  }
+ ]
+}

@@ -1,11 +1,14 @@
+"use client";
+import { useT } from "@/i18n/client";
 import { CORRUPTION_EFFECTS } from "@/lib/shz/constants";
 import { cx } from "./ui";
 
 /** Corruption etkileri birikimlidir: 1'den mevcut seviyeye kadar her etki ayrı bir uyarı kutusunda. */
 export function CorruptionEffects({ value, className }: { value: number; className?: string }) {
+  const t = useT();
   const levels = Array.from({ length: value }, (_, i) => i + 1);
   return (
-    <ul className={cx("grid gap-2 sm:grid-cols-2", className)} aria-label="Aktif Corruption etkileri">
+    <ul className={cx("grid gap-2 sm:grid-cols-2", className)} aria-label={t("Aktif Corruption etkileri")}>
       {levels.map((lv) => (
         <li
           key={lv}
@@ -26,7 +29,7 @@ export function CorruptionEffects({ value, className }: { value: number; classNa
             <span lang="en" className="font-medium text-ink">
               Corruption {lv}:
             </span>{" "}
-            <span className="text-ink/85">{CORRUPTION_EFFECTS[lv]}</span>
+            <span className="text-ink/85">{t(CORRUPTION_EFFECTS[lv])}</span>
           </span>
         </li>
       ))}

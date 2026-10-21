@@ -28,6 +28,7 @@ import type { RulesData } from "@/lib/shz/content";
 import { amputationPlan, buildCreation, effectiveStats, learnState, type Stats } from "@/lib/shz/rules";
 import { LanguagePicker } from "@/components/character/languages";
 import { SHZ_LANGUAGES, languageProblems, languageSlots } from "@/lib/languages";
+import { useT, useTLoose } from "@/i18n/client";
 
 const STEP_LABELS = { kimlik: "Kimlik", ekspertiz: "Ekspertiz", perkler: "Perkler", diller: "Diller", augment: "Augment", statlar: "Statlar", yetenek: "İlk yetenek", ozet: "Özet" } as const;
 type StepKey = keyof typeof STEP_LABELS;
@@ -44,6 +45,8 @@ interface Identity {
 }
 
 export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: string; startPerkPoints: number; data: RulesData }) {
+  const t = useT();
+  const tLoose = useTLoose();
   const router = useRouter();
   const { busy, run } = useAction();
   const [cur, setCur] = useState<StepKey>("kimlik");
@@ -58,7 +61,7 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
   const [perkFilter, setPerkFilter] = useState("");
   const [perkTab, setPerkTab] = useState<"positive" | "negative" | "selected">("positive");
 
-  const T = data.trees.find((t) => t.key === tree);
+  const T = data.trees.find((x) => x.key === tree);
   const result = useMemo(
     () => buildCreation({ tree, points, perks, startAugment: aug, firstAbility: first, amputation: perks.includes(KV) ? amp : null }, startPerkPoints, data),
     [tree, points, perks, aug, first, amp, startPerkPoints, data],
@@ -150,7 +153,7 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
                   i === step ? "border-accent bg-accent/15 text-ink" : stepOk[i] && i < step ? "border-ok/40 text-ok" : "border-line text-muted",
                 )}
               >
-                <span className="font-mono">{i + 1}</span> {STEP_LABELS[s]}
+                <span className="font-mono">{i + 1}</span> {t(STEP_LABELS[s])}
               </button>
             </li>
           ))}
@@ -159,54 +162,53 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
         {cur === "kimlik" && (
           <Card className="space-y-4 p-6">
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Karakter adı" hint="Milliyetine uygun bir isim seçmek iyi olur">
+              <Field label={t("Karakter adı")} hint={t("Milliyetine uygun bir isim seçmek iyi olur")}>
                 <input className="input" value={id.name} maxLength={60} onChange={(e) => setId({ ...id, name: e.target.value })} />
               </Field>
-              <Field label="Yaş" hint={`${AGE_MIN}–${AGE_MAX} arası`}>
+              <Field label={t("Yaş")} hint={t("{min}–{max} arası", { min: AGE_MIN, max: AGE_MAX })}>
                 <input type="number" min={AGE_MIN} max={AGE_MAX} className="input" value={id.age} onChange={(e) => setId({ ...id, age: Number(e.target.value) })} />
               </Field>
-              <Field label="Milliyet" hint="Irk ve milliyet RP içinde iletişimi etkileyebilir">
+              <Field label={t("Milliyet")} hint={t("Irk ve milliyet RP içinde iletişimi etkileyebilir")}>
                 <input className="input" value={id.nationality} maxLength={60} onChange={(e) => setId({ ...id, nationality: e.target.value })} />
               </Field>
-              <Field label="Taraf" hint="Alignment: karakterin genel faction bilgisi (ör. Wehrmacht sadıkı, direnişçi)">
+              <Field label={t("Taraf")} hint={t("Alignment: karakterin genel faction bilgisi (ör. Wehrmacht sadıkı, direnişçi)")}>
                 <input className="input" value={id.alignment} maxLength={60} onChange={(e) => setId({ ...id, alignment: e.target.value })} />
               </Field>
             </div>
-            <Field label="Geçmiş" hint="Partideki herkesin bilebileceği hikâye: nereden geliyor, ne istiyor?">
+            <Field label={t("Geçmiş")} hint={t("Partideki herkesin bilebileceği hikâye: nereden geliyor, ne istiyor?")}>
               <textarea className="input" rows={5} maxLength={4000} value={id.background} onChange={(e) => setId({ ...id, background: e.target.value })} />
             </Field>
-            <Field label="Görünüş">
+            <Field label={t("Görünüş")}>
               <textarea className="input" rows={2} maxLength={1000} value={id.appearance} onChange={(e) => setId({ ...id, appearance: e.target.value })} />
             </Field>
             <div className="rounded-xl border border-accent/30 bg-accent/[0.05] p-4">
               <Field
-                label="GM'e özel notlar ve gizli geçmiş"
-                hint="Yalnızca sen ve GM görürsünüz. Sırlar, gizli bağlantılar, karakterin bilmediğin bir geçmişi, GM'den istediğin hikâye kancaları…"
+                label={t("GM'e özel notlar ve gizli geçmiş")}
+                hint={t("Yalnızca sen ve GM görürsünüz. Sırlar, gizli bağlantılar, karakterin bilmediğin bir geçmişi, GM'den istediğin hikâye kancaları…")}
               >
                 <textarea className="input" rows={4} maxLength={6000} value={id.secretNotes} onChange={(e) => setId({ ...id, secretNotes: e.target.value })} />
               </Field>
             </div>
-            <p className="text-xs text-muted">Karakter portresini karakter oluşturduktan sonra karakter kağıdından ekleyebilirsin.</p>
+            <p className="text-xs text-muted">{t("Karakter portresini karakter oluşturduktan sonra karakter kağıdından ekleyebilirsin.")}</p>
           </Card>
         )}
 
         {cur === "ekspertiz" && (
           <div className="space-y-4">
             <p className="text-sm text-muted">
-              Başlangıç ekspertiz ağacın, sembol stat&apos;ına <strong className="text-ink">+2</strong> verir ve ağacın kendi başlangıç bonusunu kazandırır. İkinci ağacı oyun içinde yetenek
-              puanıyla açabilirsin.
+              {t("Başlangıç ekspertiz ağacın, sembol stat'ına +2 verir ve ağacın kendi başlangıç bonusunu kazandırır. İkinci ağacı oyun içinde yetenek puanıyla açabilirsin.")}
             </p>
             <div className="grid gap-3 md:grid-cols-2">
-              {data.trees.map((t) => {
-                const abs = t.abilities.map((k) => data.abilities[k]);
+              {data.trees.map((tr) => {
+                const abs = tr.abilities.map((k) => data.abilities[k]);
                 const branches = [...new Map(abs.filter((a) => a.branch !== "Kök").map((a) => [a.branch, a])).values()];
                 const root = abs.find((a) => a.branch === "Kök");
-                const on = tree === t.key;
+                const on = tree === tr.key;
                 return (
                   <button
                     type="button"
-                    key={t.key}
-                    onClick={() => chooseTree(t.key)}
+                    key={tr.key}
+                    onClick={() => chooseTree(tr.key)}
                     aria-pressed={on}
                     className={cx("card relative flex flex-col gap-3 p-5 text-left transition", on ? "border-accent bg-accent/[0.08] ring-1 ring-accent/50" : "hover:border-accent/40")}
                   >
@@ -216,24 +218,24 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
                       </span>
                     )}
                     <div className="flex items-center gap-4">
-                      <TreeIcon treeKey={t.key} className="h-14 w-14" />
+                      <TreeIcon treeKey={tr.key} className="h-14 w-14" />
                       <div>
                         <p className="flex items-center gap-2 font-serif text-xl text-ink">
-                          {t.name}
-                          <TipButton kind="trees" id={t.key} title={t.name} />
+                          {tr.name}
+                          <TipButton kind="trees" id={tr.key} title={tr.name} />
                         </p>
-                        <Meaning kind="trees" id={t.key} className="block" />
+                        <Meaning kind="trees" id={tr.key} className="block" />
                         <p className="text-xs text-muted">
-                          Ağaç stat&apos;ı: <span className="text-accent">{STAT_LABELS[t.stat]}</span> (+2)
+                          {t("Ağaç stat'ı:")} <span className="text-accent">{STAT_LABELS[tr.stat]}</span> (+2)
                         </p>
                       </div>
                     </div>
                     <p className="rounded-lg bg-surface2/60 px-3 py-2 text-sm text-ink/90">
-                      <span className="mr-1 text-[10px] font-semibold uppercase tracking-widest text-muted">İlk ağaç bonusu</span>
-                      {t.startBonusText.replace(/^.*?açılırsa\s*/i, "").replace(/oyuncu oyuna/i, "Oyuna")}
+                      <span className="mr-1 text-[10px] font-semibold uppercase tracking-widest text-muted">{t("İlk ağaç bonusu")}</span>
+                      {tr.startBonusText.replace(/^.*?açılırsa\s*/i, "").replace(/oyuncu oyuna/i, "Oyuna")}
                     </p>
                     <div className="flex flex-wrap gap-1.5">
-                      {root && <span className="chip">Kök · {root.name}</span>}
+                      {root && <span className="chip">{t("Kök")} · {root.name}</span>}
                       {branches.map((b) => (
                         <span key={b.branch} className="chip">
                           {branchLabel(b)}
@@ -246,8 +248,10 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
             </div>
             {needsAug && T && (
               <p className="rounded-lg border border-accent/40 bg-accent/10 px-4 py-3 text-sm">
-                <strong>{T.name}</strong> ilk ağaç olarak seçildi: oyuna bir <strong>{(T.startBonus as { tier: string }).tier}</strong> augment ile başlarsın. Augment&apos;ini perklerden sonraki{" "}
-                <strong>Augment</strong> adımında seçeceksin.
+                {t("{tree} ilk ağaç olarak seçildi: oyuna bir {tier} augment ile başlarsın. Augment'ini perklerden sonraki Augment adımında seçeceksin.", {
+                  tree: T.name,
+                  tier: (T.startBonus as { tier: string }).tier,
+                })}
               </p>
             )}
           </div>
@@ -257,32 +261,31 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
           <div className="space-y-4">
             <Card className="flex flex-wrap items-center gap-x-6 gap-y-2 p-4 text-sm">
               <span>
-                Başlangıç <strong className="font-mono">+{budget.start}</strong>
+                {t("Başlangıç")} <strong className="font-mono">+{budget.start}</strong>
               </span>
               <span>
-                Negatiflerden <strong className="font-mono text-ok">+{budget.gained}</strong>
+                {t("Negatiflerden")} <strong className="font-mono text-ok">+{budget.gained}</strong>
               </span>
               <span>
-                Pozitiflere <strong className="font-mono text-danger">−{budget.spent}</strong>
+                {t("Pozitiflere")} <strong className="font-mono text-danger">−{budget.spent}</strong>
               </span>
-              <span className={cx("ml-auto rounded-md px-2 py-1 font-mono", budget.left < 0 ? "bg-danger/15 text-danger" : "bg-accent/15 text-accent")}>Kalan {budget.left}</span>
+              <span className={cx("ml-auto rounded-md px-2 py-1 font-mono", budget.left < 0 ? "bg-danger/15 text-danger" : "bg-accent/15 text-accent")}>{t("Kalan {n}", { n: budget.left })}</span>
               <span className="w-full text-xs text-muted">
-                Toplam puan negatife düşmeden istediğin kadar perk alabilirsin. Kalan puan (Puan + 1) / 2 olarak stat puanına dönüşür: şu an <strong className="text-ink">{budget.convertible}</strong>{" "}
-                stat puanı.
+                {t("Toplam puan negatife düşmeden istediğin kadar perk alabilirsin. Kalan puan (Puan + 1) / 2 olarak stat puanına dönüşür: şu an {n} stat puanı.", { n: budget.convertible })}
               </span>
             </Card>
             {perks.includes(KV) && (
               <Card className="flex flex-col gap-5 border-danger/40 p-5 sm:flex-row">
                 <div className="min-w-0 flex-1 space-y-3">
                   <div>
-                    <p className="kicker text-danger">Kriegsversehrt · kopuk uzuv</p>
+                    <p className="kicker text-danger">{t("Kriegsversehrt · kopuk uzuv")}</p>
                     <p className="mt-1 text-sm text-ink/90">
-                      Kopuk başlayacak 1 ya da 2 uzuv seç. Kol seçersen o koldaki el, bacak seçersen o bacaktaki ayak da kopar. Baş, boyun ve gövde seçilemez.
+                      {t("Kopuk başlayacak 1 ya da 2 uzuv seç. Kol seçersen o koldaki el, bacak seçersen o bacaktaki ayak da kopar. Baş, boyun ve gövde seçilemez.")}
                     </p>
                     <p className="mt-1 text-sm">
-                      Tek uzuv <strong className="font-mono text-ok">+{KRIEGSVERSEHRT.points[1]}</strong>, iki uzuv <strong className="font-mono text-ok">+{KRIEGSVERSEHRT.points[2]}</strong> perk puanı.
+                      {t("Tek uzuv +{a}, iki uzuv +{b} perk puanı.", { a: KRIEGSVERSEHRT.points[1], b: KRIEGSVERSEHRT.points[2] })}
                       {ampPlan.roots.length > 0 && ampPlan.problems.length === 0 && (
-                        <span className="ml-2 rounded bg-ok/15 px-1.5 py-0.5 font-mono text-ok">şu an +{KRIEGSVERSEHRT.points[ampPlan.roots.length]}</span>
+                        <span className="ml-2 rounded bg-ok/15 px-1.5 py-0.5 font-mono text-ok">{t("şu an +{n}", { n: KRIEGSVERSEHRT.points[ampPlan.roots.length] })}</span>
                       )}
                     </p>
                   </div>
@@ -295,15 +298,15 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
                       const dis = !on && (viaParent || (!!child && amp.includes(child)) || amp.length >= KRIEGSVERSEHRT.maxLimbs);
                       return (
                         <Button key={k} size="sm" variant={on ? "danger" : "secondary"} disabled={dis} onClick={() => toggleAmp(k)} aria-pressed={on}>
-                          {bodyPartLabel(k)}
-                          {child && <span className="text-[10px] opacity-75"> +{bodyPartLabel(child).split(" ")[1]}</span>}
-                          {viaParent && <span className="text-[10px] opacity-75"> (kopuk)</span>}
+                          {t(bodyPartLabel(k))}
+                          {child && <span className="text-[10px] opacity-75"> +{t(bodyPartLabel(child)).split(" ")[1]}</span>}
+                          {viaParent && <span className="text-[10px] opacity-75"> {t("(kopuk)")}</span>}
                         </Button>
                       );
                     })}
                   </div>
-                  {amp.length === 0 && <p className="text-xs text-warn">Devam etmek için en az bir uzuv seç.</p>}
-                  {ampPlan.parts.length > 0 && <p className="text-xs text-muted">Kopuk başlayacak: {ampPlan.parts.map(bodyPartLabel).join(", ")}</p>}
+                  {amp.length === 0 && <p className="text-xs text-warn">{t("Devam etmek için en az bir uzuv seç.")}</p>}
+                  {ampPlan.parts.length > 0 && <p className="text-xs text-muted">{t("Kopuk başlayacak: {parts}", { parts: ampPlan.parts.map((x) => t(bodyPartLabel(x))).join(", ") })}</p>}
                 </div>
                 <BodyDiagram body={result.body} className="mx-auto max-w-[140px] shrink-0" />
               </Card>
@@ -312,9 +315,9 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
               <div role="tablist" className="inline-flex rounded-lg border border-line bg-surface p-1">
                 {(
                   [
-                    ["positive", `Pozitif (${data.perks.filter((p) => p.kind === "positive").length})`],
-                    ["negative", `Negatif (${data.perks.filter((p) => p.kind === "negative").length})`],
-                    ["selected", `Seçilenler (${perks.length})`],
+                    ["positive", t("Pozitif ({n})", { n: data.perks.filter((p) => p.kind === "positive").length })],
+                    ["negative", t("Negatif ({n})", { n: data.perks.filter((p) => p.kind === "negative").length })],
+                    ["selected", t("Seçilenler ({n})", { n: perks.length })],
                   ] as const
                 ).map(([k, label]) => (
                   <button
@@ -332,11 +335,15 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
                   </button>
                 ))}
               </div>
-              <input className="input max-w-xs flex-1" placeholder="Perk ara…" value={perkFilter} onChange={(e) => setPerkFilter(e.target.value)} />
+              <input className="input max-w-xs flex-1" placeholder={t("Perk ara…")} value={perkFilter} onChange={(e) => setPerkFilter(e.target.value)} />
             </div>
             <p className="text-xs text-muted">
-              {perkTab === "positive" ? "Pozitif perkler perk puanı harcar." : perkTab === "negative" ? "Negatif perkler perk puanı kazandırır ama karakterine dezavantaj getirir." : "Seçtiğin perkler."}{" "}
-              Turuncu etiketler birlikte alınamayan perkleri gösterir.
+              {perkTab === "positive"
+                ? t("Pozitif perkler perk puanı harcar.")
+                : perkTab === "negative"
+                  ? t("Negatif perkler perk puanı kazandırır ama karakterine dezavantaj getirir.")
+                  : t("Seçtiğin perkler.")}{" "}
+              {t("Turuncu etiketler birlikte alınamayan perkleri gösterir.")}
             </p>
             <div className="grid gap-3 md:grid-cols-2">
               {visiblePerks.map((p) => {
@@ -357,15 +364,15 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
                         variant={on ? "primary" : "secondary"}
                         disabled={!!blockedBy && !on}
                         onClick={() => togglePerk(p.key)}
-                        title={blockedBy ? `${perkName.get(blockedBy)} ile birlikte alınamaz` : undefined}
+                        title={blockedBy ? t("{name} ile birlikte alınamaz", { name: perkName.get(blockedBy) }) : undefined}
                       >
-                        {on ? "Seçildi" : blockedBy ? <Lock className="h-3.5 w-3.5" /> : "Seç"}
+                        {on ? t("Seçildi") : blockedBy ? <Lock className="h-3.5 w-3.5" /> : t("Seç")}
                       </Button>
                     }
                   />
                 );
               })}
-              {!visiblePerks.length && <p className="text-sm text-muted">Gösterilecek perk yok.</p>}
+              {!visiblePerks.length && <p className="text-sm text-muted">{t("Gösterilecek perk yok.")}</p>}
             </div>
           </div>
         )}
@@ -376,21 +383,21 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
           <div className="space-y-4">
             <Card className="flex flex-col gap-5 p-5 sm:flex-row">
               <div className="min-w-0 flex-1 space-y-2 text-sm">
-                <p className="kicker">Başlangıç augment&apos;i · {(T.startBonus as { tier: string }).tier}</p>
+                <p className="kicker">{t("Başlangıç augment'i · {tier}", { tier: (T.startBonus as { tier: string }).tier })}</p>
                 <p className="text-ink/90">
-                  {T.name} ilk ağacın olduğu için oyuna bir augment takılı başlarsın. Bir augment ve takılacağı uzvu seç. Augment&apos;in stat etkileri statlara hemen yansır.
+                  {t("{tree} ilk ağacın olduğu için oyuna bir augment takılı başlarsın. Bir augment ve takılacağı uzvu seç. Augment'in stat etkileri statlara hemen yansır.", { tree: T.name })}
                 </p>
                 {perks.includes(KV) && amp.length > 0 && (
                   <p className="text-warn">
-                    Kopuk uzvuna (ör. kopan ayağa Federfuß) augment takarsan protez olarak çalışır ve o uzuv sağlam sayılır. Kopuk bir kolun eline ya da kopuk bir bacağın ayağına augment takılamaz.
+                    {t("Kopuk uzvuna (ör. kopan ayağa Federfuß) augment takarsan protez olarak çalışır ve o uzuv sağlam sayılır. Kopuk bir kolun eline ya da kopuk bir bacağın ayağına augment takılamaz.")}
                   </p>
                 )}
                 {aug && (
                   <p>
-                    Seçilen: <strong className="text-accent">{data.augments.find((a) => a.key === aug.key)?.name}</strong> · {bodyPartLabel(aug.part)}
+                    {t("Seçilen:")} <strong className="text-accent">{data.augments.find((a) => a.key === aug.key)?.name}</strong> · {t(bodyPartLabel(aug.part))}
                   </p>
                 )}
-                {augProblem && <p className="text-danger">{augProblem}</p>}
+                {augProblem && <p className="text-danger">{tLoose(augProblem)}</p>}
               </div>
               <BodyDiagram body={result.body} selected={(aug?.part as BodyPartKey) ?? null} className="mx-auto max-w-[150px] shrink-0" />
             </Card>
@@ -412,12 +419,12 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
                               key={sl}
                               size="sm"
                               disabled={blocked}
-                              title={blocked ? `${bodyPartLabel(parent!)} kopuk` : undefined}
+                              title={blocked ? t("{part} kopuk", { part: t(bodyPartLabel(parent!)) }) : undefined}
                               variant={aug?.key === a.key && aug.part === sl ? "primary" : "secondary"}
                               onClick={() => setAug({ key: a.key, part: sl })}
                             >
-                              {bodyPartLabel(sl)}
-                              {lost && !blocked && " (protez)"}
+                              {t(bodyPartLabel(sl))}
+                              {lost && !blocked && ` ${t("(protez)")}`}
                             </Button>
                           );
                         })}
@@ -433,23 +440,25 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
           <Card className="p-5">
             <div className="mb-4 grid gap-3 sm:grid-cols-3">
               <div className="rounded-lg border border-line bg-surface2/50 px-3 py-2">
-                <p className="text-[10px] uppercase tracking-wider text-muted">Varsayılan</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted">{t("Varsayılan")}</p>
                 <p className="font-mono text-xl">{START_FREE_STATS}</p>
               </div>
               <div className="rounded-lg border border-line bg-surface2/50 px-3 py-2">
-                <p className="text-[10px] uppercase tracking-wider text-muted">Perklerden</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted">{t("Perklerden")}</p>
                 <p className="font-mono text-xl">{budget.convertible}</p>
               </div>
               <div className={cx("rounded-lg border px-3 py-2", used === totalPoints ? "border-ok/50 bg-ok/10" : "border-accent/50 bg-accent/10")}>
-                <p className="text-[10px] uppercase tracking-wider text-muted">Kalan</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted">{t("Kalan")}</p>
                 <p className="font-mono text-xl">
                   {totalPoints - used} / {totalPoints}
                 </p>
               </div>
             </div>
             <p className="mb-4 text-sm text-muted">
-              Puanları istediğin statlara dağıt. Ağaç stat&apos;ın ({T ? STAT_LABELS[T.stat] : "—"}) zaten +2 aldığı için ona en fazla perklerden gelen puan kadar ({treeCap}) ekleyebilirsin. Klang
-              herkese +2 başlar.
+              {t(
+                "Puanları istediğin statlara dağıt. Ağaç stat'ın ({stat}) zaten +2 aldığı için ona en fazla perklerden gelen puan kadar ({cap}) ekleyebilirsin. Klang herkese +2 başlar.",
+                { stat: T ? STAT_LABELS[T.stat] : "—", cap: treeCap },
+              )}
             </p>
             <div className="divide-y divide-line">
               {STAT_KEYS.map((k) => {
@@ -462,17 +471,17 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
                       <span className="text-ink">{STAT_LABELS[k]}</span>
                       {isTree && (
                         <Badge tone="accent" className="ml-2">
-                          Ağaç
+                          {t("Ağaç")}
                         </Badge>
                       )}
-                      <span className="block text-xs text-muted">{STAT_HINTS[k]}</span>
+                      <span className="block text-xs text-muted">{t(STAT_HINTS[k])}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <button type="button" className="h-8 w-8 rounded-md border border-line text-muted hover:text-ink disabled:opacity-30" disabled={v <= 0} onClick={() => setPoints((f) => ({ ...f, [k]: v - 1 }))} aria-label={`${STAT_LABELS[k]} azalt`}>
+                      <button type="button" className="h-8 w-8 rounded-md border border-line text-muted hover:text-ink disabled:opacity-30" disabled={v <= 0} onClick={() => setPoints((f) => ({ ...f, [k]: v - 1 }))} aria-label={t("{stat} azalt", { stat: STAT_LABELS[k] })}>
                         −
                       </button>
                       <span className={cx("w-7 text-center font-mono text-sm", v > 0 ? "text-accent" : "text-muted")}>{v > 0 ? `+${v}` : 0}</span>
-                      <button type="button" className="h-8 w-8 rounded-md border border-line text-muted hover:text-ink disabled:opacity-30" disabled={!canInc} onClick={() => setPoints((f) => ({ ...f, [k]: v + 1 }))} aria-label={`${STAT_LABELS[k]} artır`}>
+                      <button type="button" className="h-8 w-8 rounded-md border border-line text-muted hover:text-ink disabled:opacity-30" disabled={!canInc} onClick={() => setPoints((f) => ({ ...f, [k]: v + 1 }))} aria-label={t("{stat} artır", { stat: STAT_LABELS[k] })}>
                         +
                       </button>
                     </div>
@@ -480,12 +489,12 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
                       <span className={cx("font-mono text-lg", eff[k].value < 0 ? "text-danger" : "text-ink")}>{eff[k].value}</span>
                       {eff[k].parts.length > 0 && (
                         <span className="block text-[10px] leading-tight text-muted">
-                          taban {eff[k].base}
+                          {t("taban {n}", { n: eff[k].base })}
                           {eff[k].parts.map((p) => (
                             <span key={p.label} className={p.value > 0 ? "text-ok" : "text-danger"}>
                               {" "}
                               {p.value > 0 ? "+" : "−"}
-                              {Math.abs(p.value)} {p.label}
+                              {Math.abs(p.value)} {tLoose(p.label)}
                             </span>
                           ))}
                         </span>
@@ -500,9 +509,9 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
 
         {cur === "yetenek" && (
           <div className="space-y-4">
-            <p className="text-sm text-muted">Seviye 0&apos;da 1 yetenek puanın var. Şartlarını karşıladığın bir yeteneği şimdi alabilir ya da puanı saklayıp oyun içinde harcayabilirsin.</p>
+            <p className="text-sm text-muted">{t("Seviye 0'da 1 yetenek puanın var. Şartlarını karşıladığın bir yeteneği şimdi alabilir ya da puanı saklayıp oyun içinde harcayabilirsin.")}</p>
             <Button variant={first === null ? "primary" : "secondary"} onClick={() => setFirst(null)}>
-              Şimdi seçme, puanı sakla
+              {t("Şimdi seçme, puanı sakla")}
             </Button>
             <div className="grid gap-3 md:grid-cols-2">
               {T?.abilities.map((k) => {
@@ -519,10 +528,10 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
                     footer={
                       ok ? (
                         <Button size="sm" variant={first === k ? "primary" : "outline"} onClick={() => setFirst(k)}>
-                          {first === k ? "Seçildi" : "Bunu al"}
+                          {first === k ? t("Seçildi") : t("Bunu al")}
                         </Button>
                       ) : (
-                        <p className="text-xs text-muted">Kilitli: {st.state === "locked" ? st.problems.join(" · ") : ""}</p>
+                        <p className="text-xs text-muted">{t("Kilitli:")} {st.state === "locked" ? st.problems.map(tLoose).join(" · ") : ""}</p>
                       )
                     }
                   />
@@ -535,40 +544,42 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
         {cur === "ozet" && (
           <Card className="space-y-5 p-6">
             <div>
-              <p className="kicker mb-1">Kimlik</p>
+              <p className="kicker mb-1">{t("Kimlik")}</p>
               <p className="font-serif text-2xl">{id.name || "—"}</p>
               <p className="text-sm text-muted">
-                {id.age} yaş · {id.nationality} · {id.alignment}
+                {t("{n} yaş", { n: id.age })} · {id.nationality} · {id.alignment}
               </p>
             </div>
             <div className="flex items-start gap-3">
               {T && <TreeIcon treeKey={T.key} />}
               <div>
-                <p className="kicker mb-1">Ekspertiz</p>
+                <p className="kicker mb-1">{t("Ekspertiz")}</p>
                 <p>
                   {T?.name} <span className="text-muted">({T && STAT_LABELS[T.stat]})</span>
-                  {aug && ` · Augment: ${data.augments.find((a) => a.key === aug.key)?.name} (${bodyPartLabel(aug.part)})`}
+                  {aug && ` · Augment: ${data.augments.find((a) => a.key === aug.key)?.name} (${t(bodyPartLabel(aug.part))})`}
                 </p>
                 {T && <Html html={T.introHtml} className="mt-1 text-sm text-muted" />}
               </div>
             </div>
             <div>
-              <p className="kicker mb-1">Perkler</p>
-              <p className="text-sm">{perks.map((k) => perkName.get(k)).join(", ") || "Yok"}</p>
-              {perks.includes(KV) && ampPlan.parts.length > 0 && <p className="mt-1 text-sm text-danger">Kopuk: {ampPlan.parts.map(bodyPartLabel).join(", ")}</p>}
+              <p className="kicker mb-1">{t("Perkler")}</p>
+              <p className="text-sm">{perks.map((k) => perkName.get(k)).join(", ") || t("Yok")}</p>
+              {perks.includes(KV) && ampPlan.parts.length > 0 && (
+                <p className="mt-1 text-sm text-danger">{t("Kopuk: {parts}", { parts: ampPlan.parts.map((x) => t(bodyPartLabel(x))).join(", ") })}</p>
+              )}
             </div>
             <div>
-              <p className="kicker mb-1">Diller</p>
-              <p className="text-sm">{langs.length ? langs.map((l, i) => (i === 0 ? `${l} (ana dil)` : l)).join(", ") : "Seçilmedi"}</p>
+              <p className="kicker mb-1">{t("Diller")}</p>
+              <p className="text-sm">{langs.length ? langs.map((l, i) => (i === 0 ? t("{lang} (ana dil)", { lang: l }) : l)).join(", ") : t("Seçilmedi")}</p>
             </div>
             <div>
-              <p className="kicker mb-1">İlk yetenek</p>
-              <p className="text-sm">{first ? data.abilities[first].name : "Seçilmedi (1 yetenek puanı saklanacak)"}</p>
+              <p className="kicker mb-1">{t("İlk yetenek")}</p>
+              <p className="text-sm">{first ? data.abilities[first].name : t("Seçilmedi (1 yetenek puanı saklanacak)")}</p>
             </div>
             {!result.ok && (
               <ul className="list-disc space-y-1 rounded-lg border border-danger/40 bg-danger/10 py-3 pl-8 pr-4 text-sm text-danger">
                 {result.problems.map((p) => (
-                  <li key={p}>{p}</li>
+                  <li key={p}>{tLoose(p)}</li>
                 ))}
               </ul>
             )}
@@ -585,18 +596,18 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
                 if (r) router.push(`/karakter/${r.id}`);
               }}
             >
-              Karakteri onaya gönder
+              {t("Karakteri onaya gönder")}
             </Button>
           </Card>
         )}
 
         <div className="mt-6 flex justify-between">
           <Button disabled={step === 0} onClick={() => setStep((s) => s - 1)}>
-            ← Geri
+            ← {t("Geri")}
           </Button>
           {step < STEPS.length - 1 && (
             <Button variant="primary" disabled={!stepOk[step]} onClick={() => setStep((s) => s + 1)}>
-              İleri →
+              {t("İleri")} →
             </Button>
           )}
         </div>
@@ -604,13 +615,13 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
 
       <aside className="lg:sticky lg:top-24 lg:self-start">
         <Card className="p-5">
-          <p className="kicker mb-3">Özet</p>
+          <p className="kicker mb-3">{t("Özet")}</p>
           <div className="flex items-center gap-3">
             {T && <TreeIcon treeKey={T.key} className="h-10 w-10" />}
             <div className="min-w-0">
-              <p className="truncate font-serif text-lg">{id.name || "İsimsiz"}</p>
+              <p className="truncate font-serif text-lg">{id.name || t("İsimsiz")}</p>
               <p className="text-xs text-muted">
-                Seviye 0 · {T?.name ?? "ağaç seçilmedi"} · Corruption {result.corruption}
+                {t("Seviye 0")} · {T?.name ?? t("ağaç seçilmedi")} · Corruption {result.corruption}
               </p>
             </div>
           </div>
@@ -623,7 +634,7 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
             ))}
           </div>
           <div className="mt-4 text-sm">
-            <span className="text-muted">Perk puanı: </span>
+            <span className="text-muted">{t("Perk puanı:")} </span>
             <span className={cx("font-mono", budget.left < 0 && "text-danger")}>{budget.left}</span>
             <span className="text-muted"> → stat: </span>
             <span className="font-mono">{budget.convertible}</span>
@@ -631,7 +642,7 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
           {result.problems.length > 0 && step > 0 && (
             <ul className="mt-4 space-y-1 text-xs text-warn">
               {result.problems.slice(0, 5).map((p) => (
-                <li key={p}>• {p}</li>
+                <li key={p}>• {tLoose(p)}</li>
               ))}
             </ul>
           )}

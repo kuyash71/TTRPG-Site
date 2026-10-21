@@ -3,8 +3,12 @@ import { AuthBrand } from "@/components/auth-brand";
 import { redirect } from "next/navigation";
 import { absoluteRedirect, currentUser } from "@/lib/auth/session";
 import { LoginForm } from "./login-form";
+import { getT } from "@/i18n/server";
 
-export const metadata: Metadata = { title: "Giriş" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t("Giriş") };
+}
 
 /** Yalnızca site içi yollara yönlendir (açık yönlendirme engeli). */
 function safeNext(sonra: string | undefined) {

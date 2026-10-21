@@ -3,6 +3,8 @@ import { z } from "zod";
 import { db } from "@/db";
 import { characterLogs, characters } from "@/db/schema";
 import { bad, conflict, route, zId } from "@/lib/api";
+import { fmt } from "@/i18n/core";
+import { badLoose } from "@/lib/api-loose";
 import { campaignAccess } from "@/lib/access";
 import { notifyCampaign } from "@/lib/realtime-bus";
 import { AGE_MAX, AGE_MIN, BODY_PART_KEYS, STAT_KEYS, bodyPartLabel } from "@/lib/shz/constants";
@@ -35,15 +37,15 @@ export const POST = route(
       }),
     }),
   },
-  async ({ body, user }) => {
+  async ({ req, body, user }) => {
     const { campaign, isGM, isSpectator } = await campaignAccess(body.campaignId, user);
     if (campaign.status === "ARCHIVED") throw bad("Bu kampanya arşivlenmiş.");
     if (isSpectator) throw bad("İzleyiciler karakter oluşturamaz.");
     if (campaign.system !== "SHZ") throw bad("Bu kampanya Umbra Caelis kampanyası; karakteri Umbra Caelis bölümünden oluştur.");
     const lp = languageProblems("SHZ", body.creation.perks, body.languages);
-    if (lp.length) throw bad(lp[0]);
+    if (lp.length) throw badLoose(req, lp[0]);
     const r = buildCreation(body.creation, campaign.startPerkPoints, rulesData());
-    if (!r.ok) throw bad(r.problems[0]);
+    if (!r.ok) throw badLoose(req, r.problems[0]);
 
     // Aynı oyuncunun eşzamanlı isteklerini sıraya sok (kampanya başına tek karakter kuralı).
     const c = await db.transaction(async (tx) => {
@@ -83,11 +85,15 @@ export const POST = route(
       return row;
     });
     const tree = getTree(body.creation.tree);
+    const perks = body.creation.perks.map((k) => getPerk(k)?.name ?? k).join(", ") || "yok";
     await db.insert(characterLogs).values({
       characterId: c.id,
       actorId: user.id,
       kind: "create",
-      text: `Karakter oluşturuldu: ${tree?.name ?? "?"} ağacı; perkler: ${body.creation.perks.map((k) => getPerk(k)?.name ?? k).join(", ") || "yok"}${body.creation.amputation?.length && body.creation.perks.includes("kriegsversehrt") ? `; kopuk: ${body.creation.amputation.map(bodyPartLabel).join(", ")}` : ""}.`,
+      text:
+        body.creation.amputation?.length && body.creation.perks.includes("kriegsversehrt")
+          ? fmt("Karakter oluşturuldu: {tree} ağacı; perkler: {perks}; kopuk: {parts}.", { tree: tree?.name ?? "?", perks, parts: body.creation.amputation.map(bodyPartLabel).join(", ") })
+          : fmt("Karakter oluşturuldu: {tree} ağacı; perkler: {perks}.", { tree: tree?.name ?? "?", perks }),
     });
     notifyCampaign(campaign.id, "approvals:changed", {});
     return { id: c.id };

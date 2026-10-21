@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { characterLogs, characters, messages } from "@/db/schema";
 import { bad, route, zId } from "@/lib/api";
+import { fmt } from "@/i18n/core";
 import { requireCampaignGM, requireSystem } from "@/lib/access";
 import { notifyCampaign } from "@/lib/realtime-bus";
 import { asUcChar, ucStatsColumn, ucUnspent } from "@/lib/uc/char";
@@ -11,6 +12,9 @@ import { ucRulesData } from "@/lib/uc/content";
 import { UC_STAT_MAX, ucDalOfTier, ucTierOfLevel } from "@/lib/uc/rules";
 
 const zStat = z.enum(UC_STAT_KEYS);
+
+const levelUpMessage = (list: string, mvp: string | null) =>
+  mvp ? fmt("Seviye atlayanlar: {list} · MVP: {mvp}", { list, mvp }) : fmt("Seviye atlayanlar: {list}", { list });
 
 /**
  * Umbra Caelis toplu seviye atlatma (Core: her seviyede 2 + 1 stat, katmanında 1 yetenek puanı).
@@ -42,8 +46,8 @@ export const POST = route(
       if (chars.length !== ids.length) throw bad("Karakterlerden biri bu kampanyada değil.");
       const plans = body.entries.map((e) => {
         const c = chars.find((x) => x.id === e.characterId)!;
-        if (c.status !== "ACTIVE") throw bad(`${c.name} aktif değil.`);
-        if (c.level >= camp.levelCap) throw bad(`${c.name} seviye sınırında (${camp.levelCap}).`);
+        if (c.status !== "ACTIVE") throw bad("{name} aktif değil.", { name: c.name });
+        if (c.level >= camp.levelCap) throw bad("{name} seviye sınırında ({cap}).", { name: c.name, cap: camp.levelCap });
         const ch = asUcChar(c);
         const stats = { ...ch.stats };
         const notes: string[] = [];
@@ -55,25 +59,25 @@ export const POST = route(
         if (dal) {
           if (stats[dal.stat] < UC_STAT_MAX) {
             stats[dal.stat]++;
-            notes.push(`${UC_STAT_LABELS[dal.stat]} +1 (sembol)`);
+            notes.push(fmt("{stat} +1 (sembol)", { stat: UC_STAT_LABELS[dal.stat] }));
           } else {
             free++;
-            notes.push("sembol stat 10 olduğu için +1 serbest puan");
+            notes.push(fmt("sembol stat 10 olduğu için +1 serbest puan"));
           }
         } else {
           pending++;
-          notes.push(`K${tier} dalı seçilince sembol stat +1`);
+          notes.push(fmt("K{tier} dalı seçilince sembol stat +1", { tier }));
         }
-        if (stats[e.actionStat] >= UC_STAT_MAX) throw bad(`${c.name}: ${UC_STAT_LABELS[e.actionStat]} zaten ${UC_STAT_MAX}. Başka bir aksiyon stat'ı seç.`);
+        if (stats[e.actionStat] >= UC_STAT_MAX) throw bad("{name}: {stat} zaten {max}. Başka bir aksiyon stat'ı seç.", { name: c.name, stat: UC_STAT_LABELS[e.actionStat], max: UC_STAT_MAX });
         stats[e.actionStat]++;
-        notes.push(`${UC_STAT_LABELS[e.actionStat]} +1 (aksiyon)`);
+        notes.push(fmt("{stat} +1 (aksiyon)", { stat: UC_STAT_LABELS[e.actionStat] }));
         if (body.mvp?.characterId === c.id) {
-          if (stats[body.mvp.stat] >= UC_STAT_MAX) throw bad(`${c.name}: MVP için seçilen ${UC_STAT_LABELS[body.mvp.stat]} zaten ${UC_STAT_MAX}.`);
+          if (stats[body.mvp.stat] >= UC_STAT_MAX) throw bad("{name}: MVP için seçilen {stat} zaten {max}.", { name: c.name, stat: UC_STAT_LABELS[body.mvp.stat], max: UC_STAT_MAX });
           stats[body.mvp.stat]++;
           notes.push(`${UC_STAT_LABELS[body.mvp.stat]} +1 (MVP)`);
         }
-        if (newLevel === 5 || newLevel === 10) notes.push(`K${tier} açıldı`);
-        if (newLevel === 15) notes.push("Zirve: 1 serbest yetenek puanı");
+        if (newLevel === 5 || newLevel === 10) notes.push(fmt("K{tier} açıldı", { tier }));
+        if (newLevel === 15) notes.push(fmt("Zirve: 1 serbest yetenek puanı"));
         return { c, stats, free, pending, newLevel, notes };
       });
       for (const p of plans) {
@@ -87,13 +91,16 @@ export const POST = route(
             uc: { ...p.c.uc, pendingSymbol: p.pending },
           })
           .where(eq(characters.id, p.c.id));
-        await tx.insert(characterLogs).values({ characterId: p.c.id, actorId: user.id, kind: "level-up", text: `Seviye ${p.c.level} → ${p.newLevel}: +1 yetenek puanı, ${p.notes.join(", ")}` });
+        await tx.insert(characterLogs).values({ characterId: p.c.id, actorId: user.id, kind: "level-up", text: fmt("Seviye {from} → {to}: +1 yetenek puanı, {notes}", { from: p.c.level, to: p.newLevel, notes: p.notes.join(", ") }) });
       }
       await tx.insert(messages).values({
         campaignId: camp.id,
         userId: user.id,
         channel: "SYSTEM",
-        content: `Seviye atlayanlar: ${plans.map((p) => `${p.c.name} (Sv ${p.newLevel})`).join(", ")}${body.mvp ? ` · MVP: ${plans.find((p) => p.c.id === body.mvp!.characterId)!.c.name}` : ""}`,
+        content: levelUpMessage(
+          plans.map((p) => fmt("{name} (Sv {level})", { name: p.c.name, level: p.newLevel })).join(", "),
+          body.mvp ? plans.find((p) => p.c.id === body.mvp!.characterId)!.c.name : null,
+        ),
       });
       return plans;
     });

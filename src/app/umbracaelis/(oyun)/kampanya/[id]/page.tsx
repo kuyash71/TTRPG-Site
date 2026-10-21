@@ -14,8 +14,12 @@ import { campaignHref } from "@/lib/links";
 import { asUcChar } from "@/lib/uc/char";
 import { ucRulesData } from "@/lib/uc/content";
 import { ucDalOfTier, ucTierOfLevel } from "@/lib/uc/rules";
+import { getLocale, getT } from "@/i18n/server";
 
-export const metadata: Metadata = { title: "Kampanya" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t("Kampanya") };
+}
 
 export default async function UcCampaignPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -24,7 +28,9 @@ export default async function UcCampaignPage({ params }: { params: Promise<{ id:
   if (!access) notFound();
   const { campaign: c, isGM, isSpectator } = access;
   if (c.system !== "UC") redirect(campaignHref("SHZ", c.id));
-  const data = ucRulesData();
+  const t = await getT();
+  const loc = await getLocale();
+  const data = ucRulesData(loc);
   const chars = await db
     .select({ ch: characters, ownerName: users.displayName })
     .from(characters)
@@ -42,30 +48,31 @@ export default async function UcCampaignPage({ params }: { params: Promise<{ id:
   const pending = chars.filter(({ ch }) => ch.status === "PENDING");
   const mine = chars.filter(({ ch }) => ch.userId === user.id && (ch.status === "ACTIVE" || ch.status === "PENDING"));
   const active = chars.filter(({ ch }) => ch.status === "ACTIVE");
-  const dalLine = (trees: string[]) => trees.map((t) => `K${data.dals[t]?.tier} ${data.dals[t]?.name ?? t}`).join(" / ");
+  const dalLine = (trees: string[]) => trees.map((tk) => `${t("K{n}", { n: data.dals[tk]?.tier })} ${data.dals[tk]?.name ?? tk}`).join(" / ");
   const className = (k?: string) => data.classes.find((x) => x.key === k)?.name ?? "—";
 
   return (
     <div>
       <PageHeader
-        kicker="Umbra Caelis · Kampanya"
+        kicker={`Umbra Caelis · ${t("Kampanya")}`}
         title={c.name}
         actions={
           <>
             <LinkButton href={`/umbracaelis/kampanya/${c.id}/oda`} variant="primary">
-              Oyun odasına gir
+              {t("Oyun odasına gir")}
             </LinkButton>
             {(isGM || mine.length === 0) && !isSpectator && c.status !== "ARCHIVED" && (
               <LinkButton href={`/umbracaelis/kampanya/${c.id}/karakter-olustur`} variant="outline">
-                Karakter oluştur
+                {t("Karakter oluştur")}
               </LinkButton>
             )}
           </>
         }
       >
         <span className="text-sm">
-          GM: {gm?.displayName} · Başlangıç perk puanı +{c.startPerkPoints} · Seviye sınırı {c.levelCap} · Death Save {c.deathSaveEnabled ? "açık" : "kapalı"}
-          {c.physicalDice && " · Fiziksel zar"}
+          GM: {gm?.displayName} · {t("Başlangıç perk puanı +{n}", { n: c.startPerkPoints })} · {t("Seviye sınırı {n}", { n: c.levelCap })} ·{" "}
+          {c.deathSaveEnabled ? t("Death Save açık") : t("Death Save kapalı")}
+          {c.physicalDice && ` · ${t("Fiziksel zar")}`}
         </span>
       </PageHeader>
 
@@ -75,7 +82,7 @@ export default async function UcCampaignPage({ params }: { params: Promise<{ id:
 
           {isGM && pending.length > 0 && (
             <section>
-              <SectionTitle>Onay bekleyen karakterler</SectionTitle>
+              <SectionTitle>{t("Onay bekleyen karakterler")}</SectionTitle>
               <div className="space-y-3">
                 {pending.map(({ ch, ownerName }) => (
                   <Card key={ch.id} className="flex flex-wrap items-center justify-between gap-4 border-warn/40 p-4">
@@ -84,7 +91,7 @@ export default async function UcCampaignPage({ params }: { params: Promise<{ id:
                         {ch.name}
                       </a>
                       <p className="text-sm text-muted">
-                        {ownerName ?? "Sahipsiz"} · {className(ch.uc?.classKey)} · {dalLine(ch.trees)} · {ch.nationality}
+                        {ownerName ?? t("Sahipsiz")} · {className(ch.uc?.classKey)} · {dalLine(ch.trees)} · {ch.nationality}
                       </p>
                     </div>
                     <ApprovalActions characterId={ch.id} />
@@ -95,9 +102,9 @@ export default async function UcCampaignPage({ params }: { params: Promise<{ id:
           )}
 
           <section>
-            <SectionTitle>Parti</SectionTitle>
+            <SectionTitle>{t("Parti")}</SectionTitle>
             {visible.length === 0 ? (
-              <Empty title="Henüz karakter yok">Oyuncular katıldıktan sonra karakterlerini oluşturup onaya gönderir.</Empty>
+              <Empty title={t("Henüz karakter yok")}>{t("Oyuncular katıldıktan sonra karakterlerini oluşturup onaya gönderir.")}</Empty>
             ) : (
               <div className="grid gap-3 sm:grid-cols-2">
                 {visible.map((row) => {
@@ -112,9 +119,9 @@ export default async function UcCampaignPage({ params }: { params: Promise<{ id:
                           {ch.name}
                         </a>
                         <p className="truncate text-xs text-muted">
-                          Sv {ch.level} · <span className={row.ownerName ? undefined : "text-warn"}>{row.ownerName ?? "Sahipsiz"}</span> · {className(ch.uc?.classKey)} · {dalLine(ch.trees)}
+                          {t("Sv {n}", { n: ch.level })} · <span className={row.ownerName ? undefined : "text-warn"}>{row.ownerName ?? t("Sahipsiz")}</span> · {className(ch.uc?.classKey)} · {dalLine(ch.trees)}
                         </p>
-                        {ch.languages.length > 0 && <p className="truncate text-[11px] text-muted">Diller: {ch.languages.join(", ")}</p>}
+                        {ch.languages.length > 0 && <p className="truncate text-[11px] text-muted">{t("Diller: {list}", { list: ch.languages.join(", ") })}</p>}
                         {isGM && (
                           <TransferOwner
                             characterId={ch.id}
@@ -134,7 +141,7 @@ export default async function UcCampaignPage({ params }: { params: Promise<{ id:
 
           {isGM && (
             <section>
-              <SectionTitle>Seviye atlat</SectionTitle>
+              <SectionTitle>{t("Seviye atlat")}</SectionTitle>
               <UcLevelUpPanel
                 campaignId={c.id}
                 levelCap={c.levelCap}
@@ -145,7 +152,7 @@ export default async function UcCampaignPage({ params }: { params: Promise<{ id:
                   return {
                     id: row.ch.id,
                     name: row.ch.name,
-                    owner: row.ownerName ?? "Sahipsiz",
+                    owner: row.ownerName ?? t("Sahipsiz"),
                     level: row.ch.level,
                     nextTier: tier,
                     nextSymbol: dal ? { stat: dal.stat, dal: dal.name } : null,
@@ -158,7 +165,7 @@ export default async function UcCampaignPage({ params }: { params: Promise<{ id:
 
           {isGM && (
             <section>
-              <SectionTitle>Kampanya ayarları</SectionTitle>
+              <SectionTitle>{t("Kampanya ayarları")}</SectionTitle>
               <Card className="p-6">
                 <CampaignForm
                   id={c.id}
@@ -181,7 +188,7 @@ export default async function UcCampaignPage({ params }: { params: Promise<{ id:
 
           {isGM && (
             <section>
-              <SectionTitle>Odayı kapat</SectionTitle>
+              <SectionTitle>{t("Odayı kapat")}</SectionTitle>
               <CloseRoom
                 campaignId={c.id}
                 name={c.name}
@@ -198,14 +205,14 @@ export default async function UcCampaignPage({ params }: { params: Promise<{ id:
           {isGM && <JoinCodeBox campaignId={c.id} code={c.joinCode} spectatorCode={c.spectatorCode} />}
           {isSpectator && (
             <Card className="border-accent/40 p-5 text-sm">
-              <Badge tone="accent">İzleyici</Badge>
-              <p className="mt-2 text-muted">Bu kampanyayı izliyorsun. Karakter oluşturamaz, sahneye yazamaz ve zar atamazsın; Masa sohbetine ve GM&apos;e fısıltıyla yazabilirsin.</p>
+              <Badge tone="accent">{t("İzleyici")}</Badge>
+              <p className="mt-2 text-muted">{t("Bu kampanyayı izliyorsun. Karakter oluşturamaz, sahneye yazamaz ve zar atamazsın; Masa sohbetine ve GM'e fısıltıyla yazabilirsin.")}</p>
             </Card>
           )}
           <Card className="p-5">
-            <p className="kicker mb-3">Oyuncular ve izleyiciler</p>
+            <p className="kicker mb-3">{t("Oyuncular ve izleyiciler")}</p>
             {members.length === 0 ? (
-              <p className="text-sm text-muted">Henüz kimse katılmadı.</p>
+              <p className="text-sm text-muted">{t("Henüz kimse katılmadı.")}</p>
             ) : (
               <ul className="space-y-2">
                 {members.map((m) => (
@@ -214,7 +221,7 @@ export default async function UcCampaignPage({ params }: { params: Promise<{ id:
                       {m.displayName} <span className="text-xs text-muted">@{m.username}</span>
                       {m.role === "SPECTATOR" && (
                         <Badge className="ml-1.5" tone="neutral">
-                          İzleyici
+                          {t("İzleyici")}
                         </Badge>
                       )}
                     </span>
@@ -230,7 +237,7 @@ export default async function UcCampaignPage({ params }: { params: Promise<{ id:
             )}
             {c.status !== "ACTIVE" && (
               <div className="mt-3">
-                <Badge tone="warn">{c.status === "PAUSED" ? "Duraklatıldı" : "Arşivlendi"}</Badge>
+                <Badge tone="warn">{c.status === "PAUSED" ? t("Duraklatıldı") : t("Arşivlendi")}</Badge>
               </div>
             )}
           </Card>

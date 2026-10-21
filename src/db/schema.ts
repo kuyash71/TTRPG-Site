@@ -165,12 +165,38 @@ export interface InventoryItem {
   note: string;
 }
 
+/** GM'in bir karaktere özel yazdığı yetenek (puan harcatmaz, katman kurallarına girmez). */
+export interface CustomAbility {
+  id: string;
+  name: string;
+  /** Sitedeki simge setinden bir anahtar (ör. "dal:shinigami", "tree:ubermann", "type:Aktif", "glyph:skull") */
+  icon: string;
+  type: "Aktif" | "Pasif" | "Tepki";
+  maxLevel: 1 | 2 | 3;
+  /** Karakterin mevcut seviyesi (0 = kilitli/gizli değil, henüz açılmamış) */
+  level: number;
+  /** Seviye başına etki metni (uzunluk = maxLevel) */
+  levels: string[];
+  requirement: string;
+  cost: string;
+  synergy: string;
+  note: string;
+  flavor: string;
+}
+
 /** Yozlaşma çatalları (3, 6, 9, 12): Teslim ya da Direniş. */
 export type UcForkChoice = "teslim" | "direnis";
 export interface UcCharData {
   classKey?: string;
   faith?: string;
+  /** Priest: kasadaki inanç anahtarı ("trifarium/excidis") ve serbest ayrıntı (ejder/duygu) */
+  faithKey?: string;
+  faithDetail?: string;
   food?: string;
+  /** Dal mekaniği sayaçları (Akış, Açıklık, Atılım, Lütuf, Kızıl Yük...) */
+  counters?: Record<string, number>;
+  /** Dal mekaniği notları (Av Defteri, İpler) — anahtar: sayaç anahtarı */
+  dalNotes?: Record<string, string>;
   forks?: Partial<Record<"3" | "6" | "9" | "12", UcForkChoice>>;
   /** Dalı henüz seçilmemiş katmanda kazanılan sembol stat puanları (dal seçilince eklenir). */
   pendingSymbol?: number;
@@ -219,6 +245,8 @@ export const characters = pgTable(
     /** GM izni: oyuncu perklerini bir kez yeniden düzenleyebilir. */
     perkEditAllowed: boolean("perk_edit_allowed").notNull().default(false),
     gmNotes: text("gm_notes").notNull().default(""),
+    /** GM'in bu karaktere özel yazdığı yetenekler (SHZ ve UC). */
+    customAbilities: jsonb("custom_abilities").$type<CustomAbility[]>().notNull().default([]),
     /** Umbra Caelis'e özgü alanlar (SHZ karakterlerinde boş). */
     uc: jsonb("uc").$type<UcCharData>().notNull().default({}),
     createdAt: created(),

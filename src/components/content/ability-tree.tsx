@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { Ability, Tree } from "@/lib/shz/content-types";
 import { cx } from "../ui";
+import { Tr } from "./tr";
 
 /**
  * Ekspertiz ağacının görsel düzeni:
@@ -39,7 +40,10 @@ export function AbilityTree({
           <div key={sb.key} className="mt-3 ml-4 sm:ml-6">
             <p className="mb-2 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-warn">
               <span className="inline-block h-px w-4 bg-warn/60" aria-hidden />
-              Yan dal {sb.branch} · {sb.branchName} <span className="normal-case tracking-normal text-muted">({a.name} sonrası)</span>
+              <Tr s="Yan dal {b}" vars={{ b: sb.branch }} /> · {sb.branchName}{" "}
+              <span className="normal-case tracking-normal text-muted">
+                <Tr s="({name} sonrası)" vars={{ name: a.name }} />
+              </span>
             </p>
             <div className="border-l-2 border-dashed border-warn/50 pl-3 sm:pl-4">{node(sb, group, depth + 1)}</div>
           </div>
@@ -58,7 +62,7 @@ export function AbilityTree({
     <div className="space-y-6">
       {roots.length > 0 && (
         <div>
-          <BranchHeader code="Kök" name="Ağacın temeli · öncülsüz" />
+          <BranchHeader code={<Tr s="Kök" />} name={<Tr s="Ağacın temeli · öncülsüz" />} />
           <div className="grid gap-3 md:grid-cols-2">{roots.map((a) => render(a))}</div>
         </div>
       )}
@@ -69,7 +73,7 @@ export function AbilityTree({
           const mainName = g.list.find((a) => a.branch === g.L)?.branchName ?? "";
           return (
             <section key={g.L} className="min-w-0">
-              <BranchHeader code={`Kol ${g.L}`} name={mainName} />
+              <BranchHeader code={<Tr s="Kol {l}" vars={{ l: g.L }} />} name={mainName} />
               <div className="space-y-4">{starts.map((a) => node(a, g.list, 0))}</div>
             </section>
           );
@@ -77,7 +81,7 @@ export function AbilityTree({
       </div>
       {other.length > 0 && (
         <div>
-          <BranchHeader code="Diğer" name="" />
+          <BranchHeader code={<Tr s="Diğer" />} name="" />
           <div className="grid gap-3 md:grid-cols-2">{other.map((a) => render(a))}</div>
         </div>
       )}
@@ -85,7 +89,7 @@ export function AbilityTree({
   );
 }
 
-function BranchHeader({ code, name }: { code: string; name: string }) {
+function BranchHeader({ code, name }: { code: ReactNode; name: ReactNode }) {
   return (
     <div className="mb-3 flex items-center gap-3">
       <span className="rounded-md bg-accent/15 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-widest text-accent">{code}</span>

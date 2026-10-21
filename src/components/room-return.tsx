@@ -4,9 +4,11 @@ import { usePathname } from "next/navigation";
 import { AppLink } from "@/components/app-link";
 import { roomHref, type Sys } from "@/lib/links";
 import { useEffect, useState } from "react";
+import { useT } from "@/i18n/client";
 
 /** Oyun odasından başka bir sayfaya geçilince sağ altta "Oyun odasına dön" düğmesi. */
 export function RoomReturn() {
+  const t = useT();
   const path = usePathname();
   const [room, setRoom] = useState<{ id: string; name: string; system?: Sys } | null>(null);
   useEffect(() => {
@@ -23,12 +25,12 @@ export function RoomReturn() {
       <AppLink href={roomHref(room.system === "UC" ? "UC" : "SHZ", room.id)} className="flex items-center gap-2 py-2.5 pl-4 pr-3 text-sm text-ink hover:text-accent">
         <ArrowLeft className="h-4 w-4" />
         <span>
-          Oyun odasına dön <span className="hidden text-muted sm:inline">· {room.name}</span>
+          {t("Oyun odasına dön")} <span className="hidden text-muted sm:inline">· {room.name}</span>
         </span>
       </AppLink>
       <button
         type="button"
-        aria-label="Kapat"
+        aria-label={t("Kapat")}
         className="border-l border-line px-2.5 py-2.5 text-muted hover:text-ink"
         onClick={() => {
           try {

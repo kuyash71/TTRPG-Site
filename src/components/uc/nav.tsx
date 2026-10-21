@@ -1,3 +1,5 @@
+import { getT } from "@/i18n/server";
+import { LangSwitch } from "../lang-switch";
 import { MoonLogo } from "./logo";
 import { UcMobileMenu } from "./nav-client";
 
@@ -10,7 +12,9 @@ const LINKS = [
 ];
 
 /** Umbra Caelis üst çubuğu. Bu bölümde hesap yoktur; bağlantılar düz <a> (adres /umbracaelis altında kalır). */
-export function UcTopNav() {
+export async function UcTopNav() {
+  const t = await getT();
+  const links = LINKS.map((l) => ({ ...l, label: t(l.label) }));
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-bg/85 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
@@ -18,11 +22,11 @@ export function UcTopNav() {
           <MoonLogo className="h-8 w-8 text-accent" />
           <span className="leading-tight">
             <span className="block font-serif text-[15px] font-semibold tracking-[0.12em] text-ink">UMBRA CAELIS</span>
-            <span className="block text-[10px] uppercase tracking-[0.22em] text-lav">TTRPG · Kurallar</span>
+            <span className="block text-[10px] uppercase tracking-[0.22em] text-lav">{t("TTRPG · Kurallar")}</span>
           </span>
         </a>
         <nav className="hidden items-center gap-1 md:flex">
-          {LINKS.map((l) => (
+          {links.map((l) => (
             <a key={l.href} href={l.href} className="rounded-md px-3 py-2 text-sm text-muted transition hover:bg-surface2 hover:text-ink">
               {l.label}
             </a>
@@ -31,8 +35,10 @@ export function UcTopNav() {
           <a href="/" className="rounded-md px-3 py-2 text-sm text-muted transition hover:bg-surface2 hover:text-ink">
             umbracaelis.com
           </a>
+          <LangSwitch className="ml-2" />
         </nav>
-        <UcMobileMenu links={[...LINKS, { href: "/", label: "umbracaelis.com" }]} />
+        <LangSwitch className="ml-auto md:hidden" />
+        <UcMobileMenu links={[...links, { href: "/", label: "umbracaelis.com" }]} />
       </div>
     </header>
   );

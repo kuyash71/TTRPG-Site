@@ -1,10 +1,13 @@
 import Link from "next/link";
+import { LangSwitch } from "@/components/lang-switch";
+import { getT } from "@/i18n/server";
 
 /**
  * Giriş, kayıt ve şifre ekranlarının ortak çerçevesi. Amblem her sayfada (AuthBrand) sisteme göre çizilir;
  * oturum yönlendirmeleri her sayfanın kendisindedir. Kurallar iki sistem için de hesapsız okunur.
  */
 export default async function AuthLayout({ children }: { children: React.ReactNode }) {
+  const t = await getT();
   return (
     <div className="relative grid min-h-dvh place-items-center overflow-hidden px-4 py-12">
       <div
@@ -15,16 +18,19 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
             "radial-gradient(60rem 30rem at 50% -10%, rgb(var(--accent) / 0.14), transparent 60%), radial-gradient(40rem 20rem at 50% 110%, rgb(var(--accent) / 0.06), transparent 60%)",
         }}
       />
+      <div className="absolute right-4 top-4 z-10">
+        <LangSwitch />
+      </div>
       <div className="relative w-full max-w-sm">
         {children}
         <div className="mt-6 space-y-1 text-center text-sm text-muted">
-          <p className="text-[11px] uppercase tracking-widest">Kurallar · hesap gerekmez</p>
+          <p className="text-[11px] uppercase tracking-widest">{t("Kurallar · hesap gerekmez")}</p>
           <p className="flex flex-wrap justify-center gap-x-4 gap-y-1">
             <Link href="/kurallar" className="hover:text-ink">
-              Schwarzesonne kuralları →
+              {t("Schwarzesonne kuralları")} →
             </Link>
             <a href="/umbracaelis/kurallar" className="hover:text-ink">
-              Umbra Caelis kuralları →
+              {t("Umbra Caelis kuralları")} →
             </a>
           </p>
         </div>

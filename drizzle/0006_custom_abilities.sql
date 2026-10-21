@@ -1,0 +1,1 @@
+ALTER TABLE "characters" ADD COLUMN "custom_abilities" jsonb DEFAULT '[]'::jsonb NOT NULL;

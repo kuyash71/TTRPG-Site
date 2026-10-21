@@ -1,22 +1,25 @@
-// Yeni oyuncular için Almanca terimlerin Türkçe anlamı, okunuşu ve "ne işe yarar" özeti.
-// Veri content/tips.json dosyasındadır; kural içeriğinden (shz.json) bağımsız olarak elle düzenlenir.
-import raw from "../../../content/tips.json";
+// Yeni oyuncular için Almanca terimlerin Türkçe (ya da İngilizce) anlamı, okunuşu ve "ne işe yarar" özeti.
+// Veri content/tips.json (Türkçe) ve content/tips.en.json (İngilizce) dosyalarındadır; kural içeriğinden
+// (shz.json) bağımsız olarak elle düzenlenir.
+import rawTr from "../../../content/tips.json";
+import rawEn from "../../../content/tips.en.json";
+import type { Locale } from "../../i18n/core";
 
 export interface Tip {
-  /** Adın Türkçe anlamı */
+  /** Adın anlamı */
   meaning?: string;
   /** Yaklaşık okunuşu */
   say?: string;
-  /** Sade Türkçe ile ne işe yaradığı */
+  /** Sade dille ne işe yaradığı */
   summary?: string;
 }
 export type TipKind = "abilities" | "augments" | "trees" | "perks" | "stats" | "terms";
 
-interface TermTip extends Tip {
+export interface TermTip extends Tip {
   match: string[];
 }
 
-const data = raw as unknown as {
+interface TipData {
   abilities: Record<string, Tip>;
   augments: Record<string, Tip>;
   trees: Record<string, Tip>;
@@ -24,19 +27,28 @@ const data = raw as unknown as {
   stats: Record<string, Tip>;
   terms: Record<string, TermTip>;
   branches: Record<string, string>;
-};
+}
 
-export function tipFor(kind: TipKind, key: string): Tip | null {
-  return (data[kind] as Record<string, Tip> | undefined)?.[key] ?? null;
+const DATA: Record<Locale, TipData> = {
+  tr: rawTr as unknown as TipData,
+  en: rawEn as unknown as TipData,
+};
+const dataFor = (loc: Locale) => DATA[loc] ?? DATA.tr;
+
+export function tipFor(kind: TipKind, key: string, loc: Locale = "tr"): Tip | null {
+  return (dataFor(loc)[kind] as Record<string, Tip> | undefined)?.[key] ?? (dataFor("tr")[kind] as Record<string, Tip> | undefined)?.[key] ?? null;
 }
-export function branchMeaning(name: string | null | undefined) {
-  return name ? (data.branches[name] ?? null) : null;
+export function branchMeaning(name: string | null | undefined, loc: Locale = "tr") {
+  return name ? (dataFor(loc).branches[name] ?? null) : null;
 }
-export const TERM_TIPS = data.terms;
-export const STAT_TIPS = data.stats;
+/** Dile göre sözlük terimleri (Corruption, Cower…). */
+export const termTips = (loc: Locale = "tr") => dataFor(loc).terms;
+export const statTips = (loc: Locale = "tr") => dataFor(loc).stats;
+export const TERM_TIPS: Record<Locale, Record<string, TermTip>> = { tr: DATA.tr.terms, en: DATA.en.terms };
+export const STAT_TIPS: Record<Locale, Record<string, Tip>> = { tr: DATA.tr.stats, en: DATA.en.stats };
 
 /** Aramada kullanılmak üzere ipucunun küçük harfli düz metni. */
-export function tipText(kind: TipKind, key: string) {
-  const t = tipFor(kind, key);
-  return t ? [t.meaning, t.summary].filter(Boolean).join(" ").toLocaleLowerCase("tr-TR") : "";
+export function tipText(kind: TipKind, key: string, loc: Locale = "tr") {
+  const t = tipFor(kind, key, loc);
+  return t ? [t.meaning, t.summary].filter(Boolean).join(" ").toLocaleLowerCase(loc === "en" ? "en-GB" : "tr-TR") : "";
 }

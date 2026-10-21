@@ -15,7 +15,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { UC_BASE, ucStatFromLabel, type UcStatKey } from "../src/lib/uc/constants";
-import type { UcAbility, UcClass, UcContent, UcDal, UcDoc, UcPerk, UcRequirement, UcSection } from "../src/lib/uc/content-types";
+import type { UcAbility, UcClass, UcContent, UcDal, UcDoc, UcFaith, UcFaithOption, UcPerk, UcRequirement, UcSection } from "../src/lib/uc/content-types";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, "..");
@@ -207,7 +207,9 @@ function md(text: string): string {
         continue;
       }
       const tag = m[1].length <= 2 ? "h2" : m[1].length === 3 ? "h3" : "h4";
-      out.push(`<${tag}>${inline(m[2].replace(/:+$/, ""))}</${tag}>`);
+      const htxt = m[2].replace(/:+$/, "");
+      const hid = slug(htxt.replace(/\[\[|\]\]|\*/g, ""));
+      out.push(`<${tag}${hid ? ` id="${hid}"` : ""}>${inline(htxt)}</${tag}>`);
       i++;
       continue;
     }
@@ -321,6 +323,62 @@ const stripFields = (t: string) =>
     .replace(/^\s*-{3,}\s*$/gm, "")
     .trim();
 const titleCase = (k: string) => k.charAt(0) + k.slice(1).toLocaleLowerCase("tr-TR");
+
+// ---------------------------------------------------------------- inançlar
+const SMALL = new Set(["of", "the", "and", "ve"]);
+function niceName(s: string, turkish = false) {
+  return (turkish ? s.toLocaleLowerCase("tr-TR") : s.replace(/İ/g, "i").toLowerCase())
+    .split(/(\s+|\()/)
+    .map((w, i) => (SMALL.has(w) && i > 0 ? w : w.charAt(0).toLocaleUpperCase("tr-TR") + w.slice(1)))
+    .join("");
+}
+/** Oyuncunun ayrıca yazacağı ayrıntı (seçenek yerine). Kasada serbest metin olan inançlar için. */
+const FAITH_DETAIL: Record<string, string> = {
+  "religion-of-the-mighty-dragons": "Adandığın yüce ejder ve duygu (ör. öfke, onur, hüzün, açgözlülük, umut)",
+};
+function parseFaiths(text: string, where: string): { intro: string; faiths: UcFaith[] } {
+  const parts = text.split(/^#{3,4}\s+(.+?)\s*$/m);
+  const intro = md(parts[0].trim());
+  const faiths: UcFaith[] = [];
+  for (let k = 1; k < parts.length; k += 2) {
+    const raw = parts[k].trim();
+    const block = (parts[k + 1] ?? "").trim();
+    const name = niceName(raw);
+    const key = slug(raw.replace(/\(.*?\)/g, ""));
+    const short = name.replace(/\s*\(.*?\)\s*/g, "").trim();
+    const options: UcFaithOption[] = [];
+    const lines = block.split("\n");
+    const rest: string[] = [];
+    for (const ln of lines) {
+      const om = /^\s*[-*]\s+\*\*(.+?):?\*\*:?\s*(.*)$/.exec(ln);
+      if (om) {
+        const oname = om[1].replace(/:$/, "").trim();
+        options.push({ key: slug(oname.replace(/\(.*?\)/g, "")), name: oname, html: md(om[2].trim()) });
+      } else rest.push(ln);
+    }
+    let html = md(rest.join("\n").trim());
+    if (!options.length) {
+      // "**A**, **B** ve **C**" biçiminde sayılan alt inançlar (ezoterik)
+      const first = block.split(/\n\s*\n/)[0];
+      const bolds = [...first.matchAll(/\*\*(.+?)\*\*/g)].map((m) => m[1].trim());
+      if (bolds.length >= 2) for (const b of bolds) options.push({ key: slug(b), name: b, html: "" });
+    }
+    const sc = /Oyuna\s*\+(\d+)\s*Yozlaşma ile başlarsın/i.exec(block);
+    faiths.push({
+      key,
+      name,
+      short: /ezoterik/.test(norm(raw)) ? "Ezoterik" : short,
+      html,
+      options,
+      detailHint: FAITH_DETAIL[key] ?? null,
+      startCorruption: sc ? Number(sc[1]) : 0,
+      esoteric: /ezoterik/.test(norm(raw)),
+    });
+    if (!html && !options.length) warn(`${where} inanç ${name}: metin yok`);
+  }
+  if (!faiths.length) warn(`${where}: İNANÇ bölümünde inanç bulunamadı`);
+  return { intro, faiths };
+}
 
 // ---------------------------------------------------------------- toplama
 if (!fs.existsSync(SYS) || !fs.existsSync(CLASSES)) {
@@ -452,6 +510,15 @@ for (const p of rawPerks) {
   LINKS.set(p.name, l);
 }
 for (const [fn, title] of DOC_ORDER) LINKS.set(fn.replace(/\.md$/, ""), { href: `${UC_BASE}/${slug(title)}`, label: title });
+// Mana tipleri ayrı dosya değil; Mana sayfasındaki tabloya gider.
+for (const [k, label] of [
+  ["Decayed Mana", "Decayed Mana"],
+  ["Primordial Mana", "Primordial Mana"],
+  ["Artificial Mana", "Blu Mana"],
+  ["Internal, İç Mana", "İç Mana"],
+  ["External, Dış Mana", "Dış Mana"],
+])
+  LINKS.set(k, { href: `${UC_BASE}/mana#mana-tipleri`, label });
 // Stats.md henüz yok: statlar sözlükte listelenir.
 if (!fs.existsSync(path.join(SYS, "Stats.md"))) {
   LINKS.set("Stats", { href: `${UC_BASE}/sozluk#statlar`, label: "Statlar" });
@@ -523,7 +590,7 @@ for (const c of rawClasses) {
         }
         if (key === "SİNERJİ")
           for (const sm of txt.matchAll(/\[\[([^\]|]+)/g)) {
-            const k = nameToKey.get(linkKey(sm[1]));
+            const k = nameToKey.get(linkKey(sm[1])) ?? nameToKey.get(linkKey(sm[1]).split("/").pop() ?? "");
             if (k && !synergies.includes(k)) synergies.push(k);
             else if (!k) warn(`${where}: sinerji yeteneği bulunamadı: ${sm[1]}`);
           }
@@ -544,7 +611,7 @@ for (const c of rawClasses) {
         requirementText: f["GEREKSİNİM"] ?? "",
         requirements,
         maxLevel,
-        signature: maxLevel === 1,
+        signature: maxLevel === 1 || /vertex/i.test(f["TİP"] ?? ""),
         levelEffects,
         sections: out,
         synergies,
@@ -558,9 +625,18 @@ for (const c of rawClasses) {
       order.push({ key: ab.key, sort: [ab.signature ? 1 : 0, maxReq, ab.name] });
     }
     order.sort((x, y) => x.sort[0] - y.sort[0] || x.sort[1] - y.sort[1] || x.sort[2].localeCompare(y.sort[2]));
-    if (order.length !== 5) warn(`${c.name}/${d.name}: ${order.length} yetenek var (kural: 5)`);
+    if (order.length !== 6) warn(`${c.name}/${d.name}: ${order.length} yetenek var (kural: 6, ikisi Vertex)`);
+    if (order.filter((o) => o.sort[0] === 1).length !== 2) warn(`${c.name}/${d.name}: Vertex sayısı 2 değil`);
     const bonus = fieldsOf(d.text)["BAŞLANGIÇ BONUSU"] ?? null;
-    const introHtml = md(stripFields(d.text));
+    // a.DAL: alanlar + giriş metni, "---" sonrası dalın kendi mekaniği (AKIŞ, DÜELLO...).
+    const body = d.text.replace(/^\*\*[A-ZÇĞİÖŞÜ ]+\*\*:.*$/gm, "").trim();
+    const cut = /^\s*-{3,}\s*$/m.exec(body);
+    const introHtml = md(cut ? body.slice(0, cut.index) : body);
+    const mtext = cut ? body.slice(cut.index + cut[0].length).trim() : "";
+    const mhead = /^#{2,4}\s+(.+?)\s*$/m.exec(mtext);
+    // Başlık ayrı gösterildiği için metin başındaki ilk başlık çıkarılır.
+    const mbody = mhead && mhead.index === 0 ? mtext.slice(mhead[0].length).trim() : mtext;
+    const mechanic = mtext ? { title: mhead ? niceName(mhead[1].replace(/:+$/, "").trim(), true) : "Dal mekaniği", html: md(mbody) } : null;
     const dal: UcDal = {
       key: d.key,
       name: d.name,
@@ -569,19 +645,38 @@ for (const c of rawClasses) {
       stat: d.stat ?? "yalman",
       identity: d.identity,
       introHtml,
+      mechanic: mechanic ? { title: mechanic.title, html: mechanic.html } : null,
       startBonusText: bonus ? bonus.replace(/\s+/g, " ").trim() : null,
       abilities: order.map((o) => o.key),
-      searchText: plain([d.name, c.name, d.identity, introHtml, bonus ?? ""].join(" ")),
+      searchText: plain([d.name, c.name, d.identity, introHtml, mechanic?.html ?? "", bonus ?? ""].join(" ")),
     };
     if (dals[dal.key]) fail(`Aynı isimde iki dal: ${dal.name}`);
     dals[dal.key] = dal;
     dalKeys.push(dal.key);
   }
   // Katman tablosu sayfada yapısal olarak çizilir; metinden çıkarılır. Diğer başlıklar olduğu gibi kalır.
-  const ctxt = stripFields(c.text).replace(/^(#{2,4})\s+KATMANLAR\s*:?\s*$[\s\S]*?(?=^#{1,4}\s|(?![\s\S]))/m, "");
+  let ctxt = stripFields(c.text).replace(/^(#{2,4})\s+KATMANLAR\s*:?\s*$[\s\S]*?(?=^#{1,4}\s|(?![\s\S]))/m, "");
+  // İNANÇ bölümü yapısal olarak çıkarılır (karakter oluşturmada seçilir).
+  let faiths: UcFaith[] | undefined;
+  let faithIntroHtml: string | undefined;
+  const fm = /^#{1,2}\s+İNANÇ\s*$([\s\S]*?)(?=^#{1,2}\s|(?![\s\S]))/m.exec(ctxt);
+  if (fm) {
+    ctxt = ctxt.replace(fm[0], "");
+    const parsed = parseFaiths(fm[1], c.name);
+    faiths = parsed.faiths;
+    faithIntroHtml = parsed.intro;
+  }
   const introHtml = md(ctxt);
   const csecs: UcSection[] = [];
-  classes.push({ key: c.key, name: c.name, introHtml, sections: csecs, dals: dalKeys, searchText: plain([c.name, introHtml].join(" ")) });
+  classes.push({
+    key: c.key,
+    name: c.name,
+    introHtml,
+    sections: csecs,
+    dals: dalKeys,
+    ...(faiths && { faiths, faithIntroHtml }),
+    searchText: plain([c.name, introHtml, faithIntroHtml ?? "", ...(faiths ?? []).map((f) => f.html + " " + f.options.map((o) => o.name + " " + o.html).join(" "))].join(" ")),
+  });
 }
 
 const CATEGORY_ORDER = ["Köken", "Bağ", "Beden", "Zihin", "Beceri", "Mana", "Bağımlılık"];

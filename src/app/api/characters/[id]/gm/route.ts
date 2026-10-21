@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { characters, type Character } from "@/db/schema";
 import { bad, forbidden, route } from "@/lib/api";
+import { fmt } from "@/i18n/core";
 import { addLog, characterAccess, requireSystem } from "@/lib/access";
 import { characterChanged, notifyCampaign } from "@/lib/realtime-bus";
 import { messages } from "@/db/schema";
@@ -44,15 +45,15 @@ export const PATCH = route(
 
     if (body.level !== undefined && body.level !== c.level) {
       set.level = body.level;
-      log.push(`seviye ${c.level} → ${body.level}`);
+      log.push(fmt("seviye {from} → {to}", { from: c.level, to: body.level }));
     }
     if (body.abilityPoints !== undefined && body.abilityPoints !== c.abilityPoints) {
       set.abilityPoints = body.abilityPoints;
-      log.push(`yetenek puanı ${c.abilityPoints} → ${body.abilityPoints}`);
+      log.push(fmt("yetenek puanı {from} → {to}", { from: c.abilityPoints, to: body.abilityPoints }));
     }
     if (body.freeStatPoints !== undefined && body.freeStatPoints !== c.freeStatPoints) {
       set.freeStatPoints = body.freeStatPoints;
-      log.push(`serbest stat puanı ${c.freeStatPoints} → ${body.freeStatPoints}`);
+      log.push(fmt("serbest stat puanı {from} → {to}", { from: c.freeStatPoints, to: body.freeStatPoints }));
     }
     if (body.stats) {
       const next = { ...c.stats };
@@ -67,7 +68,7 @@ export const PATCH = route(
       const unlock = body.corruptionLocked === false;
       const r = clampCorruption(body.corruption ?? c.corruption, unlock ? false : (body.corruptionLocked ?? c.corruptionLocked));
       if (r.value !== c.corruption) log.push(`Corruption ${c.corruption} → ${r.value}`);
-      if (unlock && c.corruptionLocked) log.push("Corruption kilidi kaldırıldı");
+      if (unlock && c.corruptionLocked) log.push(fmt("Corruption kilidi kaldırıldı"));
       set.corruption = r.value;
       set.corruptionLocked = unlock ? false : r.locked;
     }
@@ -77,63 +78,69 @@ export const PATCH = route(
     }
     if (body.status && body.status !== c.status) {
       set.status = body.status;
-      log.push(`durum ${c.status} → ${body.status}`);
+      log.push(fmt("durum {from} → {to}", { from: c.status, to: body.status }));
     }
     if (body.gmNotes !== undefined) set.gmNotes = body.gmNotes;
     if (body.trees) {
       if (body.trees.some((t) => !getTree(t))) throw bad("Bilinmeyen ağaç.");
       set.trees = [...new Set(body.trees)];
-      log.push(`ağaçlar: ${set.trees.map((t) => getTree(t)!.name).join(", ")}`);
+      log.push(fmt("ağaçlar: {list}", { list: set.trees.map((t) => getTree(t)!.name).join(", ") }));
     }
     if (body.abilities) {
       const next: Record<string, number> = {};
       for (const [k, v] of Object.entries(body.abilities)) {
         const ab = getAbility(k);
-        if (!ab) throw bad(`Bilinmeyen yetenek: ${k}`);
-        if (v > ab.maxLevel) throw bad(`${ab.name} en fazla ${ab.maxLevel}. seviye olabilir.`);
+        if (!ab) throw bad("Bilinmeyen yetenek: {key}", { key: k });
+        if (v > ab.maxLevel) throw bad("{name} en fazla {max}. seviye olabilir.", { name: ab.name, max: ab.maxLevel });
         if (v > 0) next[k] = v;
       }
       set.abilities = next;
-      log.push("yetenekler GM tarafından düzenlendi");
+      log.push(fmt("yetenekler GM tarafından düzenlendi"));
     }
     if (body.perks) {
       if (body.perks.some((p) => !getPerk(p))) throw bad("Bilinmeyen perk.");
       set.perks = [...new Set(body.perks)];
-      log.push(`perkler: ${set.perks.map((p) => getPerk(p)!.name).join(", ") || "yok"}`);
+      log.push(fmt("perkler: {list}", { list: set.perks.map((p) => getPerk(p)!.name).join(", ") || "yok" }));
     }
     if (body.deathSave) {
       set.deathSave = { ...c.deathSave, ...body.deathSave };
-      log.push(`Death Save ${body.deathSave.available ? "hakkı verildi" : "hakkı kaldırıldı"}`);
+      log.push(body.deathSave.available ? fmt("Death Save hakkı verildi") : fmt("Death Save hakkı kaldırıldı"));
     }
     if (body.perkEditAllowed !== undefined && body.perkEditAllowed !== c.perkEditAllowed) {
       set.perkEditAllowed = body.perkEditAllowed;
-      log.push(body.perkEditAllowed ? "perk düzenleme izni verildi" : "perk düzenleme izni kaldırıldı");
+      log.push(body.perkEditAllowed ? fmt("perk düzenleme izni verildi") : fmt("perk düzenleme izni kaldırıldı"));
     }
     let announce: string | null = null;
     if (body.revive) {
       if (c.status !== "DEAD") throw bad("Karakter ölü değil.");
       set.status = "ACTIVE";
       set.deathSave = { ...c.deathSave, available: true, deaths: 0, saves: 0 };
-      log.push("karakter diriltildi");
-      announce = `✚ ${c.name} GM tarafından diriltildi.`;
+      log.push(fmt("karakter diriltildi"));
+      announce = fmt("✚ {name} GM tarafından diriltildi.", { name: c.name });
     }
     if (body.refund && (body.refund.stats || body.refund.abilities)) {
       const plan = refundPlan({ ...c, stats: (set.stats as typeof c.stats) ?? c.stats }, rulesData());
       if (body.refund.stats && plan.statPoints > 0) {
         set.stats = plan.stats;
         set.freeStatPoints = (set.freeStatPoints ?? c.freeStatPoints) + plan.statPoints;
-        log.push(`${plan.statPoints} stat puanı iade edildi`);
+        log.push(fmt("{n} stat puanı iade edildi", { n: plan.statPoints }));
       }
       if (body.refund.abilities && plan.abilityPoints > 0) {
         set.abilities = {};
         set.trees = plan.trees;
         set.abilityPoints = (set.abilityPoints ?? c.abilityPoints) + plan.abilityPoints;
-        log.push(`${plan.abilityPoints} yetenek puanı iade edildi (yetenekler ve ek ağaçlar sıfırlandı)`);
+        log.push(fmt("{n} yetenek puanı iade edildi (yetenekler ve ek ağaçlar sıfırlandı)", { n: plan.abilityPoints }));
       }
     }
     if (!Object.keys(set).length) return { ok: true };
     await db.update(characters).set(set).where(eq(characters.id, c.id));
-    if (log.length) await addLog(c.id, user.id, "gm", `GM: ${log.join(", ")}${body.reason ? ` (${body.reason})` : ""}`);
+    if (log.length)
+      await addLog(
+        c.id,
+        user.id,
+        "gm",
+        body.reason ? fmt("GM: {changes} ({reason})", { changes: log.join(", "), reason: body.reason }) : fmt("GM: {changes}", { changes: log.join(", ") }),
+      );
     characterChanged(a.campaign.id, c.id);
     if (announce) {
       const [m] = await db.insert(messages).values({ campaignId: a.campaign.id, userId: user.id, channel: "SYSTEM", content: announce }).returning();

@@ -1,6 +1,7 @@
 // Umbra Caelis kural motoru. Saf fonksiyonlardır; sunucuda (doğrulama) ve istemcide (önizleme) aynı sonucu verir.
 // Beden/yara sistemi SHZ ile aynıdır (Body.md): yara cezaları ve sargı formülleri ortak kullanılır.
 import type { UcCharData, UcForkChoice } from "../../db/schema";
+import { fmt } from "../../i18n/core";
 import { bodyPartLabel, type BodyPartKey } from "../shz/constants";
 import { normalizeBody, woundPenalty, type BodyState } from "../shz/rules";
 import { UC_STAT_KEYS, UC_STAT_LABELS, UC_TIER_OPEN, ucStatFromLabel, type UcStatKey } from "./constants";
@@ -167,7 +168,7 @@ export function ucPerkBudget(keys: string[], start: number, data: Pick<UcRules, 
   for (const k of new Set(keys)) {
     const p = data.perks.find((x) => x.key === k);
     if (!p) {
-      problems.push(`Bilinmeyen perk: ${k}`);
+      problems.push(fmt("Bilinmeyen perk: {key}", { key: k }));
       continue;
     }
     picked.push(p);
@@ -176,10 +177,10 @@ export function ucPerkBudget(keys: string[], start: number, data: Pick<UcRules, 
   }
   for (const p of picked)
     for (const ex of p.exclusive)
-      if (picked.some((q) => q.key === ex) && p.key < ex) problems.push(`${p.name} ile ${data.perks.find((q) => q.key === ex)?.name ?? ex} birlikte alınamaz`);
+      if (picked.some((q) => q.key === ex) && p.key < ex) problems.push(fmt("{a} ile {b} birlikte alınamaz", { a: p.name, b: data.perks.find((q) => q.key === ex)?.name ?? ex }));
   const left = start + gained - spent;
   if (left < 0) problems.push("Perk puanı negatife düşemez");
-  if (gained > UC_NEG_PERK_CAP) warnings.push(`Negatif perklerden +${gained} puan: tavan +${UC_NEG_PERK_CAP}, fazlası için GM onayı gerekir`);
+  if (gained > UC_NEG_PERK_CAP) warnings.push(fmt("Negatif perklerden +{gained} puan: tavan +{cap}, fazlası için GM onayı gerekir", { gained, cap: UC_NEG_PERK_CAP }));
   return { start, spent, gained, left, convertible: left > 0 ? Math.floor((left + 1) / 2) : 0, problems, warnings };
 }
 
@@ -209,10 +210,10 @@ export type UcLearnState =
 function reqProblems(c: Pick<UcCharLike, "stats" | "level" | "corruption">, reqs: UcRequirement[]) {
   const out: string[] = [];
   for (const r of reqs) {
-    if (r.kind === "stat" && (c.stats[r.stat] ?? 0) < r.min) out.push(`${UC_STAT_LABELS[r.stat]} ${r.min} gerekli`);
-    if (r.kind === "level" && c.level < r.min) out.push(`Sv ${r.min} gerekli`);
-    if (r.kind === "decayMin" && c.corruption < r.min) out.push(`Yozlaşma en az ${r.min}`);
-    if (r.kind === "decayMax" && c.corruption > r.max) out.push(`Yozlaşma en fazla ${r.max}`);
+    if (r.kind === "stat" && (c.stats[r.stat] ?? 0) < r.min) out.push(fmt("{stat} {min} gerekli", { stat: UC_STAT_LABELS[r.stat], min: r.min }));
+    if (r.kind === "level" && c.level < r.min) out.push(fmt("Sv {min} gerekli", { min: r.min }));
+    if (r.kind === "decayMin" && c.corruption < r.min) out.push(fmt("Yozlaşma en az {min}", { min: r.min }));
+    if (r.kind === "decayMax" && c.corruption > r.max) out.push(fmt("Yozlaşma en fazla {max}", { max: r.max }));
   }
   return out;
 }
@@ -224,14 +225,14 @@ export function ucLearnState(c: UcCharLike, abilityKey: string, data: UcRules): 
   if (!a) return { state: "locked", nextLevel: next, problems: ["Bilinmeyen yetenek"] };
   if (lv >= a.maxLevel) return { state: "maxed", nextLevel: lv, problems: [] };
   const problems: string[] = [];
-  if (!c.trees.includes(a.dalKey)) problems.push(`${data.dals[a.dalKey]?.name ?? a.dalKey} dalı seçilmedi`);
+  if (!c.trees.includes(a.dalKey)) problems.push(fmt("{dal} dalı seçilmedi", { dal: data.dals[a.dalKey]?.name ?? a.dalKey }));
   const open = UC_TIER_OPEN[a.tier];
-  if (c.level < open) problems.push(`K${a.tier} Sv ${open}'te açılır`);
-  if (next === 3 && c.level < open + 2) problems.push(`3. seviye en erken Sv ${open + 2}`);
+  if (c.level < open) problems.push(fmt("K{tier} Sv {lv}'te açılır", { tier: a.tier, lv: open }));
+  if (next === 3 && c.level < open + 2) problems.push(fmt("3. seviye en erken Sv {lv}", { lv: open + 2 }));
   if (lv === 0) problems.push(...reqProblems(c, a.requirements));
   const pts = ucPoints(c, data);
   const usesZirve = pts.available[a.tier] <= 0;
-  if (usesZirve && pts.zirveLeft <= 0) problems.push(`K${a.tier} için yetenek puanı yok`);
+  if (usesZirve && pts.zirveLeft <= 0) problems.push(fmt("K{tier} için yetenek puanı yok", { tier: a.tier }));
   if (problems.length) return { state: "locked", nextLevel: next, problems };
   return { state: "available", nextLevel: next, usesZirve, problems: [] };
 }
@@ -243,8 +244,8 @@ export function ucOpenDalProblems(c: Pick<UcCharLike, "level" | "trees" | "uc">,
   const out: string[] = [];
   if (d.classKey !== c.uc.classKey) out.push("Dal ana sınıfına ait değil");
   if (d.tier === 1) out.push("K1 dalı karakter oluştururken seçilir");
-  if (c.level < UC_TIER_OPEN[d.tier]) out.push(`K${d.tier} Sv ${UC_TIER_OPEN[d.tier]}'te açılır`);
-  if (c.trees.some((k) => data.dals[k]?.tier === d.tier)) out.push(`K${d.tier} dalı zaten seçildi`);
+  if (c.level < UC_TIER_OPEN[d.tier]) out.push(fmt("K{tier} Sv {lv}'te açılır", { tier: d.tier, lv: UC_TIER_OPEN[d.tier] }));
+  if (c.trees.some((k) => data.dals[k]?.tier === d.tier)) out.push(fmt("K{tier} dalı zaten seçildi", { tier: d.tier }));
   return out;
 }
 
@@ -291,21 +292,21 @@ export function ucBuildCreation(input: UcCreationInput, startPerkPoints: number,
     used += v ?? 0;
   }
   const total = UC_START_FREE + budget.convertible;
-  if (used !== total) problems.push(`Tam olarak ${total} stat puanı dağıtılmalı (${UC_START_FREE} serbest + ${budget.convertible} perklerden)`);
+  if (used !== total) problems.push(fmt("Tam olarak {total} stat puanı dağıtılmalı ({free} serbest + {perk} perklerden)", { total, free: UC_START_FREE, perk: budget.convertible }));
   if (okDal && (input.points[okDal.stat] ?? 0) > budget.convertible)
     problems.push(
       budget.convertible
-        ? `Sembol stat'a (${UC_STAT_LABELS[okDal.stat]}) en fazla ${budget.convertible} puan verilebilir (yalnızca perklerden gelen puanlar)`
-        : `Serbest puanlar sembol stat'a (${UC_STAT_LABELS[okDal.stat]}) verilemez`,
+        ? fmt("Sembol stat'a ({stat}) en fazla {n} puan verilebilir (yalnızca perklerden gelen puanlar)", { stat: UC_STAT_LABELS[okDal.stat], n: budget.convertible })
+        : fmt("Serbest puanlar sembol stat'a ({stat}) verilemez", { stat: UC_STAT_LABELS[okDal.stat] }),
     );
-  for (const k of UC_STAT_KEYS) if (stats[k] > UC_STAT_MAX) problems.push(`${UC_STAT_LABELS[k]} ${UC_STAT_MAX}'u geçemez`);
+  for (const k of UC_STAT_KEYS) if (stats[k] > UC_STAT_MAX) problems.push(fmt("{stat} {max}'u geçemez", { stat: UC_STAT_LABELS[k], max: UC_STAT_MAX }));
 
   const abilities: Record<string, number> = {};
   if (input.firstAbility) {
     const a = data.abilities[input.firstAbility];
     const c: UcCharLike = { level: 0, stats, trees: okDal ? [okDal.key] : [], abilities: {}, perks: input.perks, body: {}, corruption: 0, inspiration: 0, uc: { classKey: input.classKey } };
     const st = ucLearnState(c, input.firstAbility, data);
-    if (!a || a.tier !== 1 || st.state !== "available") problems.push(`İlk yetenek alınamıyor: ${st.problems.join(", ") || "K1 dalından olmalı"}`);
+    if (!a || a.tier !== 1 || st.state !== "available") problems.push(fmt("İlk yetenek alınamıyor: {reason}", { reason: st.problems.join(", ") || "K1 dalından olmalı" }));
     else abilities[input.firstAbility] = 1;
   }
   return { ok: problems.length === 0, problems, warnings: budget.warnings, stats, abilities, budget };
@@ -355,7 +356,7 @@ export function ucCheckParts(c: Pick<UcCharLike, "stats" | "body" | "level" | "c
   if (p.stat) parts.push({ label: UC_STAT_LABELS[p.stat], value: c.stats[p.stat] ?? 0 });
   if (p.part) {
     const pen = woundPenalty(normalizeBody(c.body)[p.part]);
-    if (pen) parts.push({ label: `${bodyPartLabel(p.part)} yarası`, value: -pen });
+    if (pen) parts.push({ label: fmt("{part} yarası", { part: bodyPartLabel(p.part) }), value: -pen });
   }
   const cap = ucBonusCap(c.level);
   const bonusSources: RollPart[] = [];
@@ -363,7 +364,7 @@ export function ucCheckParts(c: Pick<UcCharLike, "stats" | "body" | "level" | "c
   if (p.decay && ucDecayDiceBonus(c.corruption)) bonusSources.push({ label: "Yoz zar", value: ucDecayDiceBonus(c.corruption) });
   const bonus = bonusSources.reduce((a, b) => a + b.value, 0);
   const applied = Math.min(bonus, cap);
-  if (bonus > 0) parts.push({ label: bonus > cap ? `Bonus (tavan +${cap})` : bonusSources.map((b) => b.label).join(" + "), value: applied });
+  if (bonus > 0) parts.push({ label: bonus > cap ? fmt("Bonus (tavan +{cap})", { cap }) : bonusSources.map((b) => b.label).join(" + "), value: applied });
   if (p.modifier < 0) parts.push({ label: "Ceza", value: p.modifier });
   if (c.inspiration < 0) parts.push({ label: "Esin borcu", value: c.inspiration * UC_ESIN_DEBT });
   if (p.magic && c.uc?.forks?.["12"] === "direnis") parts.push({ label: "Mühür (büyü)", value: -2 });
@@ -372,9 +373,9 @@ export function ucCheckParts(c: Pick<UcCharLike, "stats" | "body" | "level" | "c
 
 export type UcDecayMode = "dusotu" | "geri-tepme" | "arinma";
 export const UC_DECAY_MODES: Record<UcDecayMode, { label: string; hint: string }> = {
-  dusotu: { label: "Düşotu", hint: "d20 + Sebahat − Yozlaşma/3 ≥ eşik; başarısızlıkta +1 Yozlaşma. Halka IV+ ve Oruç'ta etkisiz." },
-  "geri-tepme": { label: "Mana geri tepmesi", hint: "Büyü zarında Nat1 sonrası: d20 + Sebahat ≥ eşik (genelde Kolay); başarısızlıkta +1 Yozlaşma." },
-  arinma: { label: "Blu Mana arınması", hint: "Uzun dinlenmede kristal: d20 + Sebahat ≥ eşik (Zor); başarıda −1 Yozlaşma (taban altına inmez)." },
+  dusotu: { label: "Düşotu", hint: "d20 + Sebahat − Yozlaşma/3 (Orta); başarısızlıkta +1 Yozlaşma. Halka IV+ ve Oruç'ta etkisiz." },
+  "geri-tepme": { label: "Mana geri tepmesi", hint: "Büyü zarında Nat1 sonrası: d20 + Sebahat (zorluğu GM belirler, genelde Kolay); başarısızlıkta +1 Yozlaşma." },
+  arinma: { label: "Blu Mana arınması", hint: "Uzun dinlenmede kristal: d20 + Sebahat (Zor); başarıda −1 Yozlaşma (taban altına inmez)." },
 };
 
 /** Yozlaşma zarlarının d20 dışındaki parçaları. */
@@ -400,11 +401,11 @@ export function ucDecayOutcome(c: Pick<UcCharLike, "corruption" | "uc">, mode: U
     const next = ucClampDecay(c.corruption - 1, forks);
     return next === c.corruption
       ? { next, note: "Yozlaşma çatal tabanında; daha aşağı inemez.", effect: "none" as const }
-      : { next, note: `Yozlaşma ${c.corruption} → ${next}`, effect: "down" as const };
+      : { next, note: fmt("Yozlaşma {from} → {to}", { from: c.corruption, to: next }), effect: "down" as const };
   }
   if (success) return { next: c.corruption, note: "Yozlaşma artmadı.", effect: "none" as const };
   const next = ucClampDecay(c.corruption + 1, forks);
-  return { next, note: `Yozlaşma ${c.corruption} → ${next}`, effect: "up" as const };
+  return { next, note: fmt("Yozlaşma {from} → {to}", { from: c.corruption, to: next }), effect: "up" as const };
 }
 
 /** Seviye atlamada sembol stat'ın hangi katmanın dalından geleceği (yeni seviyeye göre). */
