@@ -226,6 +226,8 @@ export const characters = pgTable(
     freeStatPoints: integer("free_stat_points").notNull().default(0),
     stats: jsonb("stats").$type<Stats>().notNull(),
     trees: text("trees").array().notNull().default([]),
+    /** GM'in açılmasına izin verdiği kısıtlı ağaçlar (ör. Mors: Morswecken bulunduktan sonra). */
+    treeGrants: text("tree_grants").array().notNull().default([]),
     abilities: jsonb("abilities").$type<Record<string, number>>().notNull().default({}),
     perks: text("perks").array().notNull().default([]),
     /** Bildiği diller (ilki ana dil). */

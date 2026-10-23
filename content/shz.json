@@ -1,6 +1,6 @@
 {
- "generatedAt": "2026-10-05T16:39:52.365Z",
- "hash": "b380b5719701",
+ "generatedAt": "2026-10-23T15:06:32.549Z",
+ "hash": "52d34714d2f4",
  "docs": [
   {
    "key": "temel-kurallar",
@@ -184,6 +184,27 @@
     "uberladung",
     "schnittstelle",
     "kriegsmaschine"
+   ]
+  },
+  {
+   "key": "mors",
+   "name": "Mors",
+   "stat": "sanita",
+   "introHtml": "<p>Mors, bedeni kara büyüyle bir kukla gibi yönetilen karakterlerin ekspertizidir. Et artık sahibinin değil; onu ipler taşır.</p>\n<h4>AÇILIŞ</h4>\n<p>Mors başlangıç ekspertizi olarak seçilemez ve yalnızca 2. ekspertiz ağacı olarak açılır. Oyuncu bu ağacı kendisi açamaz: Morswecken materyalini bulmuş olması ve GM'in izin vermesi gerekir. GM izin verdikten sonra ağaç 1 yetenek puanı ile açılır.</p>\n<h4>KUKLA BEDEN</h4>\n<p>Yara cezaları uygulanmaz; Kullanılamaz bir uzuv iplerle çalışmaya devam eder. Kopuk uzuv ise kullanılamaz. Baş &amp; Boyun ya da Üst Gövde Kopuk olursa beden çöker.</p>\n<h4>AĞIR BEDEN</h4>\n<p>Fiziksel zarlarda (Korp, Krach, Agil, Aim) eşik 2 kademe yükselir: Kolay → Zor, Orta → Çok Zor, Zor ve üstü → Uber.</p>\n<h4>YENİLENME</h4>\n<p>Seans başına 1 kez, uzun dinlenmede bir uzvun yarası tamamen iyileşir; Kopuk bir uzuv da yeniden büyür ve Sağlam'a döner.</p>\n<h4>CORRUPTION</h4>\n<p>Corruption tablosundaki olumsuz etkiler (Cower, Frenzy, saldırıların hırçınlaşması ve aksiyonların dengesizleşmesi) Mors karakterinde işlemez; kara büyü bonusları ve Klang bonusu gibi olumlu etkiler uygulanır. Corruption 7 tabanı geçerlidir. Corruption 13'te ruh tükenir ve karakter kalıcı olarak cansız bir kuklaya döner. Pervitin Mors karakterine etki etmez.</p>\n<h4>NOT</h4>\n<p>Death Save Throw kuralları Mors karakterinde de geçerlidir.</p>",
+   "startBonus": {
+    "kind": "none"
+   },
+   "startBonusText": "",
+   "restricted": true,
+   "abilities": [
+    "totenhulle",
+    "seelensplitter",
+    "fadenzieher",
+    "seelenwanderung",
+    "grenzenlos",
+    "marionettenzug",
+    "totentanz",
+    "wiederkehr"
    ]
   }
  ],
@@ -2552,6 +2573,368 @@
    "synergies": [],
    "flavorHtml": "<p>Sigortalar atana kadar. Belki biraz daha fazla.</p>",
    "searchText": "überladung metallkorp aktif klang 4 waffenarm augmentini aşırı yüklersin: bir sonraki augment aksiyonunun zarına +klang/2 (aşağı yuvarla) bonus alır, isabette yara 1 kademe fazla ilerler. ardından d20 + klang ≥ zor atılır; başarısızlıkta augmentli uzuv 1 kademe hasar alır. kontrol zarı orta eşikte atılır. kontrol zarı kolay eşikte atılır. sigortalar atana kadar. belki biraz daha fazla."
+  },
+  "fadenzieher": {
+   "key": "fadenzieher",
+   "name": "Fadenzieher",
+   "tree": "mors",
+   "type": "Aktif",
+   "requirementText": "Sanita 5, Wissen 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "sanita",
+     "min": 5
+    },
+    {
+     "kind": "stat",
+     "stat": "wissen",
+     "min": 3
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": "seelensplitter",
+   "branch": "A",
+   "branchName": "Seelenfaden",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "Bir sahne boyunca seçtiğin bir fiziksel stat (Korp, Krach, Agil ya da Aim) yerine Sanita ile zar atarsın. Bu zarlarda ağır beden cezası 2 yerine 1 kademe uygulanır. Seans başına 1 kez."
+    },
+    {
+     "level": 2,
+     "html": "Seans başına 2 kez; ya da tek kullanımda iki fiziksel stat seçersin."
+    }
+   ],
+   "sections": [
+    {
+     "key": "BEDEL",
+     "label": "Bedel",
+     "html": "<p>Her kullanımda +1 Corruption.</p>"
+    }
+   ],
+   "synergies": [],
+   "flavorHtml": "<p>Kasların artık dinlemiyor. İpler dinliyor.</p>",
+   "searchText": "fadenzieher mors aktif sanita 5, wissen 3 seelenfaden bir sahne boyunca seçtiğin bir fiziksel stat (korp, krach, agil ya da aim) yerine sanita ile zar atarsın. bu zarlarda ağır beden cezası 2 yerine 1 kademe uygulanır. seans başına 1 kez. seans başına 2 kez; ya da tek kullanımda iki fiziksel stat seçersin. her kullanımda +1 corruption. kasların artık dinlemiyor. ipler dinliyor."
+  },
+  "grenzenlos": {
+   "key": "grenzenlos",
+   "name": "Grenzenlos",
+   "tree": "mors",
+   "type": "Aktif",
+   "requirementText": "Sanita 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "sanita",
+     "min": 3
+    }
+   ],
+   "maxLevel": 3,
+   "prerequisite": null,
+   "branch": "B",
+   "branchName": "Überlast",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "Bir fiziksel zarda bedenini sınırının ötesine zorlarsın: o zarda ağır beden cezası uygulanmaz ve zara +Krach/2 (aşağı yuvarla) bonus eklenir. Ardından d20 + Sanita ≥ Orta atılır; başarısızlıkta kullanılan uzuv 1 kademe yara alır. Kontrol zarında Nat1 gelirse uzuv kopar (GM RP'ye göre daha ağır bir sonuç uygulayabilir)."
+    },
+    {
+     "level": 2,
+     "html": "Kontrol zarı Kolay eşikte atılır."
+    },
+    {
+     "level": 3,
+     "html": "Bonus +Krach olur."
+    }
+   ],
+   "sections": [
+    {
+     "key": "SİNERJİ",
+     "label": "Sinerji",
+     "html": "<p><strong><a href=\"@/kurallar/yetenekler/metallkorp#zweite-haut\">Zweite Haut</a></strong> ile: Augmentli uzuv Grenzenlos ile kopmaz; Kullanılamaz durumda kalır.</p>"
+    }
+   ],
+   "synergies": [
+    "zweite-haut"
+   ],
+   "flavorHtml": "<p>Acı yok. Sınır yok. Sadece kopan bir şeyin sesi.</p>",
+   "searchText": "grenzenlos mors aktif sanita 3 überlast bir fiziksel zarda bedenini sınırının ötesine zorlarsın: o zarda ağır beden cezası uygulanmaz ve zara +krach/2 (aşağı yuvarla) bonus eklenir. ardından d20 + sanita ≥ orta atılır; başarısızlıkta kullanılan uzuv 1 kademe yara alır. kontrol zarında nat1 gelirse uzuv kopar (gm rp'ye göre daha ağır bir sonuç uygulayabilir). kontrol zarı kolay eşikte atılır. bonus +krach olur. zweite haut ile: augmentli uzuv grenzenlos ile kopmaz; kullanılamaz durumda kalır. acı yok. sınır yok. sadece kopan bir şeyin sesi."
+  },
+  "marionettenzug": {
+   "key": "marionettenzug",
+   "name": "Marionettenzug",
+   "tree": "mors",
+   "type": "Pasif",
+   "requirementText": "Sanita 5, Korp 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "sanita",
+     "min": 5
+    },
+    {
+     "kind": "stat",
+     "stat": "korp",
+     "min": 3
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": "grenzenlos",
+   "branch": "B",
+   "branchName": "Überlast",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "Kopuk bir uzvun bir sahne boyunca iplerle kullanılmaya devam eder; o uzvun kullanıldığı zarlarda Kopuk cezası yerine -5 uygulanır."
+    },
+    {
+     "level": 2,
+     "html": "Ceza uygulanmaz. Seans başına 1 kez kopan uzuv yerde kalmaz, iplerle yerine geri bağlanır ve sahne sonunda Kullanılamaz durumda kalır."
+    }
+   ],
+   "sections": [],
+   "synergies": [],
+   "flavorHtml": "<p>Kol düştü. İpler düşmedi.</p>",
+   "searchText": "marionettenzug mors pasif sanita 5, korp 3 überlast kopuk bir uzvun bir sahne boyunca iplerle kullanılmaya devam eder; o uzvun kullanıldığı zarlarda kopuk cezası yerine -5 uygulanır. ceza uygulanmaz. seans başına 1 kez kopan uzuv yerde kalmaz, iplerle yerine geri bağlanır ve sahne sonunda kullanılamaz durumda kalır. kol düştü. ipler düşmedi."
+  },
+  "seelensplitter": {
+   "key": "seelensplitter",
+   "name": "Seelensplitter",
+   "tree": "mors",
+   "type": "Aktif",
+   "requirementText": "Sanita 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "sanita",
+     "min": 3
+    }
+   ],
+   "maxLevel": 3,
+   "prerequisite": null,
+   "branch": "A",
+   "branchName": "Seelenfaden",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "Ruhundan bir parça koparıp görüş alanındaki bir hedefe salarsın: d20 + Sanita ≥ Orta. İsabette hedefin seçtiğin uzvu 1 kademe yara alır ve hedef yozlaşır: NPC'ler 1 tur Cower durumuna girer (Sanita zarı ile direnir), oyuncu karakterleri +1 Corruption alır."
+    },
+    {
+     "level": 2,
+     "html": "Yara 2 kademe ilerler."
+    },
+    {
+     "level": 3,
+     "html": "Ruh parçası yakındaki ikinci bir hedefe de sıçrar (ayrı zar)."
+    }
+   ],
+   "sections": [
+    {
+     "key": "BEDEL",
+     "label": "Bedel",
+     "html": "<p>Her kullanımda +1 Corruption.</p>"
+    },
+    {
+     "key": "NOT",
+     "label": "Not",
+     "html": "<p>Bu yeteneğin zarları kara büyü zarıdır; Corruption kaynaklı kara büyü etkileri uygulanır.</p>"
+    },
+    {
+     "key": "SİNERJİ",
+     "label": "Sinerji",
+     "html": "<p><strong><a href=\"@/kurallar/yetenekler/schwarzesonne#blutopfer\">Blutopfer</a></strong> ile: Blutopfer'in bonusu Seelensplitter zarına da uygulanır.</p>"
+    }
+   ],
+   "synergies": [
+    "blutopfer"
+   ],
+   "flavorHtml": "<p>Ruhun bir yara gibi açılır. Karşındaki o yarayı kendi bedeninde hisseder.</p>",
+   "searchText": "seelensplitter mors aktif sanita 3 seelenfaden ruhundan bir parça koparıp görüş alanındaki bir hedefe salarsın: d20 + sanita ≥ orta. isabette hedefin seçtiğin uzvu 1 kademe yara alır ve hedef yozlaşır: npc'ler 1 tur cower durumuna girer (sanita zarı ile direnir), oyuncu karakterleri +1 corruption alır. yara 2 kademe ilerler. ruh parçası yakındaki ikinci bir hedefe de sıçrar (ayrı zar). her kullanımda +1 corruption. bu yeteneğin zarları kara büyü zarıdır; corruption kaynaklı kara büyü etkileri uygulanır. blutopfer ile: blutopfer'in bonusu seelensplitter zarına da uygulanır. ruhun bir yara gibi açılır. karşındaki o yarayı kendi bedeninde hisseder."
+  },
+  "seelenwanderung": {
+   "key": "seelenwanderung",
+   "name": "Seelenwanderung",
+   "tree": "mors",
+   "type": "Aktif",
+   "requirementText": "Sanita 7, Wissen 4, Sv 7",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "sanita",
+     "min": 7
+    },
+    {
+     "kind": "stat",
+     "stat": "wissen",
+     "min": 4
+    },
+    {
+     "kind": "level",
+     "min": 7
+    }
+   ],
+   "maxLevel": 1,
+   "prerequisite": "fadenzieher",
+   "branch": "A",
+   "branchName": "Seelenfaden",
+   "levelEffects": [],
+   "sections": [
+    {
+     "key": "ETKİ",
+     "label": "Etki",
+     "html": "<p>Bedenini terk edip son 1 saat içinde ölmüş ya da bilinçsiz bir insan bedenine geçersin: d20 + Sanita ≥ Zor (bilinçsiz bedende Çok Zor). Başarıda ruhun yeni bedene geçer ve oyuna oradan devam edersin. Zihinsel statların (Sanita, Wissen, Rede, Leis), yeteneklerin ve perklerin seninle gelir. Fiziksel statları (Korp, Krach, Agil, Aim) ve beden tablosunu GM yeni bedene göre belirler. Augmentler eski bedende kalır, eski beden çöker. Mors sınıf kuralları yeni bedende de geçerlidir.</p>\n<p>Ölmek üzereyken (Death Save'den önce) tepki olarak da kullanılabilir; yakında uygun bir beden yoksa işe yaramaz.</p>"
+    },
+    {
+     "key": "BEDEL",
+     "label": "Bedel",
+     "html": "<p>+3 Corruption. Kampanya başına 1 kez (GM izniyle 2).</p>"
+    },
+    {
+     "key": "NOT",
+     "label": "Not",
+     "html": "<p>Bu yeteneğin zarları kara büyü zarıdır; Corruption kaynaklı kara büyü etkileri uygulanır.</p>"
+    },
+    {
+     "key": "SİNERJİ",
+     "label": "Sinerji",
+     "html": "<p><strong><a href=\"@/kurallar/yetenekler/ubermann#endsieg-der-mann\">Endsieg der Mann</a></strong> ile: Endsieg modunda ölürsen Seelenwanderung zar atılmadan başarılı sayılır.</p>"
+    }
+   ],
+   "synergies": [
+    "endsieg-der-mann"
+   ],
+   "flavorHtml": "<p>Beden bir elbise. Yırtılınca yenisini giyersin.</p>",
+   "searchText": "seelenwanderung mors aktif sanita 7, wissen 4, sv 7 seelenfaden bedenini terk edip son 1 saat içinde ölmüş ya da bilinçsiz bir insan bedenine geçersin: d20 + sanita ≥ zor (bilinçsiz bedende çok zor). başarıda ruhun yeni bedene geçer ve oyuna oradan devam edersin. zihinsel statların (sanita, wissen, rede, leis), yeteneklerin ve perklerin seninle gelir. fiziksel statları (korp, krach, agil, aim) ve beden tablosunu gm yeni bedene göre belirler. augmentler eski bedende kalır, eski beden çöker. mors sınıf kuralları yeni bedende de geçerlidir. ölmek üzereyken (death save'den önce) tepki olarak da kullanılabilir; yakında uygun bir beden yoksa işe yaramaz. +3 corruption. kampanya başına 1 kez (gm izniyle 2). bu yeteneğin zarları kara büyü zarıdır; corruption kaynaklı kara büyü etkileri uygulanır. endsieg der mann ile: endsieg modunda ölürsen seelenwanderung zar atılmadan başarılı sayılır. beden bir elbise. yırtılınca yenisini giyersin."
+  },
+  "totenhulle": {
+   "key": "totenhulle",
+   "name": "Totenhülle",
+   "tree": "mors",
+   "type": "Pasif",
+   "requirementText": "Yok",
+   "requirements": [],
+   "maxLevel": 3,
+   "prerequisite": null,
+   "branch": "Kök",
+   "branchName": "Kök",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "Corruption'ın her 3 puanı kara büyü zarlarına +1 verir (Corruption tablosunun kara büyü bonuslarına eklenir)."
+    },
+    {
+     "level": 2,
+     "html": "Corruption'ın her 3 puanı ayrıca fiziksel zarlara (Korp, Krach, Agil, Aim) +1 verir."
+    },
+    {
+     "level": 3,
+     "html": "Bölen 2 olur: Corruption'ın her 2 puanı kara büyü ve fiziksel zarlara +1 verir."
+    }
+   ],
+   "sections": [
+    {
+     "key": "NOT",
+     "label": "Not",
+     "html": "<p>Ağır beden cezasını telafi eden ana yetenektir. Ruh çürüdükçe ipler güçlenir.</p>"
+    }
+   ],
+   "synergies": [],
+   "flavorHtml": "<p>Bir ölü kabuk. İçinde hâlâ bir şey var ve her geçen gün daha az insan.</p>",
+   "searchText": "totenhülle mors pasif yok kök corruption'ın her 3 puanı kara büyü zarlarına +1 verir (corruption tablosunun kara büyü bonuslarına eklenir). corruption'ın her 3 puanı ayrıca fiziksel zarlara (korp, krach, agil, aim) +1 verir. bölen 2 olur: corruption'ın her 2 puanı kara büyü ve fiziksel zarlara +1 verir. ağır beden cezasını telafi eden ana yetenektir. ruh çürüdükçe ipler güçlenir. bir ölü kabuk. içinde hâlâ bir şey var ve her geçen gün daha az insan."
+  },
+  "totentanz": {
+   "key": "totentanz",
+   "name": "Totentanz",
+   "tree": "mors",
+   "type": "Aktif",
+   "requirementText": "Sanita 7, Korp 4, Sv 6",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "sanita",
+     "min": 7
+    },
+    {
+     "kind": "stat",
+     "stat": "korp",
+     "min": 4
+    },
+    {
+     "kind": "level",
+     "min": 6
+    }
+   ],
+   "maxLevel": 1,
+   "prerequisite": "marionettenzug",
+   "branch": "B",
+   "branchName": "Überlast",
+   "levelEffects": [],
+   "sections": [
+    {
+     "key": "ETKİ",
+     "label": "Etki",
+     "html": "<p>3 tur boyunca bedenin tamamen ipler tarafından yönetilir: ağır beden cezası uygulanmaz, her tur fazladan bir saldırı aksiyonu yaparsın ve Kopuk uzuvların da kullanılır. Süre bitince bu sürede kullandığın her uzuv için d20 + Sanita ≥ Orta atılır; başarısızlıkta uzuv kopar.</p>"
+    },
+    {
+     "key": "BEDEL",
+     "label": "Bedel",
+     "html": "<p>+2 Corruption. Çatışma başına 1 kez.</p>"
+    },
+    {
+     "key": "SİNERJİ",
+     "label": "Sinerji",
+     "html": "<p><strong><a href=\"@/kurallar/yetenekler/ubermann#titan\">Titan</a></strong> ile: Totentanz süresince Titan bir kez daha kullanılabilir.</p>"
+    }
+   ],
+   "synergies": [
+    "titan"
+   ],
+   "flavorHtml": "<p>Ölüler de dans eder. Müziği başkası çalar.</p>",
+   "searchText": "totentanz mors aktif sanita 7, korp 4, sv 6 überlast 3 tur boyunca bedenin tamamen ipler tarafından yönetilir: ağır beden cezası uygulanmaz, her tur fazladan bir saldırı aksiyonu yaparsın ve kopuk uzuvların da kullanılır. süre bitince bu sürede kullandığın her uzuv için d20 + sanita ≥ orta atılır; başarısızlıkta uzuv kopar. +2 corruption. çatışma başına 1 kez. titan ile: totentanz süresince titan bir kez daha kullanılabilir. ölüler de dans eder. müziği başkası çalar."
+  },
+  "wiederkehr": {
+   "key": "wiederkehr",
+   "name": "Wiederkehr",
+   "tree": "mors",
+   "type": "Pasif",
+   "requirementText": "Sanita 5, Korp 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "sanita",
+     "min": 5
+    },
+    {
+     "kind": "stat",
+     "stat": "korp",
+     "min": 3
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": "grenzenlos",
+   "branch": "B′",
+   "branchName": "Fleisch",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "Yenilenme seans başına 2 uzva çıkar."
+    },
+    {
+     "level": 2,
+     "html": "Ayrıca çatışma başına 1 kez, tur harcamadan bir uzvunun yarasını 2 kademe iyileştirirsin (Kopuk uzuv hariç)."
+    }
+   ],
+   "sections": [
+    {
+     "key": "BEDEL",
+     "label": "Bedel",
+     "html": "<p>Seviye 2 etkisinin her kullanımında +1 Corruption.</p>"
+    }
+   ],
+   "synergies": [],
+   "flavorHtml": "<p>Et geri gelir. Her seferinde biraz daha az senin.</p>",
+   "searchText": "wiederkehr mors pasif sanita 5, korp 3 fleisch yenilenme seans başına 2 uzva çıkar. ayrıca çatışma başına 1 kez, tur harcamadan bir uzvunun yarasını 2 kademe iyileştirirsin (kopuk uzuv hariç). seviye 2 etkisinin her kullanımında +1 corruption. et geri gelir. her seferinde biraz daha az senin."
   }
  },
  "perks": [

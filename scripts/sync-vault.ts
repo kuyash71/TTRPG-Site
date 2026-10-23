@@ -50,7 +50,7 @@ const SYS = path.join(VAULT, "System");
 const CAMPAIGNS = path.join(VAULT, "Campaigns");
 const OUT = path.join(repo, "content", "shz.json");
 
-const TREE_ORDER = ["Ubermann", "Stahlkrieg", "Spionage", "Diplomat", "Wunderwaffe", "Schwarzesonne", "Metallkorp"];
+const TREE_ORDER = ["Ubermann", "Stahlkrieg", "Spionage", "Diplomat", "Wunderwaffe", "Schwarzesonne", "Metallkorp", "Mors"];
 const DOC_ORDER: [string, string][] = [
   ["Core.md", "Temel Kurallar"],
   ["Character.md", "Karakter"],
@@ -404,14 +404,16 @@ for (const t of rawTrees) for (const a of t.abilities) nameToKey.set(a.name, a.k
 
 for (const t of rawTrees) {
   // giriş metni ve ilk ağaç bonusu
-  const bonusLine = t.intro.replace(/^\*\*BONUS STAT\*\*:.*$/m, "").trim();
+  // **KISIT**: ağaç başlangıçta seçilemez, yalnızca GM izniyle 2. ağaç olarak açılır (ör. Mors).
+  const restricted = /^\*\*KISIT\*\*:/m.test(t.intro);
+  const bonusLine = t.intro.replace(/^\*\*BONUS STAT\*\*:.*$/m, "").replace(/^\*\*KISIT\*\*:.*$/m, "").trim();
   let startBonus: TreeStartBonus = { kind: "none" };
   let m: RegExpExecArray | null;
   if ((m = /\+\s*(\d+)\s+Corruption/i.exec(bonusLine))) startBonus = { kind: "corruption", amount: Number(m[1]) };
   else if ((m = /(T[123])\s+augment/i.exec(bonusLine))) startBonus = { kind: "augment", tier: m[1].toUpperCase() as "T1" };
   else if ((m = /\+\s*(\d+)\s+([A-Za-zÇĞİÖŞÜçğıöşü]+)/.exec(bonusLine)) && statFromLabel(m[2]))
     startBonus = { kind: "stat", stat: statFromLabel(m[2])!, amount: Number(m[1]) };
-  else warn(`${t.name}: ilk ağaç bonusu okunamadı ("${bonusLine}")`);
+  else if (!restricted) warn(`${t.name}: ilk ağaç bonusu okunamadı ("${bonusLine}")`);
 
   const order: { key: string; sort: [number, number, number, string] }[] = [];
   for (const a of t.abilities) {
@@ -500,7 +502,8 @@ for (const t of rawTrees) {
     stat: t.stat,
     introHtml: md(bonusLine),
     startBonus,
-    startBonusText: bonusLine.replace(/\s+/g, " ").trim(),
+    startBonusText: restricted ? "" : bonusLine.replace(/\s+/g, " ").trim(),
+    ...(restricted && { restricted: true }),
     abilities: order.map((o) => o.key),
   });
 }

@@ -103,6 +103,11 @@ import {
   Wine,
   Wrench,
   Zap,
+  Spool,
+  Orbit,
+  Unlink,
+  Sprout,
+  Music,
 } from "lucide-react";
 import { SunLogo } from "../logo";
 import { cx } from "../ui";
@@ -194,6 +199,7 @@ const TREE_ICONS: Record<string, LucideIcon | "sun"> = {
   wunderwaffe: Cog,
   schwarzesonne: "sun",
   metallkorp: Cpu,
+  mors: Skull,
 };
 
 export function TreeIcon({ treeKey, className }: { treeKey: string; className?: string }) {
@@ -263,6 +269,14 @@ const ABILITY_ICONS: Record<string, LucideIcon> = {
   uberladung: BatteryCharging,
   schnittstelle: Cable,
   kriegsmaschine: Siren,
+  totenhulle: Bone,
+  seelensplitter: Wind,
+  fadenzieher: Spool,
+  seelenwanderung: Orbit,
+  grenzenlos: HeartCrack,
+  marionettenzug: Unlink,
+  wiederkehr: Sprout,
+  totentanz: Music,
 };
 const TYPE_STYLE: Record<string, string> = {
   Aktif: "border-accent/35 bg-accent/10 text-accent",

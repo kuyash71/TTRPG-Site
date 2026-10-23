@@ -15,7 +15,7 @@ import { BASE_PATH } from "@/lib/base";
 import { api } from "@/lib/client";
 import { BODY_PARTS, CORRUPTION_EFFECTS, STAT_KEYS, STAT_LABELS, THRESHOLDS, type BodyPartKey, type StatKey } from "@/lib/shz/constants";
 import type { RulesData } from "@/lib/shz/content";
-import { checkModifiers, effectiveStats, installedAugments, normalizeBody, outcomeLabel, woundPenalty } from "@/lib/shz/rules";
+import { PHYSICAL_STATS, bodyPenalty, checkModifiers, effectiveStats, installedAugments, isMors, morsThreshold, normalizeBody, outcomeLabel, woundPenalty } from "@/lib/shz/rules";
 import { campaignHref, characterHref, createCharHref, panelHref, type Sys } from "@/lib/links";
 import { UC_STAT_KEYS, UC_STAT_LABELS, type UcStatKey } from "@/lib/uc/constants";
 import { UC_DECAY_EFFECTS, UC_DECAY_MAX, UC_DECAY_MODES, ucBonusCap, ucCheckParts, ucNormalizeStats, type UcDecayMode, type UcRules } from "@/lib/uc/rules";
@@ -675,7 +675,7 @@ function Party({
                     <DeathPips ds={full.deathSave} />
                   </div>
                 )}
-                {hurt.length > 0 && <p className="text-danger/90">{hurt.map((p) => `${t(p.label)} −${woundPenalty(body![p.key])}`).join(" · ")}</p>}
+                {hurt.length > 0 && <p className="text-danger/90">{hurt.map((p) => `${t(p.label)} −${full && "trees" in full ? bodyPenalty(full as never, body![p.key]) : woundPenalty(body![p.key])}`).join(" · ")}</p>}
                 {full.abilityPoints > 0 && <p className="text-accent">{t("Harcanmamış yetenek puanı: {n}", { n: full.abilityPoints })}</p>}
               </div>
             )}
@@ -1781,7 +1781,10 @@ function DicePanel({
       ? [{ label: "Düzenleyici", value: mod }]
       : [];
   const sum = parts.reduce((a, b) => a + b.value, 0);
-  const thValue = manual ?? (uc ? null : (THRESHOLDS.find((x) => x.key === threshold)?.value ?? null));
+  const thBase = manual ?? (uc ? null : (THRESHOLDS.find((x) => x.key === threshold)?.value ?? null));
+  // Mors · Ağır beden: fiziksel zarlarda eşik 2 kademe yükselir (sunucu da aynısını uygular).
+  const morsHeavy = !uc && !!ch && isMors(ch) && !!stat && PHYSICAL_STATS.includes(stat as StatKey);
+  const thValue = thBase != null && morsHeavy ? morsThreshold({ value: thBase, label: "" }, manual != null ? null : threshold).value : thBase;
 
   const doEmit = async (ev: string, payload: unknown) => {
     setBusy(true);
@@ -1843,7 +1846,7 @@ function DicePanel({
       <select className="input" value={part} onChange={(e) => setPart(e.target.value as BodyPartKey | "")}>
         <option value="">{t("Yok")}</option>
         {BODY_PARTS.map((p) => {
-          const pen = woundPenalty(normalizeBody(ch.body)[p.key]);
+          const pen = !uc && ch.trees ? bodyPenalty(ch, normalizeBody(ch.body)[p.key]) : woundPenalty(normalizeBody(ch.body)[p.key]);
           return (
             <option key={p.key} value={p.key}>
               {t(p.label)}
@@ -1865,6 +1868,11 @@ function DicePanel({
       ))}
       <span className="ml-1 font-mono text-ink"> = {first} {sum >= 0 ? "+" : "−"} {Math.abs(sum)}</span>
       {thValue != null && <span className="ml-1 text-muted">≥ {thValue}</span>}
+      {morsHeavy && (
+        <span className="mt-1 block text-[11px] text-lav" data-testid="mors-heavy">
+          {t("Mors · Ağır beden: eşik 2 kademe yükselir.")}
+        </span>
+      )}
       {ucr && (
         <span className="mt-1 block text-[11px] text-muted">
           {t("Bonus tavanı +{n}", { n: ucr.cap })}
@@ -2367,7 +2375,7 @@ function QuickFull({ c, data }: { c: FullChar; data: RulesData }) {
           </p>
           {BODY_PARTS.filter((p) => body[p.key].wound !== "saglam").map((p) => (
             <p key={p.key} className="text-danger/90">
-              {t(p.label)}: −{woundPenalty(body[p.key])}
+              {t(p.label)}: −{bodyPenalty(c, body[p.key])}
             </p>
           ))}
           {augs.map(({ part, augment }) => (
@@ -2377,7 +2385,7 @@ function QuickFull({ c, data }: { c: FullChar; data: RulesData }) {
           ))}
         </div>
       </div>
-      {c.corruption > 0 && <CorruptionEffects value={c.corruption} />}
+      {c.corruption > 0 && <CorruptionEffects value={c.corruption} mors={isMors(c)} />}
       {owned.length > 0 && (
         <div>
           <p className="kicker mb-2">{t("Yetenekler")}</p>

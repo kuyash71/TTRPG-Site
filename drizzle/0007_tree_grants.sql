@@ -1,0 +1,1 @@
+ALTER TABLE "characters" ADD COLUMN "tree_grants" text[] DEFAULT '{}' NOT NULL;

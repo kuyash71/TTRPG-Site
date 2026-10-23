@@ -10,8 +10,8 @@ function char(over: Partial<CharLike> = {}): CharLike {
   return { level: 0, stats: { ...emptyStats(), klang: 2 }, trees: ["ubermann"], abilities: {}, perks: [], body: {}, corruption: 0, inspiration: 0, abilityPoints: 1, ...over };
 }
 
-test("içerik: 7 ağaç, her biri 8 yetenek, 30/30 perk", () => {
-  assert.equal(data.trees.length, 7);
+test("içerik: 8 ağaç, her biri 8 yetenek, 30/30 perk", () => {
+  assert.equal(data.trees.length, 8);
   for (const t of data.trees) assert.equal(t.abilities.length, 8, t.name);
   assert.equal(data.perks.filter((p) => p.kind === "positive").length, 30);
   assert.equal(data.perks.filter((p) => p.kind === "negative").length, 30);
@@ -201,4 +201,37 @@ test("Metallkorp: başlangıç augment'i ve kopuk uzuv etkileşimi", () => {
   assert.equal(prosthesis.body["r-foot"].wound, "saglam");
   const none = buildCreation({ tree: "metallkorp", points: {}, perks: [], firstAbility: null, startAugment: null }, 0, data);
   assert.ok(none.problems.some((p) => p.includes("augment'i seçilmeli")));
+});
+
+// ---- Mors
+import { canOpenTree as _open, morsThreshold as _mth } from "../src/lib/shz/rules";
+
+test("Mors: başlangıç ağacı olamaz, yalnızca GM izniyle 2. ağaç olarak açılır", () => {
+  const start = buildCreation({ tree: "mors", points: {}, perks: [], startAugment: null, firstAbility: null }, 0, data);
+  assert.ok(!start.ok);
+  assert.ok(_open(char(), "mors", data).length > 0, "izinsiz açılmamalı");
+  assert.deepEqual(_open(char({ treeGrants: ["mors"] }), "mors", data), []);
+  assert.ok(_open(char({ trees: [], treeGrants: ["mors"] }), "mors", data).length > 0, "ilk ağaç olamaz");
+});
+
+test("Mors: yara cezası yok (Kopuk hariç), Totenhülle bonusu, ağır beden eşiği", () => {
+  const body = { "l-arm": { wound: "agir" }, "r-arm": { wound: "kopuk" } } as never;
+  const m = char({ trees: ["ubermann", "mors"], body, corruption: 6, abilities: { totenhulle: 2 } });
+  const arm = checkModifiers(m, { stat: "krach", part: "l-arm", modifier: 0, blackMagic: false }, data);
+  assert.ok(!arm.some((p) => /yarası/.test(p.label)), "ağır yara cezası uygulanmamalı");
+  assert.ok(arm.some((p) => p.label === "Totenhülle" && p.value === 2), "Sv2: fiziksel +6/3");
+  const cut = checkModifiers(m, { stat: "krach", part: "r-arm", modifier: 0, blackMagic: false }, data);
+  assert.ok(cut.some((p) => /yarası/.test(p.label) && p.value === -20), "Kopuk cezası kalır");
+  const wis = checkModifiers(m, { stat: "wissen", part: null, modifier: 0, blackMagic: false }, data);
+  assert.ok(!wis.some((p) => p.label === "Totenhülle"), "zihinsel zara bonus yok");
+  assert.equal(_mth({ value: 13, label: "Orta" }, "orta").value, 19);
+  assert.equal(_mth({ value: 9, label: "Kolay" }, "kolay").value, 15);
+  assert.equal(_mth({ value: 19, label: "Çok Zor" }, "cok-zor").value, 22);
+  assert.equal(_mth({ value: 14, label: "Eşik 14" }, null).value, 20);
+});
+
+test("Mors olmayan karakterde ağır yara cezası uygulanır (kontrol)", () => {
+  const n = char({ body: { "l-arm": { wound: "agir" } } as never });
+  const r = checkModifiers(n, { stat: "krach", part: "l-arm", modifier: 0, blackMagic: false }, data);
+  assert.ok(r.some((p) => /yarası/.test(p.label) && p.value === -5));
 });

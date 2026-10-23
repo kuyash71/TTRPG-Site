@@ -50,6 +50,13 @@
       "when": 1792542077883,
       "tag": "0006_custom_abilities",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792768110466,
+      "tag": "0007_tree_grants",
+      "breakpoints": true
     }
   ]
 }

@@ -50,6 +50,8 @@ export interface Tree {
   startBonus: TreeStartBonus;
   startBonusText: string;
   abilities: string[];
+  /** Başlangıç ağacı olamaz; yalnızca GM izniyle 2. ağaç olarak açılır (Mors). */
+  restricted?: boolean;
 }
 
 export interface Perk {

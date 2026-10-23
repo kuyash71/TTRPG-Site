@@ -36,7 +36,7 @@ import {
 import type { RulesData } from "@/lib/shz/content";
 import type { Ability } from "@/lib/shz/content-types";
 import { MAX_TREES } from "@/lib/shz/constants";
-import { activeSynergies, kriegsversehrtLimbs, perkPoints, canOpenTree, effectiveStats, installedAugments, learnState, normalizeBody, perkBudget, refundPlan, woundPenalty, type CharLike } from "@/lib/shz/rules";
+import { activeSynergies, bodyPenalty, isMors, kriegsversehrtLimbs, perkPoints, canOpenTree, effectiveStats, installedAugments, learnState, normalizeBody, perkBudget, refundPlan, woundPenalty, type CharLike } from "@/lib/shz/rules";
 
 type Ch = Omit<Character, "createdAt" | "updatedAt"> & { createdAt: string; updatedAt: string };
 interface Log {
@@ -177,7 +177,8 @@ export function Sheet({
         <Resource label="Corruption" value={`${c.corruption}/13`} tone={c.corruption >= 7 ? "danger" : c.corruption >= 4 ? "warn" : undefined} sub={c.corruptionLocked ? t("7 altına inemez") : undefined} />
       </div>
 
-      <CorruptionBar value={c.corruption} />
+      <CorruptionBar value={c.corruption} mors={isMors(c)} />
+      {isMors(c) && <MorsNotice />}
 
       {campaign.deathSaveEnabled && !ds.available && canAct && (
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-line bg-surface px-4 py-3 text-sm">
@@ -322,7 +323,23 @@ export function Sheet({
   );
 }
 
-export function CorruptionBar({ value }: { value: number }) {
+/** Mors sınıf kurallarının kâğıttaki özeti. */
+function MorsNotice() {
+  const t = useT();
+  return (
+    <div className="mb-6 rounded-xl border border-lav/45 bg-lav/[0.06] px-4 py-3 text-sm" data-testid="mors-notice">
+      <p className="mb-1 font-mono text-xs font-semibold tracking-[0.2em] text-lav">MORS</p>
+      <ul className="grid gap-x-6 gap-y-1 text-ink/90 sm:grid-cols-2">
+        <li>{t("Kukla beden: yara cezaları uygulanmaz (Kopuk uzuv hariç).")}</li>
+        <li>{t("Ağır beden: Korp, Krach, Agil ve Aim zarlarında eşik 2 kademe yükselir.")}</li>
+        <li>{t("Yenilenme: seans başına 1 kez, uzun dinlenmede bir uzuv tamamen iyileşir; Kopuk uzuv yeniden büyür.")}</li>
+        <li>{t("Corruption'ın olumsuz etkileri işlemez; 7 tabanı ve 13 sınırı geçerli. Pervitin etkisiz.")}</li>
+      </ul>
+    </div>
+  );
+}
+
+export function CorruptionBar({ value, mors }: { value: number; mors?: boolean }) {
   const t = useT();
   if (value === 0)
     return (
@@ -353,7 +370,7 @@ export function CorruptionBar({ value }: { value: number }) {
           />
         ))}
       </div>
-      <CorruptionEffects value={value} className="mt-3" />
+      <CorruptionEffects value={value} className="mt-3" mors={mors} />
     </div>
   );
 }
@@ -607,7 +624,8 @@ function BodyTab({ c, data, isGM, act }: { c: Ch; data: RulesData; isGM: boolean
         <Card className="p-5">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="font-serif text-lg">{t(bodyPartLabel(sel))}</h2>
-            {woundPenalty(part) > 0 && <Badge tone="danger">{t("Zar cezası −{n}", { n: woundPenalty(part) })}</Badge>}
+            {bodyPenalty(c, part) > 0 && <Badge tone="danger">{t("Zar cezası −{n}", { n: bodyPenalty(c, part) })}</Badge>}
+            {isMors(c) && part.wound !== "saglam" && bodyPenalty(c, part) === 0 && <Badge tone="accent">{t("Mors: ceza yok")}</Badge>}
           </div>
           {isGM ? (
             <div className="grid gap-4 sm:grid-cols-2">
@@ -673,7 +691,7 @@ function BodyTab({ c, data, isGM, act }: { c: Ch; data: RulesData; isGM: boolean
             <tbody>
               {BODY_PARTS.map((p) => {
                 const s = body[p.key];
-                const pen = woundPenalty(s);
+                const pen = bodyPenalty(c, s);
                 return (
                   <tr key={p.key} onClick={() => setSel(p.key)} className={cx("cursor-pointer border-b border-line/50 last:border-0 hover:bg-surface2/50", sel === p.key && "bg-accent/5")}>
                     <td className="px-4 py-2">{t(p.label)}</td>
@@ -718,8 +736,10 @@ function GMEditor({ open, onClose, c, data, act }: { open: boolean; onClose: () 
     stats: { ...c.stats },
     deathAvailable: c.deathSave.available,
     perkEditAllowed: c.perkEditAllowed,
+    treeGrants: c.treeGrants ?? [],
     reason: "",
   });
+  const restricted = data.trees.filter((x) => x.restricted);
   const t = useT();
   const [refund, setRefund] = useState(false);
   const num = (k: "level" | "abilityPoints" | "freeStatPoints" | "corruption" | "inspiration", min: number, max: number) => (
@@ -760,6 +780,17 @@ function GMEditor({ open, onClose, c, data, act }: { open: boolean; onClose: () 
             <input type="checkbox" checked={v.perkEditAllowed} onChange={(e) => setV({ ...v, perkEditAllowed: e.target.checked })} className="h-4 w-4 accent-[rgb(186,168,240)]" />
             {t("Oyuncu perklerini düzenleyebilir")}
           </label>
+          {restricted.map((tr) => (
+            <label key={tr.key} className="mt-6 flex items-center gap-2 text-sm" title={t("Kısıtlı ağaç: oyuncu yalnızca GM izniyle, 2. ağaç olarak açabilir")} data-testid={`grant-${tr.key}`}>
+              <input
+                type="checkbox"
+                checked={v.treeGrants.includes(tr.key)}
+                onChange={(e) => setV({ ...v, treeGrants: e.target.checked ? [...v.treeGrants, tr.key] : v.treeGrants.filter((x) => x !== tr.key) })}
+                className="h-4 w-4 accent-[rgb(186,168,240)]"
+              />
+              {t("{tree} açılabilir", { tree: tr.name })}
+            </label>
+          ))}
         </div>
         <div>
           <span className="label">{t("Ham statlar (perk, augment ve corruption hariç; eksi değer girilebilir)")}</span>
@@ -801,6 +832,7 @@ function GMEditor({ open, onClose, c, data, act }: { open: boolean; onClose: () 
                       ...(STAT_KEYS.some((k) => v.stats[k] !== c.stats[k]) && { stats: v.stats }),
                       ...(v.deathAvailable !== c.deathSave.available && { deathSave: { available: v.deathAvailable, resets: c.deathSave.resets } }),
                       ...(v.perkEditAllowed !== c.perkEditAllowed && { perkEditAllowed: v.perkEditAllowed }),
+                      ...(v.treeGrants.join() !== (c.treeGrants ?? []).join() && { treeGrants: v.treeGrants }),
                       reason: v.reason || undefined,
                     },
                   }),

@@ -30,6 +30,7 @@ export const PATCH = route(
       perks: z.array(z.string().max(80)).max(40).optional(),
       deathSave: z.object({ available: z.boolean(), resets: z.number().int().min(0).max(50) }).optional(),
       perkEditAllowed: z.boolean().optional(),
+      treeGrants: z.array(z.string().max(60)).max(10).optional(),
       revive: z.literal(true).optional(),
       refund: z.object({ stats: z.boolean(), abilities: z.boolean() }).optional(),
       reason: z.string().trim().max(200).optional(),
@@ -109,6 +110,15 @@ export const PATCH = route(
     if (body.perkEditAllowed !== undefined && body.perkEditAllowed !== c.perkEditAllowed) {
       set.perkEditAllowed = body.perkEditAllowed;
       log.push(body.perkEditAllowed ? fmt("perk düzenleme izni verildi") : fmt("perk düzenleme izni kaldırıldı"));
+    }
+    if (body.treeGrants) {
+      const next = [...new Set(body.treeGrants)];
+      if (next.some((t) => !getTree(t)?.restricted)) throw bad("Bu ağaç için izin gerekmez.");
+      const added = next.filter((t) => !c.treeGrants.includes(t));
+      const removed = c.treeGrants.filter((t) => !next.includes(t));
+      for (const t of added) log.push(fmt("{tree} açma izni verildi", { tree: getTree(t)!.name }));
+      for (const t of removed) log.push(fmt("{tree} açma izni kaldırıldı", { tree: getTree(t)!.name }));
+      if (added.length || removed.length) set.treeGrants = next;
     }
     let announce: string | null = null;
     if (body.revive) {

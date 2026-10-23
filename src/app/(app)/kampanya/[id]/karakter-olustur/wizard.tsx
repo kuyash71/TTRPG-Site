@@ -199,7 +199,7 @@ export function Wizard({ campaignId, startPerkPoints, data }: { campaignId: stri
               {t("Başlangıç ekspertiz ağacın, sembol stat'ına +2 verir ve ağacın kendi başlangıç bonusunu kazandırır. İkinci ağacı oyun içinde yetenek puanıyla açabilirsin.")}
             </p>
             <div className="grid gap-3 md:grid-cols-2">
-              {data.trees.map((tr) => {
+              {data.trees.filter((tr) => !tr.restricted).map((tr) => {
                 const abs = tr.abilities.map((k) => data.abilities[k]);
                 const branches = [...new Map(abs.filter((a) => a.branch !== "Kök").map((a) => [a.branch, a])).values()];
                 const root = abs.find((a) => a.branch === "Kök");

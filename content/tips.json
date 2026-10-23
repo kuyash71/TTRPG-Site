@@ -277,6 +277,46 @@
    "meaning": "Savaş makinesi",
    "say": "kriks-maşine",
    "summary": "Çatışmada bir kez, 2 tur boyunca tüm augmentlerini zarsız aşırı yükler ve fazladan aksiyon yaparsın."
+  },
+  "totenhulle": {
+   "meaning": "Ölü kabuk",
+   "say": "toten-hül-le",
+   "summary": "Corruption arttıkça kara büyü ve fiziksel zarlara bonus alırsın; ağır beden cezasını telafi eder."
+  },
+  "seelensplitter": {
+   "meaning": "Ruh kıymığı",
+   "say": "zeelen-şplitır",
+   "summary": "Ruhundan bir parçayı hedefe salıp uzvunu yaralar ve onu yozlaştırırsın."
+  },
+  "fadenzieher": {
+   "meaning": "İpleri çeken",
+   "say": "faden-tsi-ır",
+   "summary": "Bir sahne boyunca fiziksel bir stat yerine Sanita ile zar atarsın; ağır beden cezası azalır."
+  },
+  "seelenwanderung": {
+   "meaning": "Ruh göçü",
+   "say": "zeelen-vanderung",
+   "summary": "Bedenini terk edip ölü ya da bilinçsiz başka bir bedene geçer, oyuna oradan devam edersin."
+  },
+  "grenzenlos": {
+   "meaning": "Sınırsız",
+   "say": "grentsen-lohs",
+   "summary": "Bir fiziksel zarda ağır beden cezasını yok sayıp Krach bonusu alırsın; bedeli uzvunun yaralanması ya da kopması olabilir."
+  },
+  "marionettenzug": {
+   "meaning": "Kukla ipi",
+   "say": "mari-o-netten-tsuk",
+   "summary": "Kopuk uzvunu iplerle kullanmaya devam edersin."
+  },
+  "wiederkehr": {
+   "meaning": "Geri dönüş",
+   "say": "viider-kehr",
+   "summary": "Yenilenmen güçlenir: seans başına 2 uzuv, çatışmada da yara iyileştirme."
+  },
+  "totentanz": {
+   "meaning": "Ölüm dansı",
+   "say": "toten-tants",
+   "summary": "3 tur boyunca fiziksel cezasız, ek saldırılarla savaşırsın; sonunda uzuvların kopabilir."
   }
  },
  "augments": {
@@ -376,6 +416,11 @@
    "meaning": "Metal beden",
    "say": "metal-korp",
    "summary": "Augment ağacı (Klang): makineyle bütünleşmiş bir beden."
+  },
+  "mors": {
+   "meaning": "Ölüm (Latince)",
+   "say": "mors",
+   "summary": "Kukla beden ağacı (Sanita): kara büyüyle yönetilen, yaradan etkilenmeyen ama fiziksel zarlarda ağır bir beden. Yalnızca GM izniyle, 2. ağaç olarak açılır."
   }
  },
  "branches": {
@@ -399,7 +444,10 @@
   "Blut": "Kan",
   "Panzerung": "Zırhlanma",
   "Feldumbau": "Saha dönüşümü",
-  "Waffenarm": "Silah kol"
+  "Waffenarm": "Silah kol",
+  "Seelenfaden": "Ruh ipi",
+  "Überlast": "Aşırı yük",
+  "Fleisch": "Et"
  },
  "perks": {
   "careful-runner": {

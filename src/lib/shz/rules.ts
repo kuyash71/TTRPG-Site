@@ -17,6 +17,7 @@ import {
   STAT_KEYS,
   STAT_LABELS,
   STAT_MAX,
+  THRESHOLDS,
   WOUNDS,
   bodyPartLabel,
   type BandageKey,
@@ -55,6 +56,47 @@ export interface CharLike {
   corruption: number;
   inspiration: number;
   abilityPoints: number;
+  /** GM'in açılmasına izin verdiği kısıtlı ağaçlar (ör. Mors). */
+  treeGrants?: string[];
+}
+
+// ------------------------------------------------------------------ Mors
+export const MORS_TREE = "mors";
+/** Ağır beden kuralının uygulandığı fiziksel statlar. */
+export const PHYSICAL_STATS: StatKey[] = ["korp", "krach", "agil", "aim"];
+export const isMors = (c: Pick<CharLike, "trees">) => c.trees.includes(MORS_TREE);
+/**
+ * Mors · Ağır beden: eşik 2 kademe yükselir (Kolay → Zor, Orta → Çok Zor, Zor ve üstü → Uber).
+ * Elle girilen eşik, altındaki en yakın kademenin farkı kadar yükselir.
+ */
+export function morsThreshold(th: { value: number; label: string }, key?: string | null) {
+  const i0 = key ? THRESHOLDS.findIndex((t) => t.key === key) : -1;
+  if (i0 >= 0) {
+    const to = THRESHOLDS[Math.min(THRESHOLDS.length - 1, i0 + 2)];
+    return { value: to.value, label: fmt("Mors ağır beden: {from} → {to}", { from: th.label, to: to.label }) };
+  }
+  let i = 0;
+  THRESHOLDS.forEach((t, k) => {
+    if (t.value <= th.value) i = k;
+  });
+  const value = th.value + (THRESHOLDS[Math.min(THRESHOLDS.length - 1, i + 2)].value - THRESHOLDS[i].value);
+  return { value, label: fmt("Mors ağır beden: {from} → {to}", { from: th.label, to: value }) };
+}
+/** Mors'ta işlemeyen (olumsuz) Corruption seviyeleri: Cower, hırçınlık, dengesizlik, Frenzy. */
+export const MORS_SUPPRESSED_CORRUPTION = [5, 6, 8, 9, 11, 12];
+/** Mors · Kukla beden: yara cezası uygulanmaz (Kopuk uzuv hariç). */
+export function bodyPenalty(c: Pick<CharLike, "trees">, part: Pick<PartState, "wound" | "bandage">) {
+  return isMors(c) && part.wound !== "kopuk" ? 0 : woundPenalty(part);
+}
+/** Totenhülle: her 3 (Sv3'te 2) Corruption için kara büyü (Sv1+) ve fiziksel zarlara (Sv2+) +1. */
+export function totenhulleBonus(c: Pick<CharLike, "abilities" | "corruption">, opts: { blackMagic: boolean; stat: StatKey | null }) {
+  const lv = c.abilities["totenhulle"] ?? 0;
+  if (!lv) return 0;
+  const per = lv >= 3 ? 2 : 3;
+  const v = Math.floor(c.corruption / per);
+  if (opts.blackMagic) return v;
+  if (lv >= 2 && opts.stat && PHYSICAL_STATS.includes(opts.stat)) return v;
+  return 0;
 }
 
 export function emptyStats(): Stats {
@@ -191,6 +233,11 @@ export function canOpenTree(c: CharLike, treeKey: string, data: RulesInput): str
   if (!data.trees.some((t) => t.key === treeKey)) problems.push("Bilinmeyen ağaç");
   if (c.trees.includes(treeKey)) problems.push("Ağaç zaten açık");
   if (c.trees.length >= MAX_TREES) problems.push(fmt("En fazla {n} ağaç açılabilir", { n: MAX_TREES }));
+  const tree = data.trees.find((t) => t.key === treeKey);
+  if (tree?.restricted) {
+    if (!c.trees.length) problems.push(fmt("{tree} yalnızca 2. ağaç olarak açılabilir", { tree: tree.name }));
+    if (!c.treeGrants?.includes(treeKey)) problems.push(fmt("{tree} için GM izni gerekir", { tree: tree.name }));
+  }
   if (c.abilityPoints < 1) problems.push("Yetenek puanı yok");
   return problems;
 }
@@ -305,6 +352,7 @@ export function buildCreation(input: CreationInput, startPerkPoints: number, dat
   let corruption = 0;
   const body = normalizeBody({});
   if (!tree) problems.push("Başlangıç ağacı seçilmedi");
+  else if (tree.restricted) problems.push(fmt("{tree} başlangıç ağacı olarak seçilemez", { tree: tree.name }));
   else {
     stats[tree.stat] += START_TREE_STAT;
     const b = tree.startBonus;
@@ -412,12 +460,15 @@ export function checkModifiers(c: CharLike, p: CheckParams, data: Pick<RulesInpu
   if (p.stat) parts.push({ label: STAT_LABELS[p.stat], value: eff[p.stat].value });
   if (p.part) {
     const st = normalizeBody(c.body)[p.part];
-    const pen = woundPenalty(st);
+    // Mors · Kukla beden: yara cezaları uygulanmaz; Kopuk uzuv yine kullanılamaz.
+    const pen = isMors(c) && st.wound !== "kopuk" ? 0 : woundPenalty(st);
     if (pen) parts.push({ label: fmt("{part} yarası", { part: bodyPartLabel(p.part) }), value: -pen });
   }
   if (eff.klang.value < 0 && p.stat !== "klang") parts.push({ label: "Negatif Klang", value: eff.klang.value });
   if (c.inspiration < 0) parts.push({ label: "Inspiration borcu", value: c.inspiration * INSPIRATION_DEBT_PENALTY });
   if (p.blackMagic) parts.push(...blackMagicBonus(c.corruption));
+  const th = totenhulleBonus(c, { blackMagic: p.blackMagic, stat: p.stat });
+  if (th) parts.push({ label: "Totenhülle", value: th });
   if (p.modifier) parts.push({ label: "Durum", value: p.modifier });
   return parts;
 }

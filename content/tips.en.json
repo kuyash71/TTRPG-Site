@@ -277,6 +277,46 @@
    "meaning": "War machine",
    "say": "kriks-maşine",
    "summary": "Once per combat, for 2 turns, you overload all your augments without rolling and take extra actions."
+  },
+  "totenhulle": {
+   "meaning": "Dead shell",
+   "say": "toten-hül-le",
+   "summary": "The higher your Corruption, the bigger your bonus to black magic and physical rolls; it offsets the heavy body penalty."
+  },
+  "seelensplitter": {
+   "meaning": "Soul shard",
+   "say": "zeelen-şplitır",
+   "summary": "You loose a piece of your soul at a target, wounding a limb and corrupting it."
+  },
+  "fadenzieher": {
+   "meaning": "Puppeteer",
+   "say": "faden-tsi-ır",
+   "summary": "For one scene you roll Sanita instead of a physical stat; the heavy body penalty is reduced."
+  },
+  "seelenwanderung": {
+   "meaning": "Soul migration",
+   "say": "zeelen-vanderung",
+   "summary": "You leave your body for another body that is dead or unconscious, and continue playing from there."
+  },
+  "grenzenlos": {
+   "meaning": "Limitless",
+   "say": "grentsen-lohs",
+   "summary": "On one physical roll you ignore the heavy body penalty and gain a Krach bonus; the price may be a wounded or severed limb."
+  },
+  "marionettenzug": {
+   "meaning": "Puppet string",
+   "say": "mari-o-netten-tsuk",
+   "summary": "You keep using a Severed limb on strings."
+  },
+  "wiederkehr": {
+   "meaning": "Return",
+   "say": "viider-kehr",
+   "summary": "Your regeneration grows stronger: 2 limbs per session, plus wound healing in combat."
+  },
+  "totentanz": {
+   "meaning": "Dance of death",
+   "say": "toten-tants",
+   "summary": "For 3 turns you fight without physical penalties and with extra attacks; afterwards your limbs may be severed."
   }
  },
  "augments": {
@@ -376,6 +416,11 @@
    "meaning": "Metal body",
    "say": "metal-korp",
    "summary": "Augment tree (Klang): a body fused with the machine."
+  },
+  "mors": {
+   "meaning": "Death (Latin)",
+   "say": "mors",
+   "summary": "Puppet body tree (Sanita): a body steered by black magic, unaffected by wounds but heavy on physical rolls. Opened only with the GM's permission, as the 2nd tree."
   }
  },
  "branches": {
@@ -399,7 +444,10 @@
   "Blut": "Blood",
   "Panzerung": "Armoring",
   "Feldumbau": "Field conversion",
-  "Waffenarm": "Weapon arm"
+  "Waffenarm": "Weapon arm",
+  "Seelenfaden": "Soul string",
+  "Überlast": "Overload",
+  "Fleisch": "Flesh"
  },
  "perks": {
   "careful-runner": {

@@ -1,6 +1,6 @@
 {
- "generatedAt": "2026-10-05T16:39:52.365Z",
- "hash": "b380b5719701-en",
+ "generatedAt": "2026-10-23T15:06:32.549Z",
+ "hash": "52d34714d2f4-en",
  "docs": [
   {
    "key": "temel-kurallar",
@@ -184,6 +184,27 @@
     "uberladung",
     "schnittstelle",
     "kriegsmaschine"
+   ]
+  },
+  {
+   "key": "mors",
+   "name": "Mors",
+   "stat": "sanita",
+   "introHtml": "<p>Mors is the expertise of characters whose bodies are steered by black magic like a puppet. The flesh no longer belongs to its owner; strings carry it.</p>\n<h4>UNLOCKING</h4>\n<p>Mors cannot be chosen as a starting expertise and can only be opened as the 2nd expertise tree. The player cannot open it on their own: they must have found the Morswecken material and the GM must allow it. Once the GM allows it, the tree is opened with 1 ability point.</p>\n<h4>PUPPET BODY</h4>\n<p>Wound penalties do not apply; an Unusable limb keeps working on strings. A Severed limb, however, cannot be used. If Head &amp; Neck or Upper Torso is Severed, the body collapses.</p>\n<h4>HEAVY BODY</h4>\n<p>On physical rolls (Korp, Krach, Agil, Aim) the threshold rises two steps: Easy → Hard, Medium → Very Hard, Hard and above → Uber.</p>\n<h4>REGENERATION</h4>\n<p>Once per session, during a long rest, one limb's wound heals completely; a Severed limb also grows back and returns to Intact.</p>\n<h4>CORRUPTION</h4>\n<p>The negative effects on the Corruption table (Cower, Frenzy, savage attacks and unstable actions) do not apply to a Mors character; positive effects such as the black magic bonuses and the Klang bonus do apply. The Corruption 7 floor still applies. At Corruption 13 the soul is spent and the character permanently becomes a lifeless puppet. Pervitin has no effect on a Mors character.</p>\n<h4>NOTE</h4>\n<p>The Death Save Throw rules also apply to a Mors character.</p>",
+   "startBonus": {
+    "kind": "none"
+   },
+   "startBonusText": "",
+   "restricted": true,
+   "abilities": [
+    "totenhulle",
+    "seelensplitter",
+    "fadenzieher",
+    "seelenwanderung",
+    "grenzenlos",
+    "marionettenzug",
+    "totentanz",
+    "wiederkehr"
    ]
   }
  ],
@@ -2552,6 +2573,368 @@
    "synergies": [],
    "flavorHtml": "<p>Until the fuses blow. Maybe a little longer.</p>",
    "searchText": "überladung klang 4 you overload your augment: your next augment action's roll gets a +klang/2 (round down) bonus, and on a hit the wound advances 1 extra stage. then d20 + klang ≥ hard is rolled; on a failure, the augmented limb takes 1 stage of damage. the control roll is made at the medium threshold. the control roll is made at the easy threshold. until the fuses blow. maybe a little longer."
+  },
+  "fadenzieher": {
+   "key": "fadenzieher",
+   "name": "Fadenzieher",
+   "tree": "mors",
+   "type": "Aktif",
+   "requirementText": "Sanita 5, Wissen 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "sanita",
+     "min": 5
+    },
+    {
+     "kind": "stat",
+     "stat": "wissen",
+     "min": 3
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": "seelensplitter",
+   "branch": "A",
+   "branchName": "Seelenfaden",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "For one scene you roll Sanita instead of a physical stat of your choice (Korp, Krach, Agil or Aim). On these rolls the heavy body penalty is one step instead of two. Once per session."
+    },
+    {
+     "level": 2,
+     "html": "Twice per session; or choose two physical stats with a single use."
+    }
+   ],
+   "sections": [
+    {
+     "key": "BEDEL",
+     "label": "Cost",
+     "html": "<p>+1 Corruption on each use.</p>"
+    }
+   ],
+   "synergies": [],
+   "flavorHtml": "<p>Your muscles no longer listen. The strings do.</p>",
+   "searchText": "fadenzieher sanita 5, wissen 3 for one scene you roll sanita instead of a physical stat of your choice (korp, krach, agil or aim). on these rolls the heavy body penalty is one step instead of two. once per session. twice per session; or choose two physical stats with a single use. cost +1 corruption on each use. your muscles no longer listen. the strings do."
+  },
+  "grenzenlos": {
+   "key": "grenzenlos",
+   "name": "Grenzenlos",
+   "tree": "mors",
+   "type": "Aktif",
+   "requirementText": "Sanita 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "sanita",
+     "min": 3
+    }
+   ],
+   "maxLevel": 3,
+   "prerequisite": null,
+   "branch": "B",
+   "branchName": "Überlast",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "You push your body past its limit on one physical roll: the heavy body penalty does not apply to that roll and you add +Krach/2 (round down) to it. Then roll d20 + Sanita ≥ Medium; on a failure the limb you used takes 1 wound stage. On a Nat1 on this control roll the limb is severed (the GM may apply a harsher outcome depending on the RP)."
+    },
+    {
+     "level": 2,
+     "html": "The control roll is made at the Easy threshold."
+    },
+    {
+     "level": 3,
+     "html": "The bonus becomes +Krach."
+    }
+   ],
+   "sections": [
+    {
+     "key": "SİNERJİ",
+     "label": "Synergy",
+     "html": "<p>With <strong><a href=\"@/kurallar/yetenekler/metallkorp#zweite-haut\">Zweite Haut</a></strong>: An augmented limb is not severed by Grenzenlos; it stays Unusable.</p>"
+    }
+   ],
+   "synergies": [
+    "zweite-haut"
+   ],
+   "flavorHtml": "<p>No pain. No limit. Only the sound of something tearing.</p>",
+   "searchText": "grenzenlos sanita 3 you push your body past its limit on one physical roll: the heavy body penalty does not apply to that roll and you add +krach/2 (round down) to it. then roll d20 + sanita ≥ medium; on a failure the limb you used takes 1 wound stage. on a nat1 on this control roll the limb is severed (the gm may apply a harsher outcome depending on the rp). the control roll is made at the easy threshold. the bonus becomes +krach. synergy with zweite haut : an augmented limb is not severed by grenzenlos; it stays unusable. zweite-haut no pain. no limit. only the sound of something tearing."
+  },
+  "marionettenzug": {
+   "key": "marionettenzug",
+   "name": "Marionettenzug",
+   "tree": "mors",
+   "type": "Pasif",
+   "requirementText": "Sanita 5, Korp 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "sanita",
+     "min": 5
+    },
+    {
+     "kind": "stat",
+     "stat": "korp",
+     "min": 3
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": "grenzenlos",
+   "branch": "B",
+   "branchName": "Überlast",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "A Severed limb of yours keeps working on strings for one scene; rolls using that limb take −5 instead of the Severed penalty."
+    },
+    {
+     "level": 2,
+     "html": "No penalty applies. Once per session a severed limb does not stay on the ground: the strings tie it back in place, and it is Unusable at the end of the scene."
+    }
+   ],
+   "sections": [],
+   "synergies": [],
+   "flavorHtml": "<p>The arm fell. The strings did not.</p>",
+   "searchText": "marionettenzug sanita 5, korp 3 a severed limb of yours keeps working on strings for one scene; rolls using that limb take −5 instead of the severed penalty. no penalty applies. once per session a severed limb does not stay on the ground: the strings tie it back in place, and it is unusable at the end of the scene. the arm fell. the strings did not."
+  },
+  "seelensplitter": {
+   "key": "seelensplitter",
+   "name": "Seelensplitter",
+   "tree": "mors",
+   "type": "Aktif",
+   "requirementText": "Sanita 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "sanita",
+     "min": 3
+    }
+   ],
+   "maxLevel": 3,
+   "prerequisite": null,
+   "branch": "A",
+   "branchName": "Seelenfaden",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "You tear off a piece of your soul and loose it at a target in sight: d20 + Sanita ≥ Medium. On a hit, a limb of the target you choose takes 1 wound stage and the target is corrupted: NPCs Cower for 1 turn (they resist with a Sanita roll), player characters gain +1 Corruption."
+    },
+    {
+     "level": 2,
+     "html": "The wound advances 2 stages."
+    },
+    {
+     "level": 3,
+     "html": "The soul shard also leaps to a second nearby target (separate roll)."
+    }
+   ],
+   "sections": [
+    {
+     "key": "BEDEL",
+     "label": "Cost",
+     "html": "<p>+1 Corruption on each use.</p>"
+    },
+    {
+     "key": "NOT",
+     "label": "Note",
+     "html": "<p>This ability's rolls are black magic rolls; Corruption-based black magic effects apply.</p>"
+    },
+    {
+     "key": "SİNERJİ",
+     "label": "Synergy",
+     "html": "<p>With <strong><a href=\"@/kurallar/yetenekler/schwarzesonne#blutopfer\">Blutopfer</a></strong>: Blutopfer's bonus also applies to the Seelensplitter roll.</p>"
+    }
+   ],
+   "synergies": [
+    "blutopfer"
+   ],
+   "flavorHtml": "<p>Your soul opens like a wound. The one facing you feels that wound in their own body.</p>",
+   "searchText": "seelensplitter sanita 3 you tear off a piece of your soul and loose it at a target in sight: d20 + sanita ≥ medium. on a hit, a limb of the target you choose takes 1 wound stage and the target is corrupted: npcs cower for 1 turn (they resist with a sanita roll), player characters gain +1 corruption. the wound advances 2 stages. the soul shard also leaps to a second nearby target (separate roll). cost +1 corruption on each use. note this ability's rolls are black magic rolls; corruption-based black magic effects apply. synergy with blutopfer : blutopfer's bonus also applies to the seelensplitter roll. blutopfer your soul opens like a wound. the one facing you feels that wound in their own body."
+  },
+  "seelenwanderung": {
+   "key": "seelenwanderung",
+   "name": "Seelenwanderung",
+   "tree": "mors",
+   "type": "Aktif",
+   "requirementText": "Sanita 7, Wissen 4, Lv 7",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "sanita",
+     "min": 7
+    },
+    {
+     "kind": "stat",
+     "stat": "wissen",
+     "min": 4
+    },
+    {
+     "kind": "level",
+     "min": 7
+    }
+   ],
+   "maxLevel": 1,
+   "prerequisite": "fadenzieher",
+   "branch": "A",
+   "branchName": "Seelenfaden",
+   "levelEffects": [],
+   "sections": [
+    {
+     "key": "ETKİ",
+     "label": "Effect",
+     "html": "<p>You leave your body and move into a human body that died within the last hour or is unconscious: d20 + Sanita ≥ Hard (Very Hard for an unconscious body). On a success your soul passes into the new body and you continue playing from there. Your mental stats (Sanita, Wissen, Rede, Leis), abilities and perks come with you. The GM sets the physical stats (Korp, Krach, Agil, Aim) and the body table according to the new body. Augments stay in the old body, and the old body collapses. The Mors class rules also apply in the new body.</p>\n<p>It can also be used as a reaction when you are about to die (before the Death Save); it does nothing if there is no suitable body nearby.</p>"
+    },
+    {
+     "key": "BEDEL",
+     "label": "Cost",
+     "html": "<p>+3 Corruption. Once per campaign (twice with the GM's permission).</p>"
+    },
+    {
+     "key": "NOT",
+     "label": "Note",
+     "html": "<p>This ability's rolls are black magic rolls; Corruption-based black magic effects apply.</p>"
+    },
+    {
+     "key": "SİNERJİ",
+     "label": "Synergy",
+     "html": "<p>With <strong><a href=\"@/kurallar/yetenekler/ubermann#endsieg-der-mann\">Endsieg der Mann</a></strong>: If you die in Endsieg mode, Seelenwanderung succeeds without a roll.</p>"
+    }
+   ],
+   "synergies": [
+    "endsieg-der-mann"
+   ],
+   "flavorHtml": "<p>The body is a garment. When it tears, you put on a new one.</p>",
+   "searchText": "seelenwanderung sanita 7, wissen 4, lv 7 effect you leave your body and move into a human body that died within the last hour or is unconscious: d20 + sanita ≥ hard (very hard for an unconscious body). on a success your soul passes into the new body and you continue playing from there. your mental stats (sanita, wissen, rede, leis), abilities and perks come with you. the gm sets the physical stats (korp, krach, agil, aim) and the body table according to the new body. augments stay in the old body, and the old body collapses. the mors class rules also apply in the new body. it can also be used as a reaction when you are about to die (before the death save); it does nothing if there is no suitable body nearby. cost +3 corruption. once per campaign (twice with the gm's permission). note this ability's rolls are black magic rolls; corruption-based black magic effects apply. synergy with endsieg der mann : if you die in endsieg mode, seelenwanderung succeeds without a roll. endsieg-der-mann the body is a garment. when it tears, you put on a new one."
+  },
+  "totenhulle": {
+   "key": "totenhulle",
+   "name": "Totenhülle",
+   "tree": "mors",
+   "type": "Pasif",
+   "requirementText": "None",
+   "requirements": [],
+   "maxLevel": 3,
+   "prerequisite": null,
+   "branch": "Kök",
+   "branchName": "Kök",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "Every 3 points of Corruption give +1 to black magic rolls (added to the black magic bonuses of the Corruption table)."
+    },
+    {
+     "level": 2,
+     "html": "Every 3 points of Corruption also give +1 to physical rolls (Korp, Krach, Agil, Aim)."
+    },
+    {
+     "level": 3,
+     "html": "The divisor becomes 2: every 2 points of Corruption give +1 to black magic and physical rolls."
+    }
+   ],
+   "sections": [
+    {
+     "key": "NOT",
+     "label": "Note",
+     "html": "<p>The main ability that offsets the heavy body penalty. The more the soul rots, the stronger the strings.</p>"
+    }
+   ],
+   "synergies": [],
+   "flavorHtml": "<p>A dead shell. Something is still inside, and it is less human every day.</p>",
+   "searchText": "totenhülle none every 3 points of corruption give +1 to black magic rolls (added to the black magic bonuses of the corruption table). every 3 points of corruption also give +1 to physical rolls (korp, krach, agil, aim). the divisor becomes 2: every 2 points of corruption give +1 to black magic and physical rolls. note the main ability that offsets the heavy body penalty. the more the soul rots, the stronger the strings. a dead shell. something is still inside, and it is less human every day."
+  },
+  "totentanz": {
+   "key": "totentanz",
+   "name": "Totentanz",
+   "tree": "mors",
+   "type": "Aktif",
+   "requirementText": "Sanita 7, Korp 4, Lv 6",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "sanita",
+     "min": 7
+    },
+    {
+     "kind": "stat",
+     "stat": "korp",
+     "min": 4
+    },
+    {
+     "kind": "level",
+     "min": 6
+    }
+   ],
+   "maxLevel": 1,
+   "prerequisite": "marionettenzug",
+   "branch": "B",
+   "branchName": "Überlast",
+   "levelEffects": [],
+   "sections": [
+    {
+     "key": "ETKİ",
+     "label": "Effect",
+     "html": "<p>For 3 turns your body is steered entirely by the strings: the heavy body penalty does not apply, you make one extra attack action each turn, and your Severed limbs can be used too. When it ends, roll d20 + Sanita ≥ Medium for every limb you used during it; on a failure that limb is severed.</p>"
+    },
+    {
+     "key": "BEDEL",
+     "label": "Cost",
+     "html": "<p>+2 Corruption. Once per combat.</p>"
+    },
+    {
+     "key": "SİNERJİ",
+     "label": "Synergy",
+     "html": "<p>With <strong><a href=\"@/kurallar/yetenekler/ubermann#titan\">Titan</a></strong>: Titan can be used once more during Totentanz.</p>"
+    }
+   ],
+   "synergies": [
+    "titan"
+   ],
+   "flavorHtml": "<p>The dead dance too. Someone else plays the music.</p>",
+   "searchText": "totentanz sanita 7, korp 4, lv 6 effect for 3 turns your body is steered entirely by the strings: the heavy body penalty does not apply, you make one extra attack action each turn, and your severed limbs can be used too. when it ends, roll d20 + sanita ≥ medium for every limb you used during it; on a failure that limb is severed. cost +2 corruption. once per combat. synergy with titan : titan can be used once more during totentanz. titan the dead dance too. someone else plays the music."
+  },
+  "wiederkehr": {
+   "key": "wiederkehr",
+   "name": "Wiederkehr",
+   "tree": "mors",
+   "type": "Pasif",
+   "requirementText": "Sanita 5, Korp 3",
+   "requirements": [
+    {
+     "kind": "stat",
+     "stat": "sanita",
+     "min": 5
+    },
+    {
+     "kind": "stat",
+     "stat": "korp",
+     "min": 3
+    }
+   ],
+   "maxLevel": 2,
+   "prerequisite": "grenzenlos",
+   "branch": "B′",
+   "branchName": "Fleisch",
+   "levelEffects": [
+    {
+     "level": 1,
+     "html": "Regeneration rises to 2 limbs per session."
+    },
+    {
+     "level": 2,
+     "html": "Also, once per combat and without spending a turn, you heal one limb's wound by 2 stages (not a Severed limb)."
+    }
+   ],
+   "sections": [
+    {
+     "key": "BEDEL",
+     "label": "Cost",
+     "html": "<p>+1 Corruption each time the Level 2 effect is used.</p>"
+    }
+   ],
+   "synergies": [],
+   "flavorHtml": "<p>The flesh comes back. A little less yours every time.</p>",
+   "searchText": "wiederkehr sanita 5, korp 3 regeneration rises to 2 limbs per session. also, once per combat and without spending a turn, you heal one limb's wound by 2 stages (not a severed limb). cost +1 corruption each time the level 2 effect is used. the flesh comes back. a little less yours every time."
   }
  },
  "perks": [

@@ -12,7 +12,7 @@ import { campaignMembers, campaigns, characterLogs, characters, messages, rolls,
 import { SESSION_COOKIE, readCookie, userFromToken, type SessionUser } from "../src/lib/auth/core";
 import { BODY_PART_KEYS, CORRUPTION_PERVITIN_IMMUNE, STAT_KEYS, STAT_LABELS, thresholdByKey, type StatKey } from "../src/lib/shz/constants";
 import { rulesData } from "../src/lib/shz/content";
-import { checkModifiers, clampCorruption, effectiveStats, outcomeFor, outcomeLabel, type CharLike } from "../src/lib/shz/rules";
+import { PHYSICAL_STATS, checkModifiers, clampCorruption, effectiveStats, isMors, morsThreshold, outcomeFor, outcomeLabel, type CharLike } from "../src/lib/shz/rules";
 import { UC_STAT_KEYS, UC_STAT_LABELS, type UcStatKey } from "../src/lib/uc/constants";
 import { fmt, isLocale, localeFromHeaders, translate, type Locale, type TVars } from "../src/i18n/core";
 import { UC_DECAY_MODES, ucCheckParts, ucDecayOutcome, ucDecayParts, ucNormalizeStats, type UcCharLike, type UcDecayMode } from "../src/lib/uc/rules";
@@ -641,7 +641,7 @@ export function attachRealtime(io: Server) {
           const stat = req ? req.stat : p.stat;
           if (stat && !statLabel(camp.system, stat)) fail("Geçersiz stat.");
           // Umbra Caelis'te sabit eşik tablosu yoktur: eşiği yalnızca GM sayı olarak koyar.
-          const th = req
+          let th = req
             ? req.thresholdValue != null
               ? {
                   value: req.thresholdValue,
@@ -671,7 +671,14 @@ export function attachRealtime(io: Server) {
               const r = ucCheckParts(asUcChar(c), { stat: isUcStat(stat) ? stat : null, part: part as never, modifier, magic, decay });
               parts = r.parts;
               if (r.overflow) extra.push(fmt("Taşan bonus +{n}: anlatıma dahil (GM karar verir).", { n: r.overflow }));
-            } else parts = checkModifiers(asCharLike(c), { stat: isShzStat(stat) ? stat : null, part: part as never, modifier, blackMagic }, rulesData());
+            } else {
+              parts = checkModifiers(asCharLike(c), { stat: isShzStat(stat) ? stat : null, part: part as never, modifier, blackMagic }, rulesData());
+              // Mors · Ağır beden: fiziksel zarlarda eşik 2 kademe yükselir.
+              if (th && isMors(c) && isShzStat(stat) && PHYSICAL_STATS.includes(stat)) {
+                const key = req ? (req.thresholdValue != null ? null : req.threshold) : isGM && p.thresholdValue != null ? null : p.threshold;
+                th = morsThreshold(th, key);
+              }
+            }
             charName = c.name;
           } else {
             if (!isGM) fail("Bir karakter seçmelisin.");
@@ -1040,7 +1047,10 @@ export function attachRealtime(io: Server) {
           const total = parts.reduce((a, b) => a + b.value, 0);
           let note: string;
           let outcome: RollDetail["outcome"];
-          if (c.corruption >= CORRUPTION_PERVITIN_IMMUNE) {
+          if (isMors(c)) {
+            note = fmt("Mors: Pervitin bu bedene etki etmez.");
+            outcome = "info";
+          } else if (c.corruption >= CORRUPTION_PERVITIN_IMMUNE) {
             note = fmt("Corruption 10+: Pervitin artık Corruption'ı etkilemez.");
             outcome = "info";
           } else if (total >= th!.value) {

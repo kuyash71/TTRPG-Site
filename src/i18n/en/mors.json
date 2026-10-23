@@ -1,0 +1,20 @@
+{
+ "Kukla beden: yara cezaları uygulanmaz (Kopuk uzuv hariç).": "Puppet body: wound penalties do not apply (except Severed limbs).",
+ "Ağır beden: Korp, Krach, Agil ve Aim zarlarında eşik 2 kademe yükselir.": "Heavy body: on Korp, Krach, Agil and Aim rolls the threshold rises two steps.",
+ "Yenilenme: seans başına 1 kez, uzun dinlenmede bir uzuv tamamen iyileşir; Kopuk uzuv yeniden büyür.": "Regeneration: once per session, during a long rest, one limb heals completely; a Severed limb grows back.",
+ "Corruption'ın olumsuz etkileri işlemez; 7 tabanı ve 13 sınırı geçerli. Pervitin etkisiz.": "Corruption's negative effects do not apply; the 7 floor and the 13 limit still do. Pervitin has no effect.",
+ "Mors: ceza yok": "Mors: no penalty",
+ "Mors: işlemez": "Mors: no effect",
+ "Mors · Ağır beden: eşik 2 kademe yükselir.": "Mors · Heavy body: the threshold rises two steps.",
+ "Mors ağır beden: {from} → {to}": "Mors heavy body: {from} → {to}",
+ "Mors: Pervitin bu bedene etki etmez.": "Mors: Pervitin has no effect on this body.",
+ "{tree} açılabilir": "{tree} can be opened",
+ "Kısıtlı ağaç: oyuncu yalnızca GM izniyle, 2. ağaç olarak açabilir": "Restricted tree: the player can open it only with GM permission, as the 2nd tree",
+ "{tree} yalnızca 2. ağaç olarak açılabilir": "{tree} can only be opened as the 2nd tree",
+ "{tree} için GM izni gerekir": "{tree} requires GM permission",
+ "{tree} başlangıç ağacı olarak seçilemez": "{tree} cannot be chosen as a starting tree",
+ "{tree} açma izni verildi": "permission to open {tree} granted",
+ "{tree} açma izni kaldırıldı": "permission to open {tree} revoked",
+ "Bu ağaç için izin gerekmez.": "This tree does not need permission.",
+ "Totenhülle": "Totenhülle"
+}
